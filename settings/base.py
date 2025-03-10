@@ -89,7 +89,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'fr-fr'
 
-TIME_ZONE = 'Afrika-Kinshasa'
+TIME_ZONE = 'Africa/Kinshasa'
 
 USE_I18N = True
 
@@ -108,7 +108,7 @@ AUTH_USER_MODEL = 'users.User'
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
-STATICFILES_DIRS = [BASE_DIR / "staticfiles"]
+# STATICFILES_DIRS = [BASE_DIR / "staticfiles"]
 
 MEDIA_ROOT = os.path.join(BASE_DIR, "mediafiles")
 MEDIA_URL = '/media/'
