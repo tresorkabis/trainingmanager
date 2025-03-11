@@ -1,6 +1,7 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -17,6 +18,7 @@
     <link rel="stylesheet" href="{% static 'assets/css/app.css' %}">
     <link rel="shortcut icon" href="{% static 'assets/images/favicon.svg' %}" type="image/x-icon">
 </head>
+
 <body>
     <div id="app">
         <div id="sidebar" class="active">
@@ -48,6 +50,13 @@
                                 <span>Admin</span>
                             </a>
                         </li>
+
+                        <li class="sidebar-item">
+                            <a href="{% url 'formations' %}" class='sidebar-link'>
+                                <i class="bi bi-bookmark-fill"></i>
+                                <span>Formations</span>
+                            </a>
+                        </li>
                     </ul>
                 </div>
                 <button class="sidebar-toggler btn x"><i data-feather="x"></i></button>
@@ -60,120 +69,8 @@
                 </a>
             </header>
 
-            <div class="page-heading">
-                <h3>Dashboard</h3>
-            </div>
             <div class="page-content">
-                <section class="row">
-                    <div class="col-12 col-lg-9">
-                        <div class="row">
-                            <div class="col-6 col-lg-3 col-md-6">
-                                <div class="card">
-                                    <div class="card-body px-3 py-4-5">
-                                        <div class="row">
-                                            <div class="col-md-4">
-                                                <div class="stats-icon purple">
-                                                    <i class="iconly-boldShow"></i>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-8">
-                                                <h6 class="text-muted font-semibold">Profile Views</h6>
-                                                <h6 class="font-extrabold mb-0">112.000</h6>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-6 col-lg-3 col-md-6">
-                                <div class="card">
-                                    <div class="card-body px-3 py-4-5">
-                                        <div class="row">
-                                            <div class="col-md-4">
-                                                <div class="stats-icon blue">
-                                                    <i class="iconly-boldProfile"></i>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-8">
-                                                <h6 class="text-muted font-semibold">Followers</h6>
-                                                <h6 class="font-extrabold mb-0">183.000</h6>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-6 col-lg-3 col-md-6">
-                                <div class="card">
-                                    <div class="card-body px-3 py-4-5">
-                                        <div class="row">
-                                            <div class="col-md-4">
-                                                <div class="stats-icon green">
-                                                    <i class="iconly-boldAdd-User"></i>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-8">
-                                                <h6 class="text-muted font-semibold">Following</h6>
-                                                <h6 class="font-extrabold mb-0">80.000</h6>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-6 col-lg-3 col-md-6">
-                                <div class="card">
-                                    <div class="card-body px-3 py-4-5">
-                                        <div class="row">
-                                            <div class="col-md-4">
-                                                <div class="stats-icon red">
-                                                    <i class="iconly-boldBookmark"></i>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-8">
-                                                <h6 class="text-muted font-semibold">Saved Post</h6>
-                                                <h6 class="font-extrabold mb-0">112</h6>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-12">
-                                <div class="card">
-                                    <div class="card-header">
-                                        <h4>Profile Visit</h4>
-                                    </div>
-                                    <div class="card-body">
-                                        <div id="chart-profile-visit"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-12 col-lg-3">
-                        <div class="card">
-                            <div class="card-body py-4 px-5">
-                                <div class="d-flex align-items-center">
-                                    <div class="avatar avatar-xl">
-                                        <img src="{% static 'assets/images/faces/1.jpg' %}" alt="Face 1">
-                                    </div>
-                                    <div class="ms-3 name">
-                                        <h5 class="font-bold">John Duck</h5>
-                                        <h6 class="text-muted mb-0">@johnducky</h6>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                      
-                        <div class="card">
-                            <div class="card-header">
-                                <h4>Genre</h4>
-                            </div>
-                            <div class="card-body">
-                                <div id="chart-visitors-profile"></div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
+                {% block content %} {% endblock content %}
             </div>
 
             <footer>
@@ -188,14 +85,14 @@
             </footer>
         </div>
     </div>
-    {% block content %} <h1>Content</h1> {% endblock content %}
+
 
     <script src="{% static 'assets/vendors/perfect-scrollbar/perfect-scrollbar.min.js' %}"></script>
     <script src="{% static 'assets/js/bootstrap.bundle.min.js' %}"></script>
 
-    <script src="{% static 'assets/vendors/apexcharts/apexcharts.js' %}"></script>
-    <script src="{% static 'assets/js/pages/dashboard.js' %}"></script>
+    {% block script %}{% endblock script %}
 
     <script src="{% static 'assets/js/main.js' %}"></script>
 </body>
+
 </html>
