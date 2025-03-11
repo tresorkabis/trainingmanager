@@ -20,6 +20,7 @@ ALLOWED_HOSTS = ["*"]
 # Application definition
 
 INSTALLED_APPS = [
+    'jazzmin',
     'whitenoise.runserver_nostatic',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -112,3 +113,20 @@ STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
 MEDIA_ROOT = os.path.join(BASE_DIR, "mediafiles")
 MEDIA_URL = '/media/'
+
+# jazzmin
+JAZZMIN_SETTINGS = {
+    "site_title": "Training Manager",
+    "site_header": "Training Manager",
+    "site_brand": "Training Manager",
+    "site_logo": "admin/img/logo.jpeg",
+
+    "welcome_sign": "Bienvenue",
+    "copyright": "MK",
+
+    "topmenu_links": [
+        {"app": "users"},
+    ],
+    "show_ui_builder": False,
+    #"language_chooser": True,
+}
