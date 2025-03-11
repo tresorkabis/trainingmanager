@@ -127,6 +127,7 @@ JAZZMIN_SETTINGS = {
     "copyright": "MK",
 
     "topmenu_links": [
+        {"name": "Home",  "url": "home"},
         {"app": "users"},
     ],
     "show_ui_builder": False,
