@@ -1,3 +1,6 @@
 from django.contrib import admin
 
-# Register your models here.
+from training.models import Filiere, Formation
+
+admin.site.register(Formation)
+admin.site.register(Filiere)
