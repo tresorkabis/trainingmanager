@@ -8,4 +8,5 @@ class FiliereListView(ListView):
     template_name = "training/filieres.html"
 
 class FiliereDetailView(DetailView):
-    pass
+    model = Filiere
+    template_name = "training/filiere.html"
