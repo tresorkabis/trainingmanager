@@ -16,7 +16,7 @@
             <div class="col-12 col-md-6 order-md-2 order-first">
                 <nav aria-label="breadcrumb" class="breadcrumb-header float-start float-lg-end">
                     <ol class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="% url 'home' %}">Dashboard</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'home' %}">Dashboard</a></li>
                         <li class="breadcrumb-item active" aria-current="page">Formations</li>
                     </ol>
                 </nav>
@@ -26,7 +26,7 @@
     <section class="section">
         <div class="card">
             <div class="card-header">
-                <a href="% url 'home' %}">Nouvelle formation</a>
+                <a href="{% url 'formation' %}">Nouvelle formation</a>
             </div>
             <div class="card-body">
                 <div class="dataTable-wrapper dataTable-loading no-footer sortable searchable fixed-columns">
@@ -63,7 +63,7 @@
                                 {% if formation_list %}
                                 {% for item in object_list %}
                                 <tr>
-                                    <td>{{ item.nom }}</td>
+                                    <td><a href="{% url 'formation' item.id %}">{{ item.nom }}</a></td>
                                     <td>{{ item.duree }} mois</td>
                                     <td>{{ item.filiere }}</td>
                                     <td>

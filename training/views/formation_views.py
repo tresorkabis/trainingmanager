@@ -8,5 +8,5 @@ class FormationListView(ListView):
     template_name = "training/formations.html"
 
 class FormationDetailView(DetailView):
-    pass
-
+    model = Formation
+    template_name = "training/formation.html"
