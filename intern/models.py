@@ -20,7 +20,7 @@ class Stagiaire(models.Model):
     postnom = models.CharField(max_length=50)
     prenom = models.CharField(max_length=50)
     adresse = models.CharField(max_length=50)
-    sexe = models.CharField(max_length=1, choices=SEXE_CHOISES)
+    sexe = models.CharField(max_length=2, choices=SEXE_CHOISES)
     telephone = models.CharField(max_length=15)
     categorie = models.ForeignKey(Categorie, on_delete=models.CASCADE)
     active= models.BooleanField(default=True)
