@@ -1,1 +1,1 @@
-sudo python manage.py runserver 81
+python manage.py runserver 81
