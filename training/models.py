@@ -9,6 +9,7 @@ class Filiere(models.Model):
 
     def __str__(self):
         return self.nom
+    
 class Formation(models.Model):
     nom = models.CharField(max_length=200)
     duree = models.IntegerField(default=0)
