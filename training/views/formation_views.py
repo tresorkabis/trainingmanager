@@ -9,3 +9,4 @@ class FormationListView(ListView):
 
 class FormationDetailView(DetailView):
     pass
+
