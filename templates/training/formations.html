@@ -63,7 +63,7 @@
                                 {% if formation_list %}
                                 {% for item in object_list %}
                                 <tr>
-                                    <td>{{ item.nom }}</td>
+                                    <td><a href="{{ item.get_ }}"></a> {{ item.nom }}</td>
                                     <td>{{ item.duree }} mois</td>
                                     <td>{{ item.filiere }}</td>
                                     <td>
