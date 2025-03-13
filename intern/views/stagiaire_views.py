@@ -9,4 +9,4 @@ class StagiaireListView(ListView):
 
 class StagiaireDetailView(DetailView):
     model = Stagiaire
-    template_name = "intern/stagiaire"
+    template_name = "intern/stagiaire.html"
