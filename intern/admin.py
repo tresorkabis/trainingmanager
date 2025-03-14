@@ -1,8 +1,7 @@
 from django.contrib import admin
 
-# Register your models here.
-from training.models import Filiere, Formation, Service
+from intern.models import  Stagiaire, Categorie
 
-admin.site.register(Service)
-admin.site.register(Filiere)
-admin.site.register(Formation)
+admin.site.register(Stagiaire)
+admin.site.register(Categorie)
+
