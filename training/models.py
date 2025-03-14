@@ -25,7 +25,7 @@ class Formation(models.Model):
     nom = models.CharField(max_length=200)
     duree = models.IntegerField(default=0)
     filiere = models.ForeignKey(Filiere, on_delete=models.SET_NULL, null=True, blank=True)
-    fraismateriels = models.FloatField(default=0.0)
+    fraismateriels = models.FloatField(verbose_name="Frais matériels", default=0.0)
 
     active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
