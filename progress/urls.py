@@ -1,4 +1,9 @@
 from django.urls import path
+
+from progress.views.Action_views import ActionListViews
+from progress.views.detailAction_views import DetailActionListViews
+from progress.views.formateur_views import FormateurListView
+from progress.views.typeaction_views import TypeActionListView
 from progress.views.Action_views import ActionDetailViews, ActionListViews
 from progress.views.detailAction_views import DetailActionDetailView,DetailActionListViews
 from progress.views.formateur_views import FormateurDetailView,FormateurListView
