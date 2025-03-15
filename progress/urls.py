@@ -12,7 +12,7 @@ urlpatterns = [
     path("detailactions/<int:pk>", DetailActionDetailView.as_view(), name="detailaction"),
     path("formateurs",FormateurListView.as_view(),name="formateurs"),
     path("formateurs/<int:pk>", FormateurDetailView.as_view(), name="formateur"),
-    path("typeactions",FormateurListView.as_view(),name="typeactions"),
-    path("typeactions/<int:pk>", FormateurDetailView.as_view(), name="typeaction"), 
+    path("typeactions",TypeActionListView.as_view(),name="typeactions"),
+    path("typeactions/<int:pk>", TypeActionDetailView.as_view(), name="typeaction"), 
   
 ]
