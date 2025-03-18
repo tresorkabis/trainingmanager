@@ -11,6 +11,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'assets/css/bootstrap.css' %}">
 
+    <link rel="stylesheet" href="{% static 'assets/vendors/dripicons/webfont.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/pages/dripicons.css' %}">
+
     <link rel="stylesheet" href="{% static 'assets/vendors/iconly/bold.css' %}">
     {% block style %}{% endblock style %}
 
@@ -95,11 +98,10 @@
                         </li>
                         <li class="sidebar-item">
                             <a href="{% url 'typeactions' %}" class='sidebar-link'>
-                                <i class="bi bi-bookmark-fill"></i>
+                                <i class="icon dripicons-archive"></i>
                                 <span>Type actions</span>
                             </a>
                         </li>
-                       
 
                     </ul>
                 </div>
