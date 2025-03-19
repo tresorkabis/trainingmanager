@@ -1,3 +1,6 @@
+from django.http import HttpResponseRedirect
+from django.shortcuts import render
+from django.views import View
 from django.views.generic import ListView, DetailView, CreateView
 
 from training.models import Filiere, Formation
@@ -12,14 +15,9 @@ class FormationDetailView(DetailView):
     template_name = "training/formation.html"
 
 
-class FormationCreateView(CreateView):
-    model = Formation
-    template_name = "training/formation.html"
-    fields = '__all__'
-    success_url = "/formations"
-
-    def get_context_data(self, **kwargs):
-        filieres = Filiere.objects.all()
-        kwargs['filieres'] = filieres
-        return super().get_context_data(**kwargs)
-
+class FormationCreateView(View):
+    def get(self, request):
+        return render(request, 'training/formation.html')
+    
+    def post(self, request):
+        return HttpResponseRedirect("/formations")
