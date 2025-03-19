@@ -1,76 +1,89 @@
 {% extends "base.html" %}
 {% load static %}
-{% block title %} Dashboard {% endblock title %}
+{% block title %} Formations {% endblock title %}
 
 {% block content %}
 <div class="page-heading">
     <div class="page-title">
         <div class="row">
             <div class="col-12 col-md-6 order-md-1 order-last">
-                <h3>Formations</h3>
+                <h3><a href="% url 'formations' %}">Formations</a></h3>
                 <p class="text-subtitle text-muted">Saisie d'une formation</p>
             </div>
             <div class="col-12 col-md-6 order-md-2 order-first">
                 <nav aria-label="breadcrumb" class="breadcrumb-header float-start float-lg-end">
                     <ol class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="% url 'home' %}">Dashboard</a></li>
-                        <li class="breadcrumb-item active" aria-current="page">Formations</li>
+                        <li class="breadcrumb-item">Formations</li>
+                        <li class="breadcrumb-item active" aria-current="page">Création</li>
                     </ol>
                 </nav>
             </div>
         </div>
     </div>
     <section class="section">
-        <div class="col-md-6 col-12">
+        <div class="col-md-12 col-12">
             <div class="card">
                 <div class="card-header">
                     <h4 class="card-title">Details</h4>
                 </div>
                 <div class="card-content">
                     <div class="card-body">
-                        <form class="form form-horizontal">
+                        <form class="form form-horizontal" method="post" action="#">
+                            {% csrf_token %}
                             <div class="form-body">
                                 <div class="row">
-                                    <div class="col-md-4">
-                                        <label>First Name</label>
+                                    <div class="col-6">
+                                        <div class="row">
+                                            <div class="col-4">
+                                                <label for="nom">Nom</label>
+                                            </div>
+                                            <div class="col-8 form-group">
+                                                <input type="text" id="nom" class="form-control" name="nom"
+                                                    placeholder="Nom de la formation">
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div class="col-md-8 form-group">
-                                        <input type="text" id="first-name" class="form-control" name="fname"
-                                            placeholder="First Name">
+                                    <div class="col-6">
+                                        <div class="row">
+                                            <div class="col-4">
+                                                <label for="filiere">Filière</label>
+                                            </div>
+                                            <div class="col-8 form-group">
+
+                                                <select name="filiere" id="filiere" class="form-control">
+                                                    <option value="">Selectionner une filère</option>
+                                                    {% for item in filieres %}
+                                                    <option value="{{ item.id }}">{{ item.nom }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div class="col-md-4">
-                                        <label>Email</label>
+                                    <div class="col-6">
+                                        <div class="row">
+                                            <div class="col-4">
+                                                <label for="duree">Durée en mois</label>
+                                            </div>
+                                            <div class="col-8 form-group">
+                                                <input type="number" id="duree" class="form-control" name="duree"
+                                                    placeholder="Durée en mois">
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div class="col-md-8 form-group">
-                                        <input type="email" id="email-id" class="form-control" name="email-id"
-                                            placeholder="Email">
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label>Mobile</label>
-                                    </div>
-                                    <div class="col-md-8 form-group">
-                                        <input type="number" id="contact-info" class="form-control" name="contact"
-                                            placeholder="Mobile">
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label>Password</label>
-                                    </div>
-                                    <div class="col-md-8 form-group">
-                                        <input type="password" id="password" class="form-control" name="password"
-                                            placeholder="Password">
-                                    </div>
-                                    <div class="col-12 col-md-8 offset-md-4 form-group">
-                                        <div class="form-check">
-                                            <div class="checkbox">
-                                                <input type="checkbox" id="checkbox1" class="form-check-input"
-                                                    checked="">
-                                                <label for="checkbox1">Remember Me</label>
+                                    <div class="col-6">
+                                        <div class="row">
+                                            <div class="col-4">
+                                                <label for="fraism">Frais matériels</label>
+                                            </div>
+                                            <div class="col-8 form-group">
+                                                <input type="text" id="fraism" class="form-control" name="fraism"
+                                                    placeholder="Frais matériels">
                                             </div>
                                         </div>
                                     </div>
                                     <div class="col-sm-12 d-flex justify-content-end">
-                                        <button type="submit" class="btn btn-primary me-1 mb-1">Submit</button>
-                                        <button type="reset" class="btn btn-light-secondary me-1 mb-1">Reset</button>
+                                        <button type="submit" class="btn btn-primary me-1 mb-1">Envoyer</button>
+                                        <button type="reset" class="btn btn-light-secondary me-1 mb-1">Annuler</button>
                                     </div>
                                 </div>
                             </div>
