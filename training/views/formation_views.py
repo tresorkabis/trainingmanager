@@ -1,9 +1,9 @@
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.views import View
-from django.views.generic import ListView, DetailView, CreateView
+from django.views.generic import ListView, DetailView
 
-from training.models import Filiere, Formation
+from training.models import Formation
 
 class FormationListView(ListView):
     context_object_name = "formation_list"
