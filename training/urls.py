@@ -14,5 +14,5 @@ urlpatterns = [
 
     path("filieres", FiliereListView.as_view(), name="filieres"),
     path("filieres/create", FiliereCreateView.as_view(), name="filiere_create"),
-    path("filieres/<int:pk>", FiliereDetailView.as_view(), name="filiere"),
+    path("filieres/<int:pk>", FiliereDetailView.as_view(), name="filiere"), 
 ]
