@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %} Formations {% endblock title %}
+
+{% block content %}
+<div class="page-heading">
+    <div class="page-title">
+        <div class="row">
+            <div class="col-12 col-md-6 order-md-1 order-last">
+                <h3><a href="{% url 'filieres' %}">Filieres</a></h3>
+                <p class="text-subtitle text-muted">Saisie d'une filiere</p>
+            </div>
+            <div class="col-12 col-md-6 order-md-2 order-first">
+                <nav aria-label="breadcrumb" class="breadcrumb-header float-start float-lg-end">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item">Filiere</li>
+                        <li class="breadcrumb-item active" aria-current="page">Création</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+    </div>
+    <section class="section">
+        <div class="col-md-12 col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">Details</h4>
+                </div>
+                <div class="card-content">
+                    <div class="card-body">
+                        <form class="form form-horizontal" method="post" action="#">
+                            {% csrf_token %}
+                            <div class="form-body">
+                                <div class="row">
+                                    <div class="col-6">
+                                        <div class="row">
+                                            <div class="col-4">
+                                                <label for="nom">Nom</label>
+                                            </div>
+                                            <div class="col-8 form-group">
+                                                <input type="text" id="nom" class="form-control" name="nom"
+                                                    placeholder="Nom de la filiere">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="row">
+                                            <div class="col-4">
+                                                <label for="service">Service</label>
+                                            </div>
+                                            <div class="col-8 form-group">
+                                                <select name="service" id="service" class="form-control">
+                                                    <option value="">Selectionner une service</option>
+                                                    {% for item in services %}
+                                                    <option value="{{ item.id }}">{{ item.nom }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-sm-12 d-flex justify-content-end mt-4">
+                                        <button type="submit" class="btn btn-primary me-1 mb-1">Envoyer</button>
+                                        <button type="reset" class="btn btn-light-secondary me-1 mb-1">Annuler</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock content %}
+{% block script %}
+<script src="{% static 'assets/vendors/simple-datatables/simple-datatables.js' %}"></script>
+<script>
+    // Simple Datatable
+    let table1 = document.querySelector('#table1');
+    let dataTable = new simpleDatatables.DataTable(table1);
+</script>
+{% endblock script %}
