@@ -30,7 +30,8 @@
                 <div class="sidebar-header">
                     <div class="d-flex justify-content-between">
                         <div class="logo">
-                            <a href="index.html"><img src="{% static 'admin/img/logo.jpeg' %}" alt="Logo" srcset=""></a>
+                            <a href="index.html"><img src="{% static 'admin/img/logo.jpeg' %}" width="40" height="80"
+                                    alt="Logo" srcset=""></a>
                         </div>
                         <div class="toggler">
                             <a href="#" class="sidebar-hide d-xl-none d-block"><i class="bi bi-x bi-middle"></i></a>
@@ -62,7 +63,7 @@
                         <li class="sidebar-item {% if link == 'filieres' %} active {% endif %}">
                             <a href="{% url 'filieres' %}" class='sidebar-link'>
                                 <i class="bi bi-file-earmark-medical-fill"></i>
-                                <span>Filiers</span>
+                                <span>Filieres</span>
                             </a>
                         </li>
                         <li class="sidebar-item {% if link == 'categories' %} active {% endif %} ">
@@ -86,7 +87,7 @@
                         <li class="sidebar-item {% if link == 'actions' %} active {% endif %} ">
                             <a href="{% url 'actions' %}" class='sidebar-link'>
                                 <i class="bi bi-egg-fill"></i>
-                                <span>Action</span>
+                                <span>Actions</span>
                             </a>
                         </li>
 
