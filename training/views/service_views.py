@@ -11,6 +11,11 @@ class ServiceListView(ListView):
     queryset = Service.objects.all()
     template_name = "training/services.html"
 
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['link'] = "services"
+        return ctx
+
 class ServiceDetailView(DetailView):
     model = Service
     template_name = "training/service.html"

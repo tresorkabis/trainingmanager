@@ -9,6 +9,12 @@ class FormateurListView(ListView):
     context_object_name = "formateur_list"
     queryset = Formateur.objects.all()
     template_name = "progress/formateurs.html"
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['link'] = "formateurs"
+        return ctx
+
 class FormateurDetailView(DetailView):
     model = Formateur
     template_name = "progress/formateurs.html"

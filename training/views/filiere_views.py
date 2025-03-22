@@ -9,6 +9,11 @@ class FiliereListView(ListView):
     queryset = Filiere.objects.all()
     template_name = "training/filieres.html"
 
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['link'] = "filieres"
+        return ctx
+
 class FiliereDetailView(DetailView):
     model = Filiere
     template_name = "training/filiere.html"

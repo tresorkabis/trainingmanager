@@ -10,6 +10,11 @@ class DetailActionListViews(ListView):
     queryset = DetailAction.objects.all()
     template_name = "progress/detailactions.html"
 
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['link'] = "detailactions"
+        return ctx
+
 class DetailActionDetailView(DetailView):
     model = DetailAction
     template_name = "progress/detailaction.html"

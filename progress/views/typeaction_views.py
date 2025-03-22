@@ -10,6 +10,11 @@ class TypeActionListView(ListView):
     queryset = TypeAction.objects.all()
     template_name = "progress/typeactions.html"
 
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['link'] = "typeactions"
+        return ctx
+
 class TypeActionDetailView(DetailView):
     model = TypeAction
     template_name = "progress/typeaction.html"

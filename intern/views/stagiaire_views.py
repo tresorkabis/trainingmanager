@@ -10,6 +10,11 @@ class StagiaireListView(ListView):
     queryset = Stagiaire.objects.all()
     template_name = "intern/stagiaires.html"
 
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['link'] = "stagiaires"
+        return ctx
+
 class StagiaireDetailView(DetailView):
     model = Stagiaire
     template_name = "intern/stagiaire.html"

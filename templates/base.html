@@ -41,7 +41,7 @@
                     <ul class="menu">
                         <li class="sidebar-title">Menu</li>
 
-                        <li class="sidebar-item active ">
+                        <li class="sidebar-item {% if link == 'home' %} active {% endif %} ">
                             <a href="{% url 'home' %}" class='sidebar-link'>
                                 <i class="bi bi-grid-fill"></i>
                                 <span>Dashboard</span>
@@ -53,50 +53,50 @@
                                 <span>Admin</span>
                             </a>
                         </li>
-                        <li class="sidebar-item">
+                        <li class="sidebar-item {% if link == 'formations' %} active {% endif %} ">
                             <a href="{% url 'formations' %}" class='sidebar-link'>
                                 <i class="bi bi-file-earmark-spreadsheet-fill"></i>
                                 <span>Formations</span>
                             </a>
                         </li>
-                        <li class="sidebar-item">
+                        <li class="sidebar-item {% if link == 'filieres' %} active {% endif %}">
                             <a href="{% url 'filieres' %}" class='sidebar-link'>
                                 <i class="bi bi-file-earmark-medical-fill"></i>
                                 <span>Filiers</span>
                             </a>
                         </li>
-                        <li class="sidebar-item">
+                        <li class="sidebar-item {% if link == 'categories' %} active {% endif %} ">
                             <a href="{% url 'categories' %}" class='sidebar-link'>
                                 <i class="bi bi-collection-fill"></i>
                                 <span>Catégories</span>
                             </a>
                         </li>
-                        <li class="sidebar-item">
+                        <li class="sidebar-item {% if link == 'stagiaires' %} active {% endif %} ">
                             <a href="{% url 'stagiaires' %}" class='sidebar-link'>
                                 <i class="bi bi-stack"></i>
                                 <span>Stagiaires</span>
                             </a>
                         </li>
-                        <li class="sidebar-item">
+                        <li class="sidebar-item {% if link == 'services' %} active {% endif %} ">
                             <a href="{% url 'services' %}" class='sidebar-link'>
                                 <i class="bi bi-life-preserver"></i>
                                 <span>Services </span>
                             </a>
                         </li>
-                        <li class="sidebar-item">
+                        <li class="sidebar-item {% if link == 'actions' %} active {% endif %} ">
                             <a href="{% url 'actions' %}" class='sidebar-link'>
                                 <i class="bi bi-egg-fill"></i>
                                 <span>Action</span>
                             </a>
                         </li>
-                        
-                        <li class="sidebar-item">
+
+                        <li class="sidebar-item {% if link == 'formateurs' %} active {% endif %} ">
                             <a href="{% url 'formateurs' %}" class='sidebar-link'>
                                 <i class="iconly-boldProfile"></i>
                                 <span>Formateurs</span>
                             </a>
                         </li>
-                        <li class="sidebar-item">
+                        <li class="sidebar-item {% if link == 'typeactions' %} active {% endif %} ">
                             <a href="{% url 'typeactions' %}" class='sidebar-link'>
                                 <i class="icon dripicons-archive"></i>
                                 <span>Type actions</span>

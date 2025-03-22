@@ -11,6 +11,11 @@ class FormationListView(ListView):
     paginate_by = 3
     template_name = "training/formations.html"
 
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['link'] = "formations"
+        return ctx
+
 class FormationDetailView(DetailView):
     model = Formation
     template_name = "training/formation.html"

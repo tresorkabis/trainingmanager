@@ -10,6 +10,11 @@ class CategorieListView(ListView):
     queryset = Categorie.objects.all()
     template_name = "intern/categories.html"
 
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['link'] = "categories"
+        return ctx
+
 class CategorieDetailView(DetailView):
     model = Categorie
     template_name = "training/categorie.html"
