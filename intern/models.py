@@ -23,7 +23,6 @@ class Stagiaire(models.Model):
     sexe = models.CharField(max_length=2, choices=SEXE_CHOISES)
     telephone = models.CharField(max_length=15)
     categorie = models.ForeignKey(Categorie, on_delete=models.CASCADE)
-    active= models.BooleanField(default=True)
 
     active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)

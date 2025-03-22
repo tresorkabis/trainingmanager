@@ -49,16 +49,16 @@
                         <table class="table table-striped dataTable-table" id="table1">
                             <thead>
                                 <tr>
-                                    <th data-sortable="" style="width: 42.490%;"><a href="#"
-                                            class="dataTable-sorter">Nom</a></th>
-                                    <th data-sortable="" style="width: 10.6547%;"><a href="#"
-                                            class="dataTable-sorter">Status</a></th>
+                                    <th data-sortable="" style="width: 3.490%;"><a href="#" class="dataTable-sorter">N°</a></th>
+                                    <th data-sortable="" style="width: 42.490%;"><a href="#" class="dataTable-sorter">Nom</a></th>
+                                    <th data-sortable="" style="width: 10.6547%;"><a href="#" class="dataTable-sorter">Status</a></th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% if filiere_list %}
                                 {% for item in object_list %}
                                 <tr>
+                                    <td>{{ item.id }}</td>
                                     <td>{{ item.nom }}</td>
                                     <td>
                                         {% if item.active %}

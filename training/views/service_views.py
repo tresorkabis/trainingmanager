@@ -1,12 +1,34 @@
+from django.http import HttpResponseRedirect
+from django.shortcuts import render
+from django.views import View
 from django.views.generic import ListView, DetailView
 
 from training.models import Service
 
+
 class ServiceListView(ListView):
-    context_object_name = "filiere_list"
+    context_object_name = "service_list"
     queryset = Service.objects.all()
-    template_name = "training/filieres.html"
+    template_name = "training/services.html"
 
 class ServiceDetailView(DetailView):
     model = Service
-    template_name = "training/filiere.html"
+    template_name = "training/service.html"
+
+class ServiceCreateView(View):
+    def get(self, request):
+        services = Service.objects.all()
+        ctx = {
+            "services":services
+        }
+        return render(request, 'training/service.html', ctx)
+    
+    def post(self, request):
+        nom = request.POST['nom']
+
+        service = Service(
+            nom = nom,
+        )
+        service.save()
+
+        return HttpResponseRedirect("/training/services")

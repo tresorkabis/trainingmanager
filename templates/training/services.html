@@ -10,14 +10,14 @@
     <div class="page-title">
         <div class="row">
             <div class="col-12 col-md-6 order-md-1 order-last">
-                <h3>Stagiaire</h3>
-                <p class="text-subtitle text-muted">Liste des stagiaires</p>
+                <h3>Filieres</h3>
+                <p class="text-subtitle text-muted">Liste des services</p>
             </div>
             <div class="col-12 col-md-6 order-md-2 order-first">
                 <nav aria-label="breadcrumb" class="breadcrumb-header float-start float-lg-end">
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item"><a href="% url 'home' %}">Dashboard</a></li>
-                        <li class="breadcrumb-item active" aria-current="page">stagiaire</li>
+                        <li class="breadcrumb-item active" aria-current="page">service</li>
                     </ol>
                 </nav>
             </div>
@@ -26,7 +26,7 @@
     <section class="section">
         <div class="card">
             <div class="card-header">
-                <a href="{% url 'stagiaire_create' %}">Nouvelle Stagiaire</a>
+                <a href="{% url 'service_create' %}">Nouvelle service</a>
             </div>
             <div class="card-body">
                 <div class="dataTable-wrapper dataTable-loading no-footer sortable searchable fixed-columns">
@@ -49,27 +49,17 @@
                         <table class="table table-striped dataTable-table" id="table1">
                             <thead>
                                 <tr>
-                                    <th data-sortable="" style="width: 2.490%;"><a href="#" class="dataTable-sorter">N°</a></th>
-                                    <th data-sortable="" style="width: 25.490%;"><a href="#" class="dataTable-sorter">Nom</a></th>
-                                    <th data-sortable="" style="width: 25.490%;"><a href="#" class="dataTable-sorter">Postnom</a></th>
-                                    <th data-sortable="" style="width: 25.490%;"><a href="#" class="dataTable-sorter">Prénom</a></th>
-                                    <th data-sortable="" style="width: 5.490%;"><a href="#" class="dataTable-sorter">Sexe</a></th>
-                                    <th data-sortable="" style="width: 20.490%;"><a href="#" class="dataTable-sorter">Telephone</a></th>
-                                    <th data-sortable="" style="width: 25.490%;"><a href="#" class="dataTable-sorter">Categorie</a></th>
+                                    <th data-sortable="" style="width: 3.490%;"><a href="#" class="dataTable-sorter">N°</a></th>
+                                    <th data-sortable="" style="width: 42.490%;"><a href="#" class="dataTable-sorter">Nom</a></th>
                                     <th data-sortable="" style="width: 10.6547%;"><a href="#" class="dataTable-sorter">Status</a></th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {% if stagiaire_list %}
+                                {% if service_list %}
                                 {% for item in object_list %}
                                 <tr>
                                     <td>{{ item.id }}</td>
                                     <td>{{ item.nom }}</td>
-                                    <td>{{ item.postnom }}</td>
-                                    <td>{{ item.prenom }}</td>
-                                    <td>{{ item.sexe }}</td>
-                                    <td>{{ item.telephone }}</td>
-                                    <td>{{ item.categorie }}</td>
                                     <td>
                                         {% if item.active %}
                                         <span class="badge bg-success">Active</span>
@@ -81,7 +71,7 @@
                                 {% endfor %}
                                 {% else %}
                                 <tr>
-                                    <td colspan="4">Pas de stagiaire</td>
+                                    <td colspan="4">Pas de service</td>
                                 </tr>
                                 {% endif %}
                             </tbody>
