@@ -1,0 +1,9 @@
+
+.sidebar-wrapper .sidebar-header img {
+    height: 4rem;
+    width: 4rem;
+}
+
+.sidebar-wrapper .sidebar-header a {
+    font-size: smaller;
+}
