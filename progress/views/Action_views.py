@@ -24,7 +24,7 @@ class ActionCreateView(View):
         ctx = {
             "action":action
         }
-        return render(request, 'progress/actions.html', ctx)
+        return render(request, 'progress/action.html', ctx)
     
     def post(self, request):
         description= request.POST['description']
