@@ -28,17 +28,11 @@ class TypeActionCreateView(View):
         return render(request, 'progress/typeaction.html', ctx)
     
     def post(self, request):
-        description= request.POST['description']
-        date_debut = request.POST['date_debut']
-        date_fin= request.POST['date_fin']
-        formation= request.POST['formation']
-        
+        code= request.POST['code']
+        libelle = request.POST['libelle'] 
         typeaction= typeaction(
-            description = description,
-            date_debut = date_debut,
-            date_fin= date_fin,
-            formation = formation,
-            
+            code= code,
+            libelle = libelle,    
         )
         typeaction.save()
 
