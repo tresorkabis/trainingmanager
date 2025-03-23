@@ -2,6 +2,8 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.views import View
 from django.views.generic import ListView, DetailView
+from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
 
 from intern.models import Stagiaire, Categorie
 

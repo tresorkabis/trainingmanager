@@ -134,3 +134,7 @@ JAZZMIN_SETTINGS = {
     "show_ui_builder": False,
     #"language_chooser": True,
 }
+
+LOGIN_URL = 'login'
+
+LOGIN_REDIRECT_URL = 'home'

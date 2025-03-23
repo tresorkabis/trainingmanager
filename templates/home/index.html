@@ -103,6 +103,10 @@
                     <div class="ms-3 name">
                         <h5 class="font-bold">{{ user.first_name }}</h5>
                         <h6 class="text-muted mb-0">{{ user.last_name }}</h6>
+                        <a href="{% url 'logout' %}">
+                            <i class="icon dripicons-exit"></i>
+                            Se deconnecter
+                        </a>
                     </div>
                 </div>
             </div>
