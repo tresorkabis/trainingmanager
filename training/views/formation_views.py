@@ -8,7 +8,7 @@ from training.models import Filiere, Formation
 class FormationListView(ListView):
     context_object_name = "formation_list"
     queryset = Formation.objects.all()
-    paginate_by = 3
+    paginate_by = 4
     template_name = "training/formations.html"
 
     def get_context_data(self, **kwargs):
@@ -20,12 +20,20 @@ class FormationDetailView(DetailView):
     model = Formation
     template_name = "training/formation.html"
 
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['filieres'] = Filiere.objects.all()
+        ctx['titre'] = "Voir"
+        return ctx
+
 
 class FormationCreateView(View):
     def get(self, request):
         filieres = Filiere.objects.all()
         ctx = {
-            "filieres":filieres
+            "filieres":filieres,
+            "titre" : "Saisie d'une formation",
+            "mode" : "new"
         }
         return render(request, 'training/formation.html', ctx)
     

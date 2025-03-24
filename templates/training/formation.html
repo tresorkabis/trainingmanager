@@ -8,13 +8,13 @@
         <div class="row">
             <div class="col-12 col-md-6 order-md-1 order-last">
                 <h3><a href="{% url 'formations' %}">Formations</a></h3>
-                <p class="text-subtitle text-muted">Saisie d'une formation</p>
+                <p class="text-subtitle text-muted">{{ titre }}</p>
             </div>
             <div class="col-12 col-md-6 order-md-2 order-first">
                 <nav aria-label="breadcrumb" class="breadcrumb-header float-start float-lg-end">
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item">Formations</li>
-                        <li class="breadcrumb-item active" aria-current="page">Création</li>
+                        <li class="breadcrumb-item active" aria-current="page">{{ titre }}</li>
                     </ol>
                 </nav>
             </div>
@@ -39,7 +39,8 @@
                                             </div>
                                             <div class="col-8 form-group">
                                                 <input type="text" id="nom" class="form-control" name="nom"
-                                                    placeholder="Nom de la formation">
+                                                    placeholder="Nom de la formation" {% if object.id %}
+                                                    value="{{object.nom}}" disabled {% endif %}>
                                             </div>
                                         </div>
                                     </div>
@@ -49,11 +50,19 @@
                                                 <label for="filiere">Filière</label>
                                             </div>
                                             <div class="col-8 form-group">
-
-                                                <select name="filiere" id="filiere" class="form-control">
+                                                <select {% if object.id %} disabled {% endif %} name="filiere"
+                                                    id="filiere" class="form-control">
                                                     <option value="">Selectionner une filère</option>
                                                     {% for item in filieres %}
-                                                    <option value="{{ item.id }}">{{ item.nom }}</option>
+                                                    {% if item.id == object.filiere.id %}
+                                                    <option value="{{ item.id }}" selected>
+                                                        {{ item.nom }}
+                                                    </option>
+                                                    {% else %}
+                                                    <option value="{{ item.id }}">
+                                                        {{ item.nom }}
+                                                    </option>
+                                                    {% endif %}
                                                     {% endfor %}
                                                 </select>
                                             </div>
@@ -66,7 +75,8 @@
                                             </div>
                                             <div class="col-8 form-group">
                                                 <input type="number" id="duree" class="form-control" name="duree"
-                                                    placeholder="Durée en mois">
+                                                    placeholder="Durée en mois" {% if object.id %}
+                                                    value="{{ object.duree }}" disabled {% endif %}>
                                             </div>
                                         </div>
                                     </div>
@@ -76,8 +86,9 @@
                                                 <label for="fraism">Frais matériels</label>
                                             </div>
                                             <div class="col-8 form-group">
-                                                <input type="text" id="fraism" class="form-control" name="fraism"
-                                                    placeholder="Frais matériels">
+                                                <input {% if object.id %} value="{{ object.fraismateriels }}" disabled
+                                                    {% endif %} type="text" id="fraism" class="form-control"
+                                                    name="fraism" placeholder="Frais matériels">
                                             </div>
                                         </div>
                                     </div>
