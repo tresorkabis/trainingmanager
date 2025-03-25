@@ -7,6 +7,7 @@ from training.models import Filiere, Service
 class FiliereListView(ListView):
     context_object_name = "filiere_list"
     queryset = Filiere.objects.all()
+    paginate_by = 4
     template_name = "training/filieres.html"
 
     def get_context_data(self, **kwargs):
@@ -17,6 +18,12 @@ class FiliereListView(ListView):
 class FiliereDetailView(DetailView):
     model = Filiere
     template_name = "training/filiere.html"
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['services'] = Service.objects.all()
+        ctx['titre'] = "Voir"
+        return ctx
 
 class FiliereCreateView(View):
     def get(self, request):

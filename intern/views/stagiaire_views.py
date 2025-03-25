@@ -10,6 +10,7 @@ from intern.models import Stagiaire, Categorie
 class StagiaireListView(ListView):
     context_object_name = "stagiaire_list"
     queryset = Stagiaire.objects.all()
+    paginate_by = 4
     template_name = "intern/stagiaires.html"
 
     def get_context_data(self, **kwargs):
@@ -21,12 +22,20 @@ class StagiaireDetailView(DetailView):
     model = Stagiaire
     template_name = "intern/stagiaire.html"
 
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['stagiaires'] = Stagiaire.objects.all()
+        ctx['titre'] = "Voir"
+        return ctx
+
 
 class StagiaireCreateView(View):
     def get(self, request):
-        categorie = Categorie.objects.all()
+        categories = Categorie.objects.all()
         ctx = {
-            "categorie":categorie
+            "categories":categories,
+            "titre" : "Saisie d'une formation",
+            "mode" : "new"
         }
         return render(request, 'intern/stagiaire.html', ctx)
     

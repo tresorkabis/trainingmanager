@@ -9,6 +9,7 @@ from training.models import Service
 class ServiceListView(ListView):
     context_object_name = "service_list"
     queryset = Service.objects.all()
+    paginate_by = 4
     template_name = "training/services.html"
 
     def get_context_data(self, **kwargs):
@@ -19,6 +20,12 @@ class ServiceListView(ListView):
 class ServiceDetailView(DetailView):
     model = Service
     template_name = "training/service.html"
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['services'] = Service.objects.all()
+        ctx['titre'] = "Voir"
+        return ctx
 
 class ServiceCreateView(View):
     def get(self, request):
