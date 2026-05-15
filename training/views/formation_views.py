@@ -40,13 +40,17 @@ class FormationCreateView(View):
     def post(self, request):
         nom = request.POST['nom']
         duree = request.POST['duree']
+        duree_heures = request.POST.get('duree_heures') or 0
         id_filiere = request.POST['filiere']
+        cout = request.POST.get('cout') or 0
         fraismateriels = request.POST['fraism']
 
         formation = Formation(
             nom = nom,
             duree = duree,
+            duree_heures = duree_heures,
             filiere_id = id_filiere,
+            cout = cout,
             fraismateriels = fraismateriels
         )
         formation.save()

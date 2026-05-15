@@ -11,10 +11,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'assets/css/bootstrap.css' %}">
 
-    <link rel="stylesheet" href="{% static 'assets/vendors/dripicons/webfont.css' %}">
-    <link rel="stylesheet" href="{% static 'assets/css/pages/dripicons.css' %}">
-
-    <link rel="stylesheet" href="{% static 'assets/vendors/iconly/bold.css' %}">
     {% block style %}{% endblock style %}
 
     <link rel="stylesheet" href="{% static 'assets/vendors/perfect-scrollbar/perfect-scrollbar.css' %}">
@@ -49,13 +45,13 @@
 
                         <li class="sidebar-item {% if link == 'home' %} active {% endif %} ">
                             <a href="{% url 'home' %}" class='sidebar-link'>
-                                <i class="bi bi-grid-fill"></i>
+                                <i class="bi bi-columns-gap"></i>
                                 <span>Tableau de bord</span>
                             </a>
                         </li>
                         <li class="sidebar-item">
                             <a href="{% url 'admin:index' %}" class='sidebar-link'>
-                                <i class="bi bi-person-badge-fill"></i>
+                                <i class="bi bi-shield-lock"></i>
                                 <span>Administration</span>
                             </a>
                         </li>
@@ -64,14 +60,14 @@
 
                         <li class="sidebar-item {% if link == 'stagiaires' %} active {% endif %} ">
                             <a href="{% url 'stagiaires' %}" class='sidebar-link'>
-                                <i class="bi bi-stack"></i>
+                                <i class="bi bi-people"></i>
                                 <span>Stagiaires</span>
                             </a>
                         </li>
 
                         <li class="sidebar-item {% if link == 'actions' %} active {% endif %} ">
                             <a href="{% url 'actions' %}" class='sidebar-link'>
-                                <i class="bi bi-egg-fill"></i>
+                                <i class="bi bi-clipboard-check"></i>
                                 <span>Actions de formation</span>
                             </a>
                         </li>
@@ -80,7 +76,7 @@
 
                         <li class="sidebar-item {% if link == 'formateurs' %} active {% endif %} ">
                             <a href="{% url 'formateurs' %}" class='sidebar-link'>
-                                <i class="iconly-boldProfile"></i>
+                                <i class="bi bi-person-badge"></i>
                                 <span>Formateurs</span>
                             </a>
                         </li>
@@ -90,34 +86,34 @@
 
                         <li class="sidebar-item {% if link == 'services' %} active {% endif %} ">
                             <a href="{% url 'services' %}" class='sidebar-link'>
-                                <i class="bi bi-life-preserver"></i>
+                                <i class="bi bi-building"></i>
                                 <span>Services </span>
                             </a>
                         </li>
 
                         <li class="sidebar-item {% if link == 'typeactions' %} active {% endif %} ">
                             <a href="{% url 'typeactions' %}" class='sidebar-link'>
-                                <i class="icon dripicons-archive"></i>
+                                <i class="bi bi-diagram-3"></i>
                                 <span>Types d'actions</span>
                             </a>
                         </li>
 
                         <li class="sidebar-item {% if link == 'formations' %} active {% endif %} ">
                             <a href="{% url 'formations' %}" class='sidebar-link'>
-                                <i class="bi bi-file-earmark-spreadsheet-fill"></i>
+                                <i class="bi bi-journal-text"></i>
                                 <span>Formations</span>
                             </a>
                         </li>
                         <li class="sidebar-item {% if link == 'filieres' %} active {% endif %}">
                             <a href="{% url 'filieres' %}" class='sidebar-link'>
-                                <i class="bi bi-file-earmark-medical-fill"></i>
+                                <i class="bi bi-signpost-2"></i>
                                 <span>Filières</span>
                             </a>
                         </li>
 
                         <li class="sidebar-item {% if link == 'categories' %} active {% endif %} ">
                             <a href="{% url 'categories' %}" class='sidebar-link'>
-                                <i class="bi bi-collection-fill"></i>
+                                <i class="bi bi-bookmarks"></i>
                                 <span>Catégories</span>
                             </a>
                         </li>
