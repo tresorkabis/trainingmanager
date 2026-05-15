@@ -1,17 +1,42 @@
 {% extends "base.html" %}
 {% load static %}
 {% block title %} Dashboard {% endblock title %}
+{% block page_header %}Tableau de bord opérationnel{% endblock page_header %}
 
 
 {% block content %}
 <div class="page-heading">
-    <h3>Dashboard</h3>
+    <section class="tm-hero mb-4">
+        <span class="tm-hero__eyebrow">
+            <i class="bi bi-shield-check"></i>
+            Vision globale
+        </span>
+        <h1>Pilotez les formations, les stagiaires et les actions depuis un espace unifié.</h1>
+        <p>
+            Cette interface centralise les principaux indicateurs du centre et donne un accès rapide
+            aux opérations essentielles de suivi.
+        </p>
+        <div class="tm-hero__actions">
+            <a href="{% url 'stagiaires' %}" class="tm-btn-soft">
+                <i class="bi bi-people"></i>
+                Voir les stagiaires
+            </a>
+            <a href="{% url 'formations' %}" class="tm-btn-soft">
+                <i class="bi bi-journal-richtext"></i>
+                Voir les formations
+            </a>
+            <a href="{% url 'admin:index' %}" class="tm-btn-soft">
+                <i class="bi bi-sliders"></i>
+                Administration
+            </a>
+        </div>
+    </section>
 </div>
-<section class="row">
-    <div class="col-12 col-lg-9">
+<section class="row g-4">
+    <div class="col-12 col-lg-8">
         <div class="row">
             <div class="col-6 col-lg-3 col-md-6">
-                <div class="card">
+                <div class="card tm-stat-card">
                     <div class="card-body px-3 py-4-5">
                         <div class="row">
                             <div class="col-md-4">
@@ -20,15 +45,16 @@
                                 </div>
                             </div>
                             <div class="col-md-8">
-                                <h6 class="text-muted font-semibold">Formations</h6>
-                                <h6 class="font-extrabold mb-0">{{ nbformations }}</h6>
+                                <div class="tm-stat-label">Formations</div>
+                                <div class="tm-stat-value">{{ nbformations }}</div>
+                                <div class="tm-stat-meta">Offres actuellement suivies</div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="col-6 col-lg-3 col-md-6">
-                <div class="card">
+                <div class="card tm-stat-card">
                     <div class="card-body px-3 py-4-5">
                         <div class="row">
                             <div class="col-md-4">
@@ -37,15 +63,16 @@
                                 </div>
                             </div>
                             <div class="col-md-8">
-                                <h6 class="text-muted font-semibold">Filieres</h6>
-                                <h6 class="font-extrabold mb-0">{{ nbfilieres }}</h6>
+                                <div class="tm-stat-label">Filières</div>
+                                <div class="tm-stat-value">{{ nbfilieres }}</div>
+                                <div class="tm-stat-meta">Parcours catalogués</div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="col-6 col-lg-3 col-md-6">
-                <div class="card">
+                <div class="card tm-stat-card">
                     <div class="card-body px-3 py-4-5">
                         <div class="row">
                             <div class="col-md-4">
@@ -54,15 +81,16 @@
                                 </div>
                             </div>
                             <div class="col-md-8">
-                                <h6 class="text-muted font-semibold">Stagiaires</h6>
-                                <h6 class="font-extrabold mb-0">{{ nbstagiaires }}</h6>
+                                <div class="tm-stat-label">Stagiaires</div>
+                                <div class="tm-stat-value">{{ nbstagiaires }}</div>
+                                <div class="tm-stat-meta">Apprenants enregistrés</div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="col-6 col-lg-3 col-md-6">
-                <div class="card">
+                <div class="card tm-stat-card">
                     <div class="card-body px-3 py-4-5">
                         <div class="row">
                             <div class="col-md-4">
@@ -71,8 +99,9 @@
                                 </div>
                             </div>
                             <div class="col-md-8">
-                                <h6 class="text-muted font-semibold">Actions</h6>
-                                <h6 class="font-extrabold mb-0">{{ nbactions }}</h6>
+                                <div class="tm-stat-label">Actions</div>
+                                <div class="tm-stat-value">{{ nbactions }}</div>
+                                <div class="tm-stat-meta">Sessions et activités planifiées</div>
                             </div>
                         </div>
                     </div>
@@ -83,7 +112,7 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-header">
-                        <h4>Actions</h4>
+                        <h4>Aperçu activité</h4>
                     </div>
                     <div class="card-body">
                         <div id="chart-profile-visit"></div>
@@ -92,20 +121,24 @@
             </div>
         </div>
     </div>
-    <div class="col-12 col-lg-3">
+    <div class="col-12 col-lg-4">
         {% if user != None %}
-        <div class="card">
+        <div class="card tm-user-card mb-4">
             <div class="card-body py-4 px-5">
                 <div class="d-flex align-items-center">
                     <div class="avatar avatar-xl">
-                        <img src="{{ user.photo_url.url }}" alt="Face">
+                        {% if user.photo_url %}
+                        <img src="{{ user.photo_url.url }}" alt="Photo utilisateur">
+                        {% else %}
+                        <img src="{% static 'assets/images/faces/1.jpg' %}" alt="Photo utilisateur">
+                        {% endif %}
                     </div>
                     <div class="ms-3 name">
-                        <h5 class="font-bold">{{ user.first_name }}</h5>
-                        <h6 class="text-muted mb-0">{{ user.last_name }}</h6>
+                        <h5 class="font-bold mb-1">{{ user.get_full_name|default:user.username }}</h5>
+                        <h6 class="text-muted mb-3">{{ user.email|default:"Compte interne" }}</h6>
                         <a href="{% url 'logout' %}">
                             <i class="icon dripicons-exit"></i>
-                            Se deconnecter
+                            Se déconnecter
                         </a>
                     </div>
                 </div>
@@ -113,12 +146,54 @@
         </div>
         {% endif %}
 
-        <div class="card">
+        <div class="card mb-4">
             <div class="card-header">
-                <h4>Genre</h4>
+                <h4>Accès rapide</h4>
             </div>
             <div class="card-body">
-                <div id="chart-visitors-profile"></div>
+                <div class="tm-quick-grid">
+                    <a href="{% url 'stagiaire_create' %}" class="tm-quick-link">
+                        <span class="tm-quick-link__icon"><i class="bi bi-person-plus"></i></span>
+                        <span>
+                            <span class="tm-quick-link__title">Nouveau stagiaire</span>
+                            <span class="tm-quick-link__text">Créer une nouvelle fiche apprenant.</span>
+                        </span>
+                    </a>
+                    <a href="{% url 'formation_create' %}" class="tm-quick-link">
+                        <span class="tm-quick-link__icon"><i class="bi bi-journal-plus"></i></span>
+                        <span>
+                            <span class="tm-quick-link__title">Nouvelle formation</span>
+                            <span class="tm-quick-link__text">Ajouter une offre au catalogue.</span>
+                        </span>
+                    </a>
+                    <a href="{% url 'categories_create' %}" class="tm-quick-link">
+                        <span class="tm-quick-link__icon"><i class="bi bi-tags"></i></span>
+                        <span>
+                            <span class="tm-quick-link__title">Nouvelle catégorie</span>
+                            <span class="tm-quick-link__text">Mettre à jour les référentiels.</span>
+                        </span>
+                    </a>
+                    <a href="{% url 'services' %}" class="tm-quick-link">
+                        <span class="tm-quick-link__icon"><i class="bi bi-diagram-3"></i></span>
+                        <span>
+                            <span class="tm-quick-link__title">Services</span>
+                            <span class="tm-quick-link__text">Explorer la structure du centre.</span>
+                        </span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h4>Repères</h4>
+            </div>
+            <div class="card-body">
+                <div class="tm-panel-note">
+                    Suivi centralisé des formations, des filières et des stagiaires.
+                    Pour une présentation encore plus professionnelle, l'étape suivante
+                    sera d'uniformiser aussi les formulaires et tableaux du module `progress`.
+                </div>
             </div>
         </div>
     </div>
