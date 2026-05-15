@@ -18,7 +18,7 @@ class Command(BaseCommand):
         createprofile()
         manager_profile = Profile.objects.filter(name="Manager").first()
 
-        demo_user, user_created = User.objects.get_or_create(
+        demo_user, created = User.objects.get_or_create(
             username="demo.manager",
             defaults={
                 "email": "demo.manager@training.local",
@@ -27,9 +27,9 @@ class Command(BaseCommand):
                 "profile": manager_profile,
             },
         )
-        if user_created or not demo_user.check_password("demo1234"):
+        if created or not demo_user.check_password("demo1234"):
             demo_user.set_password("demo1234")
-            demo_user.profile = manager_profile
+            demo_user.profile = manager_profile # Ensure profile is set even if user existed
             demo_user.save()
 
         categories = {}
@@ -61,19 +61,29 @@ class Command(BaseCommand):
 
         formations = {}
         formation_specs = [
-            ("Electricite batiment", 6, "Electricite industrielle", 120.0),
-            ("Automatisme industriel", 8, "Electricite industrielle", 180.0),
-            ("Maintenance preventive", 5, "Maintenance des equipements", 95.0),
-            ("Pack Office professionnel", 3, "Bureautique", 60.0),
-            ("Secretaire de direction", 6, "Gestion administrative", 110.0),
+            {"nom": "Electricite batiment", "duree": 6, "filiere_nom": "Electricite industrielle", "fraismateriels": 120.0, "cout": 1500.00},
+            {"nom": "Automatisme industriel", "duree": 8, "filiere_nom": "Electricite industrielle", "fraismateriels": 180.0, "cout": 2000.00},
+            {"nom": "Maintenance preventive", "duree": 5, "filiere_nom": "Maintenance des equipements", "fraismateriels": 95.0, "cout": 1200.00},
+            {"nom": "Pack Office professionnel", "duree": 3, "filiere_nom": "Bureautique", "fraismateriels": 60.0, "cout": 800.00},
+            {"nom": "Secretaire de direction", "duree": 6, "filiere_nom": "Gestion administrative", "fraismateriels": 110.0, "cout": 1300.00},
         ]
-        for nom, duree, filiere_nom, frais in formation_specs:
+        for spec in formation_specs:
+            nom = spec["nom"]
+            duree = spec["duree"]
+            filiere_nom = spec["filiere_nom"]
+            fraismateriels = spec["fraismateriels"]
+            cout = spec["cout"]
+            duree_heures = duree * 20 * 7 # Assuming 20 working days/month, 7 hours/day
+
             formation, _ = Formation.objects.get_or_create(
                 nom=nom,
                 defaults={
                     "duree": duree,
+                    "duree_heures": duree_heures,
                     "filiere": filieres[filiere_nom],
-                    "fraismateriels": frais,
+                    "cout": cout,
+                    "fraismateriels": fraismateriels,
+                    "active": True, # Explicitly set active
                 },
             )
             changed = False
@@ -83,8 +93,17 @@ class Command(BaseCommand):
             if formation.duree != duree:
                 formation.duree = duree
                 changed = True
-            if formation.fraismateriels != frais:
-                formation.fraismateriels = frais
+            if formation.duree_heures != duree_heures:
+                formation.duree_heures = duree_heures
+                changed = True
+            if formation.cout != cout:
+                formation.cout = cout
+                changed = True
+            if formation.fraismateriels != fraismateriels:
+                formation.fraismateriels = fraismateriels
+                changed = True
+            if not formation.active: # Ensure it's active
+                formation.active = True
                 changed = True
             if changed:
                 formation.save()
