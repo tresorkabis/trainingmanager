@@ -83,6 +83,30 @@
                                     <div class="col-6">
                                         <div class="row">
                                             <div class="col-4">
+                                                <label for="duree_heures">Durée en heures</label>
+                                            </div>
+                                            <div class="col-8 form-group">
+                                                <input type="number" id="duree_heures" class="form-control" name="duree_heures"
+                                                    placeholder="Durée en heures" {% if object.id %}
+                                                    value="{{ object.duree_heures }}" disabled {% endif %}>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="row">
+                                            <div class="col-4">
+                                                <label for="cout">Coût</label>
+                                            </div>
+                                            <div class="col-8 form-group">
+                                                <input {% if object.id %} value="{{ object.cout }}" disabled
+                                                    {% endif %} type="number" step="0.01" id="cout" class="form-control"
+                                                    name="cout" placeholder="Coût de la formation">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="row">
+                                            <div class="col-4">
                                                 <label for="fraism">Frais matériels</label>
                                             </div>
                                             <div class="col-8 form-group">

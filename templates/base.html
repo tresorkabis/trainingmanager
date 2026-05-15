@@ -1,26 +1,22 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TrainingManager - {% block title %}Aceuil{% endblock title %}</title>
+    <title>TrainingManager - {% block title %}Accueil{% endblock title %}</title>
 
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'assets/css/bootstrap.css' %}">
 
-    <link rel="stylesheet" href="{% static 'assets/vendors/dripicons/webfont.css' %}">
-    <link rel="stylesheet" href="{% static 'assets/css/pages/dripicons.css' %}">
-
-    <link rel="stylesheet" href="{% static 'assets/vendors/iconly/bold.css' %}">
     {% block style %}{% endblock style %}
 
     <link rel="stylesheet" href="{% static 'assets/vendors/perfect-scrollbar/perfect-scrollbar.css' %}">
     <link rel="stylesheet" href="{% static 'assets/vendors/bootstrap-icons/bootstrap-icons.css' %}">
     <link rel="stylesheet" href="{% static 'assets/css/app.css' %}">
-    <link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <link rel="shortcut icon" href="{% static 'assets/images/favicon.svg' %}" type="image/x-icon">
 </head>
 
@@ -32,7 +28,7 @@
                 <div class="sidebar-header">
                     <div class="logo">
                         <img src="{% static 'admin/img/logo.jpeg' %}" width="30" height="30" alt="Logo" srcset="">
-                        <a href="index.html">ESFORCA/INPP</a>
+                        <a href="{% url 'home' %}">Training Manager</a>
                     </div>
                     <div class="d-flex justify-content-between">
                         <div class="toggler">
@@ -45,79 +41,79 @@
                     <br>
                     <hr>
                     <ul class="menu">
-                        <li class="sidebar-title">Dashboard</li>
+                        <li class="sidebar-title">Pilotage</li>
 
                         <li class="sidebar-item {% if link == 'home' %} active {% endif %} ">
                             <a href="{% url 'home' %}" class='sidebar-link'>
-                                <i class="bi bi-grid-fill"></i>
-                                <span>Dashboard</span>
+                                <i class="bi bi-columns-gap"></i>
+                                <span>Tableau de bord</span>
                             </a>
                         </li>
                         <li class="sidebar-item">
                             <a href="{% url 'admin:index' %}" class='sidebar-link'>
-                                <i class="bi bi-person-badge-fill"></i>
-                                <span>Admin</span>
+                                <i class="bi bi-shield-lock"></i>
+                                <span>Administration</span>
                             </a>
                         </li>
 
-                        <li class="sidebar-title">Stagiaires</li>
+                        <li class="sidebar-title">Parcours</li>
 
                         <li class="sidebar-item {% if link == 'stagiaires' %} active {% endif %} ">
                             <a href="{% url 'stagiaires' %}" class='sidebar-link'>
-                                <i class="bi bi-stack"></i>
+                                <i class="bi bi-people"></i>
                                 <span>Stagiaires</span>
                             </a>
                         </li>
 
                         <li class="sidebar-item {% if link == 'actions' %} active {% endif %} ">
                             <a href="{% url 'actions' %}" class='sidebar-link'>
-                                <i class="bi bi-egg-fill"></i>
-                                <span>Actions</span>
+                                <i class="bi bi-clipboard-check"></i>
+                                <span>Actions de formation</span>
                             </a>
                         </li>
 
-                        <li class="sidebar-title">Formateurs</li>
+                        <li class="sidebar-title">Encadrement</li>
 
                         <li class="sidebar-item {% if link == 'formateurs' %} active {% endif %} ">
                             <a href="{% url 'formateurs' %}" class='sidebar-link'>
-                                <i class="iconly-boldProfile"></i>
+                                <i class="bi bi-person-badge"></i>
                                 <span>Formateurs</span>
                             </a>
                         </li>
 
 
-                        <li class="sidebar-title">Configurations</li>
+                        <li class="sidebar-title">Référentiels</li>
 
                         <li class="sidebar-item {% if link == 'services' %} active {% endif %} ">
                             <a href="{% url 'services' %}" class='sidebar-link'>
-                                <i class="bi bi-life-preserver"></i>
+                                <i class="bi bi-building"></i>
                                 <span>Services </span>
                             </a>
                         </li>
 
                         <li class="sidebar-item {% if link == 'typeactions' %} active {% endif %} ">
                             <a href="{% url 'typeactions' %}" class='sidebar-link'>
-                                <i class="icon dripicons-archive"></i>
-                                <span>Type actions</span>
+                                <i class="bi bi-diagram-3"></i>
+                                <span>Types d'actions</span>
                             </a>
                         </li>
 
                         <li class="sidebar-item {% if link == 'formations' %} active {% endif %} ">
                             <a href="{% url 'formations' %}" class='sidebar-link'>
-                                <i class="bi bi-file-earmark-spreadsheet-fill"></i>
+                                <i class="bi bi-journal-text"></i>
                                 <span>Formations</span>
                             </a>
                         </li>
                         <li class="sidebar-item {% if link == 'filieres' %} active {% endif %}">
                             <a href="{% url 'filieres' %}" class='sidebar-link'>
-                                <i class="bi bi-file-earmark-medical-fill"></i>
-                                <span>Filieres</span>
+                                <i class="bi bi-signpost-2"></i>
+                                <span>Filières</span>
                             </a>
                         </li>
 
                         <li class="sidebar-item {% if link == 'categories' %} active {% endif %} ">
                             <a href="{% url 'categories' %}" class='sidebar-link'>
-                                <i class="bi bi-collection-fill"></i>
+                                <i class="bi bi-bookmarks"></i>
                                 <span>Catégories</span>
                             </a>
                         </li>
@@ -134,6 +130,29 @@
                 </a>
             </header>
 
+            <section class="tm-topbar">
+                <div class="tm-topbar__meta">
+                    <span class="tm-topbar__eyebrow">Centre de gestion</span>
+                    <h1 class="tm-topbar__title">{% block page_header %}Plateforme de suivi des formations{% endblock page_header %}</h1>
+                </div>
+                <div class="tm-topbar__aside">
+                    <span class="tm-chip tm-chip--strong">
+                        <i class="bi bi-building"></i>
+                        INPP / ESFORCA
+                    </span>
+                    {% if request.user.is_authenticated %}
+                    <span class="tm-chip">
+                        <i class="bi bi-person-circle"></i>
+                        {{ request.user.get_full_name|default:request.user.username }}
+                    </span>
+                    <a href="{% url 'logout' %}" class="tm-chip">
+                        <i class="bi bi-box-arrow-right"></i>
+                        Déconnexion
+                    </a>
+                    {% endif %}
+                </div>
+            </section>
+
             <div class="page-content">
                 {% block content %} {% endblock content %}
             </div>
@@ -144,7 +163,7 @@
                         <p>2026 &copy;  Esforca/INPP</p>
                     </div>
                     <div class="float-end">
-                        <p>Par <a href="#">SK</a></p>
+                        <p>Suivi des formations, filières et stagiaires</p>
                     </div>
                 </div>
             </footer>

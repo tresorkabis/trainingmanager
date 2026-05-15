@@ -4,14 +4,20 @@
 <link rel="stylesheet" href="{% static 'assets/vendors/simple-datatables/style.css' %}">
 {% endblock style %}
 {% block title %} Dashboard {% endblock title %}
+{% block page_header %}Suivi des actions de formation{% endblock page_header %}
 
 {% block content %}
 <div class="page-heading">
     <div class="page-title">
         <div class="row">
             <div class="col-12 col-md-6 order-md-1 order-last">
-                <h3>Action</h3>
-                <p class="text-subtitle text-muted">Liste des Actions</p>
+                <div class="tm-section-titlebar">
+                    <span class="tm-section-titlebar__icon"><i class="bi bi-clipboard-check"></i></span>
+                    <div class="tm-section-titlebar__text">
+                        <h3>Actions</h3>
+                        <p>Liste des actions de formation</p>
+                    </div>
+                </div>
             </div>
             <div class="col-12 col-md-6 order-md-2 order-first">
                 <nav aria-label="breadcrumb" class="breadcrumb-header float-start float-lg-end">
@@ -24,9 +30,9 @@
         </div>
     </div>
     <section class="section">
-        <div class="card">
+        <div class="card tm-listing-card">
             <div class="card-header">
-                <a href="">Nouvelle Action</a>
+                <a href=""><i class="bi bi-clipboard-plus me-2"></i>Nouvelle action</a>
             </div>
             <div class="card-body">
                 <div class="dataTable-wrapper dataTable-loading no-footer sortable searchable fixed-columns">

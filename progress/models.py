@@ -12,7 +12,7 @@ class TypeAction(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def _str_(self):
-        return self.code + " (" + self.libele + ")"
+        return self.code + " (" + self.libelle + ")"
 
 class Formateur(models.Model):
     matricule = models.CharField(max_length=10)
@@ -40,7 +40,7 @@ class Action(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def _str_(self):
-        return self.code +"(" + self.description +")"
+        return str(self.id) +"(" + self.description +")"
 
 class DetailAction(models.Model):
     stagiaire = models.ForeignKey(Stagiaire, on_delete=models.CASCADE)
@@ -51,4 +51,4 @@ class DetailAction(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def _str_(self):
-        return self.stagiaire.nom +"(" + self.action.formation.nom +")"
+        return str(self.id) +"(" + self.stagiaire.nom + " - " + self.action.formation.nom + ")"

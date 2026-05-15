@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.views.generic import View
+from django.db.models import Count
 
 from intern.models import Stagiaire
 from progress.models import Action
@@ -16,13 +17,47 @@ class HomeView(View):
         user = None
         if request.user.id:
             user = User.objects.get(pk=request.user.id)
+
+        stagiaire_counts = {
+            item["filiere__nom"]: item["total"]
+            for item in Stagiaire.objects.exclude(filiere__nom__isnull=True)
+            .values("filiere__nom")
+            .annotate(total=Count("id"))
+        }
+        action_counts = {
+            item["formation__filiere__nom"]: item["total"]
+            for item in Action.objects.exclude(formation__filiere__nom__isnull=True)
+            .values("formation__filiere__nom")
+            .annotate(total=Count("id"))
+        }
+
+        filiere_categories = sorted(
+            set(stagiaire_counts.keys()) | set(action_counts.keys()),
+            key=lambda name: (-(stagiaire_counts.get(name, 0) + action_counts.get(name, 0)), name),
+        )
+
+        dashboard_chart = {
+            "categories": filiere_categories,
+            "series": [
+                {
+                    "name": "Stagiaires",
+                    "data": [stagiaire_counts.get(name, 0) for name in filiere_categories],
+                },
+                {
+                    "name": "Actions planifiées",
+                    "data": [action_counts.get(name, 0) for name in filiere_categories],
+                },
+            ],
+        }
+
         ctx = {
             "link":"home",
             "nbformations" : Formation.objects.count(),
             "nbfilieres" : Filiere.objects.count(),
             "nbstagiaires" : Stagiaire.objects.count(),
             "nbactions" : Action.objects.count(),
-            "user" : user
+            "user" : user,
+            "dashboard_chart": dashboard_chart,
         }
         return render(request, "home/index.html", ctx)
     

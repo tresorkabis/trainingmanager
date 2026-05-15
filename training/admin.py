@@ -4,4 +4,10 @@ from training.models import Filiere, Formation, Service
 
 admin.site.register(Service)
 admin.site.register(Filiere)
-admin.site.register(Formation)
+
+
+@admin.register(Formation)
+class FormationAdmin(admin.ModelAdmin):
+    list_display = ('nom', 'filiere', 'duree', 'duree_heures', 'cout', 'fraismateriels', 'active')
+    list_filter = ('active', 'filiere')
+    search_fields = ('nom', 'filiere__nom')
