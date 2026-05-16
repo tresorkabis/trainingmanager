@@ -52,7 +52,7 @@
                                     <th data-sortable="" style="width: 5.490%;"><a href="#" class="dataTable-sorter">Sexe</a></th>
                                     <th data-sortable="" style="width: 20.490%;"><a href="#" class="dataTable-sorter">Telephone</a></th>
                                     <th data-sortable="" style="width: 25.490%;"><a href="#" class="dataTable-sorter">Categorie</a></th>
-                                    <th data-sortable="" style="width: 10.6547%;"><a href="#" class="dataTable-sorter">Status</a></th>
+                                    <!-- Removed Status column -->
                                 </tr>
                             </thead>
                             <tbody>
@@ -66,18 +66,12 @@
                                     <td>{{ item.sexe }}</td>
                                     <td>{{ item.telephone }}</td>
                                     <td>{{ item.categorie }}</td>
-                                    <td>
-                                        {% if item.active %}
-                                        <span class="badge bg-success">Active</span>
-                                        {% else %}
-                                        <span class="badge bg-danger">Inactive</span>
-                                        {% endif %}
-                                    </td>
+                                    <!-- Removed Status display -->
                                 </tr>
                                 {% endfor %}
                                 {% else %}
                                 <tr>
-                                    <td colspan="4">Pas de stagiaire</td>
+                                    <td colspan="7">Pas de stagiaire</td> {# Adjusted colspan #}
                                 </tr>
                                 {% endif %}
                             </tbody>

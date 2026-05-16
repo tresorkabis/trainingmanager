@@ -33,7 +33,8 @@ class Command(BaseCommand):
             demo_user.save()
 
         categories = {}
-        for titre in ["Technique", "Administration", "Informatique", "Maintenance"]:
+        # Updated categories as per user's request
+        for titre in ["dans l'emploi", "sans emploi", "non défini"]:
             categorie, _ = Categorie.objects.get_or_create(titre=titre)
             categories[titre] = categorie
 
@@ -117,7 +118,7 @@ class Command(BaseCommand):
                 "sexe": "F",
                 "telephone": "0991000001",
                 "email": "aline.mukendi.demo@training.local",
-                "categorie": "Technique",
+                "categorie": "dans l'emploi", # Updated category
                 "service": "Technique Industrielle",
                 "filiere": "Electricite industrielle",
                 "formation": "Electricite batiment",
@@ -148,7 +149,7 @@ class Command(BaseCommand):
                 "sexe": "M",
                 "telephone": "0991000002",
                 "email": "patrick.tshibangu.demo@training.local",
-                "categorie": "Informatique",
+                "categorie": "sans emploi", # Updated category
                 "service": "Informatique",
                 "filiere": "Bureautique",
                 "formation": "Pack Office professionnel",
@@ -188,7 +189,7 @@ class Command(BaseCommand):
                 "sexe": "F",
                 "telephone": "0991000003",
                 "email": "merveille.ilunga.demo@training.local",
-                "categorie": "Administration",
+                "categorie": "non défini", # Updated category
                 "service": "Gestion Administrative",
                 "filiere": "Gestion administrative",
                 "formation": "Secretaire de direction",

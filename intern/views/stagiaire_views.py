@@ -5,7 +5,7 @@ from django.views.generic import ListView, DetailView
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 
-from intern.models import Categorie, EtudeStagiaire, Stagiaire
+from intern.models import Categorie, EtudeStagiaire, Stagiaire, Entreprise # Import Entreprise
 from training.models import Filiere, Formation, Service
 
 class StagiaireListView(ListView):
@@ -30,6 +30,7 @@ class StagiaireDetailView(DetailView):
         ctx['services'] = Service.objects.all()
         ctx['filieres'] = Filiere.objects.select_related('service').all()
         ctx['formations'] = Formation.objects.select_related('filiere').all()
+        ctx['entreprises'] = Entreprise.objects.all() # Add enterprises to context
         ctx['titre'] = "Voir"
         return ctx
 
@@ -41,6 +42,7 @@ class StagiaireCreateView(View):
             "services": Service.objects.all(),
             "filieres": Filiere.objects.select_related('service').all(),
             "formations": Formation.objects.select_related('filiere').all(),
+            "entreprises": Entreprise.objects.all(), # Add enterprises to context
             "titre" : "Saisie d'un stagiaire",
             "mode" : "new"
         }
@@ -67,6 +69,9 @@ class StagiaireCreateView(View):
         id_formation = request.POST.get('formation') or None
         photo = request.FILES.get('photo')
 
+        # Fetch the Categorie object to check its title
+        categorie_obj = Categorie.objects.get(id=id_categorie)
+
         stagiaire = Stagiaire(
             nom = nom,
             postnom = postnom,
@@ -88,6 +93,24 @@ class StagiaireCreateView(View):
             filiere_id = id_filiere,
             formation_id = id_formation,
         )
+
+        # Conditionally handle new fields if category is "dans l'emploi"
+        if categorie_obj.titre == "dans l'emploi":
+            entreprise_id = request.POST.get('entreprise')
+            stagiaire.entreprise_id = entreprise_id if entreprise_id else None
+            stagiaire.fonction = request.POST.get('fonction') or None
+            anciennete_emploi = request.POST.get('anciennete_emploi')
+            stagiaire.anciennete_emploi = int(anciennete_emploi) if anciennete_emploi else None
+            anciennete_entreprise = request.POST.get('anciennete_entreprise')
+            stagiaire.anciennete_entreprise = int(anciennete_entreprise) if anciennete_entreprise else None
+        else:
+            # Ensure these fields are cleared if category changes from "dans l'emploi"
+            stagiaire.entreprise = None
+            stagiaire.fonction = None
+            stagiaire.anciennete_emploi = None
+            stagiaire.anciennete_entreprise = None
+
+
         stagiaire.save()
 
         etude_intitules = request.POST.getlist('etude_intitule[]')

@@ -12,6 +12,19 @@ class Categorie(models.Model):
     def __str__(self):
         return self.titre
 
+class Entreprise(models.Model):
+    nom = models.CharField(max_length=200)
+    adresse = models.CharField(max_length=255, blank=True, null=True)
+    telephone = models.CharField(max_length=20, blank=True, null=True)
+    email = models.EmailField(blank=True, null=True)
+
+    active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.nom
+
 class Stagiaire(models.Model):
     SEXE_CHOISES = (
         ('M','Masculin'),
@@ -38,6 +51,12 @@ class Stagiaire(models.Model):
     service = models.ForeignKey(Service, on_delete=models.SET_NULL, null=True, blank=True)
     filiere = models.ForeignKey(Filiere, on_delete=models.SET_NULL, null=True, blank=True)
     formation = models.ForeignKey(Formation, on_delete=models.SET_NULL, null=True, blank=True)
+
+    # New fields for "dans l'emploi" category
+    entreprise = models.ForeignKey(Entreprise, on_delete=models.SET_NULL, null=True, blank=True)
+    fonction = models.CharField(max_length=100, blank=True, null=True)
+    anciennete_emploi = models.IntegerField(blank=True, null=True, verbose_name="Ancienneté dans l'emploi (années)")
+    anciennete_entreprise = models.IntegerField(blank=True, null=True, verbose_name="Ancienneté dans l'entreprise (années)")
 
     active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)

@@ -137,9 +137,9 @@
                                                             <option value="">Sélectionner une catégorie</option>
                                                             {% for item in categories %}
                                                             {% if object and item.id == object.categorie.id %}
-                                                            <option value="{{ item.id }}" selected>{{ item.titre }}</option>
+                                                            <option value="{{ item.id }}" data-category-name="{{ item.titre }}" selected>{{ item.titre }}</option>
                                                             {% else %}
-                                                            <option value="{{ item.id }}">{{ item.titre }}</option>
+                                                            <option value="{{ item.id }}" data-category-name="{{ item.titre }}">{{ item.titre }}</option>
                                                             {% endif %}
                                                             {% endfor %}
                                                         </select>
@@ -193,6 +193,61 @@
                                             </div>
                                         </div>
                                     </div>
+
+                                    {# New section for professional information #}
+                                    <div class="col-12" id="professional-info-section">
+                                        <div class="tm-form-panel">
+                                            <div class="tm-form-panel__header">
+                                                <div>
+                                                    <h5 class="mb-1">Informations professionnelles</h5>
+                                                    <p class="text-muted mb-0">Renseignez les détails de l'emploi actuel du stagiaire.</p>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-12 col-md-6">
+                                                    <div class="tm-field-group">
+                                                        <label for="entreprise">Entreprise</label>
+                                                        <select name="entreprise" id="entreprise" class="form-control" {% if object.id %}disabled{% endif %}>
+                                                            <option value="">Sélectionner une entreprise</option>
+                                                            {% for item in entreprises %}
+                                                            {% if object and item.id == object.entreprise.id %}
+                                                            <option value="{{ item.id }}" selected>{{ item.nom }}</option>
+                                                            {% else %}
+                                                            <option value="{{ item.id }}">{{ item.nom }}</option>
+                                                            {% endif %}
+                                                            {% endfor %}
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-12 col-md-6">
+                                                    <div class="tm-field-group">
+                                                        <label for="fonction">Fonction</label>
+                                                        <input type="text" id="fonction" class="form-control" name="fonction"
+                                                            placeholder="Fonction occupée" {% if object.id %}
+                                                            value="{{ object.fonction|default:'' }}" disabled {% endif %}>
+                                                    </div>
+                                                </div>
+                                                <div class="col-12 col-md-6">
+                                                    <div class="tm-field-group">
+                                                        <label for="anciennete_emploi">Ancienneté dans l'emploi (années)</label>
+                                                        <input type="number" id="anciennete_emploi" class="form-control" name="anciennete_emploi"
+                                                            placeholder="Ex: 5" {% if object.id %}
+                                                            value="{{ object.anciennete_emploi|default:'' }}" disabled {% endif %}>
+                                                    </div>
+                                                </div>
+                                                <div class="col-12 col-md-6">
+                                                    <div class="tm-field-group">
+                                                        <label for="anciennete_entreprise">Ancienneté dans l'entreprise (années)</label>
+                                                        <input type="number" id="anciennete_entreprise" class="form-control" name="anciennete_entreprise"
+                                                            placeholder="Ex: 3" {% if object.id %}
+                                                            value="{{ object.anciennete_entreprise|default:'' }}" disabled {% endif %}>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {# End new section #}
+
                                     <div class="col-12">
                                         <div class="tm-form-panel">
                                             <div class="tm-form-panel__header">
@@ -460,5 +515,42 @@
             photoPreview.src = previewUrl;
         });
     }
+
+    // Conditional display for professional info
+    const categorieSelect = document.getElementById('categorie');
+    const professionalInfoSection = document.getElementById('professional-info-section');
+    const categoryDansEmploiName = "dans l'emploi"; // Ensure this matches the actual category name
+
+    function toggleProfessionalInfo() {
+        const selectedOption = categorieSelect.options[categorieSelect.selectedIndex];
+        const categoryName = selectedOption.getAttribute('data-category-name');
+        if (categoryName === categoryDansEmploiName) {
+            professionalInfoSection.style.display = 'block';
+            // Enable fields if not in view mode
+            if (!{{ object.id|yesno:"true,false" }}) {
+                professionalInfoSection.querySelectorAll('input, select').forEach(field => {
+                    field.disabled = false;
+                });
+            }
+        } else {
+            professionalInfoSection.style.display = 'none';
+            // Disable and clear fields if not "dans l'emploi"
+            professionalInfoSection.querySelectorAll('input, select').forEach(field => {
+                field.disabled = true;
+                if (field.tagName === 'SELECT') {
+                    field.value = '';
+                } else {
+                    field.value = '';
+                }
+            });
+        }
+    }
+
+    if (categorieSelect && professionalInfoSection) {
+        categorieSelect.addEventListener('change', toggleProfessionalInfo);
+        // Initial call to set visibility based on current value
+        toggleProfessionalInfo();
+    }
+
 </script>
 {% endblock script %}
