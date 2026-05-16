@@ -125,7 +125,7 @@ JAZZMIN_SETTINGS = {
     "site_logo": "admin/img/logo.jpeg",
 
     "welcome_sign": "Bienvenue",
-    "copyright": "MK",
+    "copyright": "SK",
 
     "topmenu_links": [
         {"name": "Home",  "url": "home"},
