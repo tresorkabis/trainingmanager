@@ -2,6 +2,14 @@
 {% load static %}
 {% block style %}
 <link rel="stylesheet" href="{% static 'assets/vendors/simple-datatables/style.css' %}">
+<style>
+    .stagiaire-photo-thumbnail {
+        width: 50px; /* Adjust size as needed */
+        height: 50px; /* Adjust size as needed */
+        object-fit: cover;
+        border-radius: 50%;
+    }
+</style>
 {% endblock style %}
 {% block title %} Dashboard {% endblock title %}
 {% block page_header %}Répertoire des stagiaires{% endblock page_header %}
@@ -46,13 +54,14 @@
                             <thead>
                                 <tr>
                                     <th data-sortable="" style="width: 4.490%;"><a href="#" class="dataTable-sorter">N°</a></th>
-                                    <th data-sortable="" style="width: 25.490%;"><a href="#" class="dataTable-sorter">Nom</a></th>
-                                    <th data-sortable="" style="width: 25.490%;"><a href="#" class="dataTable-sorter">Postnom</a></th>
-                                    <th data-sortable="" style="width: 25.490%;"><a href="#" class="dataTable-sorter">Prénom</a></th>
-                                    <th data-sortable="" style="width: 5.490%;"><a href="#" class="dataTable-sorter">Sexe</a></th>
-                                    <th data-sortable="" style="width: 20.490%;"><a href="#" class="dataTable-sorter">Telephone</a></th>
-                                    <th data-sortable="" style="width: 25.490%;"><a href="#" class="dataTable-sorter">Categorie</a></th>
-                                    <!-- Removed Status column -->
+                                    <th data-sortable="" style="width: 5%;"><a href="#" class="dataTable-sorter">Photo</a></th>
+                                    <th data-sortable="" style="width: 20%;"><a href="#" class="dataTable-sorter">Nom</a></th>
+                                    <th data-sortable="" style="width: 20%;"><a href="#" class="dataTable-sorter">Postnom</a></th>
+                                    <th data-sortable="" style="width: 20%;"><a href="#" class="dataTable-sorter">Prénom</a></th>
+                                    <th data-sortable="" style="width: 5%;"><a href="#" class="dataTable-sorter">Sexe</a></th>
+                                    <th data-sortable="" style="width: 10%;"><a href="#" class="dataTable-sorter">Téléphone</a></th>
+                                    <th data-sortable="" style="width: 10%;"><a href="#" class="dataTable-sorter">Catégorie</a></th>
+                                    {# Removed Service and Filiere columns #}
                                 </tr>
                             </thead>
                             <tbody>
@@ -60,18 +69,25 @@
                                 {% for item in object_list %}
                                 <tr>
                                     <td>{{ forloop.counter }}</td>
+                                    <td>
+                                        {% if item.photo %}
+                                            <img src="{{ item.photo.url }}" alt="Photo" class="stagiaire-photo-thumbnail">
+                                        {% else %}
+                                            <img src="{% static 'assets/images/faces/1.jpg' %}" alt="No Photo" class="stagiaire-photo-thumbnail">
+                                        {% endif %}
+                                    </td>
                                     <td><a href="{% url 'stagiaire' item.id %}">{{ item.nom }}</a></td>
                                     <td>{{ item.postnom }}</td>
                                     <td>{{ item.prenom }}</td>
                                     <td>{{ item.sexe }}</td>
                                     <td>{{ item.telephone }}</td>
                                     <td>{{ item.categorie }}</td>
-                                    <!-- Removed Status display -->
+                                    {# Removed Service and Filiere display #}
                                 </tr>
                                 {% endfor %}
                                 {% else %}
                                 <tr>
-                                    <td colspan="7">Pas de stagiaire</td> {# Adjusted colspan #}
+                                    <td colspan="8">Pas de stagiaire</td> {# Adjusted colspan #}
                                 </tr>
                                 {% endif %}
                             </tbody>

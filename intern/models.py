@@ -31,6 +31,11 @@ class Stagiaire(models.Model):
         ('F','Feminin'),
         ('ND','Non défini'),
     )
+    TYPE_PIECE_CHOICES = (
+        ('CE', "Carte d'électeur"),
+        ('PS', "Passeport"),
+        ('PC', "Permis de conduire"),
+    )
 
     nom = models.CharField(max_length=50)
     postnom = models.CharField(max_length=50)
@@ -42,15 +47,15 @@ class Stagiaire(models.Model):
     date_naissance = models.DateField(blank=True, null=True)
     lieu_naissance = models.CharField(max_length=100, blank=True, null=True)
     nationalite = models.CharField(max_length=100, blank=True, null=True)
+    type_piece = models.CharField(max_length=2, choices=TYPE_PIECE_CHOICES, blank=True, null=True, verbose_name="Type de pièce") # New field
     numero_piece = models.CharField(max_length=50, blank=True, null=True, unique=True)
     nom_pere = models.CharField(max_length=100, blank=True, null=True)
     nom_mere = models.CharField(max_length=100, blank=True, null=True)
     niveau_etude = models.CharField(max_length=100, blank=True, null=True)
     photo = models.ImageField(upload_to='stagiaires/', blank=True, null=True)
     categorie = models.ForeignKey(Categorie, on_delete=models.CASCADE)
-    service = models.ForeignKey(Service, on_delete=models.SET_NULL, null=True, blank=True)
-    filiere = models.ForeignKey(Filiere, on_delete=models.SET_NULL, null=True, blank=True)
-    formation = models.ForeignKey(Formation, on_delete=models.SET_NULL, null=True, blank=True)
+    # Removed service = models.ForeignKey(Service, on_delete=models.SET_NULL, null=True, blank=True)
+    # Removed filiere = models.ForeignKey(Filiere, on_delete=models.SET_NULL, null=True, blank=True)
 
     # New fields for "dans l'emploi" category
     entreprise = models.ForeignKey(Entreprise, on_delete=models.SET_NULL, null=True, blank=True)

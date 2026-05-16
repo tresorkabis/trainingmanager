@@ -10,65 +10,182 @@
     <link rel="stylesheet" href="{% static 'assets/css/bootstrap.css' %}">
     <link rel="stylesheet" href="{% static 'assets/vendors/bootstrap-icons/bootstrap-icons.css' %}">
     <link rel="stylesheet" href="{% static 'assets/css/app.css' %}">
-    <link rel="stylesheet" href="{% static 'assets/css/pages/auth.css' %}">
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/pages/auth.css' %}"> {# Keep this for base auth styles #}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}"> {# Your custom project styles #}
+    <style>
+        /* Custom styles for the revised login page */
+        body.tm-login {
+            background: linear-gradient(to right top, #e0eafc, #cfdef3); /* Light blue gradient */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 1rem;
+            font-family: 'Nunito', sans-serif;
+        }
+
+        .tm-login__wrapper {
+            width: 100%;
+            max-width: 500px; /* Increased width to 500px */
+            margin: auto;
+        }
+
+        .tm-login__card {
+            background-color: #ffffff;
+            padding: 3rem 2.5rem;
+            border-radius: 1rem;
+            box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.15);
+            text-align: center;
+            border: 1px solid #e9ecef;
+        }
+
+        .tm-login__brand {
+            margin-bottom: 2.5rem;
+            /* Removed flex properties to allow stacking */
+            display: block; /* Ensure it takes full width and allows stacking */
+        }
+
+        .tm-login__brand img {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 1rem; /* Space between logo and title */
+            display: block; /* Ensure logo is a block element */
+            margin-left: auto; /* Center logo */
+            margin-right: auto; /* Center logo */
+        }
+
+        .tm-login__brand-title {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #343a40;
+            line-height: 1.2;
+            margin-bottom: 0.5rem; /* Space between title and subtitle */
+        }
+
+        .tm-login__brand-subtitle {
+            font-size: 1.1rem;
+            color: #6c757d;
+            margin-top: 0; /* Reset margin-top */
+        }
+
+        .tm-login__title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #343a40;
+            margin-top: 2.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .tm-login__text {
+            font-size: 1rem;
+            color: #6c757d;
+            margin-bottom: 2rem;
+        }
+
+        .tm-login__alert {
+            margin-top: 1.5rem;
+            margin-bottom: 2rem;
+            font-size: 0.95rem;
+            border-radius: 0.5rem;
+        }
+
+        /* --- Form Input with Icon Styling --- */
+        .input-group-with-icon {
+            position: relative;
+            margin-bottom: 1.5rem; /* Spacing between input groups */
+        }
+
+        .input-group-with-icon .form-control-xl {
+            padding-left: 3.5rem; /* Make space for the icon */
+            height: calc(2.5rem + 1rem + 2px); /* Consistent height */
+            font-size: 1.15rem;
+            border-radius: 0.5rem;
+            border: 1px solid #ced4da;
+            width: 100%; /* Ensure input takes full width */
+        }
+
+        .input-group-with-icon .form-control-icon {
+            position: absolute;
+            left: 1.2rem; /* Position icon inside the input field */
+            top: 50%;
+            transform: translateY(-50%); /* Vertically center the icon */
+            color: #adb5bd;
+            font-size: 1.3rem;
+            pointer-events: none; /* Allow clicks to pass through to the input */
+            z-index: 2; /* Ensure icon is above input */
+        }
+        /* --- End Form Input with Icon Styling --- */
+
+        .btn-primary {
+            background-color: #435ebe;
+            border-color: #435ebe;
+            font-size: 1.25rem;
+            padding: 0.9rem 1.5rem;
+            width: 100%;
+            border-radius: 0.5rem;
+            margin-top: 2rem;
+            transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: #394f9b;
+            border-color: #394f9b;
+            box-shadow: 0 0.5rem 1rem rgba(67, 94, 190, 0.3);
+        }
+
+        .tm-login__footer {
+            margin-top: 2.5rem;
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+    </style>
 </head>
 
 <body class="tm-login">
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-lg-5 col-12 tm-login__panel">
-                <div class="tm-login__card">
-                    <div class="tm-login__brand">
-                        <a href="{% url 'home' %}"><img src="{% static 'admin/img/logo.jpeg' %}" alt="Logo"></a>
-                        <div>
-                            <p class="tm-login__brand-title">Training Manager</p>
-                            <p class="tm-login__brand-subtitle">Plateforme de gestion des formations</p>
-                        </div>
-                    </div>
-                    <h1 class="tm-login__title">Connexion sécurisée</h1>
-                    <p class="tm-login__text">Accédez à votre espace de pilotage pour suivre les stagiaires, les filières et les actions de formation.</p>
-
-                    {% if message %}
-                    <div class="tm-login__alert">{{ message }}</div>
-                    {% endif %}
-
-                    <form method="post" action="{% url 'login' %}">
-                        {% csrf_token %}
-                        <div class="form-group position-relative has-icon-left mb-4">
-                            <input type="text" class="form-control form-control-xl" name="username"
-                                placeholder="Nom d'utilisateur">
-                            <div class="form-control-icon">
-                                <i class="bi bi-person"></i>
-                            </div>
-                        </div>
-                        <div class="form-group position-relative has-icon-left mb-4">
-                            <input type="password" class="form-control form-control-xl" name="password"
-                                placeholder="Mot de passe">
-                            <div class="form-control-icon">
-                                <i class="bi bi-shield-lock"></i>
-                            </div>
-                        </div>
-                        <div class="form-check form-check-lg d-flex align-items-end">
-                            <input class="form-check-input me-2" type="checkbox" value="" id="flexCheckDefault">
-                            <label class="form-check-label text-gray-600" for="flexCheckDefault">
-                                Keep me logged in
-                            </label>
-                        </div>
-                        <button class="btn btn-primary btn-block btn-lg shadow-lg mt-5">Log in</button>
-                    </form>
-                    <div class="text-center mt-4 fs-6">
-                        <p class="text-gray-600">Pas de compte ? Contactez l'administrateur de la plateforme.</p>
-                    </div>
-                </div>
+    <div class="tm-login__wrapper">
+        <div class="tm-login__card">
+            <div class="tm-login__brand">
+                <img src="{% static 'assets/images/logo.png' %}" alt="Logo">
+                <p class="tm-login__brand-title">Training Manager</p>
+                <p class="tm-login__brand-subtitle">Plateforme de gestion des formations</p>
             </div>
-            <div class="col-lg-7 d-none d-lg-block">
-                <div id="auth-right">
-                    inpp@2025
+
+            <h1 class="tm-login__title">Connexion</h1>
+
+            {% if message %}
+            <div class="alert alert-danger tm-login__alert" role="alert">
+                {{ message }}
+            </div>
+            {% endif %}
+
+            <form method="post" action="{% url 'login' %}">
+                {% csrf_token %}
+                <div class="input-group-with-icon">
+                    <input type="text" class="form-control form-control-xl" name="username"
+                        placeholder="Nom d'utilisateur" required autofocus>
+                    <span class="form-control-icon">
+                        <i class="bi bi-person"></i>
+                    </span>
                 </div>
+                <div class="input-group-with-icon">
+                    <input type="password" class="form-control form-control-xl" name="password"
+                        placeholder="Mot de passe" required>
+                    <span class="form-control-icon">
+                        <i class="bi bi-shield-lock"></i>
+                    </span>
+                </div>
+                <button type="submit" class="btn btn-primary shadow-lg">Se connecter</button>
+            </form>
+
+            <div class="text-center mt-4 fs-6">
+                <p class="text-gray-600">Pas de compte ? Contactez l'administrateur de la plateforme.</p>
+            </div>
+            <div class="tm-login__footer">
+                <p>2026 &copy; ESFORCA</p> {# Updated footer text #}
             </div>
         </div>
-    </div> 
+    </div>
 </body>
 
 </html>

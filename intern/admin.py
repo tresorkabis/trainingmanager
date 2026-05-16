@@ -14,16 +14,16 @@ class StagiaireAdmin(admin.ModelAdmin):
         'nom',
         'postnom',
         'prenom',
-        'service',
-        'filiere',
-        'formation',
+        # 'service', # Removed
+        # 'filiere', # Removed
         'telephone',
         'email',
         'nationalite',
+        'type_piece',
         'categorie',
-        # 'active',  # Removed 'active' from list_display
+        # 'active',
     )
-    list_filter = ('active', 'sexe', 'categorie', 'service', 'filiere', 'formation', 'nationalite')
+    list_filter = ('active', 'sexe', 'categorie', 'nationalite', 'type_piece') # Removed 'service', 'filiere'
     search_fields = (
         'nom',
         'postnom',
@@ -31,6 +31,7 @@ class StagiaireAdmin(admin.ModelAdmin):
         'telephone',
         'email',
         'numero_piece',
+        'type_piece',
     )
     inlines = [EtudeStagiaireInline]
     fieldsets = (
@@ -39,10 +40,11 @@ class StagiaireAdmin(admin.ModelAdmin):
                 ('nom', 'postnom', 'prenom'),
                 ('sexe', 'telephone', 'email'),
                 ('date_naissance', 'lieu_naissance', 'nationalite'),
-                ('numero_piece', 'niveau_etude'),
+                ('type_piece', 'numero_piece'),
+                'niveau_etude',
                 'adresse',
                 'photo',
-                ('categorie', 'service', 'filiere', 'formation'),
+                ('categorie',), # Removed 'service', 'filiere'
             )
         }),
         ('Informations professionnelles (si dans l\'emploi)', {
@@ -51,7 +53,7 @@ class StagiaireAdmin(admin.ModelAdmin):
                 'fonction',
                 ('anciennete_emploi', 'anciennete_entreprise'),
             ),
-            'classes': ('collapse',), # Optional: collapse this section by default
+            'classes': ('collapse',),
         }),
         ('Statut', {
             'fields': ('active',),
@@ -62,14 +64,14 @@ class StagiaireAdmin(admin.ModelAdmin):
 
 @admin.register(Categorie)
 class CategorieAdmin(admin.ModelAdmin):
-    list_display = ('titre', 'created_at') # Removed 'active'
+    list_display = ('titre', 'created_at')
     search_fields = ('titre',)
 
 
 @admin.register(EtudeStagiaire)
 class EtudeStagiaireAdmin(admin.ModelAdmin):
-    list_display = ('stagiaire', 'intitule', 'niveau', 'etablissement') # Removed 'active'
-    list_filter = ('niveau',) # Removed 'active'
+    list_display = ('stagiaire', 'intitule', 'niveau', 'etablissement')
+    list_filter = ('niveau',)
     search_fields = ('stagiaire__nom', 'stagiaire__postnom', 'intitule', 'etablissement')
 
 

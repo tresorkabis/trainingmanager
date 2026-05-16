@@ -19,9 +19,9 @@ class HomeView(View):
             user = User.objects.get(pk=request.user.id)
 
         stagiaire_counts = {
-            item["filiere__nom"]: item["total"]
-            for item in Stagiaire.objects.exclude(filiere__nom__isnull=True)
-            .values("filiere__nom")
+            item["detailaction__action__formation__filiere__nom"]: item["total"]
+            for item in Stagiaire.objects.exclude(detailaction__action__formation__filiere__nom__isnull=True)
+            .values("detailaction__action__formation__filiere__nom")
             .annotate(total=Count("id"))
         }
         action_counts = {

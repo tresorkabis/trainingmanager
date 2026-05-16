@@ -7,11 +7,12 @@ from django.utils.decorators import method_decorator
 
 from intern.models import Categorie, EtudeStagiaire, Stagiaire, Entreprise # Import Entreprise
 from training.models import Filiere, Formation, Service
+from progress.models import Action, DetailAction # Import Action and DetailAction
 
 class StagiaireListView(ListView):
     context_object_name = "stagiaire_list"
     queryset = Stagiaire.objects.all()
-    paginate_by = 4
+    paginate_by = 5
     template_name = "intern/stagiaires.html"
 
     def get_context_data(self, **kwargs):
@@ -27,10 +28,14 @@ class StagiaireDetailView(DetailView):
         ctx = super().get_context_data(**kwargs)
         ctx['stagiaires'] = Stagiaire.objects.all()
         ctx['categories'] = Categorie.objects.all()
-        ctx['services'] = Service.objects.all()
-        ctx['filieres'] = Filiere.objects.select_related('service').all()
-        ctx['formations'] = Formation.objects.select_related('filiere').all()
+        # ctx['services'] = Service.objects.all() # Removed
+        # ctx['filieres'] = Filiere.objects.select_related('service').all() # Removed
         ctx['entreprises'] = Entreprise.objects.all() # Add enterprises to context
+        
+        # Fetch DetailAction objects for the current stagiaire
+        current_stagiaire = self.get_object()
+        ctx['actions_suivies'] = DetailAction.objects.filter(stagiaire=current_stagiaire).select_related('action__formation').order_by('action__date_debut')
+
         ctx['titre'] = "Voir"
         return ctx
 
@@ -39,9 +44,8 @@ class StagiaireCreateView(View):
     def get(self, request):
         ctx = {
             "categories": Categorie.objects.all(),
-            "services": Service.objects.all(),
-            "filieres": Filiere.objects.select_related('service').all(),
-            "formations": Formation.objects.select_related('filiere').all(),
+            # "services": Service.objects.all(), # Removed
+            # "filieres": Filiere.objects.select_related('service').all(), # Removed
             "entreprises": Entreprise.objects.all(), # Add enterprises to context
             "titre" : "Saisie d'un stagiaire",
             "mode" : "new"
@@ -59,14 +63,14 @@ class StagiaireCreateView(View):
         date_naissance = request.POST.get('date_naissance') or None
         lieu_naissance = request.POST.get('lieu_naissance') or None
         nationalite = request.POST.get('nationalite') or None
+        type_piece = request.POST.get('type_piece') or None # New field
         numero_piece = request.POST.get('numero_piece') or None
         nom_pere = request.POST.get('nom_pere') or None
         nom_mere = request.POST.get('nom_mere') or None
         niveau_etude = request.POST.get('niveau_etude') or None
         id_categorie = request.POST['categorie']
-        id_service = request.POST.get('service') or None
-        id_filiere = request.POST.get('filiere') or None
-        id_formation = request.POST.get('formation') or None
+        # id_service = request.POST.get('service') or None # Removed
+        # id_filiere = request.POST.get('filiere') or None # Removed
         photo = request.FILES.get('photo')
 
         # Fetch the Categorie object to check its title
@@ -83,15 +87,15 @@ class StagiaireCreateView(View):
             date_naissance = date_naissance,
             lieu_naissance = lieu_naissance,
             nationalite = nationalite,
+            type_piece = type_piece, # Assign new field
             numero_piece = numero_piece,
             nom_pere = nom_pere,
             nom_mere = nom_mere,
             niveau_etude = niveau_etude,
             photo = photo,
             categorie_id = id_categorie,
-            service_id = id_service,
-            filiere_id = id_filiere,
-            formation_id = id_formation,
+            # service_id = id_service, # Removed
+            # filiere_id = id_filiere, # Removed
         )
 
         # Conditionally handle new fields if category is "dans l'emploi"

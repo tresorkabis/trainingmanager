@@ -3,7 +3,7 @@ from datetime import date
 from django.core.management import BaseCommand
 from django.db import transaction
 
-from intern.models import Categorie, EtudeStagiaire, Stagiaire
+from intern.models import Categorie, EtudeStagiaire, Stagiaire, Entreprise
 from progress.models import Action, DetailAction, Formateur, TypeAction
 from training.models import Filiere, Formation, Service
 from users.models import Profile, User
@@ -110,6 +110,24 @@ class Command(BaseCommand):
                 formation.save()
             formations[nom] = formation
 
+        # Create demo Entreprise instances
+        entreprises = {}
+        entreprise_specs = [
+            {"nom": "Global Tech Solutions", "adresse": "123 Rue de l'Innovation, Kinshasa", "telephone": "0811234567", "email": "contact@globaltech.com"},
+            {"nom": "Alpha Consulting", "adresse": "45 Av. du Progrès, Lubumbashi", "telephone": "0978765432", "email": "info@alphaconsult.com"},
+        ]
+        for spec in entreprise_specs:
+            entreprise, _ = Entreprise.objects.get_or_create(
+                nom=spec["nom"],
+                defaults={
+                    "adresse": spec["adresse"],
+                    "telephone": spec["telephone"],
+                    "email": spec["email"],
+                }
+            )
+            entreprises[spec["nom"]] = entreprise
+
+
         stagiaire_specs = [
             {
                 "nom": "Mukendi",
@@ -119,12 +137,10 @@ class Command(BaseCommand):
                 "telephone": "0991000001",
                 "email": "aline.mukendi.demo@training.local",
                 "categorie": "dans l'emploi", # Updated category
-                "service": "Technique Industrielle",
-                "filiere": "Electricite industrielle",
-                "formation": "Electricite batiment",
                 "niveau_etude": "Diplome d'Etat",
                 "adresse": "Kinshasa / Lemba",
                 "nationalite": "Congolaise",
+                "type_piece": "CE", # New field
                 "numero_piece": "DEM-ST-001",
                 "date_naissance": date(2001, 4, 12),
                 "lieu_naissance": "Kinshasa",
@@ -141,6 +157,12 @@ class Command(BaseCommand):
                         "description": "Orientation technique avec base en installation electrique.",
                     }
                 ],
+                # New fields for "dans l'emploi"
+                "entreprise_nom": "Global Tech Solutions",
+                "fonction": "Technicien Électricien",
+                "anciennete_emploi": 3,
+                "anciennete_entreprise": 3,
+                "photo": "stagiaires/photo5.jpg", # Placeholder photo
             },
             {
                 "nom": "Tshibangu",
@@ -150,12 +172,10 @@ class Command(BaseCommand):
                 "telephone": "0991000002",
                 "email": "patrick.tshibangu.demo@training.local",
                 "categorie": "sans emploi", # Updated category
-                "service": "Informatique",
-                "filiere": "Bureautique",
-                "formation": "Pack Office professionnel",
                 "niveau_etude": "Graduat",
                 "adresse": "Kinshasa / Ngaliema",
                 "nationalite": "Congolaise",
+                "type_piece": "PS", # New field
                 "numero_piece": "DEM-ST-002",
                 "date_naissance": date(1999, 9, 5),
                 "lieu_naissance": "Matadi",
@@ -181,6 +201,7 @@ class Command(BaseCommand):
                         "description": "Module court complete pour les outils administratifs.",
                     },
                 ],
+                "photo": "stagiaires/photo6.jpg", # Placeholder photo
             },
             {
                 "nom": "Ilunga",
@@ -190,12 +211,10 @@ class Command(BaseCommand):
                 "telephone": "0991000003",
                 "email": "merveille.ilunga.demo@training.local",
                 "categorie": "non défini", # Updated category
-                "service": "Gestion Administrative",
-                "filiere": "Gestion administrative",
-                "formation": "Secretaire de direction",
                 "niveau_etude": "Licence",
                 "adresse": "Kinshasa / Gombe",
                 "nationalite": "Congolaise",
+                "type_piece": "PC", # New field
                 "numero_piece": "DEM-ST-003",
                 "date_naissance": date(1998, 1, 20),
                 "lieu_naissance": "Lubumbashi",
@@ -212,35 +231,141 @@ class Command(BaseCommand):
                         "description": "Profil oriente gestion, accueil et organisation administrative.",
                     }
                 ],
+                "photo": "stagiaires/photo7.jpg", # Placeholder photo
+            },
+            {
+                "nom": "Kabongo",
+                "postnom": "Mwepu",
+                "prenom": "David",
+                "sexe": "M",
+                "telephone": "0991000004",
+                "email": "david.kabongo.demo@training.local",
+                "categorie": "dans l'emploi",
+                "niveau_etude": "Graduat",
+                "adresse": "Kinshasa / Limete",
+                "nationalite": "Congolaise",
+                "type_piece": "CE",
+                "numero_piece": "DEM-ST-004",
+                "date_naissance": date(1995, 7, 1),
+                "lieu_naissance": "Kolwezi",
+                "nom_pere": "Pierre Kabongo",
+                "nom_mere": "Marie Mwepu",
+                "etudes": [
+                    {
+                        "intitule": "Maintenance Industrielle",
+                        "etablissement": "Institut Supérieur Technique",
+                        "niveau": "Graduat",
+                        "annee_debut": 2015,
+                        "annee_fin": 2018,
+                        "diplome_obtenu": "Graduat",
+                        "description": "Spécialisation en maintenance des équipements lourds.",
+                    }
+                ],
+                "entreprise_nom": "Alpha Consulting",
+                "fonction": "Technicien de maintenance",
+                "anciennete_emploi": 6,
+                "anciennete_entreprise": 4,
+                "photo": "stagiaires/photo1.jpg",
+            },
+            {
+                "nom": "Nzuzi",
+                "postnom": "Lunda",
+                "prenom": "Grace",
+                "sexe": "F",
+                "telephone": "0991000005",
+                "email": "grace.nzuzi.demo@training.local",
+                "categorie": "sans emploi",
+                "niveau_etude": "Diplome d'Etat",
+                "adresse": "Kinshasa / Ngaliema",
+                "nationalite": "Congolaise",
+                "type_piece": "PS",
+                "numero_piece": "DEM-ST-005",
+                "date_naissance": date(2000, 11, 25),
+                "lieu_naissance": "Boma",
+                "nom_pere": "Paul Nzuzi",
+                "nom_mere": "Sophie Lunda",
+                "etudes": [
+                    {
+                        "intitule": "Secrétariat Bureautique",
+                        "etablissement": "Institut Technique Commercial",
+                        "niveau": "Diplome d'Etat",
+                        "annee_debut": 2016,
+                        "annee_fin": 2019,
+                        "diplome_obtenu": "Diplome d'Etat",
+                        "description": "Formation complète en outils bureautiques et gestion administrative.",
+                    }
+                ],
+                "photo": "stagiaires/photo2.jpg",
+            },
+            {
+                "nom": "Mbuyi",
+                "postnom": "Kalala",
+                "prenom": "Christian",
+                "sexe": "M",
+                "telephone": "0991000006",
+                "email": "christian.mbuyi.demo@training.local",
+                "categorie": "non défini",
+                "niveau_etude": "Licence",
+                "adresse": "Kinshasa / Kasa-Vubu",
+                "nationalite": "Congolaise",
+                "type_piece": "PC",
+                "numero_piece": "DEM-ST-006",
+                "date_naissance": date(1997, 3, 8),
+                "lieu_naissance": "Mbuji-Mayi",
+                "nom_pere": "Jean Mbuyi",
+                "nom_mere": "Marthe Kalala",
+                "etudes": [
+                    {
+                        "intitule": "Gestion des Ressources Humaines",
+                        "etablissement": "Université Pédagogique Nationale",
+                        "niveau": "Licence",
+                        "annee_debut": 2016,
+                        "annee_fin": 2021,
+                        "diplome_obtenu": "Licence",
+                        "description": "Spécialisation en gestion du personnel et administration.",
+                    }
+                ],
+                "photo": "stagiaires/photo3.jpg",
+            },
+            {
+                "nom": "Lufuma",
+                "postnom": "Nkumu",
+                "prenom": "Esther",
+                "sexe": "F",
+                "telephone": "0991000007",
+                "email": "esther.lufuma.demo@training.local",
+                "categorie": "dans l'emploi",
+                "niveau_etude": "Graduat",
+                "adresse": "Kinshasa / Bandal",
+                "nationalite": "Congolaise",
+                "type_piece": "PS",
+                "numero_piece": "DEM-ST-007",
+                "date_naissance": date(1999, 1, 15),
+                "lieu_naissance": "Kisangani",
+                "nom_pere": "Joseph Lufuma",
+                "nom_mere": "Christine Nkumu",
+                "etudes": [
+                    {
+                        "intitule": "Informatique Appliquée",
+                        "etablissement": "Institut Supérieur de Commerce",
+                        "niveau": "Graduat",
+                        "annee_debut": 2017,
+                        "annee_fin": 2020,
+                        "diplome_obtenu": "Graduat",
+                        "description": "Maîtrise des logiciels de gestion et bureautique avancée.",
+                    }
+                ],
+                "entreprise_nom": "Global Tech Solutions",
+                "fonction": "Assistante administrative",
+                "anciennete_emploi": 2,
+                "anciennete_entreprise": 2,
+                "photo": "stagiaires/photo4.jpg",
             },
         ]
 
         stagiaires = {}
         for spec in stagiaire_specs:
-            stagiaire, _ = Stagiaire.objects.get_or_create(
-                email=spec["email"],
-                defaults={
-                    "nom": spec["nom"],
-                    "postnom": spec["postnom"],
-                    "prenom": spec["prenom"],
-                    "adresse": spec["adresse"],
-                    "sexe": spec["sexe"],
-                    "telephone": spec["telephone"],
-                    "categorie": categories[spec["categorie"]],
-                    "service": services[spec["service"]],
-                    "filiere": filieres[spec["filiere"]],
-                    "formation": formations[spec["formation"]],
-                    "date_naissance": spec["date_naissance"],
-                    "lieu_naissance": spec["lieu_naissance"],
-                    "nationalite": spec["nationalite"],
-                    "numero_piece": spec["numero_piece"],
-                    "nom_pere": spec["nom_pere"],
-                    "nom_mere": spec["nom_mere"],
-                    "niveau_etude": spec["niveau_etude"],
-                },
-            )
-            changed = False
-            for field, value in {
+            defaults = {
                 "nom": spec["nom"],
                 "postnom": spec["postnom"],
                 "prenom": spec["prenom"],
@@ -248,27 +373,51 @@ class Command(BaseCommand):
                 "sexe": spec["sexe"],
                 "telephone": spec["telephone"],
                 "categorie": categories[spec["categorie"]],
-                "service": services[spec["service"]],
-                "filiere": filieres[spec["filiere"]],
-                "formation": formations[spec["formation"]],
                 "date_naissance": spec["date_naissance"],
                 "lieu_naissance": spec["lieu_naissance"],
                 "nationalite": spec["nationalite"],
+                "type_piece": spec["type_piece"], # New field
                 "numero_piece": spec["numero_piece"],
                 "nom_pere": spec["nom_pere"],
                 "nom_mere": spec["nom_mere"],
                 "niveau_etude": spec["niveau_etude"],
-            }.items():
+                "photo": spec["photo"], # New field
+            }
+
+            # Add new fields to defaults if category is "dans l'emploi"
+            if spec["categorie"] == "dans l'emploi":
+                defaults["entreprise"] = entreprises[spec["entreprise_nom"]]
+                defaults["fonction"] = spec["fonction"]
+                defaults["anciennete_emploi"] = spec["anciennete_emploi"]
+                defaults["anciennete_entreprise"] = spec["anciennete_entreprise"]
+            else:
+                # Ensure these fields are explicitly None if not "dans l'emploi"
+                defaults["entreprise"] = None
+                defaults["fonction"] = None
+                defaults["anciennete_emploi"] = None
+                defaults["anciennete_entreprise"] = None
+
+
+            stagiaire, _ = Stagiaire.objects.get_or_create(
+                email=spec["email"],
+                defaults=defaults,
+            )
+            
+            # Update logic for existing stagiaires
+            changed = False
+            for field, value in defaults.items():
                 if getattr(stagiaire, field) != value:
                     setattr(stagiaire, field, value)
                     changed = True
             if changed:
                 stagiaire.save()
 
+
             EtudeStagiaire.objects.filter(stagiaire=stagiaire).delete()
             for etude in spec["etudes"]:
                 EtudeStagiaire.objects.create(stagiaire=stagiaire, **etude)
             stagiaires[spec["email"]] = stagiaire
+
 
         type_actions = {}
         for code, libelle in [("PLAN", "Planification"), ("EXEC", "Execution"), ("EVAL", "Evaluation")]:
