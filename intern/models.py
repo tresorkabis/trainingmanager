@@ -91,3 +91,21 @@ class EtudeStagiaire(models.Model):
 
     def __str__(self):
         return f"{self.stagiaire.nom} ({self.intitule})"
+
+class AutreFormation(models.Model):
+    stagiaire = models.ForeignKey(
+        Stagiaire,
+        on_delete=models.CASCADE,
+        related_name='autres_formations'
+    )
+    intitule = models.CharField(max_length=150)
+    etablissement = models.CharField(max_length=150, blank=True, null=True)
+    annee_fin = models.PositiveIntegerField(blank=True, null=True)
+    description = models.TextField(blank=True, null=True)
+
+    active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.stagiaire.nom} ({self.intitule})"

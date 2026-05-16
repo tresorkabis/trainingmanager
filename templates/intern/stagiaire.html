@@ -47,6 +47,10 @@
                                             <li class="nav-item" role="presentation">
                                                 <a class="nav-link" id="studies-tab" data-bs-toggle="tab" href="#studies" role="tab" aria-controls="studies" aria-selected="false">Parcours Académique</a>
                                             </li>
+                                            {# New Tab: Autres Formations #}
+                                            <li class="nav-item" role="presentation">
+                                                <a class="nav-link" id="other-trainings-tab" data-bs-toggle="tab" href="#other-trainings" role="tab" aria-controls="other-trainings" aria-selected="false">Autres Formations</a>
+                                            </li>
                                         </ul>
                                         <div class="tab-content" id="myTabContent">
                                             {# Tab 1: Identité & Détails Personnels #}
@@ -424,6 +428,74 @@
                                                     </div>
                                                 </div>
                                             </div>
+
+                                            {# New Tab Content: Autres Formations #}
+                                            <div class="tab-pane fade" id="other-trainings" role="tabpanel" aria-labelledby="other-trainings-tab">
+                                                <div class="tm-form-panel mt-3">
+                                                    <div class="card border">
+                                                        <div class="card-header">
+                                                            <h4 class="card-title">Autres Formations suivies</h4>
+                                                            {% if not object.id %}
+                                                            <button type="button" id="add-other-training-row" class="btn btn-primary">Ajouter une formation</button>
+                                                            {% endif %}
+                                                        </div>
+                                                        <div class="card-body">
+                                                            {% if object.id and object.autres_formations.all %}
+                                                                {% for training in object.autres_formations.all %}
+                                                                <div class="border rounded p-3 mb-3">
+                                                                    <div class="row">
+                                                                        <div class="col-md-6 mb-2">
+                                                                            <label class="form-label">Intitulé</label>
+                                                                            <input type="text" class="form-control" value="{{ training.intitule }}" disabled>
+                                                                        </div>
+                                                                        <div class="col-md-6 mb-2">
+                                                                            <label class="form-label">Établissement</label>
+                                                                            <input type="text" class="form-control" value="{{ training.etablissement }}" disabled>
+                                                                        </div>
+                                                                        <div class="col-md-4 mb-2">
+                                                                            <label class="form-label">Année de fin</label>
+                                                                            <input type="text" class="form-control" value="{{ training.annee_fin }}" disabled>
+                                                                        </div>
+                                                                        <div class="col-md-8 mb-2">
+                                                                            <label class="form-label">Description</label>
+                                                                            <textarea class="form-control" rows="2" disabled>{{ training.description }}</textarea>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                {% empty %}
+                                                                <p class="text-muted mb-0">Aucune autre formation enregistrée.</p>
+                                                                {% endfor %}
+                                                            {% else %}
+                                                            <div id="other-trainings-container">
+                                                                <div class="other-training-row border rounded p-3 mb-3">
+                                                                    <div class="row">
+                                                                        <div class="col-md-6 mb-2">
+                                                                            <label class="form-label">Intitulé</label>
+                                                                            <input type="text" class="form-control" name="autre_formation_intitule[]" placeholder="Ex: Formation en Cybersécurité">
+                                                                        </div>
+                                                                        <div class="col-md-6 mb-2">
+                                                                            <label class="form-label">Établissement</label>
+                                                                            <input type="text" class="form-control" name="autre_formation_etablissement[]" placeholder="Établissement">
+                                                                        </div>
+                                                                        <div class="col-md-4 mb-2">
+                                                                            <label class="form-label">Année de fin</label>
+                                                                            <input type="number" class="form-control" name="autre_formation_annee_fin[]" placeholder="2024">
+                                                                        </div>
+                                                                        <div class="col-md-7 mb-2">
+                                                                            <label class="form-label">Description</label>
+                                                                            <textarea class="form-control" rows="2" name="autre_formation_description[]" placeholder="Précisions éventuelles"></textarea>
+                                                                        </div>
+                                                                        <div class="col-md-1 d-flex align-items-end mb-2">
+                                                                            <button type="button" class="btn btn-light-secondary remove-other-training-row">X</button>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            {% endif %}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
 
@@ -444,41 +516,6 @@
 {% block script %}
 <script src="{% static 'assets/vendors/simple-datatables/simple-datatables.js' %}"></script>
 <script>
-    // Removed serviceSelect, filiereSelect, and formationSelect related variables and functions
-    // const serviceSelect = document.getElementById('service');
-    // const filiereSelect = document.getElementById('filiere');
-    // const formationSelect = document.getElementById('formation'); // Removed
-
-    // function filterOptions(selectElement, attributeName, expectedValue) {
-    //     if (!selectElement) return;
-
-    //     Array.from(selectElement.options).forEach((option, index) => {
-    //         if (index === 0) {
-    //             option.hidden = false;
-    //             return;
-    //         }
-
-    //         const optionValue = option.getAttribute(attributeName) || '';
-    //         const shouldShow = !expectedValue || optionValue === expectedValue;
-    //         option.hidden = !shouldShow;
-
-    //         if (!shouldShow && option.selected) {
-    //             selectElement.value = '';
-    //         }
-    //     });
-    // }
-
-    // if (serviceSelect && filiereSelect) {
-    //     serviceSelect.addEventListener('change', function () {
-    //         filterOptions(filiereSelect, 'data-service', this.value);
-    //         // filterOptions(formationSelect, 'data-filiere', ''); // Removed
-    //         // formationSelect.value = ''; // Removed
-    //     });
-    //     filterOptions(filiereSelect, 'data-service', serviceSelect.value);
-    // }
-
-    // Removed filiereSelect and formationSelect listener
-
     const studiesContainer = document.getElementById('studies-container');
     const addStudyRowButton = document.getElementById('add-study-row');
 
@@ -510,6 +547,40 @@
             event.target.closest('.study-row').remove();
         });
     }
+
+    {# New JavaScript for AutreFormation #}
+    const otherTrainingsContainer = document.getElementById('other-trainings-container');
+    const addOtherTrainingRowButton = document.getElementById('add-other-training-row');
+
+    if (addOtherTrainingRowButton && otherTrainingsContainer) {
+        addOtherTrainingRowButton.addEventListener('click', function () {
+            const firstRow = otherTrainingsContainer.querySelector('.other-training-row');
+            const clonedRow = firstRow.cloneNode(true);
+
+            clonedRow.querySelectorAll('input, textarea').forEach((field) => {
+                field.value = '';
+            });
+
+            otherTrainingsContainer.appendChild(clonedRow);
+        });
+
+        otherTrainingsContainer.addEventListener('click', function (event) {
+            if (!event.target.classList.contains('remove-other-training-row')) {
+                return;
+            }
+
+            const rows = otherTrainingsContainer.querySelectorAll('.other-training-row');
+            if (rows.length === 1) {
+                rows[0].querySelectorAll('input, textarea').forEach((field) => {
+                    field.value = '';
+                });
+                return;
+            }
+
+            event.target.closest('.other-training-row').remove();
+        });
+    }
+
 
     const photoInput = document.getElementById('photo');
     const photoPreview = document.getElementById('photo-preview');

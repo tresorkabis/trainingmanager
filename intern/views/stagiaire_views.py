@@ -5,7 +5,7 @@ from django.views.generic import ListView, DetailView
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 
-from intern.models import Categorie, EtudeStagiaire, Stagiaire, Entreprise # Import Entreprise
+from intern.models import Categorie, EtudeStagiaire, Stagiaire, Entreprise, AutreFormation # Import AutreFormation
 from training.models import Filiere, Formation, Service
 from progress.models import Action, DetailAction # Import Action and DetailAction
 
@@ -26,15 +26,17 @@ class StagiaireDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
+        current_stagiaire = self.get_object()
+
         ctx['stagiaires'] = Stagiaire.objects.all()
         ctx['categories'] = Categorie.objects.all()
-        # ctx['services'] = Service.objects.all() # Removed
-        # ctx['filieres'] = Filiere.objects.select_related('service').all() # Removed
         ctx['entreprises'] = Entreprise.objects.all() # Add enterprises to context
         
         # Fetch DetailAction objects for the current stagiaire
-        current_stagiaire = self.get_object()
         ctx['actions_suivies'] = DetailAction.objects.filter(stagiaire=current_stagiaire).select_related('action__formation').order_by('action__date_debut')
+        
+        # Fetch AutreFormation objects for the current stagiaire
+        ctx['autres_formations'] = AutreFormation.objects.filter(stagiaire=current_stagiaire)
 
         ctx['titre'] = "Voir"
         return ctx
@@ -44,8 +46,6 @@ class StagiaireCreateView(View):
     def get(self, request):
         ctx = {
             "categories": Categorie.objects.all(),
-            # "services": Service.objects.all(), # Removed
-            # "filieres": Filiere.objects.select_related('service').all(), # Removed
             "entreprises": Entreprise.objects.all(), # Add enterprises to context
             "titre" : "Saisie d'un stagiaire",
             "mode" : "new"
@@ -69,8 +69,6 @@ class StagiaireCreateView(View):
         nom_mere = request.POST.get('nom_mere') or None
         niveau_etude = request.POST.get('niveau_etude') or None
         id_categorie = request.POST['categorie']
-        # id_service = request.POST.get('service') or None # Removed
-        # id_filiere = request.POST.get('filiere') or None # Removed
         photo = request.FILES.get('photo')
 
         # Fetch the Categorie object to check its title
@@ -94,8 +92,6 @@ class StagiaireCreateView(View):
             niveau_etude = niveau_etude,
             photo = photo,
             categorie_id = id_categorie,
-            # service_id = id_service, # Removed
-            # filiere_id = id_filiere, # Removed
         )
 
         # Conditionally handle new fields if category is "dans l'emploi"
@@ -117,6 +113,7 @@ class StagiaireCreateView(View):
 
         stagiaire.save()
 
+        # Handle EtudeStagiaire
         etude_intitules = request.POST.getlist('etude_intitule[]')
         etude_etablissements = request.POST.getlist('etude_etablissement[]')
         etude_niveaux = request.POST.getlist('etude_niveau[]')
@@ -142,6 +139,27 @@ class StagiaireCreateView(View):
                 annee_fin=int(annee_fin) if annee_fin else None,
                 diplome_obtenu=etude_diplomes[index].strip() if index < len(etude_diplomes) else None,
                 description=etude_descriptions[index].strip() if index < len(etude_descriptions) else None,
+            )
+        
+        # Handle AutreFormation
+        autre_formation_intitules = request.POST.getlist('autre_formation_intitule[]')
+        autre_formation_etablissements = request.POST.getlist('autre_formation_etablissement[]')
+        autre_formation_annee_fins = request.POST.getlist('autre_formation_annee_fin[]')
+        autre_formation_descriptions = request.POST.getlist('autre_formation_description[]')
+
+        for index, intitule in enumerate(autre_formation_intitules):
+            intitule = (intitule or '').strip()
+            if not intitule:
+                continue
+
+            annee_fin = autre_formation_annee_fins[index].strip() if index < len(autre_formation_annee_fins) else ''
+
+            AutreFormation.objects.create(
+                stagiaire=stagiaire,
+                intitule=intitule,
+                etablissement=autre_formation_etablissements[index].strip() if index < len(autre_formation_etablissements) else None,
+                annee_fin=int(annee_fin) if annee_fin else None,
+                description=autre_formation_descriptions[index].strip() if index < len(autre_formation_descriptions) else None,
             )
 
         return HttpResponseRedirect("/intern/stagiaires")
