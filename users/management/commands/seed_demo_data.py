@@ -3,7 +3,7 @@ from datetime import date
 from django.core.management import BaseCommand
 from django.db import transaction
 
-from intern.models import Categorie, EtudeStagiaire, Stagiaire, Entreprise
+from intern.models import Categorie, EtudeStagiaire, Stagiaire, Entreprise, AutreFormation # Import AutreFormation
 from progress.models import Action, DetailAction, Formateur, TypeAction
 from training.models import Filiere, Formation, Service
 from users.models import Profile, User
@@ -154,7 +154,13 @@ class Command(BaseCommand):
                         "annee_debut": 2017,
                         "annee_fin": 2020,
                         "diplome_obtenu": "Diplome d'Etat",
-                        "description": "Orientation technique avec base en installation electrique.",
+                    }
+                ],
+                "autres_formations": [ # Added other formations
+                    {
+                        "intitule": "Formation en Cybersécurité",
+                        "etablissement": "Global Tech Academy",
+                        "annee_fin": 2023,
                     }
                 ],
                 # New fields for "dans l'emploi"
@@ -189,7 +195,6 @@ class Command(BaseCommand):
                         "annee_debut": 2018,
                         "annee_fin": 2021,
                         "diplome_obtenu": "Graduat",
-                        "description": "Formation initiale en bureautique et gestion numerique.",
                     },
                     {
                         "intitule": "Comptabilite generale",
@@ -198,7 +203,6 @@ class Command(BaseCommand):
                         "annee_debut": 2022,
                         "annee_fin": 2022,
                         "diplome_obtenu": "Attestation",
-                        "description": "Module court complete pour les outils administratifs.",
                     },
                 ],
                 "photo": "stagiaires/photo6.jpg", # Placeholder photo
@@ -228,7 +232,6 @@ class Command(BaseCommand):
                         "annee_debut": 2017,
                         "annee_fin": 2022,
                         "diplome_obtenu": "Licence",
-                        "description": "Profil oriente gestion, accueil et organisation administrative.",
                     }
                 ],
                 "photo": "stagiaires/photo7.jpg", # Placeholder photo
@@ -258,7 +261,6 @@ class Command(BaseCommand):
                         "annee_debut": 2015,
                         "annee_fin": 2018,
                         "diplome_obtenu": "Graduat",
-                        "description": "Spécialisation en maintenance des équipements lourds.",
                     }
                 ],
                 "entreprise_nom": "Alpha Consulting",
@@ -292,7 +294,6 @@ class Command(BaseCommand):
                         "annee_debut": 2016,
                         "annee_fin": 2019,
                         "diplome_obtenu": "Diplome d'Etat",
-                        "description": "Formation complète en outils bureautiques et gestion administrative.",
                     }
                 ],
                 "photo": "stagiaires/photo2.jpg",
@@ -322,7 +323,6 @@ class Command(BaseCommand):
                         "annee_debut": 2016,
                         "annee_fin": 2021,
                         "diplome_obtenu": "Licence",
-                        "description": "Spécialisation en gestion du personnel et administration.",
                     }
                 ],
                 "photo": "stagiaires/photo3.jpg",
@@ -352,7 +352,6 @@ class Command(BaseCommand):
                         "annee_debut": 2017,
                         "annee_fin": 2020,
                         "diplome_obtenu": "Graduat",
-                        "description": "Maîtrise des logiciels de gestion et bureautique avancée.",
                     }
                 ],
                 "entreprise_nom": "Global Tech Solutions",
@@ -416,6 +415,13 @@ class Command(BaseCommand):
             EtudeStagiaire.objects.filter(stagiaire=stagiaire).delete()
             for etude in spec["etudes"]:
                 EtudeStagiaire.objects.create(stagiaire=stagiaire, **etude)
+            
+            AutreFormation.objects.filter(stagiaire=stagiaire).delete()
+            if "autres_formations" in spec:
+                for autre_formation in spec["autres_formations"]:
+                    AutreFormation.objects.create(stagiaire=stagiaire, **autre_formation)
+
+
             stagiaires[spec["email"]] = stagiaire
 
 

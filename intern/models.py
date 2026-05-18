@@ -83,7 +83,6 @@ class EtudeStagiaire(models.Model):
     annee_debut = models.PositiveIntegerField(blank=True, null=True)
     annee_fin = models.PositiveIntegerField(blank=True, null=True)
     diplome_obtenu = models.CharField(max_length=150, blank=True, null=True)
-    description = models.TextField(blank=True, null=True)
 
     active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -101,7 +100,6 @@ class AutreFormation(models.Model):
     intitule = models.CharField(max_length=150)
     etablissement = models.CharField(max_length=150, blank=True, null=True)
     annee_fin = models.PositiveIntegerField(blank=True, null=True)
-    description = models.TextField(blank=True, null=True)
 
     active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
