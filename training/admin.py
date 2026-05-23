@@ -8,6 +8,6 @@ admin.site.register(Filiere)
 
 @admin.register(Formation)
 class FormationAdmin(admin.ModelAdmin):
-    list_display = ('nom', 'filiere', 'duree', 'duree_heures', 'cout', 'fraismateriels', 'active')
+    list_display = ('nom', 'filiere', 'duree', 'duree_heures', 'cout', 'frais_participation', 'frais_jury', 'frais_materiels', 'active')
     list_filter = ('active', 'filiere')
     search_fields = ('nom', 'filiere__nom')

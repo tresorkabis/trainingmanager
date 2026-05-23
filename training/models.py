@@ -27,7 +27,11 @@ class Formation(models.Model):
     duree_heures = models.PositiveIntegerField(default=0, verbose_name="Durée en heures")
     filiere = models.ForeignKey(Filiere, on_delete=models.SET_NULL, null=True, blank=True)
     cout = models.DecimalField(max_digits=12, decimal_places=2, default=0, verbose_name="Coût")
-    fraismateriels = models.FloatField(verbose_name="Frais matériels", default=0.0)
+    
+    # Champs de frais ajoutés/modifiés
+    frais_participation = models.DecimalField(max_digits=12, decimal_places=2, default=0, verbose_name="Frais de participation")
+    frais_jury = models.DecimalField(max_digits=12, decimal_places=2, default=0, verbose_name="Frais du jury")
+    frais_materiels = models.DecimalField(max_digits=12, decimal_places=2, default=0, verbose_name="Frais matériels") # Renommé et type ajusté
 
     active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)

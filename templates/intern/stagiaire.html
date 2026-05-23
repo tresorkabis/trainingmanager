@@ -348,43 +348,37 @@
                                                             {% endif %}
                                                         </div>
                                                         <div class="card-body">
-                                                            {% if object.id and object.etudes.all %}
-                                                                {% for etude in object.etudes.all %}
-                                                                <div class="border rounded p-3 mb-3">
-                                                                    <div class="row">
-                                                                        <div class="col-md-6 mb-2">
-                                                                            <label class="form-label">Intitulé</label>
-                                                                            <input type="text" class="form-control" value="{{ etude.intitule }}" disabled>
-                                                                        </div>
-                                                                        <div class="col-md-6 mb-2">
-                                                                            <label class="form-label">Établissement</label>
-                                                                            <input type="text" class="form-control" value="{{ etude.etablissement }}" disabled>
-                                                                        </div>
-                                                                        <div class="col-md-4 mb-2">
-                                                                            <label class="form-label">Niveau</label>
-                                                                            <input type="text" class="form-control" value="{{ etude.niveau }}" disabled>
-                                                                        </div>
-                                                                        <div class="col-md-4 mb-2">
-                                                                            <label class="form-label">Année début</label>
-                                                                            <input type="text" class="form-control" value="{{ etude.annee_debut }}" disabled>
-                                                                        </div>
-                                                                        <div class="col-md-4 mb-2">
-                                                                            <label class="form-label">Année fin</label>
-                                                                            <input type="text" class="form-control" value="{{ etude.annee_fin }}" disabled>
-                                                                        </div>
-                                                                        <div class="col-md-6 mb-2">
-                                                                            <label class="form-label">Diplôme obtenu</label>
-                                                                            <input type="text" class="form-control" value="{{ etude.diplome_obtenu }}" disabled>
-                                                                        </div>
-                                                                        <div class="col-md-6 mb-2">
-                                                                            <label class="form-label">Description</label>
-                                                                            <textarea class="form-control" rows="2" disabled>{{ etude.description }}</textarea>
-                                                                        </div>
+                                                            {% if object.id %}
+                                                                {% if object.etudes.all %}
+                                                                    <div class="table-responsive">
+                                                                        <table class="table table-striped">
+                                                                            <thead>
+                                                                                <tr>
+                                                                                    <th>Intitulé</th>
+                                                                                    <th>Établissement</th>
+                                                                                    <th>Niveau</th>
+                                                                                    <th>Année début</th>
+                                                                                    <th>Année fin</th>
+                                                                                    <th>Diplôme obtenu</th>
+                                                                                </tr>
+                                                                            </thead>
+                                                                            <tbody>
+                                                                                {% for etude in object.etudes.all %}
+                                                                                <tr>
+                                                                                    <td>{{ etude.intitule }}</td>
+                                                                                    <td>{{ etude.etablissement|default:"-" }}</td>
+                                                                                    <td>{{ etude.niveau|default:"-" }}</td>
+                                                                                    <td>{{ etude.annee_debut|default:"-" }}</td>
+                                                                                    <td>{{ etude.annee_fin|default:"-" }}</td>
+                                                                                    <td>{{ etude.diplome_obtenu|default:"-" }}</td>
+                                                                                </tr>
+                                                                                {% endfor %}
+                                                                            </tbody>
+                                                                        </table>
                                                                     </div>
-                                                                </div>
-                                                                {% empty %}
-                                                                <p class="text-muted mb-0">Aucune étude enregistrée.</p>
-                                                                {% endfor %}
+                                                                {% else %}
+                                                                    <p class="text-muted mb-0">Aucune étude enregistrée.</p>
+                                                                {% endif %}
                                                             {% else %}
                                                             <div id="studies-container">
                                                                 <div class="study-row border rounded p-3 mb-3">
@@ -409,13 +403,9 @@
                                                                             <label class="form-label">Année fin</label>
                                                                             <input type="number" class="form-control" name="etude_annee_fin[]" placeholder="2023">
                                                                         </div>
-                                                                        <div class="col-md-6 mb-2">
+                                                                        <div class="col-md-11 mb-2"> {# Adjusted from col-md-6 to col-md-11 #}
                                                                             <label class="form-label">Diplôme obtenu</label>
                                                                             <input type="text" class="form-control" name="etude_diplome[]" placeholder="Diplôme obtenu">
-                                                                        </div>
-                                                                        <div class="col-md-5 mb-2">
-                                                                            <label class="form-label">Description</label>
-                                                                            <textarea class="form-control" rows="2" name="etude_description[]" placeholder="Précisions éventuelles"></textarea>
                                                                         </div>
                                                                         <div class="col-md-1 d-flex align-items-end mb-2">
                                                                             <button type="button" class="btn btn-light-secondary remove-study-row">X</button>
@@ -440,31 +430,31 @@
                                                             {% endif %}
                                                         </div>
                                                         <div class="card-body">
-                                                            {% if object.id and object.autres_formations.all %}
-                                                                {% for training in object.autres_formations.all %}
-                                                                <div class="border rounded p-3 mb-3">
-                                                                    <div class="row">
-                                                                        <div class="col-md-6 mb-2">
-                                                                            <label class="form-label">Intitulé</label>
-                                                                            <input type="text" class="form-control" value="{{ training.intitule }}" disabled>
-                                                                        </div>
-                                                                        <div class="col-md-6 mb-2">
-                                                                            <label class="form-label">Établissement</label>
-                                                                            <input type="text" class="form-control" value="{{ training.etablissement }}" disabled>
-                                                                        </div>
-                                                                        <div class="col-md-4 mb-2">
-                                                                            <label class="form-label">Année de fin</label>
-                                                                            <input type="text" class="form-control" value="{{ training.annee_fin }}" disabled>
-                                                                        </div>
-                                                                        <div class="col-md-8 mb-2">
-                                                                            <label class="form-label">Description</label>
-                                                                            <textarea class="form-control" rows="2" disabled>{{ training.description }}</textarea>
-                                                                        </div>
+                                                            {% if object.id %}
+                                                                {% if object.autres_formations.all %}
+                                                                    <div class="table-responsive">
+                                                                        <table class="table table-striped">
+                                                                            <thead>
+                                                                                <tr>
+                                                                                    <th>Intitulé</th>
+                                                                                    <th>Établissement</th>
+                                                                                    <th>Année de fin</th>
+                                                                                </tr>
+                                                                            </thead>
+                                                                            <tbody>
+                                                                                {% for training in object.autres_formations.all %}
+                                                                                <tr>
+                                                                                    <td>{{ training.intitule }}</td>
+                                                                                    <td>{{ training.etablissement|default:"-" }}</td>
+                                                                                    <td>{{ training.annee_fin|default:"-" }}</td>
+                                                                                </tr>
+                                                                                {% endfor %}
+                                                                            </tbody>
+                                                                        </table>
                                                                     </div>
-                                                                </div>
-                                                                {% empty %}
-                                                                <p class="text-muted mb-0">Aucune autre formation enregistrée.</p>
-                                                                {% endfor %}
+                                                                {% else %}
+                                                                    <p class="text-muted mb-0">Aucune autre formation enregistrée.</p>
+                                                                {% endif %}
                                                             {% else %}
                                                             <div id="other-trainings-container">
                                                                 <div class="other-training-row border rounded p-3 mb-3">
@@ -477,13 +467,9 @@
                                                                             <label class="form-label">Établissement</label>
                                                                             <input type="text" class="form-control" name="autre_formation_etablissement[]" placeholder="Établissement">
                                                                         </div>
-                                                                        <div class="col-md-4 mb-2">
+                                                                        <div class="col-md-11 mb-2"> {# Adjusted from col-md-4 to col-md-11 #}
                                                                             <label class="form-label">Année de fin</label>
                                                                             <input type="number" class="form-control" name="autre_formation_annee_fin[]" placeholder="2024">
-                                                                        </div>
-                                                                        <div class="col-md-7 mb-2">
-                                                                            <label class="form-label">Description</label>
-                                                                            <textarea class="form-control" rows="2" name="autre_formation_description[]" placeholder="Précisions éventuelles"></textarea>
                                                                         </div>
                                                                         <div class="col-md-1 d-flex align-items-end mb-2">
                                                                             <button type="button" class="btn btn-light-secondary remove-other-training-row">X</button>
