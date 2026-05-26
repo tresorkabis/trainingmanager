@@ -20,12 +20,8 @@ rm -f db.sqlite3
 echo "   Database file deleted."
 echo ""
 
-echo "3. Creating new migration files..."
-python manage.py makemigrations users
-python manage.py makemigrations intern
-python manage.py makemigrations training
-python manage.py makemigrations progress
-python manage.py createprofile
+echo "3. Creating new migration files for all apps..."
+python manage.py makemigrations # This will create migrations for all apps
 echo "   New migration files created."
 echo ""
 

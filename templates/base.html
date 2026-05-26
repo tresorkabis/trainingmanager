@@ -16,7 +16,7 @@
     <link rel="stylesheet" href="{% static 'assets/vendors/perfect-scrollbar/perfect-scrollbar.css' %}">
     <link rel="stylesheet" href="{% static 'assets/vendors/bootstrap-icons/bootstrap-icons.css' %}">
     <link rel="stylesheet" href="{% static 'assets/css/app.css' %}">
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}"> {# Removed ?v=1 parameter #}
     <link rel="shortcut icon" href="{% static 'assets/images/favicon.svg' %}" type="image/x-icon">
 </head>
 
@@ -27,7 +27,7 @@
 
                 <div class="sidebar-header">
                     <div class="logo">
-                        <img src="{% static 'admin/img/logo.jpeg' %}" width="30" height="30" alt="Logo" srcset="">
+                        <img src="{% static 'assets/images/logo.png' %}" width="30" height="30" alt="Logo"> {# Updated logo path #}
                         <a href="{% url 'home' %}">Training Manager</a>
                     </div>
                     <div class="d-flex justify-content-between">
@@ -49,12 +49,14 @@
                                 <span>Tableau de bord</span>
                             </a>
                         </li>
+                        {% if request.user.is_superuser or request.user.profile and request.user.profile.name == "Manager" %}
                         <li class="sidebar-item">
                             <a href="{% url 'admin:index' %}" class='sidebar-link'>
                                 <i class="bi bi-shield-lock"></i>
                                 <span>Administration</span>
                             </a>
                         </li>
+                        {% endif %}
 
                         <li class="sidebar-title">Parcours</li>
 
@@ -70,6 +72,7 @@
                                 <i class="bi bi-clipboard-check"></i>
                                 <span>Actions de formation</span>
                             </a>
+                        </a>
                         </li>
 
                         <li class="sidebar-title">Encadrement</li>
@@ -82,6 +85,7 @@
                         </li>
 
 
+                        {% if request.user.is_superuser or request.user.profile and request.user.profile.name == "Manager" or request.user.profile.name == "Chef de service" or request.user.profile.name == "Chef de filière" %}
                         <li class="sidebar-title">Référentiels</li>
 
                         <li class="sidebar-item {% if link == 'services' %} active {% endif %} ">
@@ -91,12 +95,14 @@
                             </a>
                         </li>
 
+                        {% if request.user.is_superuser or request.user.profile and request.user.profile.name != "Chef de service" %} {# Condition pour Types d'actions #}
                         <li class="sidebar-item {% if link == 'typeactions' %} active {% endif %} ">
                             <a href="{% url 'typeactions' %}" class='sidebar-link'>
                                 <i class="bi bi-diagram-3"></i>
                                 <span>Types d'actions</span>
                             </a>
                         </li>
+                        {% endif %}
 
                         <li class="sidebar-item {% if link == 'formations' %} active {% endif %} ">
                             <a href="{% url 'formations' %}" class='sidebar-link'>
@@ -111,12 +117,16 @@
                             </a>
                         </li>
 
+                        {% if request.user.is_superuser or request.user.profile and request.user.profile.name != "Chef de service" %} {# Nouvelle condition ici pour Catégories #}
                         <li class="sidebar-item {% if link == 'categories' %} active {% endif %} ">
                             <a href="{% url 'categories' %}" class='sidebar-link'>
                                 <i class="bi bi-bookmarks"></i>
                                 <span>Catégories</span>
                             </a>
                         </li>
+                        {% endif %}
+
+                        {% endif %}
 
                     </ul>
                 </div>
@@ -141,11 +151,17 @@
                         INPP / ESFORCA
                     </span>
                     {% if request.user.is_authenticated %}
+                    {% if request.user.service %} {# Correction ici #}
+                    <span class="tm-chip">
+                        <i class="bi bi-briefcase"></i>
+                        {{ request.user.service.nom }} {# Correction ici #}
+                    </span>
+                    {% endif %}
                     <span class="tm-chip">
                         <i class="bi bi-person-circle"></i>
                         {{ request.user.get_full_name|default:request.user.username }}
                     </span>
-                    <a href="{% url 'logout' %}" class="tm-chip">
+                    <a href="{% url 'logout' %}" class="tm-chip tm-chip-logout">
                         <i class="bi bi-box-arrow-right"></i>
                         Déconnexion
                     </a>

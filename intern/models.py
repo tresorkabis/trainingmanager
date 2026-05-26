@@ -54,8 +54,9 @@ class Stagiaire(models.Model):
     niveau_etude = models.CharField(max_length=100, blank=True, null=True)
     photo = models.ImageField(upload_to='stagiaires/', blank=True, null=True)
     categorie = models.ForeignKey(Categorie, on_delete=models.CASCADE)
-    # Removed service = models.ForeignKey(Service, on_delete=models.SET_NULL, null=True, blank=True)
-    # Removed filiere = models.ForeignKey(Filiere, on_delete=models.SET_NULL, null=True, blank=True)
+    
+    # Nouveau champ pour lier le stagiaire à une filière
+    filiere = models.ForeignKey(Filiere, on_delete=models.SET_NULL, null=True, blank=True)
 
     # New fields for "dans l'emploi" category
     entreprise = models.ForeignKey(Entreprise, on_delete=models.SET_NULL, null=True, blank=True)
@@ -69,6 +70,13 @@ class Stagiaire(models.Model):
 
     def __str__(self):
         return self.nom +"(" + self.postnom +")" 
+
+    def get_full_name(self):
+        """
+        Returns the stagiaire's full name.
+        """
+        full_name = f"{self.nom} {self.postnom} {self.prenom}"
+        return full_name.strip()
 
 
 class EtudeStagiaire(models.Model):

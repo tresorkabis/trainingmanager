@@ -26,120 +26,115 @@
                     <i class="bi bi-journal-check"></i>
                     Voir les formations
                 </a>
+                {% if request.user.is_superuser or request.user.profile and request.user.profile.name == "Manager" %}
                 <a href="{% url 'admin:index' %}" class="tm-btn-soft">
                     <i class="bi bi-shield-check"></i>
                     Administration
                 </a>
+                {% endif %}
             </div>
         </div>
         <div class="tm-hero__summary">
-            <div class="tm-hero-metric">
-                <span class="tm-hero-metric__label">Catalogue</span>
-                <strong class="tm-hero-metric__value">{{ nbformations }}</strong>
-                <span class="tm-hero-metric__text">formations actives</span>
-            </div>
-            <div class="tm-hero-metric">
-                <span class="tm-hero-metric__label">Population</span>
-                <strong class="tm-hero-metric__value">{{ nbstagiaires }}</strong>
-                <span class="tm-hero-metric__text">stagiaires suivis</span>
-            </div>
+            <a href="{% url 'formations' %}" class="tm-hero-metric"> {# Made clickable #}
+                <div class="tm-hero-metric__icon">
+                    <i class="bi bi-book"></i> {# Icon for Catalogue #}
+                </div>
+                <div class="tm-hero-metric__content">
+                    <span class="tm-hero-metric__label">Catalogue</span>
+                    <strong class="tm-hero-metric__value">{{ nbformations }}</strong>
+                    <span class="tm-hero-metric__text">formations actives</span>
+                </div>
+            </a>
+            <a href="{% url 'stagiaires' %}" class="tm-hero-metric"> {# Made clickable #}
+                <div class="tm-hero-metric__icon">
+                    <i class="bi bi-people"></i> {# Icon for Population #}
+                </div>
+                <div class="tm-hero-metric__content">
+                    <span class="tm-hero-metric__label">Population</span>
+                    <strong class="tm-hero-metric__value">{{ nbstagiaires }}</strong>
+                    <span class="tm-hero-metric__text">stagiaires suivis</span>
+                </div>
+            </a>
         </div>
     </section>
 </div>
 <section class="row g-4 tm-dashboard-layout">
-    <div class="col-12 col-xl-8">
-        <div class="row g-4 tm-stats-row">
-            <div class="col-12 col-sm-6">
-                <a href="{% url 'formations' %}" class="tm-stat-card-link">
-                    <div class="card tm-stat-card">
-                        <div class="card-body">
-                            <div class="tm-stat-card__inner">
-                                <div class="stats-icon purple">
-                                    <i class="bi bi-journal-bookmark"></i>
-                                </div>
-                                <div class="tm-stat-card__content">
-                                    <div class="tm-stat-label">Formations</div>
-                                    <div class="tm-stat-value">{{ nbformations }}</div>
-                                    <div class="tm-stat-meta">Offres actuellement suivies</div>
-                                </div>
-                            </div>
+    {# Row 1: Stat Cards (Formations, Filières, Stagiaires) #}
+    <div class="col-12 col-md-4"> {# Column for Formations Stat Card #}
+        <a href="{% url 'formations' %}" class="tm-stat-card-link">
+            <div class="card tm-stat-card">
+                <div class="card-body">
+                    <div class="tm-stat-card__inner">
+                        <div class="stats-icon purple">
+                            <i class="bi bi-journal-bookmark"></i>
                         </div>
-                    </div>
-                </a>
-            </div>
-            <div class="col-12 col-sm-6">
-                <a href="{% url 'filieres' %}" class="tm-stat-card-link">
-                    <div class="card tm-stat-card">
-                        <div class="card-body">
-                            <div class="tm-stat-card__inner">
-                                <div class="stats-icon blue">
-                                    <i class="bi bi-signpost-split"></i>
-                                </div>
-                                <div class="tm-stat-card__content">
-                                    <div class="tm-stat-label">Filières</div>
-                                    <div class="tm-stat-value">{{ nbfilieres }}</div>
-                                    <div class="tm-stat-meta">Parcours catalogués</div>
-                                </div>
-                            </div>
+                        <div class="tm-stat-card__content">
+                            <div class="tm-stat-label">Formations</div>
+                            <div class="tm-stat-value">{{ nbformations }}</div>
+                            <div class="tm-stat-meta">Offres actuellement suivies</div>
                         </div>
-                    </div>
-                </a>
-            </div>
-            <div class="col-12 col-sm-6">
-                <a href="{% url 'stagiaires' %}" class="tm-stat-card-link">
-                    <div class="card tm-stat-card">
-                        <div class="card-body">
-                            <div class="tm-stat-card__inner">
-                                <div class="stats-icon green">
-                                    <i class="bi bi-people-fill"></i>
-                                </div>
-                                <div class="tm-stat-card__content">
-                                    <div class="tm-stat-label">Stagiaires</div>
-                                    <div class="tm-stat-value">{{ nbstagiaires }}</div>
-                                    <div class="tm-stat-meta">Apprenants enregistrés</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </a>
-            </div>
-            <div class="col-12 col-sm-6">
-                <a href="{% url 'actions' %}" class="tm-stat-card-link">
-                    <div class="card tm-stat-card">
-                        <div class="card-body">
-                            <div class="tm-stat-card__inner">
-                                <div class="stats-icon red">
-                                    <i class="bi bi-clipboard-check"></i>
-                                </div>
-                                <div class="tm-stat-card__content">
-                                    <div class="tm-stat-label">Actions</div>
-                                    <div class="tm-stat-value">{{ nbactions }}</div>
-                                    <div class="tm-stat-meta">Sessions et activités planifiées</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </a>
-            </div>
-        </div>
-        <div class="row g-4">
-            <div class="col-12">
-                <div class="card tm-chart-card">
-                    <div class="card-header">
-                        <div>
-                            <h4>Aperçu activité</h4>
-                            <p class="text-subtitle text-muted mb-0">Comparaison des stagiaires suivis et des actions planifiées par filière.</p>
-                        </div>
-                    </div>
-                    <div class="card-body tm-chart-card__body">
-                        <div id="chart-profile-visit"></div>
                     </div>
                 </div>
             </div>
-        </div>
+        </a>
     </div>
-    <div class="col-12 col-xl-4">
-        <div class="tm-dashboard-side">
+    <div class="col-12 col-md-4"> {# Column for Filières Stat Card #}
+        <a href="{% url 'filieres' %}" class="tm-stat-card-link">
+            <div class="card tm-stat-card">
+                <div class="card-body">
+                    <div class="tm-stat-card__inner">
+                        <div class="stats-icon blue">
+                            <i class="bi bi-signpost-split"></i>
+                        </div>
+                        <div class="tm-stat-card__content">
+                            <div class="tm-stat-label">Filières</div>
+                            <div class="tm-stat-value">{{ nbfilieres }}</div>
+                            <div class="tm-stat-meta">Parcours catalogués</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-12 col-md-4"> {# Column for Stagiaires Stat Card #}
+        <a href="{% url 'stagiaires' %}" class="tm-stat-card-link">
+            <div class="card tm-stat-card">
+                <div class="card-body">
+                    <div class="tm-stat-card__inner">
+                        <div class="stats-icon green">
+                            <i class="bi bi-people-fill"></i>
+                        </div>
+                        <div class="tm-stat-card__content">
+                            <div class="tm-stat-label">Stagiaires</div>
+                            <div class="tm-stat-value">{{ nbstagiaires }}</div>
+                            <div class="tm-stat-meta">Apprenants enregistrés</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    {# Row 2: Actions Stat Card, User Card, Repères Card #}
+    <div class="col-12 col-md-4"> {# Column for Actions Stat Card #}
+        <a href="{% url 'actions' %}" class="tm-stat-card-link">
+            <div class="card tm-stat-card">
+                <div class="card-body">
+                    <div class="tm-stat-card__inner">
+                        <div class="stats-icon red">
+                            <i class="bi bi-clipboard-check"></i>
+                        </div>
+                        <div class="tm-stat-card__content">
+                            <div class="tm-stat-label">Actions</div>
+                            <div class="tm-stat-value">{{ nbactions }}</div>
+                            <div class="tm-stat-meta">Sessions et activités planifiées</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-12 col-md-4"> {# Column for User Card #}
         {% if user != None %}
         <div class="card tm-user-card">
             <div class="card-body py-4 px-5">
@@ -154,7 +149,7 @@
                     <div class="ms-3 name">
                         <h5 class="font-bold mb-1">{{ user.get_full_name|default:user.username }}</h5>
                         <h6 class="text-muted mb-3">{{ user.email|default:"Compte interne" }}</h6>
-                        <a href="{% url 'logout' %}">
+                        <a href="{% url 'logout' %}" class="tm-chip tm-chip-logout">
                             <i class="bi bi-box-arrow-right"></i>
                             Se déconnecter
                         </a>
@@ -163,8 +158,38 @@
             </div>
         </div>
         {% endif %}
-
+    </div>
+    <div class="col-12 col-md-4"> {# Column for Repères card #}
         <div class="card">
+            <div class="card-header">
+                <h4>Repères</h4>
+            </div>
+            <div class="card-body">
+                <div class="tm-panel-note">
+                    Suivi centralisé des formations, des filières et des stagiaires.
+                    Pour une présentation encore plus professionnelle, l'étape suivante
+                    sera d'uniformiser aussi les formulaires et tableaux du module `progress`.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Row 3: Chart Card and Quick Access Card #}
+    <div class="col-12 col-md-8"> {# Chart will take 2/3 width #}
+        <div class="card tm-chart-card">
+            <div class="card-header">
+                <div>
+                    <h4>Aperçu activité</h4>
+                    <p class="text-subtitle text-muted mb-0">Comparaison des stagiaires suivis et des actions planifiées par filière.</p>
+                </div>
+            </div>
+            <div class="card-body tm-chart-card__body">
+                <div id="chart-profile-visit"></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-md-4"> {# Column for Quick Access card #}
+        <div class="card tm-quick-access-card"> {# Added tm-quick-access-card class #}
             <div class="card-header">
                 <h4>Accès rapide</h4>
             </div>
@@ -177,6 +202,7 @@
                             <span class="tm-quick-link__text">Créer une nouvelle fiche apprenant.</span>
                         </span>
                     </a>
+                    {% if request.user.is_superuser or request.user.profile and request.user.profile.name == "Manager" %}
                     <a href="{% url 'formation_create' %}" class="tm-quick-link">
                         <span class="tm-quick-link__icon"><i class="bi bi-folder-plus"></i></span>
                         <span>
@@ -198,22 +224,9 @@
                             <span class="tm-quick-link__text">Explorer la structure du centre.</span>
                         </span>
                     </a>
+                    {% endif %}
                 </div>
             </div>
-        </div>
-
-        <div class="card">
-            <div class="card-header">
-                <h4>Repères</h4>
-            </div>
-            <div class="card-body">
-                <div class="tm-panel-note">
-                    Suivi centralisé des formations, des filières et des stagiaires.
-                    Pour une présentation encore plus professionnelle, l'étape suivante
-                    sera d'uniformiser aussi les formulaires et tableaux du module `progress`.
-                </div>
-            </div>
-        </div>
         </div>
     </div>
 </section>

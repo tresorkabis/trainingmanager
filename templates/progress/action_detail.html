@@ -73,7 +73,7 @@
                         <tbody>
                             {% for detail_action in object.detailaction_set.all %}
                             <tr>
-                                <td><a href="{% url 'stagiaire' detail_action.stagiaire.pk %}">{{ detail_action.stagiaire.get_full_name }}</a></td>
+                                <td><a href="{% url 'stagiaire' detail_action.stagiaire.pk %}">{{ detail_action.stagiaire.get_full_name }}</a></td> {# Utilisation de get_full_name #}
                                 <td>{{ detail_action.statut }}</td>
                                 <td>{{ detail_action.date_inscription|date:"d/m/Y" }}</td>
                             </tr>
@@ -88,9 +88,11 @@
         </div>
 
         <div class="d-flex justify-content-end gap-2">
-            <a href="{% url 'actions' %}" class="btn btn-secondary">Retour à la liste</a>
-            {# Ajoutez ici un bouton d'édition si nécessaire #}
-            {# <a href="{% url 'action_edit' object.pk %}" class="btn btn-primary">Modifier</a> #}
+            <a href="{% url 'actions' %}" class="btn btn-light-secondary me-2">Retour à la liste</a>
+            {% if request.user.is_superuser or request.user.profile and request.user.profile.name == "Manager" %}
+            <a href="{% url 'action_update' object.pk %}" class="btn btn-primary me-2">Modifier</a>
+            <a href="{% url 'action_delete' object.pk %}" class="btn btn-danger">Supprimer</a>
+            {% endif %}
         </div>
     </section>
 </div>

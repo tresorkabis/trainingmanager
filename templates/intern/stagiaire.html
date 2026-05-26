@@ -23,9 +23,9 @@
     </div>
     <section class="section">
         <div class="col-md-12 col-12">
-            <div class="card">
+            <div class="card tm-card-view"> {# Added tm-card-view for consistent styling #}
                 <div class="card-header">
-                    <h4 class="card-title">Details</h4>
+                    <h4 class="card-title">Détails du stagiaire</h4> {# More descriptive title #}
                 </div>
                 <div class="card-content">
                     <div class="card-body">
@@ -34,7 +34,7 @@
                             <div class="form-body">
                                 <div class="row">
                                     <div class="col-12">
-                                        <ul class="nav nav-tabs" id="myTab" role="tablist">
+                                        <ul class="nav nav-tabs nav-fill" id="myTab" role="tablist"> {# Added nav-fill for responsive tabs #}
                                             <li class="nav-item" role="presentation">
                                                 <a class="nav-link active" id="identity-tab" data-bs-toggle="tab" href="#identity" role="tab" aria-controls="identity" aria-selected="true">Identité & Détails Personnels</a>
                                             </li>
@@ -45,96 +45,94 @@
                                                 <a class="nav-link" id="professional-tab" data-bs-toggle="tab" href="#professional" role="tab" aria-controls="professional" aria-selected="false">Professionnel</a>
                                             </li>
                                             <li class="nav-item" role="presentation">
-                                                <a class="nav-link" id="studies-tab" data-bs-toggle="tab" href="#studies" role="tab" aria-controls="studies" aria-selected="false">Parcours Académique</a>
-                                            </li>
-                                            {# New Tab: Autres Formations #}
-                                            <li class="nav-item" role="presentation">
-                                                <a class="nav-link" id="other-trainings-tab" data-bs-toggle="tab" href="#other-trainings" role="tab" aria-controls="other-trainings" aria-selected="false">Autres Formations</a>
+                                                <a class="nav-link" id="studies-trainings-tab" data-bs-toggle="tab" href="#studies-trainings" role="tab" aria-controls="studies-trainings" aria-selected="false">Études & Formations</a> {# Merged tab #}
                                             </li>
                                         </ul>
                                         <div class="tab-content" id="myTabContent">
                                             {# Tab 1: Identité & Détails Personnels #}
                                             <div class="tab-pane fade show active" id="identity" role="tabpanel" aria-labelledby="identity-tab">
-                                                <div class="tm-form-panel mt-3">
-                                                    <div class="tm-form-panel__header">
+                                                <div class="card tm-form-panel mt-3"> {# Wrapped in card for consistent styling #}
+                                                    <div class="card-header"> {# Changed tm-form-panel__header to card-header #}
                                                         <div>
                                                             <h5 class="mb-1">Identité du stagiaire</h5>
                                                             <p class="text-muted mb-0">Renseignez les informations principales et ajoutez une photo de profil.</p>
                                                         </div>
                                                     </div>
-                                                    <div class="row g-4">
-                                                        <div class="col-12 col-lg-4">
-                                                            <div class="tm-avatar-card">
-                                                                <div class="tm-avatar-card__preview">
-                                                                    {% if object.photo %}
-                                                                    <img id="photo-preview" src="{{ object.photo.url }}" alt="Photo du stagiaire">
-                                                                    {% else %}
-                                                                    <img id="photo-preview" src="{% static 'assets/images/faces/1.jpg' %}" alt="Aperçu avatar">
-                                                                    {% endif %}
-                                                                </div>
-                                                                <div class="tm-avatar-card__body">
-                                                                    <label for="photo" class="form-label">Photo du stagiaire</label>
-                                                                    <input type="file" id="photo" class="form-control" name="photo" accept="image/*" {% if object.id %}disabled{% endif %}>
-                                                                    <small class="text-muted d-block mt-2">Format portrait recommandé pour une fiche plus lisible.</small>
-                                                                    {% if object.photo %}
-                                                                    <small class="d-block mt-2">
-                                                                        <a href="{{ object.photo.url }}" target="_blank">Ouvrir la photo enregistrée</a>
-                                                                    </small>
-                                                                    {% endif %}
+                                                    <div class="card-body"> {# Changed tm-form-panel__body to card-body #}
+                                                        <div class="row g-4">
+                                                            <div class="col-12 col-lg-4">
+                                                                <div class="tm-avatar-card">
+                                                                    <div class="tm-avatar-card__preview">
+                                                                        {% if object.photo %}
+                                                                        <img id="photo-preview" src="{{ object.photo.url }}" alt="Photo du stagiaire">
+                                                                        {% else %}
+                                                                        <img id="photo-preview" src="{% static 'assets/images/faces/1.jpg' %}" alt="Aperçu avatar">
+                                                                        {% endif %}
+                                                                    </div>
+                                                                    <div class="tm-avatar-card__body">
+                                                                        <label for="photo" class="form-label">Photo du stagiaire</label>
+                                                                        <input type="file" id="photo" class="form-control" name="photo" accept="image/*" {% if object.id %}disabled{% endif %}>
+                                                                        <small class="text-muted d-block mt-2">Format portrait recommandé pour une fiche plus lisible.</small>
+                                                                        {% if object.photo %}
+                                                                        <small class="d-block mt-2">
+                                                                            <a href="{{ object.photo.url }}" target="_blank">Ouvrir la photo enregistrée</a>
+                                                                        </small>
+                                                                        {% endif %}
+                                                                    </div>
                                                                 </div>
                                                             </div>
-                                                        </div>
-                                                        <div class="col-12 col-lg-8">
-                                                            <div class="row">
-                                                                <div class="col-12 col-md-6">
-                                                                    <div class="tm-field-group">
-                                                                        <label for="nom">Nom</label>
-                                                                        <input type="text" id="nom" class="form-control" name="nom"
-                                                                            placeholder="Nom du stagiaire" {% if object.id %}
-                                                                            value="{{object.nom}}" disabled {% endif %}>
+                                                            <div class="col-12 col-lg-8">
+                                                                <div class="row g-3"> {# Added g-3 for consistent spacing #}
+                                                                    <div class="col-12 col-md-6">
+                                                                        <div class="form-group"> {# Changed tm-field-group to form-group #}
+                                                                            <label for="nom">Nom</label>
+                                                                            <input type="text" id="nom" class="form-control" name="nom"
+                                                                                placeholder="Nom du stagiaire" {% if object.id %}
+                                                                                value="{{object.nom}}" disabled {% endif %}>
+                                                                        </div>
                                                                     </div>
-                                                                </div>
-                                                                <div class="col-12 col-md-6">
-                                                                    <div class="tm-field-group">
-                                                                        <label for="postnom">Postnom</label>
-                                                                        <input type="text" id="postnom" class="form-control" name="postnom"
-                                                                            placeholder="Postnom du stagiaire" {% if object.id %}
-                                                                            value="{{object.postnom}}" disabled {% endif %}>
+                                                                    <div class="col-12 col-md-6">
+                                                                        <div class="form-group"> {# Changed tm-field-group to form-group #}
+                                                                            <label for="postnom">Postnom</label>
+                                                                            <input type="text" id="postnom" class="form-control" name="postnom"
+                                                                                placeholder="Postnom du stagiaire" {% if object.id %}
+                                                                                value="{{object.postnom}}" disabled {% endif %}>
+                                                                        </div>
                                                                     </div>
-                                                                </div>
-                                                                <div class="col-12 col-md-6">
-                                                                    <div class="tm-field-group">
-                                                                        <label for="prenom">Prénom</label>
-                                                                        <input type="text" id="prenom" class="form-control" name="prenom"
-                                                                            placeholder="Prénom du stagiaire" {% if object.id %}
-                                                                            value="{{object.prenom}}" disabled {% endif %}>
+                                                                    <div class="col-12 col-md-6">
+                                                                        <div class="form-group"> {# Changed tm-field-group to form-group #}
+                                                                            <label for="prenom">Prénom</label>
+                                                                            <input type="text" id="prenom" class="form-control" name="prenom"
+                                                                                placeholder="Prénom du stagiaire" {% if object.id %}
+                                                                                value="{{object.prenom}}" disabled {% endif %}>
+                                                                        </div>
                                                                     </div>
-                                                                </div>
-                                                                <div class="col-12 col-md-6">
-                                                                    <div class="tm-field-group">
-                                                                        <label for="telephone">Téléphone</label>
-                                                                        <input type="text" id="telephone" class="form-control" name="telephone"
-                                                                            placeholder="Téléphone du stagiaire" {% if object.id %}
-                                                                            value="{{object.telephone}}" disabled {% endif %}>
+                                                                    <div class="col-12 col-md-6">
+                                                                        <div class="form-group"> {# Changed tm-field-group to form-group #}
+                                                                            <label for="telephone">Téléphone</label>
+                                                                            <input type="text" id="telephone" class="form-control" name="telephone"
+                                                                                placeholder="Téléphone du stagiaire" {% if object.id %}
+                                                                                value="{{object.telephone}}" disabled {% endif %}>
+                                                                        </div>
                                                                     </div>
-                                                                </div>
-                                                                <div class="col-12 col-md-6">
-                                                                    <div class="tm-field-group">
-                                                                        <label for="email">Email</label>
-                                                                        <input type="email" id="email" class="form-control" name="email"
-                                                                            placeholder="Email du stagiaire" {% if object.id %}
-                                                                            value="{{ object.email }}" disabled {% endif %}>
+                                                                    <div class="col-12 col-md-6">
+                                                                        <div class="form-group"> {# Changed tm-field-group to form-group #}
+                                                                            <label for="email">Email</label>
+                                                                            <input type="email" id="email" class="form-control" name="email"
+                                                                                placeholder="Email du stagiaire" {% if object.id %}
+                                                                                value="{{ object.email }}" disabled {% endif %}>
+                                                                        </div>
                                                                     </div>
-                                                                </div>
-                                                                <div class="col-12 col-md-6">
-                                                                    <div class="tm-field-group">
-                                                                        <label for="sexe">Sexe</label>
-                                                                        <select name="sexe" id="sexe" class="form-control" {% if object.id %}disabled{% endif %}>
-                                                                            <option value="">Sélectionner le sexe</option>
-                                                                            <option value="M" {% if object.sexe == 'M' %}selected{% endif %}>Masculin</option>
-                                                                            <option value="F" {% if object.sexe == 'F' %}selected{% endif %}>Féminin</option>
-                                                                            <option value="ND" {% if object.sexe == 'ND' %}selected{% endif %}>Non défini</option>
-                                                                        </select>
+                                                                    <div class="col-12 col-md-6">
+                                                                        <div class="form-group"> {# Changed tm-field-group to form-group #}
+                                                                            <label for="sexe">Sexe</label>
+                                                                            <select name="sexe" id="sexe" class="form-control" {% if object.id %}disabled{% endif %}>
+                                                                                <option value="">Sélectionner le sexe</option>
+                                                                                <option value="M" {% if object.sexe == 'M' %}selected{% endif %}>Masculin</option>
+                                                                                <option value="F" {% if object.sexe == 'F' %}selected{% endif %}>Féminin</option>
+                                                                                <option value="ND" {% if object.sexe == 'ND' %}selected{% endif %}>Non défini</option>
+                                                                            </select>
+                                                                        </div>
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -143,87 +141,81 @@
                                                 </div>
 
                                                 {# Content from former "Détails Personnels" tab #}
-                                                <div class="tm-form-panel mt-3">
-                                                    <div class="tm-form-panel__header">
+                                                <div class="card tm-form-panel mt-3"> {# Wrapped in card #}
+                                                    <div class="card-header">
                                                         <div>
                                                             <h5 class="mb-1">Informations complémentaires</h5>
                                                             <p class="text-muted mb-0">Complétez les éléments administratifs et l’adresse physique.</p>
                                                         </div>
                                                     </div>
-                                                    <div class="row">
-                                                        <div class="col-12 col-md-6 col-xl-3">
-                                                            <div class="tm-field-group">
-                                                                <label for="date_naissance">Date de naissance</label>
-                                                                <input type="date" id="date_naissance" class="form-control" name="date_naissance"
-                                                                    {% if object.id %} value="{{ object.date_naissance|date:'Y-m-d' }}" disabled {% endif %}>
+                                                    <div class="card-body">
+                                                        <div class="row g-3"> {# Added g-3 for consistent spacing #}
+                                                            <div class="col-12 col-md-6 col-lg-3"> {# Date de naissance #}
+                                                                <div class="form-group">
+                                                                    <label for="date_naissance">Date de naissance</label>
+                                                                    <input type="date" id="date_naissance" class="form-control" name="date_naissance"
+                                                                        {% if object.id %} value="{{ object.date_naissance|date:'Y-m-d' }}" disabled {% endif %}>
+                                                                </div>
                                                             </div>
-                                                        </div>
-                                                        <div class="col-12 col-md-6 col-xl-3">
-                                                            <div class="tm-field-group">
-                                                                <label for="lieu_naissance">Lieu de naissance</label>
-                                                                <input type="text" id="lieu_naissance" class="form-control" name="lieu_naissance"
-                                                                    placeholder="Lieu de naissance" {% if object.id %}
-                                                                    value="{{ object.lieu_naissance }}" disabled {% endif %}>
+                                                            <div class="col-12 col-md-6 col-lg-3"> {# Lieu de naissance #}
+                                                                <div class="form-group">
+                                                                    <label for="lieu_naissance">Lieu de naissance</label>
+                                                                    <input type="text" id="lieu_naissance" class="form-control" name="lieu_naissance"
+                                                                        placeholder="Lieu de naissance" {% if object.id %}
+                                                                        value="{{ object.lieu_naissance }}" disabled {% endif %}>
+                                                                </div>
                                                             </div>
-                                                        </div>
-                                                        <div class="col-12 col-md-6 col-xl-3">
-                                                            <div class="tm-field-group">
-                                                                <label for="nationalite">Nationalité</label>
-                                                                <input type="text" id="nationalite" class="form-control" name="nationalite"
-                                                                    placeholder="Nationalité" {% if object.id %}
-                                                                    value="{{ object.nationalite }}" disabled {% endif %}>
+                                                            <div class="col-12 col-md-6 col-lg-3"> {# Nationalité #}
+                                                                <div class="form-group">
+                                                                    <label for="nationalite">Nationalité</label>
+                                                                    <input type="text" id="nationalite" class="form-control" name="nationalite"
+                                                                        placeholder="Nationalité" {% if object.id %}
+                                                                        value="{{ object.nationalite }}" disabled {% endif %}>
+                                                                </div>
                                                             </div>
-                                                        </div>
-                                                        {# Group type_piece and numero_piece for better visibility #}
-                                                        <div class="col-12 col-md-6">
-                                                            <div class="tm-field-group">
-                                                                <label for="type_piece">Type de pièce</label>
-                                                                <select name="type_piece" id="type_piece" class="form-control" {% if object.id %}disabled{% endif %}>
-                                                                    <option value="">Sélectionner un type</option>
-                                                                    <option value="CE" {% if object.type_piece == 'CE' %}selected{% endif %}>Carte d'électeur</option>
-                                                                    <option value="PS" {% if object.type_piece == 'PS' %}selected{% endif %}>Passeport</option>
-                                                                    <option value="PC" {% if object.type_piece == 'PC' %}selected{% endif %}>Permis de conduire</option>
-                                                                </select>
+                                                            {# Removed Niveau d'étude from here #}
+                                                            {# Group type_piece and numero_piece for better visibility #}
+                                                            <div class="col-12 col-md-6 col-lg-3"> {# Type de pièce #}
+                                                                <div class="form-group">
+                                                                    <label for="type_piece">Type de pièce</label>
+                                                                    <select name="type_piece" id="type_piece" class="form-control" {% if object.id %}disabled{% endif %}>
+                                                                        <option value="">Sélectionner un type</option>
+                                                                        <option value="CE" {% if object.type_piece == 'CE' %}selected{% endif %}>Carte d'électeur</option>
+                                                                        <option value="PS" {% if object.type_piece == 'PS' %}selected{% endif %}>Passeport</option>
+                                                                        <option value="PC" {% if object.type_piece == 'PC' %}selected{% endif %}>Permis de conduire</option>
+                                                                    </select>
+                                                                </div>
                                                             </div>
-                                                        </div>
-                                                        <div class="col-12 col-md-6">
-                                                            <div class="tm-field-group">
-                                                                <label for="numero_piece">Numéro de pièce</label>
-                                                                <input type="text" id="numero_piece" class="form-control" name="numero_piece"
-                                                                    placeholder="Numéro de pièce" {% if object.id %}
-                                                                    value="{{ object.numero_piece }}" disabled {% endif %}>
+                                                            <div class="col-12 col-md-6 col-lg-3"> {# Numéro de pièce #}
+                                                                <div class="form-group">
+                                                                    <label for="numero_piece">Numéro de pièce</label>
+                                                                    <input type="text" id="numero_piece" class="form-control" name="numero_piece"
+                                                                        placeholder="Numéro de pièce" {% if object.id %}
+                                                                        value="{{ object.numero_piece }}" disabled {% endif %}>
+                                                                </div>
                                                             </div>
-                                                        </div>
-                                                        <div class="col-12 col-md-6">
-                                                            <div class="tm-field-group">
-                                                                <label for="nom_pere">Nom du père</label>
-                                                                <input type="text" id="nom_pere" class="form-control" name="nom_pere"
-                                                                    placeholder="Nom du père" {% if object.id %}
-                                                                    value="{{ object.nom_pere }}" disabled {% endif %}>
+                                                            <div class="col-12 col-md-6 col-lg-3"> {# Nom du père #}
+                                                                <div class="form-group">
+                                                                    <label for="nom_pere">Nom du père</label>
+                                                                    <input type="text" id="nom_pere" class="form-control" name="nom_pere"
+                                                                        placeholder="Nom du père" {% if object.id %}
+                                                                        value="{{ object.nom_pere }}" disabled {% endif %}>
+                                                                </div>
                                                             </div>
-                                                        </div>
-                                                        <div class="col-12 col-md-6">
-                                                            <div class="tm-field-group">
-                                                                <label for="nom_mere">Nom de la mère</label>
-                                                                <input type="text" id="nom_mere" class="form-control" name="nom_mere"
-                                                                    placeholder="Nom de la mère" {% if object.id %}
-                                                                    value="{{ object.nom_mere }}" disabled {% endif %}>
+                                                            <div class="col-12 col-md-6 col-lg-3"> {# Nom de la mère #}
+                                                                <div class="form-group">
+                                                                    <label for="nom_mere">Nom de la mère</label>
+                                                                    <input type="text" id="nom_mere" class="form-control" name="nom_mere"
+                                                                        placeholder="Nom de la mère" {% if object.id %}
+                                                                        value="{{ object.nom_mere }}" disabled {% endif %}>
+                                                                </div>
                                                             </div>
-                                                        </div>
-                                                        <div class="col-12 col-md-6">
-                                                            <div class="tm-field-group">
-                                                                <label for="niveau_etude">Niveau d'étude</label>
-                                                                <input type="text" id="niveau_etude" class="form-control" name="niveau_etude"
-                                                                    placeholder="Niveau d'étude" {% if object.id %}
-                                                                    value="{{ object.niveau_etude }}" disabled {% endif %}>
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-12 col-md-6">
-                                                            <div class="tm-field-group">
-                                                                <label for="adresse">Adresse physique</label>
-                                                                <input type="text" id="adresse" class="form-control" name="adresse"
-                                                                    placeholder="Adresse physique" {% if object.id %}
-                                                                    value="{{object.adresse}}" disabled {% endif %}>
+                                                            <div class="col-12"> {# Adresse physique #}
+                                                                <div class="form-group">
+                                                                    <label for="adresse">Adresse physique</label>
+                                                                    <textarea id="adresse" class="form-control" name="adresse"
+                                                                        placeholder="Adresse physique" rows="3" {% if object.id %}disabled{% endif %}>{% if object.id %}{{object.adresse}}{% endif %}</textarea>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -232,35 +224,53 @@
 
                                             {# Tab 2: Affectation pédagogique #}
                                             <div class="tab-pane fade" id="assignment" role="tabpanel" aria-labelledby="assignment-tab">
-                                                <div class="tm-form-panel mt-3">
-                                                    <div class="tm-form-panel__header">
+                                                <div class="card tm-form-panel mt-3"> {# Wrapped in card #}
+                                                    <div class="card-header">
                                                         <div>
                                                             <h5 class="mb-1">Affectation pédagogique</h5>
-                                                            <p class="text-muted mb-0">Associez le stagiaire à sa catégorie.</p>
+                                                            <p class="text-muted mb-0">Associez le stagiaire à sa catégorie et sa filière.</p>
                                                         </div>
                                                     </div>
-                                                    <div class="row">
-                                                        <div class="col-12 col-md-6 col-xl-4"> {# Adjusted column width #}
-                                                            <div class="tm-field-group">
-                                                                <label for="categorie">Catégorie</label>
-                                                                <select name="categorie" id="categorie" class="form-control" {% if object.id %}disabled{% endif %}>
-                                                                    <option value="">Sélectionner une catégorie</option>
-                                                                    {% for item in categories %}
-                                                                    {% if object and item.id == object.categorie.id %}
-                                                                    <option value="{{ item.id }}" data-category-name="{{ item.titre }}" selected>{{ item.titre }}</option>
-                                                                    {% else %}
-                                                                    <option value="{{ item.id }}" data-category-name="{{ item.titre }}">{{ item.titre }}</option>
-                                                                    {% endif %}
-                                                                    {% endfor %}
-                                                                </select>
+                                                    <div class="card-body">
+                                                        <div class="row g-3"> {# Added g-3 for consistent spacing #}
+                                                            <div class="col-12 col-md-6 col-xl-4">
+                                                                <div class="form-group"> {# Changed tm-field-group to form-group #}
+                                                                    <label for="categorie">Catégorie</label>
+                                                                    <select name="categorie" id="categorie" class="form-control" {% if object.id %}disabled{% endif %}>
+                                                                        <option value="">Sélectionner une catégorie</option>
+                                                                        {% for item in categories %}
+                                                                        {% if object and item.id == object.categorie.id %}
+                                                                        <option value="{{ item.id }}" data-category-name="{{ item.titre }}" selected>{{ item.titre }}</option>
+                                                                        {% else %}
+                                                                        <option value="{{ item.id }}" data-category-name="{{ item.titre }}">{{ item.titre }}</option>
+                                                                        {% endif %}
+                                                                        {% endfor %}
+                                                                    </select>
+                                                                </div>
+                                                            </div>
+                                                            {# Nouveau champ: Filière #}
+                                                            <div class="col-12 col-md-6 col-xl-4">
+                                                                <div class="form-group"> {# Changed tm-field-group to form-group #}
+                                                                    <label for="filiere">Filière</label>
+                                                                    <select name="filiere" id="filiere" class="form-control" {% if object.id %}disabled{% endif %}>
+                                                                        <option value="">Sélectionner une filière</option>
+                                                                        {% for item in filieres %}
+                                                                        {% if object and item.id == object.filiere.id %}
+                                                                        <option value="{{ item.id }}" selected>{{ item.nom }}</option>
+                                                                        {% else %}
+                                                                        <option value="{{ item.id }}">{{ item.nom }}</option>
+                                                                        {% endif %}
+                                                                        {% endfor %}
+                                                                    </select>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </div>
 
                                                 {# New section to display internal formations (actions_suivies) #}
-                                                <div class="tm-form-panel mt-3">
-                                                    <div class="tm-form-panel__header">
+                                                <div class="card tm-form-panel mt-3"> {# Wrapped in card #}
+                                                    <div class="card-header">
                                                         <div>
                                                             <h5 class="mb-1">Formations internes suivies</h5>
                                                             <p class="text-muted mb-0">Liste des actions de formation auxquelles le stagiaire est inscrit.</p>
@@ -268,15 +278,26 @@
                                                     </div>
                                                     <div class="card-body">
                                                         {% if actions_suivies %}
-                                                            <ul class="list-group list-group-flush">
-                                                                {% for detail_action in actions_suivies %}
-                                                                    <li class="list-group-item">
-                                                                        <strong>Action:</strong> {{ detail_action.action.description }} <br>
-                                                                        <strong>Formation:</strong> {{ detail_action.action.formation.nom }} <br>
-                                                                        <strong>Période:</strong> {{ detail_action.action.date_debut|date:"d/m/Y" }} au {{ detail_action.action.date_fin|date:"d/m/Y" }}
-                                                                    </li>
-                                                                {% endfor %}
-                                                            </ul>
+                                                            <div class="table-responsive"> {# Added table-responsive #}
+                                                                <table class="table table-striped"> {# Added table-striped #}
+                                                                    <thead>
+                                                                        <tr>
+                                                                            <th>Action</th>
+                                                                            <th>Formation</th>
+                                                                            <th>Période</th>
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                        {% for detail_action in actions_suivies %}
+                                                                            <tr>
+                                                                                <td>{{ detail_action.action.description }}</td>
+                                                                                <td>{{ detail_action.action.formation.nom }}</td>
+                                                                                <td>{{ detail_action.action.date_debut|date:"d/m/Y" }} au {{ detail_action.action.date_fin|date:"d/m/Y" }}</td>
+                                                                            </tr>
+                                                                        {% endfor %}
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
                                                         {% else %}
                                                             <p class="text-muted">Ce stagiaire n'est inscrit à aucune action de formation interne.</p>
                                                         {% endif %}
@@ -286,69 +307,90 @@
 
                                             {# Tab 3: Informations professionnelles #}
                                             <div class="tab-pane fade" id="professional" role="tabpanel" aria-labelledby="professional-tab">
-                                                <div class="tm-form-panel mt-3" id="professional-info-section">
-                                                    <div class="tm-form-panel__header">
+                                                <div class="card tm-form-panel mt-3" id="professional-info-section"> {# Wrapped in card #}
+                                                    <div class="card-header">
                                                         <div>
                                                             <h5 class="mb-1">Informations professionnelles</h5>
                                                             <p class="text-muted mb-0">Renseignez les détails de l'emploi actuel du stagiaire.</p>
                                                         </div>
                                                     </div>
-                                                    <div class="row">
-                                                        <div class="col-12 col-md-6">
-                                                            <div class="tm-field-group">
-                                                                <label for="entreprise">Entreprise</label>
-                                                                <select name="entreprise" id="entreprise" class="form-control" {% if object.id %}disabled{% endif %}>
-                                                                    <option value="">Sélectionner une entreprise</option>
-                                                                    {% for item in entreprises %}
-                                                                    {% if object and item.id == object.entreprise.id %}
-                                                                    <option value="{{ item.id }}" selected>{{ item.nom }}</option>
-                                                                    {% else %}
-                                                                    <option value="{{ item.id }}">{{ item.nom }}</option>
-                                                                    {% endif %}
-                                                                    {% endfor %}
-                                                                </select>
+                                                    <div class="card-body">
+                                                        <div class="row g-3"> {# Added g-3 for consistent spacing #}
+                                                            <div class="col-12 col-md-6">
+                                                                <div class="form-group"> {# Changed tm-field-group to form-group #}
+                                                                    <label for="entreprise">Entreprise</label>
+                                                                    <select name="entreprise" id="entreprise" class="form-control" {% if object.id %}disabled{% endif %}>
+                                                                        <option value="">Sélectionner une entreprise</option>
+                                                                        {% for item in entreprises %}
+                                                                        {% if object and item.id == object.entreprise.id %}
+                                                                        <option value="{{ item.id }}" selected>{{ item.nom }}</option>
+                                                                        {% else %}
+                                                                        <option value="{{ item.id }}">{{ item.nom }}</option>
+                                                                        {% endif %}
+                                                                        {% endfor %}
+                                                                    </select>
+                                                                </div>
                                                             </div>
-                                                        </div>
-                                                        <div class="col-12 col-md-6">
-                                                            <div class="tm-field-group">
-                                                                <label for="fonction">Fonction</label>
-                                                                <input type="text" id="fonction" class="form-control" name="fonction"
-                                                                    placeholder="Fonction occupée" {% if object.id %}
-                                                                    value="{{ object.fonction|default:'' }}" disabled {% endif %}>
+                                                            <div class="col-12 col-md-6">
+                                                                <div class="form-group"> {# Changed tm-field-group to form-group #}
+                                                                    <label for="fonction">Fonction</label>
+                                                                    <input type="text" id="fonction" class="form-control" name="fonction"
+                                                                        placeholder="Fonction occupée" {% if object.id %}
+                                                                        value="{{ object.fonction|default:'' }}" disabled {% endif %}>
+                                                                </div>
                                                             </div>
-                                                        </div>
-                                                        <div class="col-12 col-md-6">
-                                                            <div class="tm-field-group">
-                                                                <label for="anciennete_emploi">Ancienneté dans l'emploi (années)</label>
-                                                                <input type="number" id="anciennete_emploi" class="form-control" name="anciennete_emploi"
-                                                                    placeholder="Ex: 5" {% if object.id %}
-                                                                    value="{{ object.anciennete_emploi|default:'' }}" disabled {% endif %}>
+                                                            <div class="col-12 col-md-6">
+                                                                <div class="form-group"> {# Changed tm-field-group to form-group #}
+                                                                    <label for="anciennete_emploi">Ancienneté dans l'emploi (années)</label>
+                                                                    <input type="number" id="anciennete_emploi" class="form-control" name="anciennete_emploi"
+                                                                        placeholder="Ex: 5" {% if object.id %}
+                                                                        value="{{ object.anciennete_emploi|default:'' }}" disabled {% endif %}>
+                                                                </div>
                                                             </div>
-                                                        </div>
-                                                        <div class="col-12 col-md-6">
-                                                            <div class="tm-field-group">
-                                                                <label for="anciennete_entreprise">Ancienneté dans l'entreprise (années)</label>
-                                                                <input type="number" id="anciennete_entreprise" class="form-control" name="anciennete_entreprise"
-                                                                    placeholder="Ex: 3" {% if object.id %}
-                                                                    value="{{ object.anciennete_entreprise|default:'' }}" disabled {% endif %}>
+                                                            <div class="col-12 col-md-6">
+                                                                <div class="form-group"> {# Changed tm-field-group to form-group #}
+                                                                    <label for="anciennete_entreprise">Ancienneté dans l'entreprise (années)</label>
+                                                                    <input type="number" id="anciennete_entreprise" class="form-control" name="anciennete_entreprise"
+                                                                        placeholder="Ex: 3" {% if object.id %}
+                                                                        value="{{ object.anciennete_entreprise|default:'' }}" disabled {% endif %}>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
 
-                                            {# Tab 4: Études faites #}
-                                            <div class="tab-pane fade" id="studies" role="tabpanel" aria-labelledby="studies-tab">
-                                                <div class="tm-form-panel mt-3">
-                                                    <div class="card border">
-                                                        <div class="card-header">
-                                                            <h4 class="card-title">Études faites</h4>
-                                                            {% if not object.id %}
-                                                            <button type="button" id="add-study-row" class="btn btn-primary">Ajouter une étude</button>
-                                                            {% endif %}
+                                            {# Merged Tab: Études & Formations #}
+                                            <div class="tab-pane fade" id="studies-trainings" role="tabpanel" aria-labelledby="studies-trainings-tab">
+                                                {# General Niveau d'étude card #}
+                                                <div class="card tm-form-panel mt-3">
+                                                    <div class="card-header">
+                                                        <h4 class="card-title">Niveau d'étude général</h4>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <div class="row g-3">
+                                                            <div class="col-12 col-md-6 col-lg-3"> {# Niveau d'étude #}
+                                                                <div class="form-group">
+                                                                    <label for="niveau_etude">Niveau d'étude</label>
+                                                                    <input type="text" id="niveau_etude" class="form-control" name="niveau_etude"
+                                                                        placeholder="Niveau d'étude" {% if object.id %}
+                                                                        value="{{ object.niveau_etude }}" disabled {% endif %}>
+                                                                </div>
+                                                            </div>
                                                         </div>
-                                                        <div class="card-body">
-                                                            {% if object.id %}
+                                                    </div>
+                                                </div>
+
+                                                {# Content from former "Études faites" tab #}
+                                                <div class="card tm-form-panel mt-3">
+                                                    <div class="card-header d-flex justify-content-between align-items-center"> {# Added d-flex for alignment #}
+                                                        <h4 class="card-title mb-0">Parcours Académique</h4> {# Changed title #}
+                                                        {% if not object.id %}
+                                                        <button type="button" id="add-study-row" class="btn btn-primary btn-sm">Ajouter une étude</button> {# Added btn-sm #}
+                                                        {% endif %}
+                                                    </div>
+                                                    <div class="card-body">
+                                                        {% if object.id %}
                                                                 {% if object.etudes.all %}
                                                                     <div class="table-responsive">
                                                                         <table class="table table-striped">
@@ -382,32 +424,32 @@
                                                             {% else %}
                                                             <div id="studies-container">
                                                                 <div class="study-row border rounded p-3 mb-3">
-                                                                    <div class="row">
-                                                                        <div class="col-md-6 mb-2">
+                                                                    <div class="row g-3"> {# Added g-3 for consistent spacing #}
+                                                                        <div class="col-md-6">
                                                                             <label class="form-label">Intitulé</label>
                                                                             <input type="text" class="form-control" name="etude_intitule[]" placeholder="Ex: Électricité industrielle">
                                                                         </div>
-                                                                        <div class="col-md-6 mb-2">
+                                                                        <div class="col-md-6">
                                                                             <label class="form-label">Établissement</label>
                                                                             <input type="text" class="form-control" name="etude_etablissement[]" placeholder="Établissement">
                                                                         </div>
-                                                                        <div class="col-md-4 mb-2">
+                                                                        <div class="col-md-4">
                                                                             <label class="form-label">Niveau</label>
                                                                             <input type="text" class="form-control" name="etude_niveau[]" placeholder="Niveau">
                                                                         </div>
-                                                                        <div class="col-md-4 mb-2">
+                                                                        <div class="col-md-4">
                                                                             <label class="form-label">Année début</label>
                                                                             <input type="number" class="form-control" name="etude_annee_debut[]" placeholder="2020">
                                                                         </div>
-                                                                        <div class="col-md-4 mb-2">
+                                                                        <div class="col-md-4">
                                                                             <label class="form-label">Année fin</label>
                                                                             <input type="number" class="form-control" name="etude_annee_fin[]" placeholder="2023">
                                                                         </div>
-                                                                        <div class="col-md-11 mb-2"> {# Adjusted from col-md-6 to col-md-11 #}
+                                                                        <div class="col-md-11">
                                                                             <label class="form-label">Diplôme obtenu</label>
                                                                             <input type="text" class="form-control" name="etude_diplome[]" placeholder="Diplôme obtenu">
                                                                         </div>
-                                                                        <div class="col-md-1 d-flex align-items-end mb-2">
+                                                                        <div class="col-md-1 d-flex align-items-end">
                                                                             <button type="button" class="btn btn-light-secondary remove-study-row">X</button>
                                                                         </div>
                                                                     </div>
@@ -417,20 +459,17 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                            </div>
 
-                                            {# New Tab Content: Autres Formations #}
-                                            <div class="tab-pane fade" id="other-trainings" role="tabpanel" aria-labelledby="other-trainings-tab">
-                                                <div class="tm-form-panel mt-3">
-                                                    <div class="card border">
-                                                        <div class="card-header">
-                                                            <h4 class="card-title">Autres Formations suivies</h4>
-                                                            {% if not object.id %}
-                                                            <button type="button" id="add-other-training-row" class="btn btn-primary">Ajouter une formation</button>
-                                                            {% endif %}
-                                                        </div>
-                                                        <div class="card-body">
-                                                            {% if object.id %}
+                                                {# Content from former "Autres Formations" tab #}
+                                                <div class="card tm-form-panel mt-3"> {# Wrapped in card #}
+                                                    <div class="card-header d-flex justify-content-between align-items-center"> {# Added d-flex for alignment #}
+                                                        <h4 class="card-title mb-0">Formations complémentaires</h4> {# Changed title #}
+                                                        {% if not object.id %}
+                                                        <button type="button" id="add-other-training-row" class="btn btn-primary btn-sm">Ajouter une formation</button> {# Added btn-sm #}
+                                                        {% endif %}
+                                                    </div>
+                                                    <div class="card-body">
+                                                        {% if object.id %}
                                                                 {% if object.autres_formations.all %}
                                                                     <div class="table-responsive">
                                                                         <table class="table table-striped">
@@ -453,25 +492,25 @@
                                                                         </table>
                                                                     </div>
                                                                 {% else %}
-                                                                    <p class="text-muted mb-0">Aucune autre formation enregistrée.</p>
+                                                                    <p class="text-muted mb-0">Aucune formation complémentaire enregistrée.</p> {# Changed text #}
                                                                 {% endif %}
                                                             {% else %}
                                                             <div id="other-trainings-container">
                                                                 <div class="other-training-row border rounded p-3 mb-3">
-                                                                    <div class="row">
-                                                                        <div class="col-md-6 mb-2">
+                                                                    <div class="row g-3"> {# Added g-3 for consistent spacing #}
+                                                                        <div class="col-md-5"> {# Adjusted width #}
                                                                             <label class="form-label">Intitulé</label>
                                                                             <input type="text" class="form-control" name="autre_formation_intitule[]" placeholder="Ex: Formation en Cybersécurité">
                                                                         </div>
-                                                                        <div class="col-md-6 mb-2">
+                                                                        <div class="col-md-5"> {# Adjusted width #}
                                                                             <label class="form-label">Établissement</label>
                                                                             <input type="text" class="form-control" name="autre_formation_etablissement[]" placeholder="Établissement">
                                                                         </div>
-                                                                        <div class="col-md-11 mb-2"> {# Adjusted from col-md-4 to col-md-11 #}
+                                                                        <div class="col-md-5"> {# Adjusted width #}
                                                                             <label class="form-label">Année de fin</label>
                                                                             <input type="number" class="form-control" name="autre_formation_annee_fin[]" placeholder="2024">
                                                                         </div>
-                                                                        <div class="col-md-1 d-flex align-items-end mb-2">
+                                                                        <div class="col-md-1 d-flex align-items-end"> {# Adjusted width #}
                                                                             <button type="button" class="btn btn-light-secondary remove-other-training-row">X</button>
                                                                         </div>
                                                                     </div>
@@ -500,7 +539,6 @@
 </div>
 {% endblock content %}
 {% block script %}
-<script src="{% static 'assets/vendors/simple-datatables/simple-datatables.js' %}"></script>
 <script>
     const studiesContainer = document.getElementById('studies-container');
     const addStudyRowButton = document.getElementById('add-study-row');

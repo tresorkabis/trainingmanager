@@ -11,7 +11,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-03hv+-k@3w-i0_*-p&#i0*9-%j^!@@0kd^)^e6dw0v-v1nlgk^'
 
-# SECURITY WARNING: don't run with debug turned on in production!
+# SECURITY WARNING: don't run on debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
@@ -92,11 +92,8 @@ AUTH_PASSWORD_VALIDATORS = [
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
 LANGUAGE_CODE = 'fr-fr'
-
 TIME_ZONE = 'Africa/Kinshasa'
-
 USE_I18N = True
-
 USE_TZ = True
 
 
@@ -112,7 +109,7 @@ AUTH_USER_MODEL = 'users.User'
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
-# STATICFILES_DIRS = [BASE_DIR / "staticfiles"]
+STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")] # <-- Ajouté cette ligne
 
 MEDIA_ROOT = os.path.join(BASE_DIR, "mediafiles")
 MEDIA_URL = '/media/'

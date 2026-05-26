@@ -1,13 +1,36 @@
 {% extends "base.html" %}
 {% load static %}
 {% block style %}
-<link rel="stylesheet" href="{% static 'assets/vendors/simple-datatables/style.css' %}">
+{# Removed simple-datatables style.css #}
 <style>
     .stagiaire-photo-thumbnail {
         width: 50px; /* Adjust size as needed */
         height: 50px; /* Adjust size as needed */
         object-fit: cover;
         border-radius: 50%;
+    }
+    /* Custom styles for search input */
+    .custom-search-container {
+        display: flex; /* Keep flex for potential future additions or alignment */
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+    .custom-search-input {
+        flex-grow: 1;
+        border: 1px solid #ced4da;
+        border-radius: 0.5rem;
+        padding: 0.5rem 1rem;
+        max-width: 300px; /* Keep max-width for aesthetics */
+    }
+    .custom-search-input:focus {
+        border-color: #435ebe;
+        box-shadow: 0 0 0 0.2rem rgba(67, 94, 190, 0.25);
+        outline: none;
+    }
+    .no-results-message {
+        text-align: center;
+        padding: 1rem;
+        color: #6c757d;
     }
 </style>
 {% endblock style %}
@@ -30,7 +53,7 @@
             <div class="col-12 col-md-6 order-md-2 order-first">
                 <nav aria-label="breadcrumb" class="breadcrumb-header float-start float-lg-end">
                     <ol class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="% url 'home' %}">Dashboard</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'home' %}">Dashboard</a></li>
                         <li class="breadcrumb-item active" aria-current="page">stagiaire</li>
                     </ol>
                 </nav>
@@ -43,101 +66,145 @@
                 <a href="{% url 'stagiaire_create' %}"><i class="bi bi-person-plus me-2"></i>Nouveau stagiaire</a>
             </div>
             <div class="card-body">
-                <div class="dataTable-wrapper dataTable-loading no-footer sortable searchable fixed-columns">
-                    <div class="dataTable-top">
-                        <div class="dataTable-search">
-                            <input class="dataTable-input" placeholder="Recherche..." type="text">
-                        </div>
-                    </div>
-                    <div class="dataTable-container">
-                        <table class="table table-striped dataTable-table" id="table1">
-                            <thead>
-                                <tr>
-                                    <th data-sortable="" style="width: 4.490%;"><a href="#" class="dataTable-sorter">N°</a></th>
-                                    <th data-sortable="" style="width: 5%;"><a href="#" class="dataTable-sorter">Photo</a></th>
-                                    <th data-sortable="" style="width: 20%;"><a href="#" class="dataTable-sorter">Nom</a></th>
-                                    <th data-sortable="" style="width: 20%;"><a href="#" class="dataTable-sorter">Postnom</a></th>
-                                    <th data-sortable="" style="width: 20%;"><a href="#" class="dataTable-sorter">Prénom</a></th>
-                                    <th data-sortable="" style="width: 5%;"><a href="#" class="dataTable-sorter">Sexe</a></th>
-                                    <th data-sortable="" style="width: 10%;"><a href="#" class="dataTable-sorter">Téléphone</a></th>
-                                    <th data-sortable="" style="width: 10%;"><a href="#" class="dataTable-sorter">Catégorie</a></th>
-                                    {# Removed Service and Filiere columns #}
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% if stagiaire_list %}
-                                {% for item in object_list %}
-                                <tr>
-                                    <td>{{ forloop.counter }}</td>
-                                    <td>
-                                        {% if item.photo %}
-                                            <img src="{{ item.photo.url }}" alt="Photo" class="stagiaire-photo-thumbnail">
-                                        {% else %}
-                                            <img src="{% static 'assets/images/faces/1.jpg' %}" alt="No Photo" class="stagiaire-photo-thumbnail">
-                                        {% endif %}
-                                    </td>
-                                    <td><a href="{% url 'stagiaire' item.id %}">{{ item.nom }}</a></td>
-                                    <td>{{ item.postnom }}</td>
-                                    <td>{{ item.prenom }}</td>
-                                    <td>{{ item.sexe }}</td>
-                                    <td>{{ item.telephone }}</td>
-                                    <td>{{ item.categorie }}</td>
-                                    {# Removed Service and Filiere display #}
-                                </tr>
-                                {% endfor %}
-                                {% else %}
-                                <tr>
-                                    <td colspan="8">Pas de stagiaire</td> {# Adjusted colspan #}
-                                </tr>
-                                {% endif %}
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="dataTable-bottom">
-                        <div class="dataTable-info">
-                            Page {{ page_obj.number }} sur {{ page_obj.paginator.num_pages }}
-                        </div>
-                        <ul class="pagination pagination-primary float-end dataTable-pagination">
-                            {% if page_obj.has_previous %}
-                            <li class="page-item pager"><a href="?page=1" class="page-link" data-page="1">&laquo;</a>
-                            </li>
-                            <li class="page-item">
-                                <a href="?page={{ page_obj.previous_page_number }}" class="page-link"
-                                    data-page="{{ page_obj.previous_page_number }}">
-                                    {{ page_obj.previous_page_number }}
-                                </a>
-                            </li>
-                            {% endif %}
-
-                            <li class="page-item active"><a href="#" class="page-link"
-                                    data-page="{{ page_obj.number }}">{{ page_obj.number }}</a></li>
-
-                            {% if page_obj.has_next %}
-                            <li class=" page-item">
-                                <a href="?page={{ page_obj.next_page_number }}" class="page-link"
-                                    data-page="{{ page_obj.next_page_number }}">
-
-                                    {{ page_obj.next_page_number }}
-                                </a>
-                            </li>
-                            <li class="page-item pager"><a href="?page={{ page_obj.paginator.num_pages }}"
-                                    class="page-link" data-page="{{ page_obj.paginator.num_pages }}">&raquo;</a></li>
-                            {% endif %}
-
-                        </ul>
-                    </div>
+                {# Custom Search Input #}
+                <div class="custom-search-container">
+                    <input type="text" id="searchInput" class="custom-search-input form-control" placeholder="Recherche par nom, postnom, prénom..."> {# Removed me-2 and added form-control #}
+                    {# Removed search button #}
                 </div>
+
+                <div class="table-responsive"> {# Added table-responsive for better mobile display #}
+                    <table class="table table-striped" id="table1"> {# Removed dataTable-table class #}
+                        <thead>
+                            <tr>
+                                <th style="width: 3%;">N°</th>
+                                <th style="width: 5%;">Photo</th>
+                                <th style="width: 25%;">Nom complet</th> {# Combined Nom, Postnom, Prénom #}
+                                <th style="width: 5%;">Sexe</th>
+                                <th style="width: 10%;">Téléphone</th>
+                                <th style="width: 10%;">Email</th>
+                                <th style="width: 15%;">Formation actuelle</th> {# Changed from Filière #}
+                                <th style="width: 10%;">Catégorie</th>
+                                <th style="width: 12%;">Entreprise</th>
+                            </tr>
+                        </thead>
+                        <tbody id="stagiaireTableBody">
+                            {% if stagiaire_list %}
+                            {% for item in object_list %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>
+                                    {% if item.photo %}
+                                        <img src="{{ item.photo.url }}" alt="Photo" class="stagiaire-photo-thumbnail">
+                                    {% else %}
+                                        <img src="{% static 'assets/images/faces/1.jpg' %}" alt="No Photo" class="stagiaire-photo-thumbnail">
+                                    {% endif %}
+                                </td>
+                                <td><a href="{% url 'stagiaire' item.id %}">{{ item.nom }} {{ item.postnom }} {{ item.prenom }}</a></td> {# Combined full name #}
+                                <td>{{ item.sexe }}</td>
+                                <td>{{ item.telephone }}</td>
+                                <td>{{ item.email|default:"N/A" }}</td>
+                                <td>{{ item.current_formation_name|default:"N/A" }}</td> {# Display current formation name #}
+                                <td>{{ item.categorie }}</td>
+                                <td>{{ item.entreprise.nom|default:"N/A" }}</td>
+                            </tr>
+                            {% endfor %}
+                            {% else %}
+                            <tr id="noResultsRow">
+                                <td colspan="9" class="no-results-message">Pas de stagiaire</td> {# Adjusted colspan #}
+                            </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+
+                {# Custom Pagination (if needed, for now keep Django's) #}
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <div class="dataTable-info">
+                        Page {{ page_obj.number }} sur {{ page_obj.paginator.num_pages }}
+                    </div>
+                    <ul class="pagination pagination-primary float-end">
+                        {% if page_obj.has_previous %}
+                        <li class="page-item pager"><a href="?page=1" class="page-link">&laquo;</a></li>
+                        <li class="page-item">
+                            <a href="?page={{ page_obj.previous_page_number }}" class="page-link">
+                                {{ page_obj.previous_page_number }}
+                            </a>
+                        </li>
+                        {% endif %}
+
+                        <li class="page-item active"><a href="#" class="page-link">{{ page_obj.number }}</a></li>
+
+                        {% if page_obj.has_next %}
+                        <li class=" page-item">
+                            <a href="?page={{ page_obj.next_page_number }}" class="page-link">
+                                {{ page_obj.next_page_number }}
+                            </a>
+                        </li>
+                        <li class="page-item pager"><a href="?page={{ page_obj.paginator.num_pages }}" class="page-link">&raquo;</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+
             </div>
         </div>
-
     </section>
 </div>
 {% endblock content %}
 {% block script %}
-<script src="{% static 'assets/vendors/simple-datatables/simple-datatables.js' %}"></script>
 <script>
-    // Simple Datatable
-    let table1 = document.querySelector('#table1');
-    let dataTable = new simpleDatatables.DataTable(table1);
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('searchInput');
+        const tableBody = document.getElementById('stagiaireTableBody');
+        const allRows = Array.from(tableBody.querySelectorAll('tr')); // Get all original rows
+        let noResultsRow = document.getElementById('noResultsRow');
+
+        // If noResultsRow doesn't exist initially, create a placeholder
+        if (!noResultsRow) {
+            noResultsRow = document.createElement('tr');
+            noResultsRow.id = 'noResultsRow';
+            const td = document.createElement('td');
+            td.colSpan = 9; // Adjusted colspan for new columns (9 total)
+            td.className = 'no-results-message';
+            td.textContent = 'Aucun résultat trouvé.';
+            noResultsRow.appendChild(td);
+            noResultsRow.style.display = 'none'; // Hide by default
+            tableBody.appendChild(noResultsRow);
+        }
+
+        function performSearch() {
+            const searchTerm = searchInput.value.toLowerCase().trim();
+            let resultsFound = false;
+
+            allRows.forEach(row => {
+                // Assuming Nom complet is at index 2
+                const fullNameCell = row.cells[2];
+                const fullName = fullNameCell ? fullNameCell.textContent.toLowerCase() : '';
+
+                if (fullName.includes(searchTerm)) {
+                    row.style.display = ''; // Show row
+                    resultsFound = true;
+                } else {
+                    row.style.display = 'none'; // Hide row
+                }
+            });
+
+            if (resultsFound) {
+                noResultsRow.style.display = 'none';
+            } else {
+                noResultsRow.style.display = '';
+            }
+        }
+
+        // Attach event listener for keyup on the search input
+        searchInput.addEventListener('keyup', performSearch);
+
+        // Initial display check for no results if the list is empty
+        if (allRows.length === 0 && !noResultsRow.textContent.includes('Pas de stagiaire')) {
+             noResultsRow.style.display = '';
+             noResultsRow.textContent = 'Aucun stagiaire enregistré.';
+        } else if (allRows.length > 0) {
+            noResultsRow.style.display = 'none';
+        }
+    });
 </script>
 {% endblock script %}

@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from training.models import Filiere, Service # Importation des modèles Filiere et Service
 
 class Profile(models.Model):
     name = models.CharField(max_length=50, unique=True)
@@ -13,5 +14,9 @@ class User(AbstractUser):
     username = models.CharField(max_length=255, unique=True)
     profile = models.ForeignKey(Profile, on_delete=models.DO_NOTHING, blank=True, null=True)
     photo_url = models.ImageField(upload_to='photos/', blank=True, null=True)
+
+    # Nouveaux champs pour l'association aux filières et services
+    filiere = models.ForeignKey(Filiere, on_delete=models.SET_NULL, null=True, blank=True)
+    service = models.ForeignKey(Service, on_delete=models.SET_NULL, null=True, blank=True)
 
     REQUIRED_FIELDS = []

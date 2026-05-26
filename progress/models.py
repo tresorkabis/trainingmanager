@@ -11,7 +11,7 @@ class TypeAction(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    def _str_(self):
+    def __str__(self): # Correction: __str__ au lieu de _str_
         return self.code + " (" + self.libelle + ")"
 
 class Formateur(models.Model):
@@ -26,7 +26,7 @@ class Formateur(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    def _str_(self):
+    def __str__(self): # Correction: __str__ au lieu de _str_
         return self.nom + "(" + self.postnom + ")"
 
 class Action(models.Model):
@@ -39,16 +39,18 @@ class Action(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    def _str_(self):
+    def __str__(self): # Correction: __str__ au lieu de _str_
         return str(self.id) +"(" + self.description +")"
 
 class DetailAction(models.Model):
     stagiaire = models.ForeignKey(Stagiaire, on_delete=models.CASCADE)
     action = models.ForeignKey(Action, on_delete=models.CASCADE)
+    statut = models.CharField(max_length=50, default="Inscrit") # Nouveau champ
+    date_inscription = models.DateField(auto_now_add=True) # Nouveau champ
 
     active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    def _str_(self):
+    def __str__(self): # Correction: __str__ au lieu de _str_
         return str(self.id) +"(" + self.stagiaire.nom + " - " + self.action.formation.nom + ")"

@@ -3,7 +3,7 @@
 {% block style %}
 <link rel="stylesheet" href="{% static 'assets/vendors/simple-datatables/style.css' %}">
 {% endblock style %}
-{% block title %} Dashboard {% endblock title %}
+{% block title %} Actions de Formation {% endblock title %}
 {% block page_header %}Suivi des actions de formation{% endblock page_header %}
 
 {% block content %}
@@ -23,7 +23,7 @@
                 <nav aria-label="breadcrumb" class="breadcrumb-header float-start float-lg-end">
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item"><a href="{% url 'home' %}">Dashboard</a></li>
-                        <li class="breadcrumb-item active" aria-current="page">Action</li>
+                        <li class="breadcrumb-item active" aria-current="page">Actions</li>
                     </ol>
                 </nav>
             </div>
@@ -32,49 +32,38 @@
     <section class="section">
         <div class="card tm-listing-card">
             <div class="card-header">
-                <a href=""><i class="bi bi-clipboard-plus me-2"></i>Nouvelle action</a>
+                <a href="{% url 'action_create' %}" class="btn btn-primary"><i class="bi bi-clipboard-plus me-2"></i>Nouvelle action</a>
             </div>
             <div class="card-body">
                 <div class="dataTable-wrapper dataTable-loading no-footer sortable searchable fixed-columns">
                     <div class="dataTable-top">
                         <div class="dataTable-dropdown">
-                            <select class="dataTable-selector form-select">
-                                <option value="5">5</option>
-                                <option value="10" selected="">10</option>
-                                <option value="15">15</option>
-                                <option value="20">20</option>
-                                <option value="25">25</option>
-                            </select>
-                            <label>entrées par page</label>
+                            {# simple-datatables injectera ici le sélecteur d'entrées par page #}
                         </div>
                         <div class="dataTable-search">
-                            <input class="dataTable-input" placeholder="Recherche..." type="text">
+                            {# simple-datatables injectera ici le champ de recherche #}
                         </div>
                     </div>
                     <div class="dataTable-container">
                         <table class="table table-striped dataTable-table" id="table1">
                             <thead>
                                 <tr>
-                                    <th data-sortable="" style="width: 42.490%;"><a href="#"
-                                            class="dataTable-sorter">Description</a></th>
-                                    <th data-sortable="" style="width: 12.0668%;"><a href="#"
-                                            class="dataTable-sorter">Date_debut</a></th>
-                                    <th data-sortable="" style="width: 12.0668%;"><a href="#"
-                                            class="dataTable-sorter">Date_fin</a></th>
-                                    <th data-sortable="" style="width: 12.0668%;"><a href="#"
-                                            class="dataTable-sorter">Formation</a></th>
-                                    <th data-sortable="" style="width: 10.6547%;"><a href="#"
-                                            class="dataTable-sorter">Status</a></th>
+                                    <th data-sortable="">Description</th>
+                                    <th data-sortable="">Date de début</th>
+                                    <th data-sortable="">Date de fin</th>
+                                    <th data-sortable="">Formation</th>
+                                    <th data-sortable="">Statut</th>
+                                    <th>Actions</th> {# Nouvelle colonne pour les actions #}
                                 </tr>
                             </thead>
                             <tbody>
                                 {% if action_list %}
                                 {% for item in object_list %}
                                 <tr>
-                                    <td><a href="">{{ item.description }}</a></td>
-                                    <td>{{ item.date_debut }}</td>
-                                    <td>{{ item.date_fin }}</td>
-                                    <td>{{ item.formation }}</td>
+                                    <td><a href="{% url 'action' item.pk %}">{{ item.description }}</a></td>
+                                    <td>{{ item.date_debut|date:"d/m/Y" }}</td>
+                                    <td>{{ item.date_fin|date:"d/m/Y" }}</td>
+                                    <td>{{ item.formation.nom }}</td>
                                     <td>
                                         {% if item.active %}
                                         <span class="badge bg-success">Active</span>
@@ -82,30 +71,33 @@
                                         <span class="badge bg-danger">Inactive</span>
                                         {% endif %}
                                     </td>
+                                    <td>
+                                        <div class="d-flex gap-2">
+                                            <a href="{% url 'action_update' item.pk %}" class="btn btn-sm btn-outline-primary" title="Modifier">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <a href="{% url 'action_delete' item.pk %}" class="btn btn-sm btn-outline-danger" title="Supprimer">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+                                        </div>
+                                    </td>
                                 </tr>
                                 {% endfor %}
                                 {% else %}
                                 <tr>
-                                    <td colspan="4">Pas de Action</td>
+                                    <td colspan="6">Pas d'Action de formation disponible.</td> {# Colspan ajusté à 6 #}
                                 </tr>
                                 {% endif %}
                             </tbody>
                         </table>
                     </div>
                     <div class="dataTable-bottom">
-                        <div class="dataTable-info">Showing 1 to 10 of 26 entries</div>
-                        <ul class="pagination pagination-primary float-end dataTable-pagination">
-                            <li class="page-item pager"><a href="#" class="page-link" data-page="1">‹</a></li>
-                            <li class="page-item active"><a href="#" class="page-link" data-page="1">1</a></li>
-                            <li class="page-item"><a href="#" class="page-link" data-page="2">2</a></li>
-                            <li class="page-item"><a href="#" class="page-link" data-page="3">3</a></li>
-                            <li class="page-item pager"><a href="#" class="page-link" data-page="2">›</a></li>
-                        </ul>
+                        <div class="dataTable-info"></div> {# simple-datatables injectera ici les informations de pagination #}
+                        <ul class="pagination pagination-primary float-end dataTable-pagination"></ul> {# simple-datatables injectera ici les liens de pagination #}
                     </div>
                 </div>
             </div>
         </div>
-
     </section>
 </div>
 {% endblock content %}

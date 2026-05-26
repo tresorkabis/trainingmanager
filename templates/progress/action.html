@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ titre }} une Action{% endblock title %}
+{% block page_header %}{{ titre }} une Action de Formation{% endblock page_header %}
+
+{% block content %}
+<div class="page-heading">
+    <div class="page-title">
+        <div class="row">
+            <div class="col-12 col-md-6 order-md-1 order-last">
+                <div class="tm-section-titlebar">
+                    <span class="tm-section-titlebar__icon"><i class="bi bi-clipboard-check"></i></span>
+                    <div class="tm-section-titlebar__text">
+                        <h3>{{ titre }} une Action</h3>
+                        <p>Formulaire pour {{ titre|lower }} une action de formation.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 order-md-2 order-first">
+                <nav aria-label="breadcrumb" class="breadcrumb-header float-start float-lg-end">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{% url 'home' %}">Dashboard</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'actions' %}">Actions</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">{{ titre }}</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <section class="section">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title">Détails de l'Action</h4>
+            </div>
+            <div class="card-body">
+                <form action="" method="post" class="form">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="description">Description</label>
+                                <input type="text" id="description" class="form-control" name="description"
+                                    value="{{ object.description|default:'' }}" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="formation">Formation Associée</label>
+                                <select id="formation" class="form-select" name="formation" required>
+                                    <option value="">Sélectionnez une formation</option>
+                                    {% for formation in formations %}
+                                        <option value="{{ formation.pk }}" {% if object.formation.pk == formation.pk %}selected{% endif %}>
+                                            {{ formation.nom }} ({{ formation.filiere.nom }})
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="date_debut">Date de Début</label>
+                                <input type="date" id="date_debut" class="form-control" name="date_debut"
+                                    value="{{ object.date_debut|date:'Y-m-d'|default:'' }}" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="date_fin">Date de Fin</label>
+                                <input type="date" id="date_fin" class="form-control" name="date_fin"
+                                    value="{{ object.date_fin|date:'Y-m-d'|default:'' }}" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-end mt-4">
+                        <a href="{% url 'actions' %}" class="btn btn-light-secondary me-2">Annuler</a>
+                        <button type="submit" class="btn btn-primary">{{ titre }}</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock content %}
