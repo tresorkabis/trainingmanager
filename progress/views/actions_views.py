@@ -10,11 +10,14 @@ from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.generic import DeleteView, DetailView, ListView, UpdateView
 
-from progress.models import Action
+from progress.models import Action, Formateur
 from training.models import Formation
 
 
 class ActionPermissionMixin:
+    def normalize_formateur_ids(self, formateur_ids):
+        return [int(formateur_id) for formateur_id in formateur_ids if str(formateur_id).isdigit()]
+
     def get_allowed_formations(self):
         user = self.request.user
         queryset = Formation.objects.all()
@@ -34,7 +37,8 @@ class ActionPermissionMixin:
         return (
             Action.objects.filter(formation__in=allowed_formations)
             .select_related("formation", "formation__filiere")
-            .annotate(stagiaire_total=Count("detailaction"))
+            .prefetch_related("formateurs")
+            .annotate(stagiaire_total=Count("detailaction", distinct=True), formateur_total=Count("formateurs", distinct=True))
             .order_by("-date_debut", "-id")
         )
 
@@ -59,12 +63,14 @@ class ActionPermissionMixin:
     def build_form_context(self, **kwargs):
         context = {
             "formations": self.get_allowed_formations().select_related("filiere").order_by("nom"),
+            "formateurs": Formateur.objects.filter(active=True).order_by("nom", "postnom"),
             "today": date.today(),
+            "selected_formateur_ids": [],
         }
         context.update(kwargs)
         return context
 
-    def validate_action_payload(self, date_debut, date_fin, formation_id):
+    def validate_action_payload(self, date_debut, date_fin, formation_id, formateur_ids):
         errors = []
         allowed_formations = self.get_allowed_formations()
 
@@ -72,6 +78,10 @@ class ActionPermissionMixin:
             errors.append("La formation sélectionnée n'est pas autorisée pour votre périmètre.")
         if date_fin and date_debut and date_fin < date_debut:
             errors.append("La date de fin doit être postérieure ou égale à la date de début.")
+        requested_formateurs = set(self.normalize_formateur_ids(formateur_ids))
+        existing_formateurs = set(Formateur.objects.filter(pk__in=requested_formateurs).values_list("pk", flat=True))
+        if requested_formateurs != existing_formateurs:
+            errors.append("Au moins un formateur sélectionné est introuvable.")
 
         return errors
 
@@ -107,7 +117,7 @@ class ActionDetailViews(ActionPermissionMixin, DetailView):
     template_name = "progress/action_detail.html"
 
     def get_queryset(self):
-        return super().get_queryset().prefetch_related("detailaction_set__stagiaire")
+        return super().get_queryset().prefetch_related("detailaction_set__stagiaire", "formateurs")
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
@@ -118,6 +128,7 @@ class ActionDetailViews(ActionPermissionMixin, DetailView):
         ctx["inscriptions"] = inscriptions
         ctx["link"] = "actions"
         ctx["inscription_count"] = inscriptions.count()
+        ctx["formateurs_assignes"] = action.formateurs.all().order_by("nom", "postnom")
         return ctx
 
 
@@ -129,6 +140,7 @@ class ActionCreateView(ActionPermissionMixin, View):
             titre="Créer",
             mode="new",
             submitted={},
+            selected_formateur_ids=[],
         )
         return render(request, "progress/action.html", ctx)
 
@@ -139,13 +151,15 @@ class ActionCreateView(ActionPermissionMixin, View):
         date_debut = request.POST["date_debut"]
         date_fin = request.POST["date_fin"]
         formation_id = request.POST["formation"]
+        formateur_ids = request.POST.getlist("formateurs")
 
-        errors = self.validate_action_payload(date_debut, date_fin, formation_id)
+        errors = self.validate_action_payload(date_debut, date_fin, formation_id, formateur_ids)
         if errors:
             ctx = self.build_form_context(
                 titre="Créer",
                 mode="new",
                 submitted=request.POST,
+                selected_formateur_ids=self.normalize_formateur_ids(formateur_ids),
                 form_errors=errors,
             )
             return render(request, "progress/action.html", ctx, status=400)
@@ -157,6 +171,8 @@ class ActionCreateView(ActionPermissionMixin, View):
             formation_id=formation_id,
         )
         action.save()
+        if formateur_ids:
+            action.formateurs.set(Formateur.objects.filter(pk__in=self.normalize_formateur_ids(formateur_ids)))
 
         return HttpResponseRedirect(reverse_lazy("actions"))
 
@@ -174,16 +190,20 @@ class ActionUpdateView(ActionPermissionMixin, UpdateView):
         return form
 
     def form_valid(self, form):
+        formateur_ids = self.request.POST.getlist("formateurs")
         errors = self.validate_action_payload(
             form.cleaned_data["date_debut"],
             form.cleaned_data["date_fin"],
             str(form.cleaned_data["formation"].pk),
+            formateur_ids,
         )
         if errors:
             for error in errors:
                 form.add_error(None, error)
             return self.form_invalid(form)
-        return super().form_valid(form)
+        response = super().form_valid(form)
+        self.object.formateurs.set(Formateur.objects.filter(pk__in=self.normalize_formateur_ids(formateur_ids)))
+        return response
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
@@ -191,6 +211,7 @@ class ActionUpdateView(ActionPermissionMixin, UpdateView):
             self.build_form_context(
                 titre="Modifier",
                 mode="edit",
+                selected_formateur_ids=self.normalize_formateur_ids(self.request.POST.getlist("formateurs")) if self.request.method == "POST" else list(self.object.formateurs.values_list("pk", flat=True)),
             )
         )
         return ctx

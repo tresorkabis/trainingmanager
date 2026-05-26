@@ -39,3 +39,21 @@ class Formation(models.Model):
 
     def __str__(self):
         return self.nom
+
+
+class Module(models.Model):
+    formation = models.ForeignKey(Formation, on_delete=models.CASCADE, related_name="modules")
+    titre = models.CharField(max_length=200)
+    description = models.TextField(blank=True, null=True)
+    duree_heures = models.PositiveIntegerField(default=0, verbose_name="Durée en heures")
+    ordre = models.PositiveIntegerField(default=1)
+
+    active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["ordre", "id"]
+
+    def __str__(self):
+        return f"{self.formation.nom} - {self.titre}"

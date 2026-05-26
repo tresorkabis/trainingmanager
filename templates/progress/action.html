@@ -94,6 +94,20 @@
                                     {% endfor %}
                                 </select>
                             </div>
+                            <div class="form-group">
+                                <label for="formateurs">Formateurs affectés</label>
+                                <select id="formateurs" class="form-select" name="formateurs" multiple size="6">
+                                    {% for formateur in formateurs %}
+                                    <option
+                                        value="{{ formateur.pk }}"
+                                        {% if formateur.pk in selected_formateur_ids %}selected{% endif %}
+                                    >
+                                        {{ formateur.nom }} {{ formateur.postnom }}{% if formateur.matricule %} - {{ formateur.matricule }}{% endif %}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                                <small class="text-muted d-block mt-2">Maintenez `Ctrl` ou `Cmd` pour sélectionner plusieurs formateurs.</small>
+                            </div>
                         </div>
                         <div class="col-12 col-lg-6">
                             <div class="form-group">

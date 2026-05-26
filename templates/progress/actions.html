@@ -169,6 +169,7 @@
                                     <th>Description</th>
                                     <th>Période</th>
                                     <th>Formation</th>
+                                    <th>Formateurs</th>
                                     <th>Inscrits</th>
                                     <th>Statut</th>
                                     <th>Actions</th>
@@ -189,6 +190,18 @@
                                     <td>
                                         {{ item.formation.nom }}<br>
                                         <span class="tm-action-row__meta">{{ item.formation.filiere.nom|default:"Sans filière" }}</span>
+                                    </td>
+                                    <td>
+                                        {{ item.formateur_total }}<br>
+                                        <span class="tm-action-row__meta">
+                                            {% if item.formateur_total %}
+                                                {% for formateur in item.formateurs.all|slice:":2" %}
+                                                    {{ formateur.nom }} {{ formateur.postnom }}{% if not forloop.last %}, {% endif %}
+                                                {% endfor %}
+                                            {% else %}
+                                                Aucun affecté
+                                            {% endif %}
+                                        </span>
                                     </td>
                                     <td>{{ item.stagiaire_total }}</td>
                                     <td><span class="badge {{ item.status_meta.badge }}">{{ item.status_meta.label }}</span></td>
@@ -212,7 +225,7 @@
                                 {% endfor %}
                                 {% else %}
                                 <tr>
-                                    <td colspan="6">Aucune action de formation disponible.</td>
+                                    <td colspan="7">Aucune action de formation disponible.</td>
                                 </tr>
                                 {% endif %}
                             </tbody>

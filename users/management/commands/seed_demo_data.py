@@ -5,7 +5,7 @@ from django.db import transaction
 
 from intern.models import Categorie, EtudeStagiaire, Stagiaire, Entreprise, AutreFormation # Import AutreFormation
 from progress.models import Action, DetailAction, Formateur, TypeAction
-from training.models import Filiere, Formation, Service
+from training.models import Filiere, Formation, Module, Service
 from users.models import Profile, User
 from users.utils import createprofile
 
@@ -25,6 +25,7 @@ class Command(BaseCommand):
         EtudeStagiaire.objects.all().delete()
         Stagiaire.objects.all().delete()
         Entreprise.objects.all().delete()
+        Module.objects.all().delete()
         Formation.objects.all().delete()
         Filiere.objects.all().delete()
         Service.objects.all().delete()
@@ -153,11 +154,11 @@ class Command(BaseCommand):
 
         formations = {}
         formation_specs = [
-            {"nom": "Electricite batiment", "duree": 6, "filiere_nom": "Electricite industrielle", "frais_materiels": 120.0, "frais_participation": 0.0, "frais_jury": 0.0, "cout": 1500.00},
-            {"nom": "Automatisme industriel", "duree": 8, "filiere_nom": "Electricite industrielle", "frais_materiels": 180.0, "frais_participation": 0.0, "frais_jury": 0.0, "cout": 2000.00},
-            {"nom": "Maintenance preventive", "duree": 5, "filiere_nom": "Maintenance des equipements", "frais_materiels": 95.0, "frais_participation": 0.0, "frais_jury": 0.0, "cout": 1200.00},
-            {"nom": "Pack Office professionnel", "duree": 3, "filiere_nom": "Bureautique", "frais_materiels": 60.0, "frais_participation": 0.0, "frais_jury": 0.0, "cout": 800.00},
-            {"nom": "Secretaire de direction", "duree": 6, "filiere_nom": "Gestion administrative", "frais_materiels": 110.0, "frais_participation": 0.0, "frais_jury": 0.0, "cout": 1300.00},
+            {"nom": "Electricite batiment", "duree": 6, "filiere_nom": "Electricite industrielle", "frais_materiels": 120.0, "frais_participation": 0.0, "frais_jury": 0.0, "cout": 1500.00, "modules": [("Fondamentaux électriques", "Notions de base et sécurité", 40), ("Installations domestiques", "Circuits et équipements du bâtiment", 80)]},
+            {"nom": "Automatisme industriel", "duree": 8, "filiere_nom": "Electricite industrielle", "frais_materiels": 180.0, "frais_participation": 0.0, "frais_jury": 0.0, "cout": 2000.00, "modules": [("API et capteurs", "Automates programmables et instrumentation", 60), ("Supervision", "Interfaces et contrôle industriel", 50)]},
+            {"nom": "Maintenance preventive", "duree": 5, "filiere_nom": "Maintenance des equipements", "frais_materiels": 95.0, "frais_participation": 0.0, "frais_jury": 0.0, "cout": 1200.00, "modules": [("Diagnostic", "Méthodes de contrôle et inspection", 35), ("Planification", "Organisation des maintenances périodiques", 25)]},
+            {"nom": "Pack Office professionnel", "duree": 3, "filiere_nom": "Bureautique", "frais_materiels": 60.0, "frais_participation": 0.0, "frais_jury": 0.0, "cout": 800.00, "modules": [("Word avancé", "Mise en forme et publipostage", 20), ("Excel métier", "Tableaux, formules et graphiques", 30)]},
+            {"nom": "Secretaire de direction", "duree": 6, "filiere_nom": "Gestion administrative", "frais_materiels": 110.0, "frais_participation": 0.0, "frais_jury": 0.0, "cout": 1300.00, "modules": [("Communication professionnelle", "Rédaction et accueil", 35), ("Organisation administrative", "Classement, agenda et suivi", 45)]},
         ]
         for spec in formation_specs:
             nom = spec["nom"]
@@ -209,6 +210,16 @@ class Command(BaseCommand):
                 changed = True
             if changed:
                 formation.save()
+            Module.objects.filter(formation=formation).delete()
+            for ordre, module_spec in enumerate(spec.get("modules", []), start=1):
+                titre, description, duree_heures = module_spec
+                Module.objects.create(
+                    formation=formation,
+                    titre=titre,
+                    description=description,
+                    duree_heures=duree_heures,
+                    ordre=ordre,
+                )
             formations[nom] = formation
 
         # Create demo Entreprise instances
@@ -578,11 +589,11 @@ class Command(BaseCommand):
 
         actions = {}
         action_specs = [
-            {"description": "Session Electricite - Cohorte A", "date_debut": date(2026, 5, 20), "date_fin": date(2026, 11, 20), "formation_nom": "Electricite batiment"},
-            {"description": "Pack Office - Vague Mai", "date_debut": date(2026, 5, 18), "date_fin": date(2026, 8, 18), "formation_nom": "Pack Office professionnel"},
-            {"description": "Maintenance Preventive - Juin", "date_debut": date(2026, 6, 1), "date_fin": date(2026, 9, 1), "formation_nom": "Maintenance preventive"},
-            {"description": "Secretaire de Direction - Sept", "date_debut": date(2026, 9, 1), "date_fin": date(2027, 3, 1), "formation_nom": "Secretaire de direction"},
-            {"description": "Automatisme Avance - Juillet", "date_debut": date(2026, 7, 10), "date_fin": date(2026, 10, 10), "formation_nom": "Automatisme industriel"},
+            {"description": "Session Electricite - Cohorte A", "date_debut": date(2026, 5, 20), "date_fin": date(2026, 11, 20), "formation_nom": "Electricite batiment", "formateur_matricules": ["FM001"]},
+            {"description": "Pack Office - Vague Mai", "date_debut": date(2026, 5, 18), "date_fin": date(2026, 8, 18), "formation_nom": "Pack Office professionnel", "formateur_matricules": ["FM002"]},
+            {"description": "Maintenance Preventive - Juin", "date_debut": date(2026, 6, 1), "date_fin": date(2026, 9, 1), "formation_nom": "Maintenance preventive", "formateur_matricules": ["FM001"]},
+            {"description": "Secretaire de Direction - Sept", "date_debut": date(2026, 9, 1), "date_fin": date(2027, 3, 1), "formation_nom": "Secretaire de direction", "formateur_matricules": ["FM002"]},
+            {"description": "Automatisme Avance - Juillet", "date_debut": date(2026, 7, 10), "date_fin": date(2026, 10, 10), "formation_nom": "Automatisme industriel", "formateur_matricules": ["FM001", "FM002"]},
         ]
         for spec in action_specs:
             action, _ = Action.objects.get_or_create(
@@ -605,6 +616,7 @@ class Command(BaseCommand):
                 changed = True
             if changed:
                 action.save()
+            action.formateurs.set([formateurs[matricule] for matricule in spec.get("formateur_matricules", []) if matricule in formateurs])
             actions[spec["description"]] = action
 
         detail_specs = [

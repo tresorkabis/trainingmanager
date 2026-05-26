@@ -28,7 +28,7 @@
                 </div>
                 <div class="card-content">
                     <div class="card-body">
-                        <form class="form form-horizontal" method="post" action="#">
+                        <form id="formation-form" class="form form-horizontal" method="post" action="#">
                             {% csrf_token %}
                             <div class="form-body">
                                 <div class="row">
@@ -144,12 +144,79 @@
                                         </div>
                                     </div>
                                     <div class="col-sm-12 d-flex justify-content-end">
+                                        {% if not object.id %}
                                         <button type="submit" class="btn btn-primary me-1 mb-1">Envoyer</button>
                                         <button type="reset" class="btn btn-light-secondary me-1 mb-1">Annuler</button>
+                                        {% endif %}
                                     </div>
                                 </div>
                             </div>
                         </form>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-12 col-12 mt-3">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">Modules de la formation</h4>
+                    </div>
+                    <div class="card-content">
+                        <div class="card-body">
+                            {% if object.id %}
+                                {% if object.modules.all %}
+                                <div class="table-responsive">
+                                    <table class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Ordre</th>
+                                                <th>Module</th>
+                                                <th>Description</th>
+                                                <th>Durée (heures)</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for module in object.modules.all %}
+                                            <tr>
+                                                <td>{{ module.ordre }}</td>
+                                                <td>{{ module.titre }}</td>
+                                                <td>{{ module.description|default:"-" }}</td>
+                                                <td>{{ module.duree_heures }}</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                {% else %}
+                                <p class="text-muted mb-0">Aucun module n'est encore rattaché à cette formation.</p>
+                                {% endif %}
+                            {% else %}
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <p class="text-muted mb-0">Ajoutez les modules qui composent cette formation.</p>
+                                <button type="button" id="add-module-row" class="btn btn-primary btn-sm">Ajouter un module</button>
+                            </div>
+                            <div id="modules-container">
+                                <div class="module-row border rounded p-3 mb-3">
+                                    <div class="row g-3">
+                                        <div class="col-md-4">
+                                            <label class="form-label">Titre du module</label>
+                                            <input type="text" class="form-control" name="module_titre[]" form="formation-form" placeholder="Ex: Introduction">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Description</label>
+                                            <input type="text" class="form-control" name="module_description[]" form="formation-form" placeholder="Résumé du module">
+                                        </div>
+                                        <div class="col-md-1">
+                                            <label class="form-label">Heures</label>
+                                            <input type="number" class="form-control" name="module_duree_heures[]" form="formation-form" min="0" placeholder="0">
+                                        </div>
+                                        <div class="col-md-1 d-flex align-items-end">
+                                            <button type="button" class="btn btn-light-secondary remove-module-row">X</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -160,8 +227,36 @@
 {% block script %}
 <script src="{% static 'assets/vendors/simple-datatables/simple-datatables.js' %}"></script>
 <script>
-    // Simple Datatable
-    let table1 = document.querySelector('#table1');
-    let dataTable = new simpleDatatables.DataTable(table1);
+    const modulesContainer = document.getElementById('modules-container');
+    const addModuleRowButton = document.getElementById('add-module-row');
+
+    if (modulesContainer && addModuleRowButton) {
+        addModuleRowButton.addEventListener('click', function () {
+            const firstRow = modulesContainer.querySelector('.module-row');
+            const clonedRow = firstRow.cloneNode(true);
+
+            clonedRow.querySelectorAll('input').forEach((field) => {
+                field.value = '';
+            });
+
+            modulesContainer.appendChild(clonedRow);
+        });
+
+        modulesContainer.addEventListener('click', function (event) {
+            if (!event.target.classList.contains('remove-module-row')) {
+                return;
+            }
+
+            const rows = modulesContainer.querySelectorAll('.module-row');
+            if (rows.length === 1) {
+                rows[0].querySelectorAll('input').forEach((field) => {
+                    field.value = '';
+                });
+                return;
+            }
+
+            event.target.closest('.module-row').remove();
+        });
+    }
 </script>
 {% endblock script %}

@@ -34,6 +34,7 @@ class Action(models.Model):
     date_debut = models.DateField()
     date_fin = models.DateField()
     formation = models.ForeignKey(Formation, on_delete=models.CASCADE)
+    formateurs = models.ManyToManyField("Formateur", blank=True, related_name="actions")
 
     active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)

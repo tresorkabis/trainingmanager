@@ -6,7 +6,7 @@ from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.generic import DetailView, ListView
 
-from training.models import Filiere, Formation
+from training.models import Filiere, Formation, Module
 
 
 class FormationPermissionMixin:
@@ -46,7 +46,7 @@ class FormationListView(FormationPermissionMixin, ListView):
     template_name = "training/formations.html"
 
     def get_queryset(self):
-        return self.get_formation_queryset().select_related("filiere", "filiere__service")
+        return self.get_formation_queryset().select_related("filiere", "filiere__service").prefetch_related("modules")
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
@@ -106,5 +106,25 @@ class FormationCreateView(FormationPermissionMixin, View):
             frais_materiels=frais_materiels,
         )
         formation.save()
+
+        module_titres = request.POST.getlist("module_titre[]")
+        module_descriptions = request.POST.getlist("module_description[]")
+        module_durees = request.POST.getlist("module_duree_heures[]")
+
+        for index, titre in enumerate(module_titres, start=1):
+            titre = (titre or "").strip()
+            if not titre:
+                continue
+
+            duree_module = module_durees[index - 1].strip() if index - 1 < len(module_durees) else ""
+            description_module = module_descriptions[index - 1].strip() if index - 1 < len(module_descriptions) else ""
+
+            Module.objects.create(
+                formation=formation,
+                titre=titre,
+                description=description_module or None,
+                duree_heures=int(duree_module) if duree_module else 0,
+                ordre=index,
+            )
 
         return HttpResponseRedirect("/training/formations")
