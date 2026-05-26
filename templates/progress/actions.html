@@ -2,82 +2,209 @@
 {% load static %}
 {% block style %}
 <link rel="stylesheet" href="{% static 'assets/vendors/simple-datatables/style.css' %}">
+<style>
+    .tm-action-hero {
+        background:
+            radial-gradient(circle at top right, rgba(67, 94, 190, 0.18), transparent 35%),
+            linear-gradient(135deg, #f7f8fc 0%, #eef3ff 100%);
+        border: 1px solid rgba(67, 94, 190, 0.12);
+        border-radius: 1.25rem;
+        overflow: hidden;
+    }
+
+    .tm-action-stat {
+        background: rgba(255, 255, 255, 0.76);
+        border: 1px solid rgba(67, 94, 190, 0.1);
+        border-radius: 1rem;
+        padding: 1rem;
+        box-shadow: 0 10px 24px rgba(17, 24, 39, 0.04);
+        height: 100%;
+    }
+
+    .tm-action-stat__label {
+        display: block;
+        font-size: 0.78rem;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: #6c757d;
+        margin-bottom: 0.35rem;
+    }
+
+    .tm-action-stat__value {
+        font-size: 1.35rem;
+        font-weight: 700;
+        color: #25396f;
+    }
+
+    .tm-action-row__title {
+        color: #25396f;
+        font-weight: 700;
+        text-decoration: none;
+    }
+
+    .tm-action-row__meta {
+        color: #7b8190;
+        font-size: 0.85rem;
+    }
+
+    .tm-action-tools {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .tm-action-tool {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.45rem 0.7rem;
+        border-radius: 999px;
+        border: 1px solid transparent;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+
+    .tm-action-tool i {
+        font-size: 0.85rem;
+    }
+
+    .tm-action-tool--view {
+        background: #eef3ff;
+        color: #435ebe;
+        border-color: rgba(67, 94, 190, 0.16);
+    }
+
+    .tm-action-tool--edit {
+        background: #f3f4f6;
+        color: #344054;
+        border-color: rgba(52, 64, 84, 0.12);
+    }
+
+    .tm-action-tool--delete {
+        background: #fff1f2;
+        color: #c1121f;
+        border-color: rgba(193, 18, 31, 0.14);
+    }
+
+    .tm-action-tool:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 10px 20px rgba(15, 23, 42, 0.08);
+    }
+</style>
 {% endblock style %}
 {% block title %} Actions de Formation {% endblock title %}
 {% block page_header %}Suivi des actions de formation{% endblock page_header %}
 
 {% block content %}
 <div class="page-heading">
-    <div class="page-title">
-        <div class="row">
-            <div class="col-12 col-md-6 order-md-1 order-last">
-                <div class="tm-section-titlebar">
+    <section class="tm-action-hero p-4 p-lg-5 mb-4">
+        <div class="row g-4 align-items-center">
+            <div class="col-12 col-xl-6">
+                <div class="tm-section-titlebar mb-3">
                     <span class="tm-section-titlebar__icon"><i class="bi bi-clipboard-check"></i></span>
                     <div class="tm-section-titlebar__text">
-                        <h3>Actions</h3>
-                        <p>Liste des actions de formation</p>
+                        <h3>Actions de formation</h3>
+                        <p>Pilotez les sessions planifiées, en cours et terminées depuis un tableau de bord plus lisible.</p>
+                    </div>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="{% url 'action_create' %}" class="btn btn-primary">
+                        <i class="bi bi-clipboard-plus me-2"></i>Nouvelle action
+                    </a>
+                    <a href="{% url 'formations' %}" class="btn btn-light-secondary">
+                        <i class="bi bi-journal-text me-2"></i>Voir les formations
+                    </a>
+                </div>
+            </div>
+            <div class="col-12 col-xl-6">
+                <div class="row g-3">
+                    <div class="col-6 col-md-4">
+                        <div class="tm-action-stat">
+                            <span class="tm-action-stat__label">Total</span>
+                            <span class="tm-action-stat__value">{{ stats.total }}</span>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-4">
+                        <div class="tm-action-stat">
+                            <span class="tm-action-stat__label">Planifiées</span>
+                            <span class="tm-action-stat__value">{{ stats.planned }}</span>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-4">
+                        <div class="tm-action-stat">
+                            <span class="tm-action-stat__label">En cours</span>
+                            <span class="tm-action-stat__value">{{ stats.ongoing }}</span>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-4">
+                        <div class="tm-action-stat">
+                            <span class="tm-action-stat__label">Terminées</span>
+                            <span class="tm-action-stat__value">{{ stats.completed }}</span>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-4">
+                        <div class="tm-action-stat">
+                            <span class="tm-action-stat__label">Inscrits</span>
+                            <span class="tm-action-stat__value">{{ stats.enrolled }}</span>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="col-12 col-md-6 order-md-2 order-first">
-                <nav aria-label="breadcrumb" class="breadcrumb-header float-start float-lg-end">
-                    <ol class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="{% url 'home' %}">Dashboard</a></li>
-                        <li class="breadcrumb-item active" aria-current="page">Actions</li>
-                    </ol>
-                </nav>
-            </div>
         </div>
-    </div>
+    </section>
+
     <section class="section">
         <div class="card tm-listing-card">
             <div class="card-header">
-                <a href="{% url 'action_create' %}" class="btn btn-primary"><i class="bi bi-clipboard-plus me-2"></i>Nouvelle action</a>
+                <h4 class="card-title mb-0">Catalogue des actions</h4>
             </div>
             <div class="card-body">
                 <div class="dataTable-wrapper dataTable-loading no-footer sortable searchable fixed-columns">
-                    <div class="dataTable-top">
-                        <div class="dataTable-dropdown">
-                            {# simple-datatables injectera ici le sélecteur d'entrées par page #}
-                        </div>
-                        <div class="dataTable-search">
-                            {# simple-datatables injectera ici le champ de recherche #}
-                        </div>
-                    </div>
                     <div class="dataTable-container">
                         <table class="table table-striped dataTable-table" id="table1">
                             <thead>
                                 <tr>
-                                    <th data-sortable="">Description</th>
-                                    <th data-sortable="">Date de début</th>
-                                    <th data-sortable="">Date de fin</th>
-                                    <th data-sortable="">Formation</th>
-                                    <th data-sortable="">Statut</th>
-                                    <th>Actions</th> {# Nouvelle colonne pour les actions #}
+                                    <th>Description</th>
+                                    <th>Période</th>
+                                    <th>Formation</th>
+                                    <th>Inscrits</th>
+                                    <th>Statut</th>
+                                    <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% if action_list %}
                                 {% for item in object_list %}
                                 <tr>
-                                    <td><a href="{% url 'action' item.pk %}">{{ item.description }}</a></td>
-                                    <td>{{ item.date_debut|date:"d/m/Y" }}</td>
-                                    <td>{{ item.date_fin|date:"d/m/Y" }}</td>
-                                    <td>{{ item.formation.nom }}</td>
                                     <td>
-                                        {% if item.active %}
-                                        <span class="badge bg-success">Active</span>
-                                        {% else %}
-                                        <span class="badge bg-danger">Inactive</span>
-                                        {% endif %}
+                                        <a href="{% url 'action' item.pk %}" class="tm-action-row__title">{{ item.description }}</a>
+                                        <div class="tm-action-row__meta">Réf. #{{ item.pk }}</div>
                                     </td>
                                     <td>
-                                        <div class="d-flex gap-2">
-                                            <a href="{% url 'action_update' item.pk %}" class="btn btn-sm btn-outline-primary" title="Modifier">
-                                                <i class="bi bi-pencil"></i>
+                                        {{ item.date_debut|date:"d/m/Y" }}<br>
+                                        <span class="tm-action-row__meta">au {{ item.date_fin|date:"d/m/Y" }}</span>
+                                    </td>
+                                    <td>
+                                        {{ item.formation.nom }}<br>
+                                        <span class="tm-action-row__meta">{{ item.formation.filiere.nom|default:"Sans filière" }}</span>
+                                    </td>
+                                    <td>{{ item.stagiaire_total }}</td>
+                                    <td><span class="badge {{ item.status_meta.badge }}">{{ item.status_meta.label }}</span></td>
+                                    <td>
+                                        <div class="tm-action-tools">
+                                            <a href="{% url 'action' item.pk %}" class="tm-action-tool tm-action-tool--view">
+                                                <i class="bi bi-eye"></i>
+                                                Voir
                                             </a>
-                                            <a href="{% url 'action_delete' item.pk %}" class="btn btn-sm btn-outline-danger" title="Supprimer">
+                                            <a href="{% url 'action_update' item.pk %}" class="tm-action-tool tm-action-tool--edit">
+                                                <i class="bi bi-pencil-square"></i>
+                                                Modifier
+                                            </a>
+                                            <a href="{% url 'action_delete' item.pk %}" class="tm-action-tool tm-action-tool--delete">
                                                 <i class="bi bi-trash"></i>
+                                                Supprimer
                                             </a>
                                         </div>
                                     </td>
@@ -85,15 +212,15 @@
                                 {% endfor %}
                                 {% else %}
                                 <tr>
-                                    <td colspan="6">Pas d'Action de formation disponible.</td> {# Colspan ajusté à 6 #}
+                                    <td colspan="6">Aucune action de formation disponible.</td>
                                 </tr>
                                 {% endif %}
                             </tbody>
                         </table>
                     </div>
                     <div class="dataTable-bottom">
-                        <div class="dataTable-info"></div> {# simple-datatables injectera ici les informations de pagination #}
-                        <ul class="pagination pagination-primary float-end dataTable-pagination"></ul> {# simple-datatables injectera ici les liens de pagination #}
+                        <div class="dataTable-info"></div>
+                        <ul class="pagination pagination-primary float-end dataTable-pagination"></ul>
                     </div>
                 </div>
             </div>
@@ -104,8 +231,17 @@
 {% block script %}
 <script src="{% static 'assets/vendors/simple-datatables/simple-datatables.js' %}"></script>
 <script>
-    // Simple Datatable
-    let table1 = document.querySelector('#table1');
-    let dataTable = new simpleDatatables.DataTable(table1);
+    const table1 = document.querySelector('#table1');
+    if (table1) {
+        new simpleDatatables.DataTable(table1, {
+            perPage: 8,
+            labels: {
+                placeholder: "Rechercher...",
+                perPage: "{select} actions par page",
+                noRows: "Aucune action trouvée",
+                info: "Affichage de {start} à {end} sur {rows} actions",
+            },
+        });
+    }
 </script>
 {% endblock script %}

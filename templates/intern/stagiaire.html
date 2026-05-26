@@ -2,20 +2,129 @@
 {% load static %}
 {% block title %} Stagiaire {% endblock title %}
 {% block page_header %}Gestion des stagiaires{% endblock page_header %}
+{% block style %}
+<style>
+    .tab-content > .tab-pane {
+        display: none;
+    }
+
+    .tab-content > .active {
+        display: block;
+    }
+
+    .tm-stagiaire-hero {
+        background:
+            radial-gradient(circle at top right, rgba(67, 94, 190, 0.18), transparent 35%),
+            linear-gradient(135deg, #f7f8fc 0%, #eef3ff 100%);
+        border: 1px solid rgba(67, 94, 190, 0.12);
+        border-radius: 1.25rem;
+        overflow: hidden;
+    }
+
+    .tm-stagiaire-hero__photo {
+        width: 120px;
+        height: 120px;
+        border-radius: 1.5rem;
+        object-fit: cover;
+        border: 4px solid rgba(255, 255, 255, 0.9);
+        box-shadow: 0 18px 45px rgba(20, 33, 61, 0.12);
+    }
+
+    .tm-stagiaire-kpi {
+        border: 1px solid rgba(67, 94, 190, 0.1);
+        border-radius: 1rem;
+        background: rgba(255, 255, 255, 0.76);
+        padding: 1rem;
+        height: 100%;
+        box-shadow: 0 10px 24px rgba(17, 24, 39, 0.04);
+    }
+
+    .tm-stagiaire-kpi__label {
+        display: block;
+        font-size: 0.78rem;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: #6c757d;
+        margin-bottom: 0.35rem;
+    }
+
+    .tm-stagiaire-kpi__value {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #25396f;
+    }
+
+    .tm-detail-card {
+        border: 1px solid rgba(15, 23, 42, 0.07);
+        border-radius: 1rem;
+        box-shadow: 0 16px 32px rgba(15, 23, 42, 0.05);
+    }
+
+    .tm-detail-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+
+    .tm-detail-item {
+        border-radius: 0.9rem;
+        border: 1px solid #edf1f7;
+        background: #fbfcfe;
+        padding: 1rem;
+        min-height: 100%;
+    }
+
+    .tm-detail-item__label {
+        display: block;
+        font-size: 0.8rem;
+        color: #7b8190;
+        margin-bottom: 0.35rem;
+    }
+
+    .tm-detail-item__value {
+        color: #25396f;
+        font-weight: 700;
+        word-break: break-word;
+    }
+
+    .tm-pill-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .tm-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.55rem 0.85rem;
+        border-radius: 999px;
+        background: #fff;
+        border: 1px solid rgba(67, 94, 190, 0.12);
+        color: #25396f;
+        font-weight: 600;
+    }
+</style>
+{% endblock style %}
 
 {% block content %}
 <div class="page-heading">
     <div class="page-title">
         <div class="row">
             <div class="col-12 col-md-6 order-md-1 order-last">
+                {% if object.id %}
+                <h3><a href="{% url 'stagiaires' %}">Stagiaires</a></h3>
+                <p class="text-subtitle text-muted">Fiche détaillée de {{ object.get_full_name }}</p>
+                {% else %}
                 <h3><a href="{% url 'stagiaires' %}">Stagiaire</a></h3>
                 <p class="text-subtitle text-muted">{{ titre }}</p>
+                {% endif %}
             </div>
             <div class="col-12 col-md-6 order-md-2 order-first">
                 <nav aria-label="breadcrumb" class="breadcrumb-header float-start float-lg-end">
                     <ol class="breadcrumb">
-                        <li class="breadcrumb-item">Stagiaire</li>
-                        <li class="breadcrumb-item active" aria-current="page">{{ titre }}</li>
+                        <li class="breadcrumb-item"><a href="{% url 'stagiaires' %}">Stagiaires</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">{% if object.id %}{{ object.get_full_name }}{% else %}{{ titre }}{% endif %}</li>
                     </ol>
                 </nav>
             </div>
@@ -25,10 +134,269 @@
         <div class="col-md-12 col-12">
             <div class="card tm-card-view"> {# Added tm-card-view for consistent styling #}
                 <div class="card-header">
-                    <h4 class="card-title">Détails du stagiaire</h4> {# More descriptive title #}
+                    <div class="d-flex flex-column flex-lg-row justify-content-lg-between align-items-lg-center gap-3">
+                        <div>
+                            <h4 class="card-title mb-1">{% if object.id %}Fiche du stagiaire{% else %}Détails du stagiaire{% endif %}</h4>
+                            <p class="text-muted mb-0">
+                                {% if object.id %}
+                                Consultez les informations d'identité, le parcours et le suivi de formation.
+                                {% else %}
+                                Renseignez les informations nécessaires pour créer une nouvelle fiche stagiaire.
+                                {% endif %}
+                            </p>
+                        </div>
+                        {% if object.id %}
+                        <a href="{% url 'stagiaires' %}" class="btn btn-light-secondary">Retour à la liste</a>
+                        {% endif %}
+                    </div>
                 </div>
                 <div class="card-content">
                     <div class="card-body">
+                        {% if object.id %}
+                        <div class="tm-stagiaire-hero p-4 p-lg-5 mb-4">
+                            <div class="row g-4 align-items-center">
+                                <div class="col-12 col-xl-7">
+                                    <div class="d-flex flex-column flex-sm-row align-items-start align-items-sm-center gap-4">
+                                        {% if object.photo %}
+                                        <img src="{{ object.photo.url }}" alt="Photo du stagiaire" class="tm-stagiaire-hero__photo">
+                                        {% else %}
+                                        <img src="{% static 'assets/images/faces/1.jpg' %}" alt="Photo du stagiaire" class="tm-stagiaire-hero__photo">
+                                        {% endif %}
+                                        <div>
+                                            <div class="tm-pill-list mb-3">
+                                                <span class="tm-pill"><i class="bi bi-person-badge"></i>{{ object.categorie }}</span>
+                                                {% if object.filiere %}
+                                                <span class="tm-pill"><i class="bi bi-signpost"></i>{{ object.filiere.nom }}</span>
+                                                {% endif %}
+                                                {% if object.entreprise %}
+                                                <span class="tm-pill"><i class="bi bi-building"></i>{{ object.entreprise.nom }}</span>
+                                                {% endif %}
+                                            </div>
+                                            <h2 class="mb-2">{{ object.get_full_name }}</h2>
+                                            <p class="text-muted mb-3">
+                                                {% if object.email %}{{ object.email }}{% else %}Adresse email non renseignée{% endif %}
+                                            </p>
+                                            <p class="mb-0 text-muted">
+                                                Fiche premium de consultation avec identité complète, affectation, parcours académique et suivi des formations.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-xl-5">
+                                    <div class="row g-3">
+                                        <div class="col-6">
+                                            <div class="tm-stagiaire-kpi">
+                                                <span class="tm-stagiaire-kpi__label">Téléphone</span>
+                                                <span class="tm-stagiaire-kpi__value">{{ object.telephone|default:"Non renseigné" }}</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="tm-stagiaire-kpi">
+                                                <span class="tm-stagiaire-kpi__label">Sexe</span>
+                                                <span class="tm-stagiaire-kpi__value">{{ object.get_sexe_display }}</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="tm-stagiaire-kpi">
+                                                <span class="tm-stagiaire-kpi__label">Type de pièce</span>
+                                                <span class="tm-stagiaire-kpi__value">{{ object.get_type_piece_display|default:"Non renseigné" }}</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="tm-stagiaire-kpi">
+                                                <span class="tm-stagiaire-kpi__label">Niveau d'étude</span>
+                                                <span class="tm-stagiaire-kpi__value">{{ object.niveau_etude|default:"Non renseigné" }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <ul class="nav nav-tabs nav-fill" id="myTab" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <a class="nav-link active" id="identity-tab" data-bs-toggle="tab" href="#identity" role="tab" aria-controls="identity" aria-selected="true">Identité</a>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <a class="nav-link" id="assignment-tab" data-bs-toggle="tab" href="#assignment" role="tab" aria-controls="assignment" aria-selected="false">Affectation</a>
+                            </li>
+                            {% if object.categorie.titre == "dans l'emploi" %}
+                            <li class="nav-item" role="presentation">
+                                <a class="nav-link" id="professional-tab" data-bs-toggle="tab" href="#professional" role="tab" aria-controls="professional" aria-selected="false">Professionnel</a>
+                            </li>
+                            {% endif %}
+                            <li class="nav-item" role="presentation">
+                                <a class="nav-link" id="studies-tab" data-bs-toggle="tab" href="#studies" role="tab" aria-controls="studies" aria-selected="false">Études</a>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <a class="nav-link" id="other-trainings-tab" data-bs-toggle="tab" href="#other-trainings" role="tab" aria-controls="other-trainings" aria-selected="false">Autres formations</a>
+                            </li>
+                        </ul>
+
+                        <div class="tab-content" id="myTabContent">
+                            <div class="tab-pane fade show active" id="identity" role="tabpanel" aria-labelledby="identity-tab">
+                                <div class="card tm-detail-card mt-4">
+                                    <div class="card-header">
+                                        <h4 class="card-title mb-1">Identité et administration</h4>
+                                        <p class="text-muted mb-0">Toutes les informations d'état civil et les références administratives du stagiaire.</p>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="tm-detail-grid">
+                                            <div class="tm-detail-item"><span class="tm-detail-item__label">Nom</span><div class="tm-detail-item__value">{{ object.nom }}</div></div>
+                                            <div class="tm-detail-item"><span class="tm-detail-item__label">Postnom</span><div class="tm-detail-item__value">{{ object.postnom }}</div></div>
+                                            <div class="tm-detail-item"><span class="tm-detail-item__label">Prénom</span><div class="tm-detail-item__value">{{ object.prenom }}</div></div>
+                                            <div class="tm-detail-item"><span class="tm-detail-item__label">Date de naissance</span><div class="tm-detail-item__value">{{ object.date_naissance|date:"d/m/Y"|default:"Non renseignée" }}</div></div>
+                                            <div class="tm-detail-item"><span class="tm-detail-item__label">Lieu de naissance</span><div class="tm-detail-item__value">{{ object.lieu_naissance|default:"Non renseigné" }}</div></div>
+                                            <div class="tm-detail-item"><span class="tm-detail-item__label">Nationalité</span><div class="tm-detail-item__value">{{ object.nationalite|default:"Non renseignée" }}</div></div>
+                                            <div class="tm-detail-item"><span class="tm-detail-item__label">Numéro de pièce</span><div class="tm-detail-item__value">{{ object.numero_piece|default:"Non renseigné" }}</div></div>
+                                            <div class="tm-detail-item"><span class="tm-detail-item__label">Nom du père</span><div class="tm-detail-item__value">{{ object.nom_pere|default:"Non renseigné" }}</div></div>
+                                            <div class="tm-detail-item"><span class="tm-detail-item__label">Nom de la mère</span><div class="tm-detail-item__value">{{ object.nom_mere|default:"Non renseigné" }}</div></div>
+                                            <div class="tm-detail-item"><span class="tm-detail-item__label">Adresse</span><div class="tm-detail-item__value">{{ object.adresse|default:"Non renseignée" }}</div></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane fade" id="assignment" role="tabpanel" aria-labelledby="assignment-tab">
+                                <div class="card tm-detail-card mt-4">
+                                    <div class="card-header">
+                                        <h4 class="card-title mb-1">Affectation et suivi interne</h4>
+                                        <p class="text-muted mb-0">Positionnement du stagiaire dans le dispositif de formation et historique des actions suivies.</p>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="tm-detail-grid mb-4">
+                                            <div class="tm-detail-item"><span class="tm-detail-item__label">Catégorie</span><div class="tm-detail-item__value">{{ object.categorie }}</div></div>
+                                            <div class="tm-detail-item"><span class="tm-detail-item__label">Filière</span><div class="tm-detail-item__value">{{ object.filiere.nom|default:"Non renseignée" }}</div></div>
+                                        </div>
+                                        <h5 class="mb-3">Formations internes suivies</h5>
+                                        {% if actions_suivies %}
+                                        <div class="table-responsive">
+                                            <table class="table table-striped">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Action</th>
+                                                        <th>Formation</th>
+                                                        <th>Période</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for detail_action in actions_suivies %}
+                                                    <tr>
+                                                        <td>{{ detail_action.action.description }}</td>
+                                                        <td>{{ detail_action.action.formation.nom }}</td>
+                                                        <td>{{ detail_action.action.date_debut|date:"d/m/Y" }} au {{ detail_action.action.date_fin|date:"d/m/Y" }}</td>
+                                                    </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        {% else %}
+                                        <p class="text-muted mb-0">Ce stagiaire n'est inscrit à aucune action de formation interne.</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {% if object.categorie.titre == "dans l'emploi" %}
+                            <div class="tab-pane fade" id="professional" role="tabpanel" aria-labelledby="professional-tab">
+                                <div class="card tm-detail-card mt-4">
+                                    <div class="card-header">
+                                        <h4 class="card-title mb-1">Situation professionnelle</h4>
+                                        <p class="text-muted mb-0">Données liées à l'emploi actuel et au contexte d'entreprise.</p>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="tm-detail-grid">
+                                            <div class="tm-detail-item"><span class="tm-detail-item__label">Entreprise</span><div class="tm-detail-item__value">{{ object.entreprise.nom|default:"Non renseignée" }}</div></div>
+                                            <div class="tm-detail-item"><span class="tm-detail-item__label">Fonction</span><div class="tm-detail-item__value">{{ object.fonction|default:"Non renseignée" }}</div></div>
+                                            <div class="tm-detail-item"><span class="tm-detail-item__label">Ancienneté dans l'emploi</span><div class="tm-detail-item__value">{{ object.anciennete_emploi|default:"Non renseignée" }}</div></div>
+                                            <div class="tm-detail-item"><span class="tm-detail-item__label">Ancienneté dans l'entreprise</span><div class="tm-detail-item__value">{{ object.anciennete_entreprise|default:"Non renseignée" }}</div></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            <div class="tab-pane fade" id="studies" role="tabpanel" aria-labelledby="studies-tab">
+                                <div class="card tm-detail-card mt-4">
+                                    <div class="card-header">
+                                        <h4 class="card-title mb-1">Parcours académique</h4>
+                                        <p class="text-muted mb-0">Niveau d'étude général et historique des études effectuées.</p>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="tm-detail-item mb-4">
+                                            <span class="tm-detail-item__label">Niveau d'étude général</span>
+                                            <div class="tm-detail-item__value">{{ object.niveau_etude|default:"Non renseigné" }}</div>
+                                        </div>
+                                        {% if object.etudes.all %}
+                                        <div class="table-responsive">
+                                            <table class="table table-striped">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Intitulé</th>
+                                                        <th>Établissement</th>
+                                                        <th>Niveau</th>
+                                                        <th>Année début</th>
+                                                        <th>Année fin</th>
+                                                        <th>Diplôme obtenu</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for etude in object.etudes.all %}
+                                                    <tr>
+                                                        <td>{{ etude.intitule }}</td>
+                                                        <td>{{ etude.etablissement|default:"-" }}</td>
+                                                        <td>{{ etude.niveau|default:"-" }}</td>
+                                                        <td>{{ etude.annee_debut|default:"-" }}</td>
+                                                        <td>{{ etude.annee_fin|default:"-" }}</td>
+                                                        <td>{{ etude.diplome_obtenu|default:"-" }}</td>
+                                                    </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        {% else %}
+                                        <p class="text-muted mb-0">Aucune étude enregistrée.</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane fade" id="other-trainings" role="tabpanel" aria-labelledby="other-trainings-tab">
+                                <div class="card tm-detail-card mt-4">
+                                    <div class="card-header">
+                                        <h4 class="card-title mb-1">Formations complémentaires</h4>
+                                        <p class="text-muted mb-0">Formations externes, certifications et perfectionnements suivis en dehors des actions internes.</p>
+                                    </div>
+                                    <div class="card-body">
+                                        {% if object.autres_formations.all %}
+                                        <div class="table-responsive">
+                                            <table class="table table-striped">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Intitulé</th>
+                                                        <th>Établissement</th>
+                                                        <th>Année de fin</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for training in object.autres_formations.all %}
+                                                    <tr>
+                                                        <td>{{ training.intitule }}</td>
+                                                        <td>{{ training.etablissement|default:"-" }}</td>
+                                                        <td>{{ training.annee_fin|default:"-" }}</td>
+                                                    </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        {% else %}
+                                        <p class="text-muted mb-0">Aucune formation complémentaire enregistrée.</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% else %}
                         <form class="form form-horizontal" method="post" action="#" enctype="multipart/form-data">
                             {% csrf_token %}
                             <div class="form-body">
@@ -41,11 +409,16 @@
                                             <li class="nav-item" role="presentation">
                                                 <a class="nav-link" id="assignment-tab" data-bs-toggle="tab" href="#assignment" role="tab" aria-controls="assignment" aria-selected="false">Affectation</a>
                                             </li>
+                                            {% if not object.id or object.categorie.titre == "dans l'emploi" %}
                                             <li class="nav-item" role="presentation" id="professional-tab-li">
                                                 <a class="nav-link" id="professional-tab" data-bs-toggle="tab" href="#professional" role="tab" aria-controls="professional" aria-selected="false">Professionnel</a>
                                             </li>
+                                            {% endif %}
                                             <li class="nav-item" role="presentation">
-                                                <a class="nav-link" id="studies-trainings-tab" data-bs-toggle="tab" href="#studies-trainings" role="tab" aria-controls="studies-trainings" aria-selected="false">Études & Formations</a> {# Merged tab #}
+                                                <a class="nav-link" id="studies-tab" data-bs-toggle="tab" href="#studies" role="tab" aria-controls="studies" aria-selected="false">Études</a>
+                                            </li>
+                                            <li class="nav-item" role="presentation">
+                                                <a class="nav-link" id="other-trainings-tab" data-bs-toggle="tab" href="#other-trainings" role="tab" aria-controls="other-trainings" aria-selected="false">Autres formations</a>
                                             </li>
                                         </ul>
                                         <div class="tab-content" id="myTabContent">
@@ -55,7 +428,13 @@
                                                     <div class="card-header"> {# Changed tm-form-panel__header to card-header #}
                                                         <div>
                                                             <h5 class="mb-1">Identité du stagiaire</h5>
-                                                            <p class="text-muted mb-0">Renseignez les informations principales et ajoutez une photo de profil.</p>
+                                                            <p class="text-muted mb-0">
+                                                                {% if object.id %}
+                                                                Consultez les informations d'identification et la photo du stagiaire.
+                                                                {% else %}
+                                                                Renseignez les informations principales et ajoutez une photo de profil.
+                                                                {% endif %}
+                                                            </p>
                                                         </div>
                                                     </div>
                                                     <div class="card-body"> {# Changed tm-form-panel__body to card-body #}
@@ -71,7 +450,11 @@
                                                                     </div>
                                                                     <div class="tm-avatar-card__body">
                                                                         <label for="photo" class="form-label">Photo du stagiaire</label>
+                                                                        {% if object.id %}
+                                                                        <p class="form-control-plaintext mb-2">Photo enregistrée pour la fiche stagiaire.</p>
+                                                                        {% else %}
                                                                         <input type="file" id="photo" class="form-control" name="photo" accept="image/*" {% if object.id %}disabled{% endif %}>
+                                                                        {% endif %}
                                                                         <small class="text-muted d-block mt-2">Format portrait recommandé pour une fiche plus lisible.</small>
                                                                         {% if object.photo %}
                                                                         <small class="d-block mt-2">
@@ -104,9 +487,10 @@
                                                                             <label for="prenom">Prénom</label>
                                                                             <input type="text" id="prenom" class="form-control" name="prenom"
                                                                                 placeholder="Prénom du stagiaire" {% if object.id %}
-                                                                                value="{{object.prenom}}" disabled {% endif %}>
+                                                                            value="{{object.prenom}}" disabled {% endif %}>
                                                                         </div>
                                                                     </div>
+                                                                    {% if not object.id %}
                                                                     <div class="col-12 col-md-6">
                                                                         <div class="form-group"> {# Changed tm-field-group to form-group #}
                                                                             <label for="telephone">Téléphone</label>
@@ -134,6 +518,7 @@
                                                                             </select>
                                                                         </div>
                                                                     </div>
+                                                                    {% endif %}
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -145,7 +530,13 @@
                                                     <div class="card-header">
                                                         <div>
                                                             <h5 class="mb-1">Informations complémentaires</h5>
-                                                            <p class="text-muted mb-0">Complétez les éléments administratifs et l’adresse physique.</p>
+                                                            <p class="text-muted mb-0">
+                                                                {% if object.id %}
+                                                                Vue d'ensemble des informations administratives et de résidence.
+                                                                {% else %}
+                                                                Complétez les éléments administratifs et l’adresse physique.
+                                                                {% endif %}
+                                                            </p>
                                                         </div>
                                                     </div>
                                                     <div class="card-body">
@@ -173,6 +564,7 @@
                                                                         value="{{ object.nationalite }}" disabled {% endif %}>
                                                                 </div>
                                                             </div>
+                                                            {% if not object.id %}
                                                             {# Removed Niveau d'étude from here #}
                                                             {# Group type_piece and numero_piece for better visibility #}
                                                             <div class="col-12 col-md-6 col-lg-3"> {# Type de pièce #}
@@ -207,9 +599,10 @@
                                                                     <label for="nom_mere">Nom de la mère</label>
                                                                     <input type="text" id="nom_mere" class="form-control" name="nom_mere"
                                                                         placeholder="Nom de la mère" {% if object.id %}
-                                                                        value="{{ object.nom_mere }}" disabled {% endif %}>
+                                                                            value="{{ object.nom_mere }}" disabled {% endif %}>
                                                                 </div>
                                                             </div>
+                                                            {% endif %}
                                                             <div class="col-12"> {# Adresse physique #}
                                                                 <div class="form-group">
                                                                     <label for="adresse">Adresse physique</label>
@@ -228,10 +621,32 @@
                                                     <div class="card-header">
                                                         <div>
                                                             <h5 class="mb-1">Affectation pédagogique</h5>
-                                                            <p class="text-muted mb-0">Associez le stagiaire à sa catégorie et sa filière.</p>
+                                                            <p class="text-muted mb-0">
+                                                                {% if object.id %}
+                                                                Positionnement du stagiaire dans le référentiel de formation.
+                                                                {% else %}
+                                                                Associez le stagiaire à sa catégorie et sa filière.
+                                                                {% endif %}
+                                                            </p>
                                                         </div>
                                                     </div>
                                                     <div class="card-body">
+                                                        {% if object.id %}
+                                                        <div class="row g-3">
+                                                            <div class="col-12 col-md-6">
+                                                                <div class="border rounded p-3 h-100">
+                                                                    <small class="text-muted d-block">Catégorie</small>
+                                                                    <strong>{{ object.categorie }}</strong>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-12 col-md-6">
+                                                                <div class="border rounded p-3 h-100">
+                                                                    <small class="text-muted d-block">Filière</small>
+                                                                    <strong>{{ object.filiere.nom|default:"Non renseignée" }}</strong>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        {% else %}
                                                         <div class="row g-3"> {# Added g-3 for consistent spacing #}
                                                             <div class="col-12 col-md-6 col-xl-4">
                                                                 <div class="form-group"> {# Changed tm-field-group to form-group #}
@@ -265,6 +680,7 @@
                                                                 </div>
                                                             </div>
                                                         </div>
+                                                        {% endif %}
                                                     </div>
                                                 </div>
 
@@ -306,15 +722,50 @@
                                             </div>
 
                                             {# Tab 3: Informations professionnelles #}
+                                            {% if not object.id or object.categorie.titre == "dans l'emploi" %}
                                             <div class="tab-pane fade" id="professional" role="tabpanel" aria-labelledby="professional-tab">
                                                 <div class="card tm-form-panel mt-3" id="professional-info-section"> {# Wrapped in card #}
                                                     <div class="card-header">
                                                         <div>
                                                             <h5 class="mb-1">Informations professionnelles</h5>
-                                                            <p class="text-muted mb-0">Renseignez les détails de l'emploi actuel du stagiaire.</p>
+                                                            <p class="text-muted mb-0">
+                                                                {% if object.id %}
+                                                                Informations liées à l'emploi actuel lorsque le stagiaire est déjà en activité.
+                                                                {% else %}
+                                                                Renseignez les détails de l'emploi actuel du stagiaire.
+                                                                {% endif %}
+                                                            </p>
                                                         </div>
                                                     </div>
                                                     <div class="card-body">
+                                                        {% if object.id %}
+                                                        <div class="row g-3">
+                                                            <div class="col-12 col-md-6">
+                                                                <div class="border rounded p-3 h-100">
+                                                                    <small class="text-muted d-block">Entreprise</small>
+                                                                    <strong>{{ object.entreprise.nom|default:"Non renseignée" }}</strong>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-12 col-md-6">
+                                                                <div class="border rounded p-3 h-100">
+                                                                    <small class="text-muted d-block">Fonction</small>
+                                                                    <strong>{{ object.fonction|default:"Non renseignée" }}</strong>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-12 col-md-6">
+                                                                <div class="border rounded p-3 h-100">
+                                                                    <small class="text-muted d-block">Ancienneté dans l'emploi</small>
+                                                                    <strong>{{ object.anciennete_emploi|default:"Non renseignée" }}</strong>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-12 col-md-6">
+                                                                <div class="border rounded p-3 h-100">
+                                                                    <small class="text-muted d-block">Ancienneté dans l'entreprise</small>
+                                                                    <strong>{{ object.anciennete_entreprise|default:"Non renseignée" }}</strong>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        {% else %}
                                                         <div class="row g-3"> {# Added g-3 for consistent spacing #}
                                                             <div class="col-12 col-md-6">
                                                                 <div class="form-group"> {# Changed tm-field-group to form-group #}
@@ -356,18 +807,23 @@
                                                                 </div>
                                                             </div>
                                                         </div>
+                                                        {% endif %}
                                                     </div>
                                                 </div>
                                             </div>
+                                            {% endif %}
 
-                                            {# Merged Tab: Études & Formations #}
-                                            <div class="tab-pane fade" id="studies-trainings" role="tabpanel" aria-labelledby="studies-trainings-tab">
+                                            {# Tab 4: Études #}
+                                            <div class="tab-pane fade" id="studies" role="tabpanel" aria-labelledby="studies-tab">
                                                 {# General Niveau d'étude card #}
                                                 <div class="card tm-form-panel mt-3">
                                                     <div class="card-header">
                                                         <h4 class="card-title">Niveau d'étude général</h4>
                                                     </div>
                                                     <div class="card-body">
+                                                        {% if object.id %}
+                                                        <p class="mb-0"><strong>{{ object.niveau_etude|default:"Non renseigné" }}</strong></p>
+                                                        {% else %}
                                                         <div class="row g-3">
                                                             <div class="col-12 col-md-6 col-lg-3"> {# Niveau d'étude #}
                                                                 <div class="form-group">
@@ -378,6 +834,7 @@
                                                                 </div>
                                                             </div>
                                                         </div>
+                                                        {% endif %}
                                                     </div>
                                                 </div>
 
@@ -459,13 +916,15 @@
                                                         </div>
                                                     </div>
                                                 </div>
+                                            </div>
 
-                                                {# Content from former "Autres Formations" tab #}
-                                                <div class="card tm-form-panel mt-3"> {# Wrapped in card #}
-                                                    <div class="card-header d-flex justify-content-between align-items-center"> {# Added d-flex for alignment #}
-                                                        <h4 class="card-title mb-0">Formations complémentaires</h4> {# Changed title #}
+                                            {# Tab 5: Autres formations #}
+                                            <div class="tab-pane fade" id="other-trainings" role="tabpanel" aria-labelledby="other-trainings-tab">
+                                                <div class="card tm-form-panel mt-3">
+                                                    <div class="card-header d-flex justify-content-between align-items-center">
+                                                        <h4 class="card-title mb-0">Formations complémentaires</h4>
                                                         {% if not object.id %}
-                                                        <button type="button" id="add-other-training-row" class="btn btn-primary btn-sm">Ajouter une formation</button> {# Added btn-sm #}
+                                                        <button type="button" id="add-other-training-row" class="btn btn-primary btn-sm">Ajouter une formation</button>
                                                         {% endif %}
                                                     </div>
                                                     <div class="card-body">
@@ -492,25 +951,25 @@
                                                                         </table>
                                                                     </div>
                                                                 {% else %}
-                                                                    <p class="text-muted mb-0">Aucune formation complémentaire enregistrée.</p> {# Changed text #}
+                                                                    <p class="text-muted mb-0">Aucune formation complémentaire enregistrée.</p>
                                                                 {% endif %}
                                                             {% else %}
                                                             <div id="other-trainings-container">
                                                                 <div class="other-training-row border rounded p-3 mb-3">
-                                                                    <div class="row g-3"> {# Added g-3 for consistent spacing #}
-                                                                        <div class="col-md-5"> {# Adjusted width #}
+                                                                    <div class="row g-3">
+                                                                        <div class="col-12 col-md-5">
                                                                             <label class="form-label">Intitulé</label>
                                                                             <input type="text" class="form-control" name="autre_formation_intitule[]" placeholder="Ex: Formation en Cybersécurité">
                                                                         </div>
-                                                                        <div class="col-md-5"> {# Adjusted width #}
+                                                                        <div class="col-12 col-md-4">
                                                                             <label class="form-label">Établissement</label>
                                                                             <input type="text" class="form-control" name="autre_formation_etablissement[]" placeholder="Établissement">
                                                                         </div>
-                                                                        <div class="col-md-5"> {# Adjusted width #}
+                                                                        <div class="col-12 col-md-2">
                                                                             <label class="form-label">Année de fin</label>
                                                                             <input type="number" class="form-control" name="autre_formation_annee_fin[]" placeholder="2024">
                                                                         </div>
-                                                                        <div class="col-md-1 d-flex align-items-end"> {# Adjusted width #}
+                                                                        <div class="col-12 col-md-1 d-flex align-items-end">
                                                                             <button type="button" class="btn btn-light-secondary remove-other-training-row">X</button>
                                                                         </div>
                                                                     </div>
@@ -524,13 +983,16 @@
                                         </div>
                                     </div>
 
+                                    {% if not object.id %}
                                     <div class="col-sm-12 d-flex justify-content-end mt-3">
                                         <button type="submit" class="btn btn-primary me-1 mb-1">Enregistrer</button>
                                         <button type="reset" class="btn btn-light-secondary me-1 mb-1">Annuler</button>
                                     </div>
+                                    {% endif %}
                                 </div>
                             </div>
                         </form>
+                        {% endif %}
                     </div>
                 </div>
             </div>
