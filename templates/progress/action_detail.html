@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Détail de l'Action{% endblock title %}
+{% block page_header %}Détail de l'Action de Formation{% endblock page_header %}
+
+{% block content %}
+<div class="page-heading">
+    <div class="page-title">
+        <div class="row">
+            <div class="col-12 col-md-6 order-md-1 order-last">
+                <h3>Action: {{ object.description }}</h3>
+                <p class="text-subtitle text-muted">Informations détaillées sur l'action de formation.</p>
+            </div>
+            <div class="col-12 col-md-6 order-md-2 order-first">
+                <nav aria-label="breadcrumb" class="breadcrumb-header float-start float-lg-end">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{% url 'home' %}">Tableau de bord</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'actions' %}">Actions</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Détail</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <section class="section">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title">Informations Générales</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="description">Description</label>
+                            <p class="form-control-static">{{ object.description }}</p>
+                        </div>
+                        <div class="form-group">
+                            <label for="formation">Formation Associée</label>
+                            <p class="form-control-static">{{ object.formation.nom }}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="date_debut">Date de Début</label>
+                            <p class="form-control-static">{{ object.date_debut|date:"d/m/Y" }}</p>
+                        </div>
+                        <div class="form-group">
+                            <label for="date_fin">Date de Fin</label>
+                            <p class="form-control-static">{{ object.date_fin|date:"d/m/Y" }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title">Stagiaires Inscrits</h4>
+            </div>
+            <div class="card-body">
+                {% if object.detailaction_set.all %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Stagiaire</th>
+                                <th>Statut</th>
+                                <th>Date d'Inscription</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for detail_action in object.detailaction_set.all %}
+                            <tr>
+                                <td><a href="{% url 'stagiaire' detail_action.stagiaire.pk %}">{{ detail_action.stagiaire.get_full_name }}</a></td>
+                                <td>{{ detail_action.statut }}</td>
+                                <td>{{ detail_action.date_inscription|date:"d/m/Y" }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p>Aucun stagiaire inscrit à cette action de formation.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2">
+            <a href="{% url 'actions' %}" class="btn btn-secondary">Retour à la liste</a>
+            {# Ajoutez ici un bouton d'édition si nécessaire #}
+            {# <a href="{% url 'action_edit' object.pk %}" class="btn btn-primary">Modifier</a> #}
+        </div>
+    </section>
+</div>
+{% endblock content %}
