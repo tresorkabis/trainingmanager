@@ -1,7 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
 {% block style %}
-{# Removed simple-datatables style.css #}
 <style>
     .stagiaire-photo-thumbnail {
         width: 50px; /* Adjust size as needed */
@@ -32,44 +31,218 @@
         padding: 1rem;
         color: #6c757d;
     }
+
+    /* Table styling */
+    .table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        border-radius: 1rem;
+        overflow: hidden;
+    }
+
+    .table thead th {
+        background-color: #f8f9fa;
+        color: #25396f;
+        font-weight: 700;
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+        text-align: left;
+    }
+
+    .table tbody tr {
+        transition: background-color 0.2s ease;
+    }
+
+    .table tbody tr:nth-of-type(odd) {
+        background-color: #ffffff;
+    }
+
+    .table tbody tr:nth-of-type(even) {
+        background-color: #fcfdff;
+    }
+
+    .table tbody tr:hover {
+        background-color: #eef2f7;
+    }
+
+    .table tbody td {
+        padding: 0.8rem 1.5rem;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.03);
+        color: #495057;
+    }
+
+    .table tbody td a {
+        color: #435ebe;
+        text-decoration: none;
+    }
+
+    .table tbody td a:hover {
+        text-decoration: underline;
+    }
+
+    /* Pagination styling */
+    .pagination {
+        margin-bottom: 0;
+    }
+
+    .pagination .page-item {
+        margin: 0 0.2rem;
+    }
+
+    .pagination .page-link {
+        border-radius: 0.5rem;
+        padding: 0.5rem 0.9rem;
+        font-size: 0.9rem;
+        color: #435ebe;
+        border: 1px solid #e9ecef;
+        transition: all 0.2s ease;
+    }
+
+    .pagination .page-item.active .page-link {
+        background-color: #435ebe;
+        border-color: #435ebe;
+        color: #fff;
+        box-shadow: 0 2px 8px rgba(67, 94, 190, 0.2);
+    }
+
+    .pagination .page-link:hover:not(.active) {
+        background-color: #f0f1f5;
+        border-color: #d8dce3;
+    }
+
+    .pagination .page-item.pager .page-link {
+        font-weight: bold;
+    }
+
+    .pagination .page-item.disabled .page-link {
+        color: #adb5bd;
+        pointer-events: none;
+        background-color: #ffffff;
+        border-color: #e9ecef;
+    }
+
+    /* Specific styles for stagiaire list */
+    .tm-stagiaire-hero {
+        background:
+            radial-gradient(circle at top right, rgba(67, 94, 190, 0.18), transparent 35%),
+            linear-gradient(135deg, #f7f8fc 0%, #eef3ff 100%);
+        border: 1px solid rgba(67, 94, 190, 0.12);
+        border-radius: 1.25rem;
+        overflow: hidden;
+    }
+
+    .tm-stagiaire-stat {
+        background: rgba(255, 255, 255, 0.76);
+        border: 1px solid rgba(67, 94, 190, 0.1);
+        border-radius: 1rem;
+        padding: 1rem;
+        box-shadow: 0 10px 24px rgba(17, 24, 39, 0.04);
+        height: 100%;
+    }
+
+    .tm-stagiaire-stat__label {
+        display: block;
+        font-size: 0.78rem;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: #6c757d;
+        margin-bottom: 0.35rem;
+    }
+
+    .tm-stagiaire-stat__value {
+        font-size: 1.35rem;
+        font-weight: 700;
+        color: #25396f;
+    }
+
+    .tm-stagiaire-row__title {
+        color: #25396f;
+        font-weight: 700;
+        text-decoration: none;
+    }
+
+    .tm-stagiaire-row__meta {
+        color: #7b8190;
+        font-size: 0.85rem;
+    }
 </style>
 {% endblock style %}
-{% block title %} Dashboard {% endblock title %}
-{% block page_header %}Répertoire des stagiaires{% endblock page_header %}
 
 {% block content %}
 <div class="page-heading">
-    <div class="page-title">
-        <div class="row">
-            <div class="col-12 col-md-6 order-md-1 order-last">
-                <div class="tm-section-titlebar">
+    <section class="tm-stagiaire-hero p-4 p-lg-5 mb-4">
+        <div class="row g-4 align-items-center">
+            <div class="col-12 col-xl-6">
+                <div class="tm-section-titlebar mb-3">
                     <span class="tm-section-titlebar__icon"><i class="bi bi-people"></i></span>
                     <div class="tm-section-titlebar__text">
                         <h3>Stagiaires</h3>
-                        <p>Liste des stagiaires</p>
+                        <p>Gérez le répertoire des stagiaires et leurs parcours.</p>
+                    </div>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="{% url 'stagiaire_create' %}" class="btn btn-primary">
+                        <i class="bi bi-person-plus me-2"></i>Nouveau stagiaire
+                    </a>
+                    {# Add other relevant buttons here if needed #}
+                </div>
+            </div>
+            <div class="col-12 col-xl-6">
+                <div class="row g-3">
+                    <div class="col-6 col-md-4">
+                        <div class="tm-stagiaire-stat">
+                            <span class="tm-stagiaire-stat__label">Total Stagiaires</span>
+                            <span class="tm-stagiaire-stat__value">{{ stats.total }}</span>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-4">
+                        <div class="tm-stagiaire-stat">
+                            <span class="tm-stagiaire-stat__label">Dans l'emploi</span>
+                            <span class="tm-stagiaire-stat__value">{{ stats.dans_emploi }}</span>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-4">
+                        <div class="tm-stagiaire-stat">
+                            <span class="tm-stagiaire-stat__label">Sans emploi</span>
+                            <span class="tm-stagiaire-stat__value">{{ stats.sans_emploi }}</span>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-4">
+                        <div class="tm-stagiaire-stat">
+                            <span class="tm-stagiaire-stat__label">Non défini</span>
+                            <span class="tm-stagiaire-stat__value">{{ stats.non_defini }}</span>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-4"> {# New stat for Masculin #}
+                        <div class="tm-stagiaire-stat">
+                            <span class="tm-stagiaire-stat__label">Masculin</span>
+                            <span class="tm-stagiaire-stat__value">{{ stats.masculin }}</span>
+                        </div>
+                    </div>
+                    <div class="6 col-md-4"> {# New stat for Féminin #}
+                        <div class="tm-stagiaire-stat">
+                            <span class="tm-stagiaire-stat__label">Féminin</span>
+                            <span class="tm-stagiaire-stat__value">{{ stats.feminin }}</span>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="col-12 col-md-6 order-md-2 order-first">
-                <nav aria-label="breadcrumb" class="breadcrumb-header float-start float-lg-end">
-                    <ol class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="{% url 'home' %}">Dashboard</a></li>
-                        <li class="breadcrumb-item active" aria-current="page">stagiaire</li>
-                    </ol>
-                </nav>
-            </div>
         </div>
-    </div>
+    </section>
+
     <section class="section">
         <div class="card tm-listing-card">
-            <div class="card-header">
-                <a href="{% url 'stagiaire_create' %}"><i class="bi bi-person-plus me-2"></i>Nouveau stagiaire</a>
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="card-title mb-0">Catalogue des stagiaires</h4>
+                <a href="{% url 'stagiaire_create' %}" class="btn btn-primary btn-sm">
+                    <i class="bi bi-person-plus me-2"></i>Nouveau stagiaire
+                </a>
             </div>
             <div class="card-body">
                 {# Custom Search Input #}
                 <div class="custom-search-container">
-                    <input type="text" id="searchInput" class="custom-search-input form-control" placeholder="Recherche par nom, postnom, prénom..."> {# Removed me-2 and added form-control #}
-                    {# Removed search button #}
+                    <input type="text" id="searchInput" class="custom-search-input form-control" placeholder="Recherche par nom, postnom, prénom...">
                 </div>
 
                 <div class="table-responsive"> {# Added table-responsive for better mobile display #}
@@ -78,13 +251,14 @@
                             <tr>
                                 <th style="width: 3%;">N°</th>
                                 <th style="width: 5%;">Photo</th>
-                                <th style="width: 25%;">Nom complet</th> {# Combined Nom, Postnom, Prénom #}
+                                <th style="width: 20%;">Nom complet</th> {# Combined Nom, Postnom, Prénom #}
                                 <th style="width: 5%;">Sexe</th>
                                 <th style="width: 10%;">Téléphone</th>
                                 <th style="width: 10%;">Email</th>
                                 <th style="width: 15%;">Formation actuelle</th> {# Changed from Filière #}
                                 <th style="width: 10%;">Catégorie</th>
                                 <th style="width: 12%;">Entreprise</th>
+                                <th style="width: 10%;">Actions</th> {# New column for actions #}
                             </tr>
                         </thead>
                         <tbody id="stagiaireTableBody">
@@ -99,18 +273,28 @@
                                         <img src="{% static 'assets/images/faces/1.jpg' %}" alt="No Photo" class="stagiaire-photo-thumbnail">
                                     {% endif %}
                                 </td>
-                                <td><a href="{% url 'stagiaire' item.id %}">{{ item.nom }} {{ item.postnom }} {{ item.prenom }}</a></td> {# Combined full name #}
+                                <td><a href="{% url 'stagiaire' item.id %}" class="tm-stagiaire-row__title">{{ item.nom }} {{ item.postnom }} {{ item.prenom }}</a></td> {# Combined full name #}
                                 <td>{{ item.sexe }}</td>
                                 <td>{{ item.telephone }}</td>
                                 <td>{{ item.email|default:"N/A" }}</td>
                                 <td>{{ item.current_formation_name|default:"N/A" }}</td> {# Display current formation name #}
                                 <td>{{ item.categorie }}</td>
                                 <td>{{ item.entreprise.nom|default:"N/A" }}</td>
+                                <td>
+                                    <div class="d-flex gap-2">
+                                        <a href="{% url 'stagiaire_update' item.pk %}" class="btn btn-sm btn-outline-primary" title="Modifier">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <a href="{% url 'stagiaire_delete' item.pk %}" class="btn btn-sm btn-outline-danger" title="Supprimer">
+                                            <i class="bi bi-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
                             </tr>
                             {% endfor %}
                             {% else %}
                             <tr id="noResultsRow">
-                                <td colspan="9" class="no-results-message">Pas de stagiaire</td> {# Adjusted colspan #}
+                                <td colspan="10" class="no-results-message">Aucun stagiaire enregistré.</td> {# Adjusted colspan #}
                             </tr>
                             {% endif %}
                         </tbody>
@@ -150,6 +334,7 @@
     </section>
 </div>
 {% endblock content %}
+
 {% block script %}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -163,9 +348,9 @@
             noResultsRow = document.createElement('tr');
             noResultsRow.id = 'noResultsRow';
             const td = document.createElement('td');
-            td.colSpan = 9; // Adjusted colspan for new columns (9 total)
+            td.colSpan = 10; // Adjusted colspan for new columns
             td.className = 'no-results-message';
-            td.textContent = 'Aucun résultat trouvé.';
+            td.textContent = 'Aucun stagiaire trouvé.';
             noResultsRow.appendChild(td);
             noResultsRow.style.display = 'none'; // Hide by default
             tableBody.appendChild(noResultsRow);
@@ -199,7 +384,7 @@
         searchInput.addEventListener('keyup', performSearch);
 
         // Initial display check for no results if the list is empty
-        if (allRows.length === 0 && !noResultsRow.textContent.includes('Pas de stagiaire')) {
+        if (allRows.length === 0 && !noResultsRow.textContent.includes('Aucun stagiaire enregistré.')) {
              noResultsRow.style.display = '';
              noResultsRow.textContent = 'Aucun stagiaire enregistré.';
         } else if (allRows.length > 0) {

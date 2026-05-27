@@ -128,69 +128,69 @@
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="col-12 col-lg-6">
-            <div class="card tm-formateur-detail-card mb-4">
-                <div class="card-header">
-                    <h4 class="card-title mb-0">Modules dispensés</h4>
-                </div>
-                <div class="card-body">
-                    {% if modules_dispenses %}
-                        <div class="table-responsive">
-                            <table class="table table-striped">
-                                <thead>
-                                    <tr>
-                                        <th>Formation</th>
-                                        <th>Module</th>
-                                        <th>Durée (h)</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for module in modules_dispenses %}
-                                    <tr>
-                                        <td>{{ module.formation.nom }}</td>
-                                        <td>{{ module.titre }}</td>
-                                        <td>{{ module.duree_heures }}</td>
-                                    </tr>
+            <div class="col-12 col-lg-6">
+                <div class="card tm-formateur-detail-card mb-4">
+                    <div class="card-header">
+                        <h4 class="card-title mb-0">Modules dispensés</h4>
+                    </div>
+                    <div class="card-body">
+                        {% if modules_dispenses %}
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Formation</th>
+                                            <th>Module</th>
+                                            <th>Durée (h)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for module in modules_dispenses %}
+                                        <tr>
+                                            <td>{{ module.formation.nom }}</td>
+                                            <td>{{ module.titre }}</td>
+                                            <td>{{ module.duree_heures }}</td>
+                                        </tr>
                                     {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    {% else %}
-                        <p class="text-muted">Ce formateur ne dispense aucun module.</p>
-                    {% endif %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <p class="text-muted">Ce formateur ne dispense aucun module.</p>
+                        {% endif %}
+                    </div>
                 </div>
-            </div>
 
-            <div class="card tm-formateur-detail-card mb-4">
-                <div class="card-header">
-                    <h4 class="card-title mb-0">Actions de formation assignées</h4>
-                </div>
-                <div class="card-body">
-                    {% if actions_assignees %}
-                        <div class="table-responsive">
-                            <table class="table table-striped">
-                                <thead>
-                                    <tr>
-                                        <th>Action</th>
-                                        <th>Formation</th>
-                                        <th>Période</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for action in actions_assignees %}
-                                    <tr>
-                                        <td>{{ action.description }}</td>
-                                        <td>{{ action.formation.nom }}</td>
-                                        <td>{{ action.date_debut|date:"d/m/Y" }} au {{ action.date_fin|date:"d/m/Y" }}</td>
-                                    </tr>
+                <div class="card tm-formateur-detail-card mb-4">
+                    <div class="card-header">
+                        <h4 class="card-title mb-0">Actions de formation assignées</h4>
+                    </div>
+                    <div class="card-body">
+                        {% if actions_assignees %}
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Action</th>
+                                            <th>Formation</th>
+                                            <th>Période</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for action in actions_assignees %}
+                                        <tr>
+                                            <td>{{ action.description }}</td>
+                                            <td>{{ action.formation.nom }}</td>
+                                            <td>{{ action.date_debut|date:"d/m/Y" }} au {{ action.date_fin|date:"d/m/Y" }}</td>
+                                        </tr>
                                     {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    {% else %}
-                        <p class="text-muted">Ce formateur n'est assigné à aucune action de formation.</p>
-                    {% endif %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <p class="text-muted">Ce formateur n'est assigné à aucune action de formation.</p>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
         </div>
