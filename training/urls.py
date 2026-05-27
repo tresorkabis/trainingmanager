@@ -1,9 +1,7 @@
-
 from django.urls import path
 
-from training.views.formation_views import FormationCreateView, FormationListView
+from training.views.formation_views import FormationCreateView, FormationListView, FormationDetailView, FormationUpdateView, FormationDeleteView # Importation des vues manquantes
 from training.views.filiere_views import FiliereListView
-from training.views.formation_views import FormationDetailView, FormationListView
 from training.views.filiere_views import FiliereDetailView, FiliereListView
 from training.views.filiere_views import FiliereCreateView, FiliereListView
 from training.views.service_views import ServiceDetailView, ServiceListView
@@ -13,6 +11,8 @@ urlpatterns = [
     path("formations/", FormationListView.as_view(), name="formations"),
     path("formations/create", FormationCreateView.as_view(), name="formation_create"),
     path("formations/<int:pk>", FormationDetailView.as_view(), name="formation"),
+    path("formations/<int:pk>/update", FormationUpdateView.as_view(), name="formation_update"), # Nouvelle URL
+    path("formations/<int:pk>/delete", FormationDeleteView.as_view(), name="formation_delete"), # Nouvelle URL
 
     path("filieres", FiliereListView.as_view(), name="filieres"),
     path("filieres/create", FiliereCreateView.as_view(), name="filiere_create"),

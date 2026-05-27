@@ -1,0 +1,199 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Détail Formateur{% endblock title %}
+{% block page_header %}Détail du Formateur{% endblock page_header %}
+
+{% block style %}
+<style>
+    .tm-formateur-detail-hero {
+        background:
+            radial-gradient(circle at top right, rgba(67, 94, 190, 0.18), transparent 35%),
+            linear-gradient(135deg, #f7f8fc 0%, #eef3ff 100%);
+        border: 1px solid rgba(67, 94, 190, 0.12);
+        border-radius: 1.25rem;
+    }
+
+    .tm-formateur-detail-card {
+        border: 1px solid rgba(15, 23, 42, 0.07);
+        border-radius: 1rem;
+        box-shadow: 0 16px 32px rgba(15, 23, 42, 0.05);
+    }
+
+    .tm-formateur-info-item {
+        padding: 0.75rem 0;
+        border-bottom: 1px dashed #e9ecef;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .tm-formateur-info-item:last-child {
+        border-bottom: none;
+    }
+
+    .tm-formateur-info-label {
+        font-weight: 600;
+        color: #6c757d;
+        flex-basis: 40%;
+    }
+
+    .tm-formateur-info-value {
+        color: #344767;
+        flex-basis: 60%;
+        text-align: right;
+    }
+
+    .tm-formateur-info-value .badge {
+        font-size: 0.85em;
+        padding: 0.4em 0.6em;
+    }
+</style>
+{% endblock style %}
+
+{% block content %}
+<div class="page-heading">
+    <section class="tm-formateur-detail-hero p-4 p-lg-5 mb-4">
+        <div class="row g-4 align-items-center">
+            <div class="col-12 col-lg-8">
+                <div class="tm-section-titlebar">
+                    <span class="tm-section-titlebar__icon"><i class="bi bi-person-badge"></i></span>
+                    <div class="tm-section-titlebar__text">
+                        <h3>{{ formateur.nom }} {{ formateur.postnom }} {{ formateur.prenom }}</h3> {# Added prenom #}
+                        <p>Détails du formateur (Matricule: {{ formateur.matricule }})</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-lg-4 d-flex justify-content-lg-end">
+                <a href="{% url 'formateurs' %}" class="btn btn-light-secondary me-2">
+                    <i class="bi bi-arrow-left me-2"></i>Retour à la liste
+                </a>
+                <a href="{% url 'formateur_update' formateur.pk %}" class="btn btn-primary">
+                    <i class="bi bi-pencil me-2"></i>Modifier
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <section class="section px-3 px-md-4"> {# Added px-3 px-md-4 for horizontal padding #}
+        <div class="row g-3"> {# Added g-3 for consistent gutter spacing #}
+            <div class="col-12 col-lg-6">
+                <div class="card tm-formateur-detail-card mb-4">
+                    <div class="card-header">
+                        <h4 class="card-title mb-0">Informations personnelles</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="tm-formateur-info-item">
+                            <span class="tm-formateur-info-label">Matricule:</span>
+                            <span class="tm-formateur-info-value">{{ formateur.matricule }}</span>
+                        </div>
+                        <div class="tm-formateur-info-item">
+                            <span class="tm-formateur-info-label">Nom:</span>
+                            <span class="tm-formateur-info-value">{{ formateur.nom }}</span>
+                        </div>
+                        <div class="tm-formateur-info-item">
+                            <span class="tm-formateur-info-label">Postnom:</span>
+                            <span class="tm-formateur-info-value">{{ formateur.postnom }}</span>
+                        </div>
+                        <div class="tm-formateur-info-item">
+                            <span class="tm-formateur-info-label">Prénom:</span> {# Added Prénom #}
+                            <span class="tm-formateur-info-value">{{ formateur.prenom|default:"-" }}</span>
+                        </div>
+                        <div class="tm-formateur-info-item">
+                            <span class="tm-formateur-info-label">Email:</span>
+                            <span class="tm-formateur-info-value">{{ formateur.email|default:"-" }}</span>
+                        </div>
+                        <div class="tm-formateur-info-item">
+                            <span class="tm-formateur-info-label">Téléphone:</span>
+                            <span class="tm-formateur-info-value">{{ formateur.telephone|default:"-" }}</span>
+                        </div>
+                        <div class="tm-formateur-info-item">
+                            <span class="tm-formateur-info-label">Adresse:</span>
+                            <span class="tm-formateur-info-value">{{ formateur.adresse|default:"-" }}</span>
+                        </div>
+                        <div class="tm-formateur-info-item">
+                            <span class="tm-formateur-info-label">Spécialité:</span>
+                            <span class="tm-formateur-info-value">{{ formateur.specialite|default:"-" }}</span>
+                        </div>
+                        <div class="tm-formateur-info-item">
+                            <span class="tm-formateur-info-label">Statut:</span>
+                            <span class="tm-formateur-info-value">
+                                {% if formateur.active %}
+                                <span class="badge bg-success">Actif</span>
+                                {% else %}
+                                <span class="badge bg-danger">Inactif</span>
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-lg-6">
+            <div class="card tm-formateur-detail-card mb-4">
+                <div class="card-header">
+                    <h4 class="card-title mb-0">Modules dispensés</h4>
+                </div>
+                <div class="card-body">
+                    {% if modules_dispenses %}
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Formation</th>
+                                        <th>Module</th>
+                                        <th>Durée (h)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for module in modules_dispenses %}
+                                    <tr>
+                                        <td>{{ module.formation.nom }}</td>
+                                        <td>{{ module.titre }}</td>
+                                        <td>{{ module.duree_heures }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted">Ce formateur ne dispense aucun module.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="card tm-formateur-detail-card mb-4">
+                <div class="card-header">
+                    <h4 class="card-title mb-0">Actions de formation assignées</h4>
+                </div>
+                <div class="card-body">
+                    {% if actions_assignees %}
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Action</th>
+                                        <th>Formation</th>
+                                        <th>Période</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for action in actions_assignees %}
+                                    <tr>
+                                        <td>{{ action.description }}</td>
+                                        <td>{{ action.formation.nom }}</td>
+                                        <td>{{ action.date_debut|date:"d/m/Y" }} au {{ action.date_fin|date:"d/m/Y" }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted">Ce formateur n'est assigné à aucune action de formation.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock content %}

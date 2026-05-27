@@ -87,8 +87,10 @@
                                             </div>
                                             <div class="col-8 form-group">
                                                 <input type="number" id="duree_heures" class="form-control" name="duree_heures"
-                                                    placeholder="Durée en heures" {% if object.id %}
-                                                    value="{{ object.duree_heures }}" disabled {% endif %}>
+                                                    placeholder="Calculée automatiquement" {% if object.id %}
+                                                    value="{{ object.duree_heures }}" disabled {% else %}
+                                                    value="0" disabled {# Set to 0 and disabled for new forms #}
+                                                    {% endif %}>
                                             </div>
                                         </div>
                                     </div>
@@ -172,6 +174,7 @@
                                                 <th>Module</th>
                                                 <th>Description</th>
                                                 <th>Durée (heures)</th>
+                                                <th>Formateur</th> {# New column for Formateur #}
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -181,6 +184,7 @@
                                                 <td>{{ module.titre }}</td>
                                                 <td>{{ module.description|default:"-" }}</td>
                                                 <td>{{ module.duree_heures }}</td>
+                                                <td>{{ module.formateur|default:"Non assigné" }}</td> {# Display Formateur #}
                                             </tr>
                                             {% endfor %}
                                         </tbody>
@@ -197,17 +201,26 @@
                             <div id="modules-container">
                                 <div class="module-row border rounded p-3 mb-3">
                                     <div class="row g-3">
-                                        <div class="col-md-4">
+                                        <div class="col-md-3"> {# Adjusted width #}
                                             <label class="form-label">Titre du module</label>
                                             <input type="text" class="form-control" name="module_titre[]" form="formation-form" placeholder="Ex: Introduction">
                                         </div>
-                                        <div class="col-md-6">
+                                        <div class="col-md-4"> {# Adjusted width #}
                                             <label class="form-label">Description</label>
                                             <input type="text" class="form-control" name="module_description[]" form="formation-form" placeholder="Résumé du module">
                                         </div>
-                                        <div class="col-md-1">
+                                        <div class="col-md-2"> {# Adjusted width #}
                                             <label class="form-label">Heures</label>
                                             <input type="number" class="form-control" name="module_duree_heures[]" form="formation-form" min="0" placeholder="0">
+                                        </div>
+                                        <div class="col-md-2"> {# New column for Formateur #}
+                                            <label class="form-label">Formateur</label>
+                                            <select name="module_formateur[]" form="formation-form" class="form-control">
+                                                <option value="">Sélectionner un formateur</option>
+                                                {% for formateur in formateurs %}
+                                                <option value="{{ formateur.id }}">{{ formateur.nom }} {{ formateur.postnom }}</option>
+                                                {% endfor %}
+                                            </select>
                                         </div>
                                         <div class="col-md-1 d-flex align-items-end">
                                             <button type="button" class="btn btn-light-secondary remove-module-row">X</button>
@@ -225,7 +238,6 @@
 </div>
 {% endblock content %}
 {% block script %}
-<script src="{% static 'assets/vendors/simple-datatables/simple-datatables.js' %}"></script>
 <script>
     const modulesContainer = document.getElementById('modules-container');
     const addModuleRowButton = document.getElementById('add-module-row');
@@ -238,6 +250,11 @@
             clonedRow.querySelectorAll('input').forEach((field) => {
                 field.value = '';
             });
+            // Reset selected option for formateur dropdown in cloned row
+            const formateurSelect = clonedRow.querySelector('select[name="module_formateur[]"]');
+            if (formateurSelect) {
+                formateurSelect.value = '';
+            }
 
             modulesContainer.appendChild(clonedRow);
         });
@@ -252,6 +269,10 @@
                 rows[0].querySelectorAll('input').forEach((field) => {
                     field.value = '';
                 });
+                const formateurSelect = rows[0].querySelector('select[name="module_formateur[]"]');
+                if (formateurSelect) {
+                    formateurSelect.value = '';
+                }
                 return;
             }
 

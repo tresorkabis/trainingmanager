@@ -18,16 +18,18 @@ class Formateur(models.Model):
     matricule = models.CharField(max_length=10)
     nom = models.CharField(max_length=50)
     postnom = models.CharField(max_length=50)
+    prenom = models.CharField(max_length=50, blank=True, null=True) # Nouveau champ prénom
     adresse = models.CharField(max_length=50)
     telephone = models.CharField(max_length=15)
     email = models.CharField(max_length=100)
+    specialite = models.CharField(max_length=200, blank=True, null=True) # Ajouté précédemment
 
     active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self): # Correction: __str__ au lieu de _str_
-        return self.nom + "(" + self.postnom + ")"
+        return f"{self.nom} {self.postnom} {self.prenom or ''}".strip() # Inclure le prénom dans __str__
 
 class Action(models.Model):
     description = models.CharField(max_length=50)

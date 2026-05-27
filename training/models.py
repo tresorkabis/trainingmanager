@@ -1,4 +1,5 @@
 from django.db import models
+# from progress.models import Formateur # <-- Cette ligne sera supprimée
 
 class Service(models.Model):
     nom = models.CharField(max_length=200)
@@ -21,6 +22,8 @@ class Filiere(models.Model):
     def __str__(self):
         return self.nom
     
+# Le modèle Formateur est défini dans progress.models, nous n'avons pas besoin de le définir ici.
+
 class Formation(models.Model):
     nom = models.CharField(max_length=200)
     duree = models.IntegerField(default=0)
@@ -46,6 +49,7 @@ class Module(models.Model):
     titre = models.CharField(max_length=200)
     description = models.TextField(blank=True, null=True)
     duree_heures = models.PositiveIntegerField(default=0, verbose_name="Durée en heures")
+    formateur = models.ForeignKey('progress.Formateur', on_delete=models.SET_NULL, null=True, blank=True, related_name="modules_dispenses") # <-- Référence de chaîne ici
     ordre = models.PositiveIntegerField(default=1)
 
     active = models.BooleanField(default=True)

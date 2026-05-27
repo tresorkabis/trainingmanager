@@ -151,6 +151,56 @@ class Command(BaseCommand):
             standard_user.profile = user_profile
             standard_user.save()
 
+        # --- Début de la section Formateurs (déplacée plus haut) ---
+        formateurs = {} # Initialiser le dictionnaire formateurs ici
+        formateur_specs_data = [
+            ("FM001", "Kabasele", "Mwamba", "Jean", "Kinshasa / Kintambo", "0817000001", "kabasele.demo@training.local", "Electricité"),
+            ("FM002", "Ngoy", "Kabeya", "Marie", "Kinshasa / Limete", "0817000002", "ngoy.demo@training.local", "Informatique"),
+            ("FM003", "Lwamba", "Kalala", "Pierre", "Lubumbashi / Kamalondo", "0971000003", "lwamba.demo@training.local", "Mécanique"),
+            ("FM004", "Mufwankolo", "Nzuzi", "Sophie", "Kinshasa / Ngaliema", "0817000004", "mufwankolo.demo@training.local", "Gestion"),
+            ("FM005", "Kazadi", "Mutombo", "Paul", "Kinshasa / Limete", "0817000005", "kazadi.demo@training.local", "Automatisme"),
+        ]
+        for matricule, nom, postnom, prenom, adresse, telephone, email, specialite in formateur_specs_data:
+            formateur, _ = Formateur.objects.get_or_create(
+                matricule=matricule,
+                defaults={
+                    "nom": nom,
+                    "postnom": postnom,
+                    "prenom": prenom, # Nouveau champ
+                    "adresse": adresse,
+                    "telephone": telephone,
+                    "email": email,
+                    "specialite": specialite, # Nouveau champ
+                },
+            )
+            changed = False
+            for field, value in {
+                "nom": nom,
+                "postnom": postnom,
+                "prenom": prenom, # Nouveau champ
+                "adresse": adresse,
+                "telephone": telephone,
+                "email": email,
+                "specialite": specialite, # Nouveau champ
+            }.items():
+                if getattr(formateur, field) != value:
+                    setattr(formateur, field, value)
+                    changed = True
+            if changed:
+                formateur.save()
+            formateurs[matricule] = formateur # Peupler le dictionnaire formateurs
+        
+        formateurs_list = list(formateurs.values()) # Créer la liste des objets Formateur
+        if not formateurs_list:
+            self.stdout.write(self.style.WARNING("Aucun formateur trouvé après création. Création de formateurs par défaut."))
+            # Fallback si, pour une raison quelconque, formateurs_list est vide
+            # Cela ne devrait pas arriver si les formateurs sont créés juste au-dessus
+            formateur1, _ = Formateur.objects.get_or_create(matricule="FM001", defaults={"nom": "Kabasele", "postnom": "Mwamba", "prenom": "Jean", "adresse": "Kinshasa / Kintambo", "telephone": "0817000001", "email": "kabasele.demo@training.local", "specialite": "Electricité"})
+            formateur2, _ = Formateur.objects.get_or_create(matricule="FM002", defaults={"nom": "Ngoy", "postnom": "Kabeya", "prenom": "Marie", "adresse": "Kinshasa / Limete", "telephone": "0817000002", "email": "ngoy.demo@training.local", "specialite": "Informatique"})
+            formateurs_list = [formateur1, formateur2]
+        # --- Fin de la section Formateurs ---
+
+        formateur_index = 0 # Réinitialiser l'index pour l'assignation des modules
 
         formations = {}
         formation_specs = [
@@ -168,13 +218,13 @@ class Command(BaseCommand):
             frais_participation = spec["frais_participation"]
             frais_jury = spec["frais_jury"]
             cout = spec["cout"]
-            duree_heures = duree * 20 * 7 # Assuming 20 working days/month, 7 hours/day
+            # duree_heures sera calculée à partir des modules
 
             formation, _ = Formation.objects.get_or_create(
                 nom=nom,
                 defaults={
                     "duree": duree,
-                    "duree_heures": duree_heures,
+                    "duree_heures": 0, # Initialiser à 0, sera mis à jour après les modules
                     "filiere": filieres[filiere_nom],
                     "cout": cout,
                     "frais_participation": frais_participation,
@@ -190,9 +240,9 @@ class Command(BaseCommand):
             if formation.duree != duree:
                 formation.duree = duree
                 changed = True
-            if formation.duree_heures != duree_heures:
-                formation.duree_heures = duree_heures
-                changed = True
+            # if formation.duree_heures != duree_heures: # Cette ligne est supprimée car duree_heures est calculée
+            #     formation.duree_heures = duree_heures
+            #     changed = True
             if formation.cout != cout:
                 formation.cout = cout
                 changed = True
@@ -210,16 +260,31 @@ class Command(BaseCommand):
                 changed = True
             if changed:
                 formation.save()
+            
             Module.objects.filter(formation=formation).delete()
+            
+            total_duree_heures_for_formation = 0 # Initialiser le total pour cette formation
             for ordre, module_spec in enumerate(spec.get("modules", []), start=1):
-                titre, description, duree_heures = module_spec
+                titre, description, duree_module_heures = module_spec # Renommé pour éviter conflit
+                
+                formateur_to_assign = formateurs_list[formateur_index % len(formateurs_list)]
+                
                 Module.objects.create(
                     formation=formation,
                     titre=titre,
                     description=description,
-                    duree_heures=duree_heures,
+                    duree_heures=duree_module_heures,
+                    formateur=formateur_to_assign,
                     ordre=ordre,
                 )
+                total_duree_heures_for_formation += duree_module_heures # Ajouter la durée du module
+                formateur_index += 1 # Passer au formateur suivant pour le prochain module
+            
+            # Mettre à jour la durée en heures de la formation après la création de tous les modules
+            if formation.duree_heures != total_duree_heures_for_formation:
+                formation.duree_heures = total_duree_heures_for_formation
+                formation.save(update_fields=['duree_heures'])
+
             formations[nom] = formation
 
         # Create demo Entreprise instances
@@ -379,7 +444,7 @@ class Command(BaseCommand):
                     }
                 ],
                 "entreprise_nom": "Alpha Consulting",
-                "fonction": "Technicien de maintenance",
+                "fonction": "Technicien Électricien",
                 "anciennete_emploi": 6,
                 "anciennete_entreprise": 4,
                 "photo": "stagiaires/photo1.jpg",
@@ -557,53 +622,29 @@ class Command(BaseCommand):
                 type_action.save(update_fields=["libelle"])
             type_actions[code] = type_action
 
-        formateurs = {}
-        for matricule, nom, postnom, adresse, telephone, email in [
-            ("FM001", "Kabasele", "Mwamba", "Kinshasa / Kintambo", "0817000001", "kabasele.demo@training.local"),
-            ("FM002", "Ngoy", "Kabeya", "Kinshasa / Limete", "0817000002", "ngoy.demo@training.local"),
-        ]:
-            formateur, _ = Formateur.objects.get_or_create(
-                matricule=matricule,
-                defaults={
-                    "nom": nom,
-                    "postnom": postnom,
-                    "adresse": adresse,
-                    "telephone": telephone,
-                    "email": email,
-                },
-            )
-            changed = False
-            for field, value in {
-                "nom": nom,
-                "postnom": postnom,
-                "adresse": adresse,
-                "telephone": telephone,
-                "email": email,
-            }.items():
-                if getattr(formateur, field) != value:
-                    setattr(formateur, field, value)
-                    changed = True
-            if changed:
-                formateur.save()
-            formateurs[matricule] = formateur
-
         actions = {}
         action_specs = [
             {"description": "Session Electricite - Cohorte A", "date_debut": date(2026, 5, 20), "date_fin": date(2026, 11, 20), "formation_nom": "Electricite batiment", "formateur_matricules": ["FM001"]},
             {"description": "Pack Office - Vague Mai", "date_debut": date(2026, 5, 18), "date_fin": date(2026, 8, 18), "formation_nom": "Pack Office professionnel", "formateur_matricules": ["FM002"]},
-            {"description": "Maintenance Preventive - Juin", "date_debut": date(2026, 6, 1), "date_fin": date(2026, 9, 1), "formation_nom": "Maintenance preventive", "formateur_matricules": ["FM001"]},
+            {"description": "Maintenance Preventive - Juin", "date_debut": date(2026, 6, 1), "date_fin": date(2026, 9, 1), "formation_nom": "Maintenance preventive", "formateur_matricules": ["FM001", "FM002"]}, # Corrected here
             {"description": "Secretaire de Direction - Sept", "date_debut": date(2026, 9, 1), "date_fin": date(2027, 3, 1), "formation_nom": "Secretaire de direction", "formateur_matricules": ["FM002"]},
             {"description": "Automatisme Avance - Juillet", "date_debut": date(2026, 7, 10), "date_fin": date(2026, 10, 10), "formation_nom": "Automatisme industriel", "formateur_matricules": ["FM001", "FM002"]},
         ]
         for spec in action_specs:
-            action, _ = Action.objects.get_or_create(
+            formation_for_action = formations[spec["formation_nom"]] # Get the Formation object
+            
+            self.stdout.write(self.style.NOTICE(f"Processing Action: {spec['description']} for Formation: {formation_for_action.nom}"))
+
+            action, created = Action.objects.get_or_create( # Use get_or_create for action
                 description=spec["description"],
                 defaults={
                     "date_debut": spec["date_debut"],
                     "date_fin": spec["date_fin"],
-                    "formation": formations[spec["formation_nom"]],
+                    "formation": formation_for_action,
                 },
             )
+            
+            # Update logic for existing actions (similar to formations and stagiaires)
             changed = False
             if action.date_debut != spec["date_debut"]:
                 action.date_debut = spec["date_debut"]
@@ -611,12 +652,26 @@ class Command(BaseCommand):
             if action.date_fin != spec["date_fin"]:
                 action.date_fin = spec["date_fin"]
                 changed = True
-            if action.formation_id != formations[spec["formation_nom"]].id:
-                action.formation = formations[spec["formation_nom"]]
+            if action.formation_id != formation_for_action.id:
+                action.formation = formation_for_action
                 changed = True
             if changed:
                 action.save()
-            action.formateurs.set([formateurs[matricule] for matricule in spec.get("formateur_matricules", []) if matricule in formateurs])
+
+            # --- MODIFIED LOGIC: Assign ALL formateurs from modules of the associated formation ---
+            # Get formateurs assigned to modules of this specific formation
+            formateurs_from_modules = Formateur.objects.filter(
+                modules_dispenses__formation=formation_for_action
+            ).distinct()
+            
+            # Convert to a list of Formateur objects
+            assigned_formateurs_for_action = list(formateurs_from_modules)
+
+            self.stdout.write(self.style.NOTICE(f"  Assigning Formateurs from modules for '{formation_for_action.nom}': {[str(f) for f in assigned_formateurs_for_action]}"))
+            
+            action.formateurs.set(assigned_formateurs_for_action)
+            # --- END MODIFIED LOGIC ---
+
             actions[spec["description"]] = action
 
         detail_specs = [

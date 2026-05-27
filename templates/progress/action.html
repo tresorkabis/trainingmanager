@@ -97,14 +97,7 @@
                             <div class="form-group">
                                 <label for="formateurs">Formateurs affectés</label>
                                 <select id="formateurs" class="form-select" name="formateurs" multiple size="6">
-                                    {% for formateur in formateurs %}
-                                    <option
-                                        value="{{ formateur.pk }}"
-                                        {% if formateur.pk in selected_formateur_ids %}selected{% endif %}
-                                    >
-                                        {{ formateur.nom }} {{ formateur.postnom }}{% if formateur.matricule %} - {{ formateur.matricule }}{% endif %}
-                                    </option>
-                                    {% endfor %}
+                                    {# Options will be populated by JavaScript #}
                                 </select>
                                 <small class="text-muted d-block mt-2">Maintenez `Ctrl` ou `Cmd` pour sélectionner plusieurs formateurs.</small>
                             </div>
@@ -144,4 +137,73 @@
         </div>
     </section>
 </div>
+
+{# JSON data for JavaScript #}
+{{ formations_json|json_script:"formations-data" }}
+{{ formateurs_json|json_script:"formateurs-data" }}
+{{ selected_formateur_ids|json_script:"selected-formateurs-data" }}
+
 {% endblock content %}
+
+{% block script %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const formationSelect = document.getElementById('formation');
+        const formateursSelect = document.getElementById('formateurs');
+
+        // Get JSON data from the template
+        const allFormationsData = JSON.parse(document.getElementById('formations-data').textContent);
+        const allFormateursData = JSON.parse(document.getElementById('formateurs-data').textContent);
+        const initialSelectedFormateurs = JSON.parse(document.getElementById('selected-formateurs-data').textContent);
+
+        function updateFormateursDropdown() {
+            const selectedFormationId = formationSelect.value;
+            formateursSelect.innerHTML = ''; // Clear current options
+
+            if (!selectedFormationId) {
+                // If no formation is selected, disable and show a default option
+                const option = document.createElement('option');
+                option.value = '';
+                option.textContent = 'Sélectionnez une formation d\'abord';
+                formateursSelect.appendChild(option);
+                formateursSelect.disabled = true;
+                return;
+            }
+
+            formateursSelect.disabled = false;
+            const selectedFormation = allFormationsData.find(f => String(f.id) === selectedFormationId);
+
+            if (selectedFormation && selectedFormation.formateurs_ids.length > 0) {
+                const allowedFormateurIds = new Set(selectedFormation.formateurs_ids);
+
+                allFormateursData.forEach(formateur => {
+                    if (allowedFormateurIds.has(formateur.id)) {
+                        const option = document.createElement('option');
+                        option.value = formateur.id;
+                        option.textContent = `${formateur.nom} ${formateur.postnom}`;
+
+                        // Pre-select formateurs if in edit mode or submitted with errors
+                        if (initialSelectedFormateurs.includes(formateur.id)) {
+                            option.selected = true;
+                        }
+                        formateursSelect.appendChild(option);
+                    }
+                });
+            } else {
+                const option = document.createElement('option');
+                option.value = '';
+                option.textContent = 'Aucun formateur disponible pour cette formation';
+                formateursSelect.appendChild(option);
+                formateursSelect.disabled = true;
+            }
+        }
+
+        // Attach event listener
+        formationSelect.addEventListener('change', updateFormateursDropdown);
+
+        // Initial call to populate formateurs based on pre-selected formation (if any)
+        // and to handle the initial state (e.g., in edit mode)
+        updateFormateursDropdown();
+    });
+</script>
+{% endblock script %}

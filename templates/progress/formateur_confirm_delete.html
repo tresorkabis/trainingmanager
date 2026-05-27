@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ titre }} un Formateur{% endblock title %}
+{% block page_header %}{{ titre }} un Formateur{% endblock page_header %}
+
+{% block content %}
+<div class="page-heading">
+    <section class="section">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title">Confirmation de suppression</h4>
+            </div>
+            <div class="card-body">
+                <p>Êtes-vous sûr de vouloir supprimer le formateur "{{ object.nom }} {{ object.postnom }}" (Matricule: {{ object.matricule }}) ?</p>
+                <form method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Confirmer la suppression</button>
+                    <a href="{% url 'formateurs' %}" class="btn btn-light-secondary">Annuler</a>
+                </form>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock content %}

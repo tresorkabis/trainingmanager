@@ -1,3 +1,4 @@
+import json # Import the json module
 from datetime import date
 
 from django.contrib.auth.decorators import login_required
@@ -11,7 +12,7 @@ from django.views import View
 from django.views.generic import DeleteView, DetailView, ListView, UpdateView
 
 from progress.models import Action, Formateur
-from training.models import Formation
+from training.models import Formation, Module # Import Module
 
 
 class ActionPermissionMixin:
@@ -20,8 +21,8 @@ class ActionPermissionMixin:
 
     def get_allowed_formations(self):
         user = self.request.user
-        queryset = Formation.objects.all()
-
+        queryset = Formation.objects.all().prefetch_related('modules__formateur') # Add prefetch
+        
         if user.is_superuser or (user.profile and user.profile.name == "Manager"):
             return queryset
         if user.profile and user.profile.name == "Chef de filière" and user.filiere:
@@ -61,9 +62,38 @@ class ActionPermissionMixin:
         return {"label": "En cours", "badge": "bg-light-success text-success", "key": "ongoing"}
 
     def build_form_context(self, **kwargs):
+        allowed_formations = self.get_allowed_formations()
+        all_formateurs = Formateur.objects.filter(active=True).order_by("nom", "postnom")
+
+        # Prepare formations data for JavaScript
+        formations_data = []
+        for formation in allowed_formations:
+            modules_data = []
+            # Get unique formateurs for this formation's modules
+            formateurs_for_formation = set()
+            for module in formation.modules.all():
+                if module.formateur:
+                    formateurs_for_formation.add(module.formateur)
+                modules_data.append({
+                    'id': module.id,
+                    'titre': module.titre,
+                    'duree_heures': module.duree_heures,
+                    'formateur_id': module.formateur.id if module.formateur else None,
+                    'formateur_name': str(module.formateur) if module.formateur else 'Non assigné',
+                })
+            
+            formations_data.append({
+                'id': formation.id,
+                'nom': formation.nom,
+                'modules': modules_data,
+                'formateurs_ids': [f.id for f in formateurs_for_formation], # List of formateur IDs for this formation
+            })
+
         context = {
-            "formations": self.get_allowed_formations().select_related("filiere").order_by("nom"),
-            "formateurs": Formateur.objects.filter(active=True).order_by("nom", "postnom"),
+            "formations": allowed_formations, # Keep original queryset for Django form fields
+            "formateurs": all_formateurs, # Keep original queryset for Django form fields
+            "formations_json": json.dumps(formations_data), # JSON data for JavaScript
+            "formateurs_json": json.dumps(list(all_formateurs.values('id', 'nom', 'postnom'))), # JSON data for JavaScript
             "today": date.today(),
             "selected_formateur_ids": [],
         }
@@ -78,10 +108,29 @@ class ActionPermissionMixin:
             errors.append("La formation sélectionnée n'est pas autorisée pour votre périmètre.")
         if date_fin and date_debut and date_fin < date_debut:
             errors.append("La date de fin doit être postérieure ou égale à la date de début.")
-        requested_formateurs = set(self.normalize_formateur_ids(formateur_ids))
-        existing_formateurs = set(Formateur.objects.filter(pk__in=requested_formateurs).values_list("pk", flat=True))
-        if requested_formateurs != existing_formateurs:
-            errors.append("Au moins un formateur sélectionné est introuvable.")
+        
+        # --- Nouvelle logique de validation des formateurs ---
+        if formation_id:
+            try:
+                selected_formation = Formation.objects.get(pk=formation_id)
+                # Get formateurs assigned to modules of this specific formation
+                allowed_formateur_ids_for_formation = set(
+                    Module.objects.filter(formation=selected_formation)
+                    .exclude(formateur__isnull=True)
+                    .values_list('formateur__id', flat=True)
+                )
+                
+                requested_formateurs_pks = set(self.normalize_formateur_ids(formateur_ids))
+                
+                for pk in requested_formateurs_pks:
+                    if pk not in allowed_formateur_ids_for_formation:
+                        formateur_obj = Formateur.objects.get(pk=pk)
+                        errors.append(
+                            f"Le formateur '{formateur_obj.nom} {formateur_obj.postnom}' ne dispense aucun module de la formation sélectionnée."
+                        )
+            except Formation.DoesNotExist:
+                errors.append("La formation sélectionnée est introuvable.")
+        # --- Fin nouvelle logique ---
 
         return errors
 
