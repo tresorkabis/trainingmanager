@@ -4,7 +4,7 @@ from django.db.models import Count
 
 from intern.models import Stagiaire
 from progress.models import Action
-from training.models import Filiere, Formation, Service
+from training.models import Filiere, Metier, Service # Changé Formation à Metier
 from users.models import User, Profile # Importation de Profile
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
@@ -19,7 +19,7 @@ class HomeView(View):
         # Initialisation des querysets de base
         stagiaires_queryset = Stagiaire.objects.all()
         actions_queryset = Action.objects.all()
-        formations_queryset = Formation.objects.all()
+        metiers_queryset = Metier.objects.all() # Changé formations_queryset à metiers_queryset
         filieres_queryset = Filiere.objects.all()
 
         # Filtrage basé sur le rôle de l'utilisateur
@@ -29,20 +29,20 @@ class HomeView(View):
         elif user.profile and user.profile.name == "Chef de filière" and user.filiere:
             # Un chef de filière voit les données de sa filière
             stagiaires_queryset = stagiaires_queryset.filter(filiere=user.filiere)
-            actions_queryset = actions_queryset.filter(formation__filiere=user.filiere)
-            formations_queryset = formations_queryset.filter(filiere=user.filiere)
+            actions_queryset = actions_queryset.filter(metier__filiere=user.filiere) # Changé formation__filiere à metier__filiere
+            metiers_queryset = metiers_queryset.filter(filiere=user.filiere) # Changé formations_queryset à metiers_queryset
             filieres_queryset = filieres_queryset.filter(pk=user.filiere.pk) # Ne voit que sa propre filière
         elif user.profile and user.profile.name == "Chef de service" and user.service:
             # Un chef de service voit les données des filières de son service
             stagiaires_queryset = stagiaires_queryset.filter(filiere__service=user.service)
-            actions_queryset = actions_queryset.filter(formation__filiere__service=user.service)
-            formations_queryset = formations_queryset.filter(filiere__service=user.service)
+            actions_queryset = actions_queryset.filter(metier__filiere__service=user.service) # Changé formation__filiere__service à metier__filiere__service
+            metiers_queryset = metiers_queryset.filter(filiere__service=user.service) # Changé formations_queryset à metiers_queryset
             filieres_queryset = filieres_queryset.filter(service=user.service)
         else:
             # Pour les autres profils (ex: "User") ou si pas de lien, ne voient aucune donnée
             stagiaires_queryset = Stagiaire.objects.none()
             actions_queryset = Action.objects.none()
-            formations_queryset = Formation.objects.none()
+            metiers_queryset = Metier.objects.none() # Changé formations_queryset à metiers_queryset
             filieres_queryset = Filiere.objects.none()
 
 
@@ -54,9 +54,9 @@ class HomeView(View):
             .annotate(total=Count("id"))
         }
         action_counts = {
-            item["formation__filiere__nom"]: item["total"]
-            for item in actions_queryset.exclude(formation__filiere__nom__isnull=True)
-            .values("formation__filiere__nom")
+            item["metier__filiere__nom"]: item["total"] # Changé formation__filiere__nom à metier__filiere__nom
+            for item in actions_queryset.exclude(metier__filiere__nom__isnull=True) # Changé formation__filiere__nom à metier__filiere__nom
+            .values("metier__filiere__nom") # Changé formation__filiere__nom à metier__filiere__nom
             .annotate(total=Count("id"))
         }
 
@@ -81,7 +81,7 @@ class HomeView(View):
 
         ctx = {
             "link":"home",
-            "nbformations" : formations_queryset.count(),
+            "nbmetiers" : metiers_queryset.count(), # Changé nbformations à nbmetiers
             "nbfilieres" : filieres_queryset.count(),
             "nbstagiaires" : stagiaires_queryset.count(),
             "nbactions" : actions_queryset.count(),

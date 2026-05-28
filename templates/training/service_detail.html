@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Détail Service{% endblock title %}
+{% block page_header %}Détail du Service{% endblock page_header %}
+
+{% block style %}
+<style>
+    .tm-service-detail-hero {
+        background:
+            radial-gradient(circle at top right, rgba(67, 94, 190, 0.18), transparent 35%),
+            linear-gradient(135deg, #f7f8fc 0%, #eef3ff 100%);
+        border: 1px solid rgba(67, 94, 190, 0.12);
+        border-radius: 1.25rem;
+    }
+
+    .tm-service-detail-card {
+        border: 1px solid rgba(15, 23, 42, 0.07);
+        border-radius: 1rem;
+        box-shadow: 0 16px 32px rgba(15, 23, 42, 0.05);
+    }
+
+    .tm-service-info-item {
+        padding: 0.75rem 0;
+        border-bottom: 1px dashed #e9ecef;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .tm-service-info-item:last-child {
+        border-bottom: none;
+    }
+
+    .tm-service-info-label {
+        font-weight: 600;
+        color: #6c757d;
+        flex-basis: 40%;
+    }
+
+    .tm-service-info-value {
+        color: #344767;
+        flex-basis: 60%;
+        text-align: right;
+    }
+
+    .tm-service-info-value .badge {
+        font-size: 0.85em;
+        padding: 0.4em 0.6em;
+    }
+</style>
+{% endblock style %}
+
+{% block content %}
+<div class="page-heading">
+    <section class="tm-service-detail-hero p-4 p-lg-5 mb-4">
+        <div class="row g-4 align-items-center">
+            <div class="col-12 col-lg-8">
+                <div class="tm-section-titlebar">
+                    <span class="tm-section-titlebar__icon"><i class="bi bi-gear"></i></span>
+                    <div class="tm-section-titlebar__text">
+                        <h3>{{ service.nom }}</h3>
+                        <p>Détails du service</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-lg-4 d-flex justify-content-lg-end">
+                <a href="{% url 'services' %}" class="btn btn-light-secondary me-2">
+                    <i class="bi bi-arrow-left me-2"></i>Retour à la liste
+                </a>
+                <a href="{% url 'service_update' service.pk %}" class="btn btn-primary">
+                    <i class="bi bi-pencil me-2"></i>Modifier
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <section class="section px-3 px-md-4">
+        <div class="row g-3">
+            <div class="col-12 col-lg-6">
+                <div class="card tm-service-detail-card mb-4">
+                    <div class="card-header">
+                        <h4 class="card-title mb-0">Informations générales</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="tm-service-info-item">
+                            <span class="tm-service-info-label">Nom du service:</span>
+                            <span class="tm-service-info-value">{{ service.nom }}</span>
+                        </div>
+                        <div class="tm-service-info-item">
+                            <span class="tm-service-info-label">Statut:</span>
+                            <span class="tm-service-info-value">
+                                {% if service.active %}
+                                <span class="badge bg-success">Actif</span>
+                                {% else %}
+                                <span class="badge bg-danger">Inactif</span>
+                                {% endif %}
+                            </span>
+                        </div>
+                        <div class="tm-service-info-item">
+                            <span class="tm-service-info-label">Date de création:</span>
+                            <span class="tm-service-info-value">{{ service.created_at|date:"d/m/Y H:i" }}</span>
+                        </div>
+                        <div class="tm-service-info-item">
+                            <span class="tm-service-info-label">Dernière mise à jour:</span>
+                            <span class="tm-service-info-value">{{ service.updated_at|date:"d/m/Y H:i" }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-lg-6">
+                <div class="card tm-service-detail-card mb-4">
+                    <div class="card-header">
+                        <h4 class="card-title mb-0">Filières associées</h4>
+                    </div>
+                    <div class="card-body">
+                        {% if filieres_associees %}
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Nom de la filière</th>
+                                            <th>Formations</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for filiere in filieres_associees %}
+                                        <tr>
+                                            <td>{{ filiere.nom }}</td>
+                                            <td>
+                                                {% if filiere.formation_set.all %}
+                                                    {% for formation in filiere.formation_set.all %}
+                                                        <span class="badge bg-info">{{ formation.nom }}</span>{% if not forloop.last %}<br>{% endif %}
+                                                    {% endfor %}
+                                                {% else %}
+                                                    -
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <p class="text-muted">Aucune filière associée à ce service.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock content %}

@@ -139,7 +139,7 @@
                                 <table class="table table-striped">
                                     <thead>
                                         <tr>
-                                            <th>Formation</th>
+                                            <th>Métier</th> {# Changed Formation to Métier #}
                                             <th>Module</th>
                                             <th>Durée (h)</th>
                                         </tr>
@@ -147,7 +147,7 @@
                                     <tbody>
                                         {% for module in modules_dispenses %}
                                         <tr>
-                                            <td>{{ module.formation.nom }}</td>
+                                            <td>{{ module.metier.nom }}</td> {# Changed module.formation.nom to module.metier.nom #}
                                             <td>{{ module.titre }}</td>
                                             <td>{{ module.duree_heures }}</td>
                                         </tr>
@@ -163,7 +163,7 @@
 
                 <div class="card tm-formateur-detail-card mb-4">
                     <div class="card-header">
-                        <h4 class="card-title mb-0">Actions de formation assignées</h4>
+                        <h4 class="card-title mb-0">Actions de métier assignées</h4> {# Changed Actions de formation assignées to Actions de métier assignées #}
                     </div>
                     <div class="card-body">
                         {% if actions_assignees %}
@@ -172,7 +172,7 @@
                                     <thead>
                                         <tr>
                                             <th>Action</th>
-                                            <th>Formation</th>
+                                            <th>Métier</th> {# Changed Formation to Métier #}
                                             <th>Période</th>
                                         </tr>
                                     </thead>
@@ -180,7 +180,7 @@
                                         {% for action in actions_assignees %}
                                         <tr>
                                             <td>{{ action.description }}</td>
-                                            <td>{{ action.formation.nom }}</td>
+                                            <td>{{ action.metier.nom }}</td> {# Changed action.formation.nom to action.metier.nom #}
                                             <td>{{ action.date_debut|date:"d/m/Y" }} au {{ action.date_fin|date:"d/m/Y" }}</td>
                                         </tr>
                                     {% endfor %}
@@ -188,7 +188,7 @@
                                 </table>
                             </div>
                         {% else %}
-                            <p class="text-muted">Ce formateur n'est assigné à aucune action de formation.</p>
+                            <p class="text-muted">Ce formateur n'est assigné à aucune action de métier.</p> {# Changed action de formation to action de métier #}
                         {% endif %}
                     </div>
                 </div>

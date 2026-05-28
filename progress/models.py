@@ -1,17 +1,17 @@
 from django.db import models
 
 from intern.models import Stagiaire
-from training.models import Formation
+from training.models import Metier # Changé Formation à Metier
 
 class TypeAction(models.Model):
-    code = models.CharField(max_length=10)
+    code = models.CharField(max_length=10, unique=True) # Ajout de unique=True
     libelle = models.CharField(max_length=100)
 
     active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    def __str__(self): # Correction: __str__ au lieu de _str_
+    def __str__(self):
         return self.code + " (" + self.libelle + ")"
 
 class Formateur(models.Model):
@@ -28,21 +28,22 @@ class Formateur(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    def __str__(self): # Correction: __str__ au lieu de _str_
+    def __str__(self):
         return f"{self.nom} {self.postnom} {self.prenom or ''}".strip() # Inclure le prénom dans __str__
 
 class Action(models.Model):
     description = models.CharField(max_length=50)
     date_debut = models.DateField()
     date_fin = models.DateField()
-    formation = models.ForeignKey(Formation, on_delete=models.CASCADE)
+    metier = models.ForeignKey(Metier, on_delete=models.CASCADE, related_name="actions") # Changé formation à metier, ajouté related_name
     formateurs = models.ManyToManyField("Formateur", blank=True, related_name="actions")
+    type_action = models.ForeignKey(TypeAction, on_delete=models.SET_NULL, null=True, blank=True, related_name="actions_liees") # Nouveau ForeignKey
 
     active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    def __str__(self): # Correction: __str__ au lieu de _str_
+    def __str__(self):
         return str(self.id) +"(" + self.description +")"
 
 class DetailAction(models.Model):
@@ -55,5 +56,5 @@ class DetailAction(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    def __str__(self): # Correction: __str__ au lieu de _str_
-        return str(self.id) +"(" + self.stagiaire.nom + " - " + self.action.formation.nom + ")"
+    def __str__(self):
+        return str(self.id) +"(" + self.stagiaire.nom + " - " + self.action.metier.nom + ")" # Changé action.formation.nom à action.metier.nom

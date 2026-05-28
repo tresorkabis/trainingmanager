@@ -8,11 +8,11 @@ from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.generic import DetailView, ListView, UpdateView, DeleteView # Import UpdateView and DeleteView
 
-from training.models import Filiere, Formation, Module
+from training.models import Filiere, Metier, Module # Changé Formation à Metier
 from progress.models import Formateur, Action as ProgressAction # Import Action from progress app
 
 
-class FormationPermissionMixin:
+class MetierPermissionMixin: # Renommé de FormationPermissionMixin à MetierPermissionMixin
     def get_allowed_filieres(self):
         user = self.request.user
         queryset = Filiere.objects.all()
@@ -25,9 +25,9 @@ class FormationPermissionMixin:
             return queryset.filter(service=user.service)
         return Filiere.objects.none()
 
-    def get_formation_queryset(self):
+    def get_metier_queryset(self): # Renommé de get_formation_queryset à get_metier_queryset
         user = self.request.user
-        queryset = Formation.objects.all()
+        queryset = Metier.objects.all() # Changé Formation à Metier
 
         if user.is_superuser or (user.profile and user.profile.name == "Manager"):
             return queryset
@@ -35,73 +35,73 @@ class FormationPermissionMixin:
             return queryset.filter(filiere=user.filiere)
         if user.profile and user.profile.name == "Chef de service" and user.service:
             return queryset.filter(filiere__service=user.service)
-        return Formation.objects.none()
+        return Metier.objects.none() # Changé Formation à Metier
 
-    def enforce_manage_permission(self): # Renommé pour être plus générique
+    def enforce_manage_permission(self):
         if not self.get_allowed_filieres().exists():
-            raise PermissionDenied("Vous n'avez pas la permission de gérer les formations.")
+            raise PermissionDenied("Vous n'avez pas la permission de gérer les métiers.") # Changé formations à métiers
 
 
 @method_decorator(login_required, name="dispatch")
-class FormationListView(FormationPermissionMixin, ListView):
-    context_object_name = "formation_list"
+class MetierListView(MetierPermissionMixin, ListView): # Renommé de FormationListView à MetierListView
+    context_object_name = "metier_list" # Changé formation_list à metier_list
     paginate_by = 4
-    template_name = "training/formations.html"
+    template_name = "training/metiers.html" # Changé formations.html à metiers.html
 
     def get_queryset(self):
-        self.enforce_manage_permission() # Vérifier la permission avant de construire le queryset
-        queryset = self.get_formation_queryset().select_related("filiere", "filiere__service")
+        self.enforce_manage_permission()
+        queryset = self.get_metier_queryset().select_related("filiere", "filiere__service") # Changé get_formation_queryset à get_metier_queryset
 
-        # Annoter chaque formation avec le nombre de modules et d'actions
+        # Annoter chaque métier avec le nombre de modules et d'actions
         queryset = queryset.annotate(
             modules_count=Count('modules', distinct=True),
-            actions_count=Count('action', distinct=True) # 'action' est le related_name par défaut pour ForeignKey de Action vers Formation
+            actions_count=Count('actions', distinct=True) # CHANGÉ 'progressaction' à 'actions'
         )
         return queryset
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        ctx["link"] = "formations"
+        ctx["link"] = "metiers" # Changé formations à metiers
 
         # Calcul des statistiques globales
-        all_formations = self.get_queryset() # Utiliser le queryset annoté
+        all_metiers = self.get_queryset() # Changé all_formations à all_metiers
         ctx['stats'] = {
-            'total': all_formations.count(),
-            'active': all_formations.filter(active=True).count(),
-            'inactive': all_formations.filter(active=False).count(),
-            'total_modules': all_formations.aggregate(total_modules=Count('modules', distinct=True))['total_modules'],
-            'total_actions': all_formations.aggregate(total_actions=Count('action', distinct=True))['total_actions'],
+            'total': all_metiers.count(),
+            'active': all_metiers.filter(active=True).count(),
+            'inactive': all_metiers.filter(active=False).count(),
+            'total_modules': all_metiers.aggregate(total_modules=Count('modules', distinct=True))['total_modules'],
+            'total_actions': all_metiers.aggregate(total_actions=Count('actions', distinct=True))['total_actions'], # CHANGÉ 'progressaction' à 'actions'
         }
         return ctx
 
 
 @method_decorator(login_required, name="dispatch")
-class FormationDetailView(FormationPermissionMixin, DetailView):
-    model = Formation
-    template_name = "training/formation.html"
+class MetierDetailView(MetierPermissionMixin, DetailView): # Renommé de FormationDetailView à MetierDetailView
+    model = Metier # Changé Formation à Metier
+    template_name = "training/metier.html" # Changé formation.html à metier.html
 
     def get_queryset(self):
-        return self.get_formation_queryset().select_related("filiere", "filiere__service").prefetch_related("modules__formateur") # Précharger les formateurs des modules
+        return self.get_metier_queryset().select_related("filiere", "filiere__service").prefetch_related("modules__formateur") # Changé get_formation_queryset à get_metier_queryset
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx["filieres"] = self.get_allowed_filieres()
-        ctx["formateurs"] = Formateur.objects.all() # Passer les formateurs au contexte
+        ctx["formateurs"] = Formateur.objects.all()
         ctx["titre"] = "Voir"
         return ctx
 
 
 @method_decorator(login_required, name="dispatch")
-class FormationCreateView(FormationPermissionMixin, View):
+class MetierCreateView(MetierPermissionMixin, View): # Renommé de FormationCreateView à MetierCreateView
     def get(self, request):
         self.enforce_manage_permission()
         ctx = {
             "filieres": self.get_allowed_filieres(),
-            "formateurs": Formateur.objects.all(), # Passer les formateurs au contexte
-            "titre": "Saisie d'une formation",
+            "formateurs": Formateur.objects.all(),
+            "titre": "Saisie d'un métier", # Changé formation à métier
             "mode": "new",
         }
-        return render(request, "training/formation.html", ctx)
+        return render(request, "training/metier.html", ctx) # Changé formation.html à metier.html
 
     def post(self, request):
         self.enforce_manage_permission()
@@ -115,11 +115,11 @@ class FormationCreateView(FormationPermissionMixin, View):
         frais_materiels = request.POST.get("frais_materiels") or 0
 
         if not self.get_allowed_filieres().filter(pk=filiere_id).exists():
-            raise PermissionDenied("Vous ne pouvez pas rattacher cette formation à cette filière.")
+            raise PermissionDenied("Vous ne pouvez pas rattacher ce métier à cette filière.") # Changé formation à métier
 
         total_duree_heures = 0
 
-        formation = Formation(
+        metier = Metier( # Changé formation à metier
             nom=nom,
             duree=duree,
             filiere_id=filiere_id,
@@ -128,7 +128,7 @@ class FormationCreateView(FormationPermissionMixin, View):
             frais_jury=frais_jury,
             frais_materiels=frais_materiels,
         )
-        formation.save()
+        metier.save() # Changé formation.save() à metier.save()
 
         module_titres = request.POST.getlist("module_titre[]")
         module_descriptions = request.POST.getlist("module_description[]")
@@ -146,7 +146,7 @@ class FormationCreateView(FormationPermissionMixin, View):
             formateur_id = module_formateurs[index - 1].strip() if index - 1 < len(module_formateurs) else None
 
             Module.objects.create(
-                formation=formation,
+                metier=metier, # Changé formation à metier
                 titre=titre,
                 description=description_module or None,
                 duree_heures=duree_module,
@@ -155,21 +155,21 @@ class FormationCreateView(FormationPermissionMixin, View):
             )
             total_duree_heures += duree_module
 
-        formation.duree_heures = total_duree_heures
-        formation.save(update_fields=['duree_heures'])
+        metier.duree_heures = total_duree_heures # Changé formation.duree_heures à metier.duree_heures
+        metier.save(update_fields=['duree_heures']) # Changé formation.save() à metier.save()
 
-        return HttpResponseRedirect(reverse_lazy("formations"))
+        return HttpResponseRedirect(reverse_lazy("metiers")) # Changé formations à metiers
 
 
 @method_decorator(login_required, name="dispatch")
-class FormationUpdateView(FormationPermissionMixin, UpdateView):
-    model = Formation
-    template_name = "training/formation.html"
+class MetierUpdateView(MetierPermissionMixin, UpdateView): # Renommé de FormationUpdateView à MetierUpdateView
+    model = Metier # Changé Formation à Metier
+    template_name = "training/metier.html" # Changé formation.html à metier.html
     fields = ["nom", "duree", "filiere", "cout", "frais_participation", "frais_jury", "frais_materiels"]
-    success_url = reverse_lazy("formations")
+    success_url = reverse_lazy("metiers") # Changé formations à metiers
 
     def get_queryset(self):
-        return self.get_formation_queryset().select_related("filiere", "filiere__service").prefetch_related("modules__formateur")
+        return self.get_metier_queryset().select_related("filiere", "filiere__service").prefetch_related("modules__formateur") # Changé get_formation_queryset à get_metier_queryset
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
@@ -196,10 +196,10 @@ class FormationUpdateView(FormationPermissionMixin, UpdateView):
 
         # Validation de la filière
         if not self.get_allowed_filieres().filter(pk=filiere.pk).exists():
-            raise PermissionDenied("Vous ne pouvez pas rattacher cette formation à cette filière.")
+            raise PermissionDenied("Vous ne pouvez pas rattacher ce métier à cette filière.") # Changé formation à métier
 
-        # Mettre à jour l'objet Formation
-        formation = form.save(commit=False)
+        # Mettre à jour l'objet Metier
+        metier = form.save(commit=False) # Changé formation à metier
         
         # Gérer les modules
         module_titres = self.request.POST.getlist("module_titre[]")
@@ -210,7 +210,7 @@ class FormationUpdateView(FormationPermissionMixin, UpdateView):
 
         # Supprimer les modules qui ne sont plus dans le formulaire
         existing_module_ids = [int(mid) for mid in module_ids if mid.isdigit()]
-        formation.modules.exclude(pk__in=existing_module_ids).delete()
+        metier.modules.exclude(pk__in=existing_module_ids).delete() # Changé formation.modules à metier.modules
 
         total_duree_heures = 0
         for index, titre in enumerate(module_titres, start=1):
@@ -225,7 +225,7 @@ class FormationUpdateView(FormationPermissionMixin, UpdateView):
             module_pk = module_ids[index - 1].strip() if index - 1 < len(module_ids) else None
 
             module_data = {
-                'formation': formation,
+                'metier': metier, # Changé formation à metier
                 'titre': titre,
                 'description': description_module or None,
                 'duree_heures': duree_module,
@@ -240,8 +240,8 @@ class FormationUpdateView(FormationPermissionMixin, UpdateView):
             
             total_duree_heures += duree_module
 
-        formation.duree_heures = total_duree_heures
-        formation.save() # Sauvegarder la formation avec la nouvelle duree_heures
+        metier.duree_heures = total_duree_heures # Changé formation.duree_heures à metier.duree_heures
+        metier.save() # Sauvegarder le métier avec la nouvelle duree_heures
 
         return HttpResponseRedirect(self.get_success_url())
 
@@ -278,10 +278,10 @@ class FormationUpdateView(FormationPermissionMixin, UpdateView):
 
 
 @method_decorator(login_required, name="dispatch")
-class FormationDeleteView(FormationPermissionMixin, DeleteView):
-    model = Formation
-    template_name = "training/formation_confirm_delete.html" # Nouveau template
-    success_url = reverse_lazy("formations")
+class MetierDeleteView(MetierPermissionMixin, DeleteView): # Renommé de FormationDeleteView à MetierDeleteView
+    model = Metier # Changé Formation à Metier
+    template_name = "training/metier_confirm_delete.html" # Changé formation_confirm_delete.html à metier_confirm_delete.html
+    success_url = reverse_lazy("metiers") # Changé formations à metiers
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)

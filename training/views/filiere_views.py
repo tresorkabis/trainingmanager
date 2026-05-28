@@ -1,12 +1,14 @@
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
+from django.db.models import Count # Import Count for statistics
 from django.http import HttpResponseRedirect
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
+from django.urls import reverse_lazy # Import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views import View
-from django.views.generic import DetailView, ListView
+from django.views.generic import ListView, DetailView, UpdateView, DeleteView # Import UpdateView and DeleteView
 
-from training.models import Filiere, Service
+from training.models import Filiere, Service, Metier # Changé Formation à Metier
 
 
 class FilierePermissionMixin:
@@ -32,63 +34,136 @@ class FilierePermissionMixin:
             return queryset.filter(pk=user.service.pk)
         return Service.objects.none()
 
-    def enforce_create_permission(self):
-        if not self.get_allowed_services().exists():
+    def enforce_manage_permission(self): # Renommé pour être plus générique
+        user = self.request.user
+        if not (user.is_superuser or (user.profile and user.profile.name == "Manager")):
             raise PermissionDenied("Vous n'avez pas la permission de gérer les filières.")
 
 
 @method_decorator(login_required, name="dispatch")
 class FiliereListView(FilierePermissionMixin, ListView):
     context_object_name = "filiere_list"
-    paginate_by = 4
+    paginate_by = 10 # Ajout de la pagination
     template_name = "training/filieres.html"
 
     def get_queryset(self):
-        return self.get_filiere_queryset().select_related("service")
+        self.enforce_manage_permission() # Vérifier la permission avant de construire le queryset
+        queryset = self.get_filiere_queryset().select_related("service")
+        
+        # Annoter chaque filière avec le nombre de métiers
+        queryset = queryset.annotate(
+            metiers_count=Count('metiers', distinct=True) # Changé formations_count à metiers_count, et 'formation' à 'metiers'
+        )
+        return queryset
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx["link"] = "filieres"
+        
+        # Calcul des statistiques globales
+        all_filieres = self.get_queryset() # Utiliser le queryset annoté
+        ctx['stats'] = {
+            'total': all_filieres.count(),
+            'active': all_filieres.filter(active=True).count(),
+            'inactive': all_filieres.filter(active=False).count(),
+            'total_metiers': all_filieres.aggregate(total_metiers=Count('metiers', distinct=True))['total_metiers'], # Changé total_formations à total_metiers, et 'formation' à 'metiers'
+        }
         return ctx
 
 
 @method_decorator(login_required, name="dispatch")
 class FiliereDetailView(FilierePermissionMixin, DetailView):
     model = Filiere
-    template_name = "training/filiere.html"
+    template_name = "training/filiere_detail.html" # Nouveau template pour le détail
+    context_object_name = "filiere"
 
     def get_queryset(self):
-        return self.get_filiere_queryset().select_related("service")
+        return self.get_filiere_queryset().select_related("service").prefetch_related('metiers') # Précharger les métiers, changé formation_set à metiers
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        ctx["services"] = self.get_allowed_services()
-        ctx["titre"] = "Voir"
+        filiere = ctx['filiere']
+        
+        ctx['metiers_associees'] = filiere.metiers.all().order_by('nom') # Changé formations_associees à metiers_associees, et formation_set à metiers
+        ctx['titre'] = "Détail de la filière"
         return ctx
 
 
 @method_decorator(login_required, name="dispatch")
-class FiliereCreateView(FilierePermissionMixin, View):
-    def get(self, request):
-        self.enforce_create_permission()
+class FiliereCreateUpdateView(FilierePermissionMixin, View): # Nouvelle vue pour créer/modifier
+    template_name = "training/filiere_form.html" # Nouveau template
+
+    def get(self, request, pk=None):
+        self.enforce_manage_permission()
+        filiere = None
+        if pk:
+            filiere = get_object_or_404(Filiere, pk=pk)
+        
         ctx = {
             "services": self.get_allowed_services(),
+            "titre": "Modifier une filière" if pk else "Créer une filière",
+            "mode": "edit" if pk else "new",
+            "object": filiere,
+            "submitted": {}, # Pour gérer les erreurs de formulaire
         }
-        return render(request, "training/filiere.html", ctx)
+        return render(request, self.template_name, ctx)
+    
+    def post(self, request, pk=None):
+        self.enforce_manage_permission()
+        filiere = None
+        if pk:
+            filiere = get_object_or_404(Filiere, pk=pk)
 
-    def post(self, request):
-        self.enforce_create_permission()
+        nom = request.POST.get('nom', '').strip()
+        service_id = request.POST.get('service', '').strip()
+        active = request.POST.get('active') == 'on' # Gérer le champ active
 
-        nom = request.POST["nom"]
-        service_id = request.POST["service"]
-
+        errors = []
+        if not nom:
+            errors.append("Le nom de la filière est requis.")
+        if not service_id:
+            errors.append("Le service est requis.")
+        
+        # Validation d'unicité du nom
+        if Filiere.objects.filter(nom=nom).exclude(pk=pk).exists():
+            errors.append(f"Une filière avec le nom '{nom}' existe déjà.")
+        
+        # Validation du service
         if not self.get_allowed_services().filter(pk=service_id).exists():
-            raise PermissionDenied("Vous ne pouvez pas rattacher cette filière à ce service.")
+            errors.append("Le service sélectionné n'est pas autorisé pour votre périmètre.")
 
-        filiere = Filiere(
-            nom=nom,
-            service_id=service_id,
-        )
-        filiere.save()
+        if errors:
+            ctx = {
+                "services": self.get_allowed_services(),
+                "titre": "Modifier une filière" if pk else "Créer une filière",
+                "mode": "edit" if pk else "new",
+                "object": filiere, # Si c'est une modification, l'objet existe
+                "submitted": request.POST, # Repopuler le formulaire avec les données soumises
+                "form_errors": errors,
+            }
+            return render(request, self.template_name, ctx, status=400)
 
-        return HttpResponseRedirect("/training/filieres")
+        if filiere: # Mode édition
+            filiere.nom = nom
+            filiere.service_id = service_id
+            filiere.active = active
+            filiere.save()
+        else: # Mode création
+            filiere = Filiere.objects.create(
+                nom=nom,
+                service_id=service_id,
+                active=active,
+            )
+        
+        return HttpResponseRedirect(reverse_lazy("filieres"))
+
+@method_decorator(login_required, name="dispatch")
+class FiliereDeleteView(FilierePermissionMixin, DeleteView):
+    model = Filiere
+    template_name = "training/filiere_confirm_delete.html" # Nouveau template pour la confirmation de suppression
+    success_url = reverse_lazy("filieres")
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["titre"] = "Supprimer"
+        return ctx

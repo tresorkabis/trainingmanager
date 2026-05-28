@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block title %}Détail de l'Action{% endblock title %}
-{% block page_header %}Détail de l'Action de Formation{% endblock page_header %}
+{% block page_header %}Détail de l'Action de Métier{% endblock page_header %} {# Changed "Formation" to "Métier" #}
 {% block style %}
 <style>
     .tm-action-hero {
@@ -11,6 +11,7 @@
             linear-gradient(135deg, #f7f8fc 0%, #eef3ff 100%);
         border: 1px solid rgba(67, 94, 190, 0.12);
         border-radius: 1.25rem;
+        overflow: hidden;
     }
 
     .tm-detail-card {
@@ -73,7 +74,7 @@
                     <span class="tm-section-titlebar__icon"><i class="bi bi-clipboard-check"></i></span>
                     <div class="tm-section-titlebar__text">
                         <h3>{{ object.description }}</h3>
-                        <p>Vue complète de l'action de formation, de ses formateurs et des stagiaires inscrits.</p>
+                        <p>Vue complète de l'action de métier, de ses formateurs et des stagiaires inscrits.</p> {# Changed "formation" to "métier" #}
                     </div>
                 </div>
             </div>
@@ -92,8 +93,8 @@
             <div class="card-body">
                 <div class="tm-detail-grid">
                     <div class="tm-detail-item"><span class="tm-detail-item__label">Description</span><div class="tm-detail-item__value">{{ object.description }}</div></div>
-                    <div class="tm-detail-item"><span class="tm-detail-item__label">Formation</span><div class="tm-detail-item__value">{{ object.formation.nom }}</div></div>
-                    <div class="tm-detail-item"><span class="tm-detail-item__label">Filière</span><div class="tm-detail-item__value">{{ object.formation.filiere.nom|default:"Sans filière" }}</div></div>
+                    <div class="tm-detail-item"><span class="tm-detail-item__label">Métier</span><div class="tm-detail-item__value">{{ object.metier.nom }}</div></div> {# Changed Formation to Métier, object.formation.nom to object.metier.nom #}
+                    <div class="tm-detail-item"><span class="tm-detail-item__label">Filière</span><div class="tm-detail-item__value">{{ object.metier.filiere.nom|default:"Sans filière" }}</div></div> {# Changed object.formation.filiere.nom to object.metier.filiere.nom #}
                     <div class="tm-detail-item"><span class="tm-detail-item__label">Date de début</span><div class="tm-detail-item__value">{{ object.date_debut|date:"d/m/Y" }}</div></div>
                     <div class="tm-detail-item"><span class="tm-detail-item__label">Date de fin</span><div class="tm-detail-item__value">{{ object.date_fin|date:"d/m/Y" }}</div></div>
                     <div class="tm-detail-item"><span class="tm-detail-item__label">Inscrits</span><div class="tm-detail-item__value">{{ inscription_count }}</div></div>
@@ -150,7 +151,7 @@
                     </table>
                 </div>
                 {% else %}
-                <p class="text-muted mb-0">Aucun stagiaire inscrit à cette action de formation.</p>
+                <p class="text-muted mb-0">Aucun stagiaire inscrit à cette action de métier.</p> {# Changed "formation" to "métier" #}
                 {% endif %}
             </div>
         </div>

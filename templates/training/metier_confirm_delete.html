@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Supprimer un Métier{% endblock title %}
+{% block page_header %}Supprimer un Métier{% endblock page_header %}
+
+{% block content %}
+<div class="page-heading">
+    <section class="section">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title">Confirmation de suppression</h4>
+            </div>
+            <div class="card-body">
+                <p>Êtes-vous sûr de vouloir supprimer le métier "{{ object.nom }}" (ID: {{ object.pk }}) ?</p>
+                <p class="text-danger">Cette action est irréversible et supprimera également tous les modules et actions de formation liés à ce métier.</p>
+                <form method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Confirmer la suppression</button>
+                    <a href="{% url 'metiers' %}" class="btn btn-light-secondary">Annuler</a> {# Changed formations to metiers #}
+                </form>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock content %}

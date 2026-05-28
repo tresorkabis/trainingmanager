@@ -1,0 +1,218 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Détail Métier - {{ object.nom }}{% endblock title %}
+{% block page_header %}Détail du Métier - {{ object.nom }}{% endblock page_header %}
+
+{% block style %}
+<style>
+    .tm-metier-hero {
+        background:
+            radial-gradient(circle at top right, rgba(67, 94, 190, 0.18), transparent 35%),
+            linear-gradient(135deg, #f7f8fc 0%, #eef3ff 100%);
+        border: 1px solid rgba(67, 94, 190, 0.12);
+        border-radius: 1.25rem;
+        overflow: hidden;
+    }
+
+    .tm-detail-card {
+        border: 1px solid rgba(15, 23, 42, 0.07);
+        border-radius: 1rem;
+        box-shadow: 0 16px 32px rgba(15, 23, 42, 0.05);
+    }
+
+    .tm-detail-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1rem;
+    }
+
+    .tm-detail-item {
+        border-radius: 0.9rem;
+        border: 1px solid #edf1f7;
+        background: #fbfcfe;
+        padding: 1rem;
+    }
+
+    .tm-detail-item__label {
+        display: block;
+        font-size: 0.8rem;
+        color: #7b8190;
+        margin-bottom: 0.35rem;
+    }
+
+    .tm-detail-item__value {
+        color: #25396f;
+        font-weight: 700;
+    }
+
+    .tm-pill-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .tm-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.55rem 0.85rem;
+        border-radius: 999px;
+        background: #fff;
+        border: 1px solid rgba(67, 94, 190, 0.12);
+        color: #25396f;
+        font-weight: 600;
+    }
+
+    /* New style for KPI cards */
+    .tm-metier-kpi-card {
+        background: rgba(255, 255, 255, 0.76);
+        border: 1px solid rgba(67, 94, 190, 0.1);
+        border-radius: 1rem;
+        padding: 1rem;
+        box-shadow: 0 10px 24px rgba(17, 24, 39, 0.04);
+        height: 100%;
+    }
+
+    .tm-metier-kpi-card__label {
+        display: block;
+        font-size: 0.78rem;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: #6c757d;
+        margin-bottom: 0.35rem;
+    }
+
+    .tm-metier-kpi-card__value {
+        font-size: 1.35rem;
+        font-weight: 700;
+        color: #25396f;
+    }
+</style>
+{% endblock style %}
+
+{% block content %}
+<div class="page-heading">
+    <section class="tm-metier-hero p-4 p-lg-5 mb-4">
+        <div class="row g-4 align-items-center">
+            <div class="col-12 col-lg-8"> {# Adjusted column size #}
+                <div class="tm-section-titlebar"> {# Added tm-section-titlebar #}
+                    <span class="tm-section-titlebar__icon"><i class="bi bi-journal-text"></i></span> {# Icon for Metier #}
+                    <div class="tm-section-titlebar__text">
+                        <h3>{{ object.nom }}</h3>
+                        <p>Fiche de consultation complète pour le métier, ses modules et ses coûts.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-lg-4 d-flex justify-content-lg-end"> {# Adjusted column size #}
+                <div class="tm-pill-list"> {# Moved pills here for context #}
+                    {% if object.filiere %}
+                    <span class="tm-pill"><i class="bi bi-signpost"></i>{{ object.filiere.nom }}</span>
+                    {% endif %}
+                    {% if object.filiere.service %}
+                    <span class="tm-pill"><i class="bi bi-building"></i>{{ object.filiere.service.nom }}</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {# New section for KPI cards (formerly in hero) #}
+    <section class="section px-3 px-md-4">
+        <div class="row g-3 mb-4"> {# Added mb-4 for spacing #}
+            <div class="col-12 col-md-6 col-lg-3">
+                <div class="tm-metier-kpi-card">
+                    <span class="tm-metier-kpi-card__label">Coût total</span>
+                    <span class="tm-metier-kpi-card__value">{{ object.cout }}</span>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-3">
+                <div class="tm-metier-kpi-card">
+                    <span class="tm-metier-kpi-card__label">Frais participation</span>
+                    <span class="tm-metier-kpi-card__value">{{ object.frais_participation }}</span>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-3">
+                <div class="tm-metier-kpi-card">
+                    <span class="tm-metier-kpi-card__label">Frais jury</span>
+                    <span class="tm-metier-kpi-card__value">{{ object.frais_jury }}</span>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-3">
+                <div class="tm-metier-kpi-card">
+                    <span class="tm-metier-kpi-card__label">Frais matériels</span>
+                    <span class="tm-metier-kpi-card__value">{{ object.frais_materiels }}</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section px-3 px-md-4"> {# Added px-3 px-md-4 for horizontal padding #}
+        <div class="row g-3"> {# Added g-3 for consistent gutter spacing #}
+            <div class="col-12 col-lg-6">
+                <div class="card tm-detail-card mb-4">
+                    <div class="card-header">
+                        <h4 class="card-title mb-0">Informations générales</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="tm-detail-grid">
+                            <div class="tm-detail-item"><span class="tm-detail-item__label">Nom du métier</span><div class="tm-detail-item__value">{{ object.nom }}</div></div>
+                            <div class="tm-detail-item"><span class="tm-detail-item__label">Filière associée</span><div class="tm-detail-item__value">{{ object.filiere.nom|default:"Non renseignée" }}</div></div>
+                            <div class="tm-detail-item"><span class="tm-detail-item__label">Durée (mois)</span><div class="tm-detail-item__value">{{ object.duree }}</div></div>
+                            <div class="tm-detail-item"><span class="tm-detail-item__label">Durée (heures)</span><div class="tm-detail-item__value">{{ object.duree_heures }}</div></div>
+                            <div class="tm-detail-item"><span class="tm-detail-item__label">Statut</span><div class="tm-detail-item__value">{% if object.active %}<span class="badge bg-success">Actif</span>{% else %}<span class="badge bg-danger">Inactif</span>{% endif %}</div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-lg-6">
+                <div class="card tm-detail-card mb-4">
+                    <div class="card-header">
+                        <h4 class="card-title mb-0">Modules du métier</h4>
+                        <p class="text-muted mb-0">Liste des modules qui composent ce métier.</p>
+                    </div>
+                    <div class="card-body">
+                        {% if object.modules.all %}
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Ordre</th>
+                                        <th>Titre</th>
+                                        <th>Durée (h)</th>
+                                        <th>Formateur</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for module in object.modules.all %}
+                                    <tr>
+                                        <td>{{ module.ordre }}</td>
+                                        <td>{{ module.titre }}</td>
+                                        <td>{{ module.duree_heures }}</td>
+                                        <td>{{ module.formateur|default:"Non assigné" }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <p class="text-muted mb-0">Aucun module n'est rattaché à ce métier.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="d-flex justify-content-end gap-2 mt-4"> {# Moved action buttons here #}
+            <a href="{% url 'metiers' %}" class="btn btn-light-secondary">
+                <i class="bi bi-arrow-left me-2"></i>Retour à la liste
+            </a>
+            <a href="{% url 'metier_update' object.pk %}" class="btn btn-primary">
+                <i class="bi bi-pencil me-2"></i>Modifier
+            </a>
+            <a href="{% url 'metier_delete' object.pk %}" class="btn btn-danger">
+                <i class="bi bi-trash me-2"></i>Supprimer
+            </a>
+        </div>
+    </section>
+</div>
+{% endblock content %}

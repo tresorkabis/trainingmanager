@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ titre }} un Type d'Action{% endblock title %}
+{% block page_header %}{{ titre }} un Type d'Action{% endblock page_header %}
+{% block style %}
+<style>
+    .tm-typeaction-form-hero {
+        background:
+            radial-gradient(circle at top right, rgba(67, 94, 190, 0.18), transparent 35%),
+            linear-gradient(135deg, #f7f8fc 0%, #eef3ff 100%);
+        border: 1px solid rgba(67, 94, 190, 0.12);
+        border-radius: 1.25rem;
+    }
+
+    .tm-typeaction-form-card {
+        border: 1px solid rgba(15, 23, 42, 0.07);
+        border-radius: 1rem;
+        box-shadow: 0 16px 32px rgba(15, 23, 42, 0.05);
+    }
+</style>
+{% endblock style %}
+
+{% block content %}
+<div class="page-heading">
+    <section class="tm-typeaction-form-hero p-4 p-lg-5 mb-4">
+        <div class="row g-4 align-items-center">
+            <div class="col-12 col-lg-8">
+                <div class="tm-section-titlebar">
+                    <span class="tm-section-titlebar__icon"><i class="bi bi-tag"></i></span>
+                    <div class="tm-section-titlebar__text">
+                        <h3>{{ titre }} un type d'action</h3>
+                        <p>Renseignez les informations du type d'action.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-lg-4 d-flex justify-content-lg-end">
+                <a href="{% url 'typeactions' %}" class="btn btn-light-secondary">
+                    <i class="bi bi-arrow-left me-2"></i>Retour aux types d'action
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="card tm-typeaction-form-card">
+            <div class="card-header">
+                <h4 class="card-title mb-1">Informations du type d'action</h4>
+                <p class="text-muted mb-0">Les champs ci-dessous permettent de gérer les détails du type d'action.</p>
+            </div>
+            <div class="card-body">
+                {% if form_errors %}
+                <div class="alert alert-danger">
+                    {% for error in form_errors %}
+                    <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <form action="" method="post" class="form">
+                    {% csrf_token %}
+                    <div class="row g-4">
+                        <div class="col-12 col-lg-6">
+                            <div class="form-group">
+                                <label for="code">Code</label>
+                                <input
+                                    type="text"
+                                    id="code"
+                                    class="form-control"
+                                    name="code"
+                                    value="{% if submitted.code %}{{ submitted.code }}{% else %}{{ object.code|default:'' }}{% endif %}"
+                                    placeholder="Ex: INT"
+                                    required
+                                >
+                            </div>
+                            <div class="form-group">
+                                <label for="libelle">Libellé</label>
+                                <input
+                                    type="text"
+                                    id="libelle"
+                                    class="form-control"
+                                    name="libelle"
+                                    value="{% if submitted.libelle %}{{ submitted.libelle }}{% else %}{{ object.libelle|default:'' }}{% endif %}"
+                                    placeholder="Ex: Interné"
+                                    required
+                                >
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-6">
+                            <div class="form-group">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="active" name="active" {% if object.active or mode == 'new' %}checked{% endif %}>
+                                    <label class="form-check-label" for="active">Actif</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+                        <a href="{% url 'typeactions' %}" class="btn btn-light-secondary">Annuler</a>
+                        <button type="submit" class="btn btn-primary">{{ titre }}</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock content %}

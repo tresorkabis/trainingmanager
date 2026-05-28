@@ -12,16 +12,16 @@ from django.views import View
 from django.views.generic import DeleteView, DetailView, ListView, UpdateView
 
 from progress.models import Action, Formateur
-from training.models import Formation, Module # Import Module
+from training.models import Metier, Module # Changé Formation à Metier
 
 
 class ActionPermissionMixin:
     def normalize_formateur_ids(self, formateur_ids):
         return [int(formateur_id) for formateur_id in formateur_ids if str(formateur_id).isdigit()]
 
-    def get_allowed_formations(self):
+    def get_allowed_metiers(self): # Changé get_allowed_formations à get_allowed_metiers
         user = self.request.user
-        queryset = Formation.objects.all().prefetch_related('modules__formateur') # Add prefetch
+        queryset = Metier.objects.all().prefetch_related('modules__formateur') # Changé Formation à Metier, et related_name de Module
         
         if user.is_superuser or (user.profile and user.profile.name == "Manager"):
             return queryset
@@ -29,15 +29,15 @@ class ActionPermissionMixin:
             return queryset.filter(filiere=user.filiere)
         if user.profile and user.profile.name == "Chef de service" and user.service:
             return queryset.filter(filiere__service=user.service)
-        return Formation.objects.none()
+        return Metier.objects.none() # Changé Formation à Metier
 
     def get_queryset(self):
-        allowed_formations = self.get_allowed_formations()
-        if not allowed_formations.exists():
+        allowed_metiers = self.get_allowed_metiers() # Changé allowed_formations à allowed_metiers
+        if not allowed_metiers.exists():
             return Action.objects.none()
         return (
-            Action.objects.filter(formation__in=allowed_formations)
-            .select_related("formation", "formation__filiere")
+            Action.objects.filter(metier__in=allowed_metiers) # Changé formation__in à metier__in
+            .select_related("metier", "metier__filiere") # Changé formation à metier
             .prefetch_related("formateurs")
             .annotate(stagiaire_total=Count("detailaction", distinct=True), formateur_total=Count("formateurs", distinct=True))
             .order_by("-date_debut", "-id")
@@ -50,7 +50,7 @@ class ActionPermissionMixin:
         return obj
 
     def enforce_manage_permission(self):
-        if not self.get_allowed_formations().exists():
+        if not self.get_allowed_metiers().exists(): # Changé get_allowed_formations à get_allowed_metiers
             raise PermissionDenied("Vous n'avez pas la permission de gérer les actions.")
 
     def get_action_status(self, action):
@@ -62,18 +62,18 @@ class ActionPermissionMixin:
         return {"label": "En cours", "badge": "bg-light-success text-success", "key": "ongoing"}
 
     def build_form_context(self, **kwargs):
-        allowed_formations = self.get_allowed_formations()
+        allowed_metiers = self.get_allowed_metiers() # Changé allowed_formations à allowed_metiers
         all_formateurs = Formateur.objects.filter(active=True).order_by("nom", "postnom")
 
-        # Prepare formations data for JavaScript
-        formations_data = []
-        for formation in allowed_formations:
+        # Prepare metiers data for JavaScript
+        metiers_data = [] # Changé formations_data à metiers_data
+        for metier in allowed_metiers: # Changé formation in allowed_formations à metier in allowed_metiers
             modules_data = []
-            # Get unique formateurs for this formation's modules
-            formateurs_for_formation = set()
-            for module in formation.modules.all():
+            # Get unique formateurs for this metier's modules
+            formateurs_for_metier = set() # Changé formateurs_for_formation à formateurs_for_metier
+            for module in metier.modules.all(): # Changé formation.modules.all() à metier.modules.all()
                 if module.formateur:
-                    formateurs_for_formation.add(module.formateur)
+                    formateurs_for_metier.add(module.formateur) # Changé formateurs_for_formation à formateurs_for_metier
                 modules_data.append({
                     'id': module.id,
                     'titre': module.titre,
@@ -82,40 +82,40 @@ class ActionPermissionMixin:
                     'formateur_name': str(module.formateur) if module.formateur else 'Non assigné',
                 })
             
-            formations_data.append({
-                'id': formation.id,
-                'nom': formation.nom,
+            metiers_data.append({ # Changé formations_data à metiers_data
+                'id': metier.id,
+                'nom': metier.nom,
                 'modules': modules_data,
-                'formateurs_ids': [f.id for f in formateurs_for_formation], # List of formateur IDs for this formation
+                'formateurs_ids': [f.id for f in formateurs_for_metier], # Changé formateurs_for_formation à formateurs_for_metier
             })
 
         context = {
-            "formations": allowed_formations, # Keep original queryset for Django form fields
-            "formateurs": all_formateurs, # Keep original queryset for Django form fields
-            "formations_json": json.dumps(formations_data), # JSON data for JavaScript
-            "formateurs_json": json.dumps(list(all_formateurs.values('id', 'nom', 'postnom'))), # JSON data for JavaScript
+            "metiers": allowed_metiers, # Changé formations à metiers
+            "formateurs": all_formateurs,
+            "metiers_json": json.dumps(metiers_data), # Changé formations_json à metiers_json
+            "formateurs_json": json.dumps(list(all_formateurs.values('id', 'nom', 'postnom'))),
             "today": date.today(),
             "selected_formateur_ids": [],
         }
         context.update(kwargs)
         return context
 
-    def validate_action_payload(self, date_debut, date_fin, formation_id, formateur_ids):
+    def validate_action_payload(self, date_debut, date_fin, metier_id, formateur_ids): # Changé formation_id à metier_id
         errors = []
-        allowed_formations = self.get_allowed_formations()
+        allowed_metiers = self.get_allowed_metiers() # Changé allowed_formations à allowed_metiers
 
-        if not allowed_formations.filter(pk=formation_id).exists():
-            errors.append("La formation sélectionnée n'est pas autorisée pour votre périmètre.")
+        if not allowed_metiers.filter(pk=metier_id).exists(): # Changé formation_id à metier_id
+            errors.append("Le métier sélectionné n'est pas autorisé pour votre périmètre.") # Changé formation à métier
         if date_fin and date_debut and date_fin < date_debut:
             errors.append("La date de fin doit être postérieure ou égale à la date de début.")
         
         # --- Nouvelle logique de validation des formateurs ---
-        if formation_id:
+        if metier_id: # Changé formation_id à metier_id
             try:
-                selected_formation = Formation.objects.get(pk=formation_id)
-                # Get formateurs assigned to modules of this specific formation
-                allowed_formateur_ids_for_formation = set(
-                    Module.objects.filter(formation=selected_formation)
+                selected_metier = Metier.objects.get(pk=metier_id) # Changé Formation à Metier, formation_id à metier_id
+                # Get formateurs assigned to modules of this specific metier
+                allowed_formateur_ids_for_metier = set( # Changé allowed_formateur_ids_for_formation à allowed_formateur_ids_for_metier
+                    Module.objects.filter(metier=selected_metier) # Changé formation à metier
                     .exclude(formateur__isnull=True)
                     .values_list('formateur__id', flat=True)
                 )
@@ -123,13 +123,13 @@ class ActionPermissionMixin:
                 requested_formateurs_pks = set(self.normalize_formateur_ids(formateur_ids))
                 
                 for pk in requested_formateurs_pks:
-                    if pk not in allowed_formateur_ids_for_formation:
+                    if pk not in allowed_formateur_ids_for_metier: # Changé allowed_formateur_ids_for_formation à allowed_formateur_ids_for_metier
                         formateur_obj = Formateur.objects.get(pk=pk)
                         errors.append(
-                            f"Le formateur '{formateur_obj.nom} {formateur_obj.postnom}' ne dispense aucun module de la formation sélectionnée."
+                            f"Le formateur '{formateur_obj.nom} {formateur_obj.postnom}' ne dispense aucun module du métier sélectionné." # Changé formation à métier
                         )
-            except Formation.DoesNotExist:
-                errors.append("La formation sélectionnée est introuvable.")
+            except Metier.DoesNotExist: # Changé Formation.DoesNotExist à Metier.DoesNotExist
+                errors.append("Le métier sélectionné est introuvable.") # Changé formation à métier
         # --- Fin nouvelle logique ---
 
         return errors
@@ -199,10 +199,10 @@ class ActionCreateView(ActionPermissionMixin, View):
         description = request.POST["description"].strip()
         date_debut = request.POST["date_debut"]
         date_fin = request.POST["date_fin"]
-        formation_id = request.POST["formation"]
+        metier_id = request.POST["metier"] # Changé formation_id à metier_id
         formateur_ids = request.POST.getlist("formateurs")
 
-        errors = self.validate_action_payload(date_debut, date_fin, formation_id, formateur_ids)
+        errors = self.validate_action_payload(date_debut, date_fin, metier_id, formateur_ids) # Changé formation_id à metier_id
         if errors:
             ctx = self.build_form_context(
                 titre="Créer",
@@ -217,7 +217,7 @@ class ActionCreateView(ActionPermissionMixin, View):
             description=description,
             date_debut=date_debut,
             date_fin=date_fin,
-            formation_id=formation_id,
+            metier_id=metier_id, # Changé formation_id à metier_id
         )
         action.save()
         if formateur_ids:
@@ -230,12 +230,12 @@ class ActionCreateView(ActionPermissionMixin, View):
 class ActionUpdateView(ActionPermissionMixin, UpdateView):
     model = Action
     template_name = "progress/action.html"
-    fields = ["description", "date_debut", "date_fin", "formation"]
+    fields = ["description", "date_debut", "date_fin", "metier"] # Changé formation à metier
     success_url = reverse_lazy("actions")
 
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
-        form.fields["formation"].queryset = self.get_allowed_formations().select_related("filiere").order_by("nom")
+        form.fields["metier"].queryset = self.get_allowed_metiers().select_related("filiere").order_by("nom") # Changé formation à metier
         return form
 
     def form_valid(self, form):
@@ -243,7 +243,7 @@ class ActionUpdateView(ActionPermissionMixin, UpdateView):
         errors = self.validate_action_payload(
             form.cleaned_data["date_debut"],
             form.cleaned_data["date_fin"],
-            str(form.cleaned_data["formation"].pk),
+            str(form.cleaned_data["metier"].pk), # Changé formation à metier
             formateur_ids,
         )
         if errors:

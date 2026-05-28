@@ -1,5 +1,9 @@
 {% extends "base.html" %}
 {% load static %}
+
+{% block title %}Répertoire des stagiaires{% endblock title %} {# This title is for the browser tab #}
+{% block page_header %}Répertoire des stagiaires{% endblock page_header %} {# This content will go into tm-topbar__title #}
+
 {% block style %}
 <style>
     .stagiaire-photo-thumbnail {
@@ -170,7 +174,7 @@
 {% endblock style %}
 
 {% block content %}
-<div class="page-heading">
+{# Removed the redundant div.page-heading here #}
     <section class="tm-stagiaire-hero p-4 p-lg-5 mb-4">
         <div class="row g-4 align-items-center">
             <div class="col-12 col-xl-6">

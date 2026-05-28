@@ -1,6 +1,6 @@
 from django.db import models
 
-from training.models import Filiere, Formation, Service
+from training.models import Filiere, Metier, Service # Changé Formation à Metier
 
 class Categorie(models.Model):
     titre = models.CharField(max_length=100)

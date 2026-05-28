@@ -6,62 +6,72 @@
 
 {% block content %}
 <div class="page-heading">
-    <section class="tm-hero tm-hero--balanced mb-4">
-        <div class="tm-hero__content">
-            <span class="tm-hero__eyebrow">
-                <i class="bi bi-building"></i>
-                Vision globale
-            </span>
-            <h1>Pilotez les formations, les stagiaires et les actions depuis un espace unifié.</h1>
-            <p>
-                Cette interface centralise les principaux indicateurs du centre et donne un accès rapide
-                aux opérations essentielles de suivi.
-            </p>
-            <div class="tm-hero__actions">
-                <a href="{% url 'stagiaires' %}" class="tm-btn-soft">
-                    <i class="bi bi-people"></i>
-                    Voir les stagiaires
-                </a>
-                <a href="{% url 'formations' %}" class="tm-btn-soft">
-                    <i class="bi bi-journal-check"></i>
-                    Voir les formations
-                </a>
-                {% if request.user.is_superuser or request.user.profile and request.user.profile.name == "Manager" %}
-                <a href="{% url 'admin:index' %}" class="tm-btn-soft">
-                    <i class="bi bi-shield-check"></i>
-                    Administration
-                </a>
-                {% endif %}
+    <section class="tm-hero tm-hero--balanced mb-4 p-4 p-lg-5"> {# Added p-4 p-lg-5 for consistent padding #}
+        <div class="row g-4 align-items-center">
+            <div class="col-12 col-xl-6">
+                <div class="tm-hero__content">
+                    <span class="tm-hero__eyebrow">
+                        <i class="bi bi-building"></i>
+                        Vision globale
+                    </span>
+                    <h1>Pilotez les métiers, les stagiaires et les actions depuis un espace unifié.</h1>
+                    <p>
+                        Cette interface centralise les principaux indicateurs du centre et donne un accès rapide
+                        aux opérations essentielles de suivi.
+                    </p>
+                    <div class="tm-hero__actions">
+                        <a href="{% url 'stagiaires' %}" class="tm-btn-soft">
+                            <i class="bi bi-people"></i>
+                            Voir les stagiaires
+                        </a>
+                        <a href="{% url 'metiers' %}" class="tm-btn-soft">
+                            <i class="bi bi-journal-text"></i>
+                            Voir les métiers
+                        </a>
+                        {% if request.user.is_superuser or request.user.profile and request.user.profile.name == "Manager" %}
+                        <a href="{% url 'admin:index' %}" class="tm-btn-soft">
+                            <i class="bi bi-shield-check"></i>
+                            Administration
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
-        </div>
-        <div class="tm-hero__summary">
-            <a href="{% url 'formations' %}" class="tm-hero-metric"> {# Made clickable #}
-                <div class="tm-hero-metric__icon">
-                    <i class="bi bi-book"></i> {# Icon for Catalogue #}
+            <div class="col-12 col-xl-6">
+                <div class="row g-3">
+                    <div class="col-12 col-md-6">
+                        <a href="{% url 'metiers' %}" class="tm-hero-metric">
+                            <div class="tm-hero-metric__icon">
+                                <i class="bi bi-book"></i>
+                            </div>
+                            <div class="tm-hero-metric__content">
+                                <span class="tm-hero-metric__label">Catalogue</span>
+                                <strong class="tm-hero-metric__value">{{ nbmetiers }}</strong>
+                                <span class="tm-hero-metric__text">métiers actifs</span>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <a href="{% url 'stagiaires' %}" class="tm-hero-metric">
+                            <div class="tm-hero-metric__icon">
+                                <i class="bi bi-people"></i>
+                            </div>
+                            <div class="tm-hero-metric__content">
+                                <span class="tm-hero-metric__label">Population</span>
+                                <strong class="tm-hero-metric__value">{{ nbstagiaires }}</strong>
+                                <span class="tm-hero-metric__text">stagiaires suivis</span>
+                            </div>
+                        </a>
+                    </div>
                 </div>
-                <div class="tm-hero-metric__content">
-                    <span class="tm-hero-metric__label">Catalogue</span>
-                    <strong class="tm-hero-metric__value">{{ nbformations }}</strong>
-                    <span class="tm-hero-metric__text">formations actives</span>
-                </div>
-            </a>
-            <a href="{% url 'stagiaires' %}" class="tm-hero-metric"> {# Made clickable #}
-                <div class="tm-hero-metric__icon">
-                    <i class="bi bi-people"></i> {# Icon for Population #}
-                </div>
-                <div class="tm-hero-metric__content">
-                    <span class="tm-hero-metric__label">Population</span>
-                    <strong class="tm-hero-metric__value">{{ nbstagiaires }}</strong>
-                    <span class="tm-hero-metric__text">stagiaires suivis</span>
-                </div>
-            </a>
+            </div>
         </div>
     </section>
 </div>
 <section class="row g-4 tm-dashboard-layout">
-    {# Row 1: Stat Cards (Formations, Filières, Stagiaires) #}
-    <div class="col-12 col-md-4"> {# Column for Formations Stat Card #}
-        <a href="{% url 'formations' %}" class="tm-stat-card-link">
+    {# New Row 1: Métiers, Filières, Stagiaires, Actions on one line #}
+    <div class="col-12 col-md-3"> {# Column for Métiers Stat Card #}
+        <a href="{% url 'metiers' %}" class="tm-stat-card-link">
             <div class="card tm-stat-card">
                 <div class="card-body">
                     <div class="tm-stat-card__inner">
@@ -69,8 +79,8 @@
                             <i class="bi bi-journal-bookmark"></i>
                         </div>
                         <div class="tm-stat-card__content">
-                            <div class="tm-stat-label">Formations</div>
-                            <div class="tm-stat-value">{{ nbformations }}</div>
+                            <div class="tm-stat-label">Métiers</div>
+                            <div class="tm-stat-value">{{ nbmetiers }}</div>
                             <div class="tm-stat-meta">Offres actuellement suivies</div>
                         </div>
                     </div>
@@ -78,7 +88,7 @@
             </div>
         </a>
     </div>
-    <div class="col-12 col-md-4"> {# Column for Filières Stat Card #}
+    <div class="col-12 col-md-3"> {# Column for Filières Stat Card #}
         <a href="{% url 'filieres' %}" class="tm-stat-card-link">
             <div class="card tm-stat-card">
                 <div class="card-body">
@@ -96,7 +106,7 @@
             </div>
         </a>
     </div>
-    <div class="col-12 col-md-4"> {# Column for Stagiaires Stat Card #}
+    <div class="col-12 col-md-3"> {# Column for Stagiaires Stat Card #}
         <a href="{% url 'stagiaires' %}" class="tm-stat-card-link">
             <div class="card tm-stat-card">
                 <div class="card-body">
@@ -114,9 +124,7 @@
             </div>
         </a>
     </div>
-
-    {# Row 2: Actions Stat Card, User Card, Repères Card #}
-    <div class="col-12 col-md-4"> {# Column for Actions Stat Card #}
+    <div class="col-12 col-md-3"> {# Column for Actions Stat Card - Moved here #}
         <a href="{% url 'actions' %}" class="tm-stat-card-link">
             <div class="card tm-stat-card">
                 <div class="card-body">
@@ -134,47 +142,8 @@
             </div>
         </a>
     </div>
-    <div class="col-12 col-md-4"> {# Column for User Card #}
-        {% if user != None %}
-        <div class="card tm-user-card">
-            <div class="card-body py-4 px-5">
-                <div class="d-flex align-items-center">
-                    <div class="avatar avatar-xl">
-                        {% if user.photo_url %}
-                        <img src="{{ user.photo_url.url }}" alt="Photo utilisateur">
-                        {% else %}
-                        <img src="{% static 'assets/images/faces/1.jpg' %}" alt="Photo utilisateur">
-                        {% endif %}
-                    </div>
-                    <div class="ms-3 name">
-                        <h5 class="font-bold mb-1">{{ user.get_full_name|default:user.username }}</h5>
-                        <h6 class="text-muted mb-3">{{ user.email|default:"Compte interne" }}</h6>
-                        <a href="{% url 'logout' %}" class="tm-chip tm-chip-logout">
-                            <i class="bi bi-box-arrow-right"></i>
-                            Se déconnecter
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-        {% endif %}
-    </div>
-    <div class="col-12 col-md-4"> {# Column for Repères card #}
-        <div class="card">
-            <div class="card-header">
-                <h4>Repères</h4>
-            </div>
-            <div class="card-body">
-                <div class="tm-panel-note">
-                    Suivi centralisé des formations, des filières et des stagiaires.
-                    Pour une présentation encore plus professionnelle, l'étape suivante
-                    sera d'uniformiser aussi les formulaires et tableaux du module `progress`.
-                </div>
-            </div>
-        </div>
-    </div>
 
-    {# Row 3: Chart Card and Quick Access Card #}
+    {# New Row 2: Chart Card and Quick Access Card #}
     <div class="col-12 col-md-8"> {# Chart will take 2/3 width #}
         <div class="card tm-chart-card">
             <div class="card-header">
@@ -188,8 +157,8 @@
             </div>
         </div>
     </div>
-    <div class="col-12 col-md-4"> {# Column for Quick Access card #}
-        <div class="card tm-quick-access-card"> {# Added tm-quick-access-card class #}
+    <div class="col-12 col-md-4"> {# Column for Quick Access card - Moved up #}
+        <div class="card tm-quick-access-card">
             <div class="card-header">
                 <h4>Accès rapide</h4>
             </div>
@@ -203,10 +172,10 @@
                         </span>
                     </a>
                     {% if request.user.is_superuser or request.user.profile and request.user.profile.name == "Manager" %}
-                    <a href="{% url 'formation_create' %}" class="tm-quick-link">
+                    <a href="{% url 'metier_create' %}" class="tm-quick-link">
                         <span class="tm-quick-link__icon"><i class="bi bi-folder-plus"></i></span>
                         <span>
-                            <span class="tm-quick-link__title">Nouvelle formation</span>
+                            <span class="tm-quick-link__title">Nouveau métier</span>
                             <span class="tm-quick-link__text">Ajouter une offre au catalogue.</span>
                         </span>
                     </a>
@@ -225,6 +194,22 @@
                         </span>
                     </a>
                     {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# New Row 3: Repères Card #}
+    <div class="col-12"> {# Repères card takes full width #}
+        <div class="card">
+            <div class="card-header">
+                <h4>Repères</h4>
+            </div>
+            <div class="card-body">
+                <div class="tm-panel-note">
+                    Suivi centralisé des métiers, des filières et des stagiaires.
+                    Pour une présentation encore plus professionnelle, l'étape suivante
+                    sera d'uniformiser aussi les formulaires et tableaux du module `progress`.
                 </div>
             </div>
         </div>

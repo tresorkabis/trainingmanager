@@ -13,7 +13,7 @@ class Service(models.Model):
 
 class Filiere(models.Model):
     nom = models.CharField(max_length=200)
-    service = models.ForeignKey(Service, on_delete=models.SET_NULL, null=True, blank=True)
+    service = models.ForeignKey(Service, on_delete=models.SET_NULL, null=True, blank=True, related_name="filieres") # Ajout de related_name
 
     active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -24,11 +24,11 @@ class Filiere(models.Model):
     
 # Le modèle Formateur est défini dans progress.models, nous n'avons pas besoin de le définir ici.
 
-class Formation(models.Model):
+class Metier(models.Model): # Renommé de Formation à Metier
     nom = models.CharField(max_length=200)
     duree = models.IntegerField(default=0)
     duree_heures = models.PositiveIntegerField(default=0, verbose_name="Durée en heures")
-    filiere = models.ForeignKey(Filiere, on_delete=models.SET_NULL, null=True, blank=True)
+    filiere = models.ForeignKey(Filiere, on_delete=models.SET_NULL, null=True, blank=True, related_name="metiers") # Changé related_name
     cout = models.DecimalField(max_digits=12, decimal_places=2, default=0, verbose_name="Coût")
     
     # Champs de frais ajoutés/modifiés
@@ -45,11 +45,11 @@ class Formation(models.Model):
 
 
 class Module(models.Model):
-    formation = models.ForeignKey(Formation, on_delete=models.CASCADE, related_name="modules")
+    metier = models.ForeignKey(Metier, on_delete=models.CASCADE, related_name="modules") # Changé de formation à metier
     titre = models.CharField(max_length=200)
     description = models.TextField(blank=True, null=True)
     duree_heures = models.PositiveIntegerField(default=0, verbose_name="Durée en heures")
-    formateur = models.ForeignKey('progress.Formateur', on_delete=models.SET_NULL, null=True, blank=True, related_name="modules_dispenses") # <-- Référence de chaîne ici
+    formateur = models.ForeignKey('progress.Formateur', on_delete=models.SET_NULL, null=True, blank=True, related_name="modules_dispenses")
     ordre = models.PositiveIntegerField(default=1)
 
     active = models.BooleanField(default=True)
@@ -60,4 +60,4 @@ class Module(models.Model):
         ordering = ["ordre", "id"]
 
     def __str__(self):
-        return f"{self.formation.nom} - {self.titre}"
+        return f"{self.metier.nom} - {self.titre}" # Changé de formation.nom à metier.nom

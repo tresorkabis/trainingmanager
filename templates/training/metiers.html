@@ -1,8 +1,8 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Référentiel des filières{% endblock title %}
-{% block page_header %}Référentiel des filières{% endblock page_header %}
+{% block title %}Catalogue des métiers{% endblock title %}
+{% block page_header %}Catalogue des métiers{% endblock page_header %}
 
 {% block style %}
 <style>
@@ -120,8 +120,8 @@
         border-color: #e9ecef;
     }
 
-    /* Specific styles for filiere list */
-    .tm-filiere-hero {
+    /* Specific styles for metier list */
+    .tm-metier-hero {
         background:
             radial-gradient(circle at top right, rgba(67, 94, 190, 0.18), transparent 35%),
             linear-gradient(135deg, #f7f8fc 0%, #eef3ff 100%);
@@ -130,7 +130,7 @@
         overflow: hidden;
     }
 
-    .tm-filiere-stat {
+    .tm-metier-stat {
         background: rgba(255, 255, 255, 0.76);
         border: 1px solid rgba(67, 94, 190, 0.1);
         border-radius: 1rem;
@@ -139,7 +139,7 @@
         height: 100%;
     }
 
-    .tm-filiere-stat__label {
+    .tm-metier-stat__label {
         display: block;
         font-size: 0.78rem;
         letter-spacing: 0.04em;
@@ -148,19 +148,19 @@
         margin-bottom: 0.35rem;
     }
 
-    .tm-filiere-stat__value {
+    .tm-metier-stat__value {
         font-size: 1.35rem;
         font-weight: 700;
         color: #25396f;
     }
 
-    .tm-filiere-row__title {
+    .tm-metier-row__title {
         color: #25396f;
         font-weight: 700;
         text-decoration: none;
     }
 
-    .tm-filiere-row__meta {
+    .tm-metier-row__meta {
         color: #7b8190;
         font-size: 0.85rem;
     }
@@ -169,47 +169,55 @@
 
 {% block content %}
 <div class="page-heading">
-    <section class="tm-filiere-hero p-4 p-lg-5 mb-4">
+    <section class="tm-metier-hero p-4 p-lg-5 mb-4">
         <div class="row g-4 align-items-center">
             <div class="col-12 col-xl-6">
                 <div class="tm-section-titlebar mb-3">
-                    <span class="tm-section-titlebar__icon"><i class="bi bi-signpost-2"></i></span>
+                    <span class="tm-section-titlebar__icon"><i class="bi bi-journal-text"></i></span>
                     <div class="tm-section-titlebar__text">
-                        <h3>Filières</h3>
-                        <p>Gérez les filières et leurs métiers associés.</p> {# Changed "formations" to "métiers" #}
+                        <h3>Métiers</h3>
+                        <p>Gérez le catalogue de métiers et leurs modules.</p>
                     </div>
                 </div>
                 <div class="d-flex flex-wrap gap-2">
-                    <a href="{% url 'filiere_create' %}" class="btn btn-primary">
-                        <i class="bi bi-signpost-2 me-2"></i>Nouvelle filière
+                    <a href="{% url 'metier_create' %}" class="btn btn-primary">
+                        <i class="bi bi-folder-plus me-2"></i>Nouveau métier
                     </a>
-                    {# Add other relevant buttons here if needed #}
+                    <a href="{% url 'formateurs' %}" class="btn btn-light-secondary">
+                        <i class="bi bi-person-badge me-2"></i>Voir les formateurs
+                    </a>
                 </div>
             </div>
             <div class="col-12 col-xl-6">
                 <div class="row g-3">
                     <div class="col-6 col-md-4">
-                        <div class="tm-filiere-stat">
-                            <span class="tm-filiere-stat__label">Total Filières</span>
-                            <span class="tm-filiere-stat__value">{{ stats.total }}</span>
+                        <div class="tm-metier-stat">
+                            <span class="tm-metier-stat__label">Total Métiers</span>
+                            <span class="tm-metier-stat__value">{{ stats.total }}</span>
                         </div>
                     </div>
                     <div class="col-6 col-md-4">
-                        <div class="tm-filiere-stat">
-                            <span class="tm-filiere-stat__label">Actives</span>
-                            <span class="tm-filiere-stat__value">{{ stats.active }}</span>
+                        <div class="tm-metier-stat">
+                            <span class="tm-metier-stat__label">Actifs</span>
+                            <span class="tm-metier-stat__value">{{ stats.active }}</span>
                         </div>
                     </div>
                     <div class="col-6 col-md-4">
-                        <div class="tm-filiere-stat">
-                            <span class="tm-filiere-stat__label">Inactives</span>
-                            <span class="tm-filiere-stat__value">{{ stats.inactive }}</span>
+                        <div class="tm-metier-stat">
+                            <span class="tm-metier-stat__label">Inactifs</span>
+                            <span class="tm-metier-stat__value">{{ stats.inactive }}</span>
                         </div>
                     </div>
                     <div class="col-6 col-md-4">
-                        <div class="tm-filiere-stat">
-                            <span class="tm-filiere-stat__label">Total Métiers</span> {# Changed "Formations" to "Métiers" #}
-                            <span class="tm-filiere-stat__value">{{ stats.total_metiers }}</span> {# Changed total_formations to total_metiers #}
+                        <div class="tm-metier-stat">
+                            <span class="tm-metier-stat__label">Total Modules</span>
+                            <span class="tm-metier-stat__value">{{ stats.total_modules }}</span>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-4">
+                        <div class="tm-metier-stat">
+                            <span class="tm-metier-stat__label">Total Actions</span>
+                            <span class="tm-metier-stat__value">{{ stats.total_actions }}</span>
                         </div>
                     </div>
                 </div>
@@ -218,52 +226,50 @@
     </section>
 
     <section class="section">
-        <div class="card tm-listing-card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h4 class="card-title mb-0">Catalogue des filières</h4>
-                <a href="{% url 'filiere_create' %}" class="btn btn-primary btn-sm">
-                    <i class="bi bi-signpost-2 me-2"></i>Nouvelle filière
+        <div class="card tm-listing-card"> {# Applied premium card styling #}
+            <div class="card-header d-flex justify-content-between align-items-center"> {# Added d-flex for alignment #}
+                <h4 class="card-title mb-0">Catalogue des métiers</h4>
+                <a href="{% url 'metier_create' %}" class="btn btn-primary btn-sm">
+                    <i class="bi bi-folder-plus me-2"></i>Nouveau métier
                 </a>
             </div>
             <div class="card-body">
                 {# Custom Search Input #}
                 <div class="custom-search-container">
-                    <input type="text" id="searchInput" class="custom-search-input form-control" placeholder="Recherche par nom, service...">
+                    <input type="text" id="searchInput" class="custom-search-input form-control" placeholder="Recherche par nom, filière...">
                 </div>
 
                 <div class="table-responsive">
-                    <table class="table table-striped" id="filiereTable">
+                    <table class="table table-striped" id="metierTable">
                         <thead>
                             <tr>
                                 <th style="width: 5%;">N°</th>
-                                <th style="width: 30%;">Nom</th>
-                                <th style="width: 25%;">Service</th>
-                                <th style="width: 10%;">Métiers</th> {# Changed Formations to Métiers #}
-                                <th style="width: 10%;">Statut</th>
+                                <th style="width: 25%;">Nom</th>
+                                <th style="width: 10%;">Durée (mois)</th>
+                                <th style="width: 10%;">Durée (heures)</th>
+                                <th style="width: 15%;">Filière</th>
+                                <th style="width: 10%;">Coût</th>
+                                <th style="width: 10%;">Frais matériels</th>
                                 <th style="width: 15%;">Actions</th>
                             </tr>
                         </thead>
-                        <tbody id="filiereTableBody">
-                            {% if filiere_list %}
+                        <tbody id="metierTableBody">
+                            {% if metier_list %}
                             {% for item in object_list %}
                             <tr>
                                 <td>{{ forloop.counter }}</td>
-                                <td><a href="{% url 'filiere' item.pk %}" class="tm-filiere-row__title">{{ item.nom }}</a></td>
-                                <td>{{ item.service.nom|default:"-" }}</td>
-                                <td><span class="badge bg-primary">{{ item.metiers_count }}</span></td> {# Changed formations_count to metiers_count #}
-                                <td>
-                                    {% if item.active %}
-                                    <span class="badge bg-success">Actif</span>
-                                    {% else %}
-                                    <span class="badge bg-danger">Inactif</span>
-                                    {% endif %}
-                                </td>
+                                <td><a href="{% url 'metier' item.pk %}" class="tm-metier-row__title">{{ item.nom }}</a></td>
+                                <td>{{ item.duree }} mois</td>
+                                <td>{{ item.duree_heures }} h</td>
+                                <td>{{ item.filiere.nom|default:"-" }}</td>
+                                <td>{{ item.cout }}</td>
+                                <td>{{ item.frais_materiels }}</td>
                                 <td>
                                     <div class="d-flex gap-2">
-                                        <a href="{% url 'filiere_update' item.pk %}" class="btn btn-sm btn-outline-primary" title="Modifier">
+                                        <a href="{% url 'metier_update' item.pk %}" class="btn btn-sm btn-outline-primary" title="Modifier">
                                             <i class="bi bi-pencil"></i>
                                         </a>
-                                        <a href="{% url 'filiere_delete' item.pk %}" class="btn btn-sm btn-outline-danger" title="Supprimer">
+                                        <a href="{% url 'metier_delete' item.pk %}" class="btn btn-sm btn-outline-danger" title="Supprimer">
                                             <i class="bi bi-trash"></i>
                                         </a>
                                     </div>
@@ -272,7 +278,7 @@
                             {% endfor %}
                             {% else %}
                             <tr id="noResultsRow">
-                                <td colspan="6" class="no-results-message">Aucune filière enregistrée.</td>
+                                <td colspan="8" class="no-results-message">Aucun métier enregistré.</td>
                             </tr>
                             {% endif %}
                         </tbody>
@@ -301,7 +307,7 @@
                             <a href="?page={{ page_obj.next_page_number }}" class="page-link">
                                 {{ page_obj.next_page_number }}
                             </a>
-                            </li>
+                        </li>
                         <li class="page-item pager"><a href="?page={{ page_obj.paginator.num_pages }}" class="page-link">&raquo;</a></li>
                         {% endif %}
                     </ul>
@@ -311,13 +317,14 @@
         </div>
     </section>
 </div>
+
 {% endblock content %}
 
 {% block script %}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const searchInput = document.getElementById('searchInput');
-        const tableBody = document.getElementById('filiereTableBody');
+        const tableBody = document.getElementById('metierTableBody');
         const allRows = Array.from(tableBody.querySelectorAll('tr')); // Get all original rows
         let noResultsRow = document.getElementById('noResultsRow');
 
@@ -326,9 +333,9 @@
             noResultsRow = document.createElement('tr');
             noResultsRow.id = 'noResultsRow';
             const td = document.createElement('td');
-            td.colSpan = 6; // Adjusted colspan for new columns
+            td.colSpan = 8; // Adjusted colspan for new columns
             td.className = 'no-results-message';
-            td.textContent = 'Aucune filière trouvée.';
+            td.textContent = 'Aucun métier trouvé.';
             noResultsRow.appendChild(td);
             noResultsRow.style.display = 'none'; // Hide by default
             tableBody.appendChild(noResultsRow);
@@ -339,14 +346,14 @@
             let resultsFound = false;
 
             allRows.forEach(row => {
-                // Assuming Nom is at index 1, Service is at index 2
+                // Assuming Nom is at index 1, Filière is at index 4
                 const nomCell = row.cells[1];
-                const serviceCell = row.cells[2];
+                const filiereCell = row.cells[4];
 
                 const nom = nomCell ? nomCell.textContent.toLowerCase() : '';
-                const service = serviceCell ? serviceCell.textContent.toLowerCase() : '';
+                const filiere = filiereCell ? filiereCell.textContent.toLowerCase() : '';
 
-                if (nom.includes(searchTerm) || service.includes(searchTerm)) {
+                if (nom.includes(searchTerm) || filiere.includes(searchTerm)) {
                     row.style.display = ''; // Show row
                     resultsFound = true;
                 } else {
@@ -365,9 +372,9 @@
         searchInput.addEventListener('keyup', performSearch);
 
         // Initial display check for no results if the list is empty
-        if (allRows.length === 0 && !noResultsRow.textContent.includes('Aucune filière enregistrée.')) {
+        if (allRows.length === 0 && !noResultsRow.textContent.includes('Aucun métier enregistré.')) {
              noResultsRow.style.display = '';
-             noResultsRow.textContent = 'Aucune filière enregistrée.';
+             noResultsRow.textContent = 'Aucun métier enregistré.';
         } else if (allRows.length > 0) {
             noResultsRow.style.display = 'none';
         }

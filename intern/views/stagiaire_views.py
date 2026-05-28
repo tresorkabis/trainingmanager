@@ -59,9 +59,9 @@ class StagiaireListView(StagiairePermissionMixin, ListView):
             stagiaire=OuterRef("pk")
         ).order_by("-action__date_debut").values("pk")[:1]
 
-        latest_formation_name = DetailAction.objects.filter(
+        latest_metier_name = DetailAction.objects.filter( # Changé latest_formation_name à latest_metier_name
             pk=Subquery(latest_detail_action_pk)
-        ).values("action__formation__nom")[:1]
+        ).values("action__metier__nom")[:1] # Changé action__formation__nom à action__metier__nom
 
         # Annoter chaque stagiaire avec le nombre d'études et d'autres formations
         queryset = queryset.annotate(
@@ -70,7 +70,7 @@ class StagiaireListView(StagiairePermissionMixin, ListView):
         )
 
         return queryset.annotate(
-            current_formation_name=Subquery(latest_formation_name, output_field=models.CharField())
+            current_formation_name=Subquery(latest_metier_name, output_field=models.CharField()) # Changé latest_formation_name à latest_metier_name
         )
 
     def get_context_data(self, **kwargs):
@@ -108,7 +108,7 @@ class StagiaireDetailView(StagiairePermissionMixin, DetailView):
         ctx["filieres"] = self.get_allowed_filieres()
         ctx["actions_suivies"] = DetailAction.objects.filter(
             stagiaire=current_stagiaire
-        ).select_related("action__formation").order_by("action__date_debut")
+        ).select_related("action__metier").order_by("action__date_debut") # Changé action__formation à action__metier
         ctx["autres_formations"] = AutreFormation.objects.filter(stagiaire=current_stagiaire)
         ctx["titre"] = "Voir"
         return ctx
@@ -318,7 +318,7 @@ class StagiaireCreateUpdateView(StagiairePermissionMixin, View): # Nouvelle vue 
 
 
 @method_decorator(login_required, name="dispatch")
-class StagiaireDeleteView(StagiairePermissionMixin, DeleteView):
+class StagiaireDeleteView(DeleteView): # StagiairePermissionMixin est déjà dans la classe parente
     model = Stagiaire
     template_name = "intern/stagiaire_confirm_delete.html" # Nouveau template pour la confirmation de suppression
     success_url = reverse_lazy("stagiaires")

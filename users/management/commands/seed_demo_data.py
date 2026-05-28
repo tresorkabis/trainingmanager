@@ -5,7 +5,7 @@ from django.db import transaction
 
 from intern.models import Categorie, EtudeStagiaire, Stagiaire, Entreprise, AutreFormation # Import AutreFormation
 from progress.models import Action, DetailAction, Formateur, TypeAction
-from training.models import Filiere, Formation, Module, Service
+from training.models import Filiere, Metier, Module, Service # Changé Formation à Metier
 from users.models import Profile, User
 from users.utils import createprofile
 
@@ -26,7 +26,7 @@ class Command(BaseCommand):
         Stagiaire.objects.all().delete()
         Entreprise.objects.all().delete()
         Module.objects.all().delete()
-        Formation.objects.all().delete()
+        Metier.objects.all().delete() # Changé Formation à Metier
         Filiere.objects.all().delete()
         Service.objects.all().delete()
         User.objects.all().delete()
@@ -81,16 +81,25 @@ class Command(BaseCommand):
             categories[titre] = categorie
 
         services = {}
-        for nom in ["Formation Continue", "Technique Industrielle", "Informatique", "Gestion Administrative"]:
+        # Nouveaux services
+        for nom in ["Informatique", "Comptabilité et Administration", "Petites et moyennes entreprises"]:
             service, _ = Service.objects.get_or_create(nom=nom)
             services[nom] = service
 
         filieres = {}
         filiere_specs = [
-            ("Electricite industrielle", "Technique Industrielle"),
-            ("Maintenance des equipements", "Technique Industrielle"),
+            # Filières pour "Informatique"
             ("Bureautique", "Informatique"),
-            ("Gestion administrative", "Gestion Administrative"),
+            ("Développement des plates-formes informatiques", "Informatique"),
+            ("Administration système et réseaux", "Informatique"),
+            # Filières pour "Comptabilité et Administration"
+            ("Finances et Comptabilité", "Comptabilité et Administration"),
+            ("Administration et Gestion", "Comptabilité et Administration"),
+            ("Relations Publiques et Communication", "Comptabilité et Administration"),
+            # Filières pour "Petites et moyennes entreprises"
+            ("Logistique et Douane", "Petites et moyennes entreprises"),
+            ("Gestion de projets", "Petites et moyennes entreprises"),
+            ("Petites et Moyennes Entreprises (PME)", "Petites et moyennes entreprises"),
         ]
         for nom, service_nom in filiere_specs:
             filiere, _ = Filiere.objects.get_or_create(
@@ -110,13 +119,13 @@ class Command(BaseCommand):
                 "first_name": "Chef",
                 "last_name": "Filiere",
                 "profile": chef_filiere_profile,
-                "filiere": filieres["Electricite industrielle"], # Assigner une filière
+                "filiere": filieres["Développement des plates-formes informatiques"], # Assigner une filière pertinente
             },
         )
         if created or not chef_filiere_user.check_password("demo"): # Mot de passe changé à "demo"
             chef_filiere_user.set_password("demo")
             chef_filiere_user.profile = chef_filiere_profile
-            chef_filiere_user.filiere = filieres["Electricite industrielle"]
+            chef_filiere_user.filiere = filieres["Développement des plates-formes informatiques"]
             chef_filiere_user.save()
 
         chef_service_user, created = User.objects.get_or_create(
@@ -126,13 +135,13 @@ class Command(BaseCommand):
                 "first_name": "Chef",
                 "last_name": "Service",
                 "profile": chef_service_profile,
-                "service": services["Technique Industrielle"], # Assigner un service
+                "service": services["Informatique"], # Assigner à un service pertinent
             },
         )
         if created or not chef_service_user.check_password("demo"): # Mot de passe changé à "demo"
             chef_service_user.set_password("demo")
             chef_service_user.profile = chef_service_profile
-            chef_service_user.service = services["Technique Industrielle"]
+            chef_service_user.service = services["Informatique"] # Assigner à un service pertinent
             chef_service_user.save()
         # --- Fin de l'ajout des utilisateurs Chef ---
 
@@ -151,8 +160,8 @@ class Command(BaseCommand):
             standard_user.profile = user_profile
             standard_user.save()
 
-        # --- Début de la section Formateurs (déplacée plus haut) ---
-        formateurs = {} # Initialiser le dictionnaire formateurs ici
+        # --- Début de la section Formateurs ---
+        formateurs = {}
         formateur_specs_data = [
             ("FM001", "Kabasele", "Mwamba", "Jean", "Kinshasa / Kintambo", "0817000001", "kabasele.demo@training.local", "Electricité"),
             ("FM002", "Ngoy", "Kabeya", "Marie", "Kinshasa / Limete", "0817000002", "ngoy.demo@training.local", "Informatique"),
@@ -166,51 +175,52 @@ class Command(BaseCommand):
                 defaults={
                     "nom": nom,
                     "postnom": postnom,
-                    "prenom": prenom, # Nouveau champ
+                    "prenom": prenom,
                     "adresse": adresse,
                     "telephone": telephone,
                     "email": email,
-                    "specialite": specialite, # Nouveau champ
+                    "specialite": specialite,
                 },
             )
             changed = False
             for field, value in {
                 "nom": nom,
                 "postnom": postnom,
-                "prenom": prenom, # Nouveau champ
+                "prenom": prenom,
                 "adresse": adresse,
                 "telephone": telephone,
                 "email": email,
-                "specialite": specialite, # Nouveau champ
+                "specialite": specialite,
             }.items():
                 if getattr(formateur, field) != value:
                     setattr(formateur, field, value)
                     changed = True
             if changed:
                 formateur.save()
-            formateurs[matricule] = formateur # Peupler le dictionnaire formateurs
+            formateurs[matricule] = formateur
         
-        formateurs_list = list(formateurs.values()) # Créer la liste des objets Formateur
+        formateurs_list = list(formateurs.values())
         if not formateurs_list:
             self.stdout.write(self.style.WARNING("Aucun formateur trouvé après création. Création de formateurs par défaut."))
-            # Fallback si, pour une raison quelconque, formateurs_list est vide
-            # Cela ne devrait pas arriver si les formateurs sont créés juste au-dessus
             formateur1, _ = Formateur.objects.get_or_create(matricule="FM001", defaults={"nom": "Kabasele", "postnom": "Mwamba", "prenom": "Jean", "adresse": "Kinshasa / Kintambo", "telephone": "0817000001", "email": "kabasele.demo@training.local", "specialite": "Electricité"})
             formateur2, _ = Formateur.objects.get_or_create(matricule="FM002", defaults={"nom": "Ngoy", "postnom": "Kabeya", "prenom": "Marie", "adresse": "Kinshasa / Limete", "telephone": "0817000002", "email": "ngoy.demo@training.local", "specialite": "Informatique"})
             formateurs_list = [formateur1, formateur2]
-        # --- Fin de la section Formateurs ---
 
-        formateur_index = 0 # Réinitialiser l'index pour l'assignation des modules
+        formateur_index = 0
 
-        formations = {}
-        formation_specs = [
-            {"nom": "Electricite batiment", "duree": 6, "filiere_nom": "Electricite industrielle", "frais_materiels": 120.0, "frais_participation": 0.0, "frais_jury": 0.0, "cout": 1500.00, "modules": [("Fondamentaux électriques", "Notions de base et sécurité", 40), ("Installations domestiques", "Circuits et équipements du bâtiment", 80)]},
-            {"nom": "Automatisme industriel", "duree": 8, "filiere_nom": "Electricite industrielle", "frais_materiels": 180.0, "frais_participation": 0.0, "frais_jury": 0.0, "cout": 2000.00, "modules": [("API et capteurs", "Automates programmables et instrumentation", 60), ("Supervision", "Interfaces et contrôle industriel", 50)]},
-            {"nom": "Maintenance preventive", "duree": 5, "filiere_nom": "Maintenance des equipements", "frais_materiels": 95.0, "frais_participation": 0.0, "frais_jury": 0.0, "cout": 1200.00, "modules": [("Diagnostic", "Méthodes de contrôle et inspection", 35), ("Planification", "Organisation des maintenances périodiques", 25)]},
+        metiers = {}
+        metier_specs = [
+            # Métiers pour "Informatique"
+            {"nom": "Electricite batiment", "duree": 6, "filiere_nom": "Développement des plates-formes informatiques", "frais_materiels": 120.0, "frais_participation": 0.0, "frais_jury": 0.0, "cout": 1500.00, "modules": [("Fondamentaux électriques", "Notions de base et sécurité", 40), ("Installations domestiques", "Circuits et équipements du bâtiment", 80)]},
+            {"nom": "Automatisme industriel", "duree": 8, "filiere_nom": "Administration système et réseaux", "frais_materiels": 180.0, "frais_participation": 0.0, "frais_jury": 0.0, "cout": 2000.00, "modules": [("API et capteurs", "Automates programmables et instrumentation", 60), ("Supervision", "Interfaces et contrôle industriel", 50)]},
+            {"nom": "Maintenance preventive", "duree": 5, "filiere_nom": "Administration système et réseaux", "frais_materiels": 95.0, "frais_participation": 0.0, "frais_jury": 0.0, "cout": 1200.00, "modules": [("Diagnostic", "Méthodes de contrôle et inspection", 35), ("Planification", "Organisation des maintenances périodiques", 25)]},
             {"nom": "Pack Office professionnel", "duree": 3, "filiere_nom": "Bureautique", "frais_materiels": 60.0, "frais_participation": 0.0, "frais_jury": 0.0, "cout": 800.00, "modules": [("Word avancé", "Mise en forme et publipostage", 20), ("Excel métier", "Tableaux, formules et graphiques", 30)]},
-            {"nom": "Secretaire de direction", "duree": 6, "filiere_nom": "Gestion administrative", "frais_materiels": 110.0, "frais_participation": 0.0, "frais_jury": 0.0, "cout": 1300.00, "modules": [("Communication professionnelle", "Rédaction et accueil", 35), ("Organisation administrative", "Classement, agenda et suivi", 45)]},
+            # Métiers pour "Comptabilité et Administration"
+            {"nom": "Secretaire de direction", "duree": 6, "filiere_nom": "Administration et Gestion", "frais_materiels": 110.0, "frais_participation": 0.0, "frais_jury": 0.0, "cout": 1300.00, "modules": [("Communication professionnelle", "Rédaction et accueil", 35), ("Organisation administrative", "Classement, agenda et suivi", 45)]},
+            # Nouveau métier pour "Petites et moyennes entreprises"
+            {"nom": "Gestion de Projets PME", "duree": 4, "filiere_nom": "Gestion de projets", "frais_materiels": 75.0, "frais_participation": 0.0, "frais_jury": 0.0, "cout": 950.00, "modules": [("Fondamentaux de la gestion de projet", "Initiation aux méthodes agiles", 30), ("Outils de planification", "MS Project et Trello", 40)]},
         ]
-        for spec in formation_specs:
+        for spec in metier_specs:
             nom = spec["nom"]
             duree = spec["duree"]
             filiere_nom = spec["filiere_nom"]
@@ -220,7 +230,7 @@ class Command(BaseCommand):
             cout = spec["cout"]
             # duree_heures sera calculée à partir des modules
 
-            formation, _ = Formation.objects.get_or_create(
+            metier, _ = Metier.objects.get_or_create(
                 nom=nom,
                 defaults={
                     "duree": duree,
@@ -234,58 +244,58 @@ class Command(BaseCommand):
                 },
             )
             changed = False
-            if formation.filiere_id != filieres[filiere_nom].id:
-                formation.filiere = filieres[filiere_nom]
+            if metier.filiere_id != filieres[filiere_nom].id:
+                metier.filiere = filieres[filiere_nom]
                 changed = True
-            if formation.duree != duree:
-                formation.duree = duree
+            if metier.duree != duree:
+                metier.duree = duree
                 changed = True
-            # if formation.duree_heures != duree_heures: # Cette ligne est supprimée car duree_heures est calculée
-            #     formation.duree_heures = duree_heures
+            # if metier.duree_heures != duree_heures: # Cette ligne est supprimée car duree_heures est calculée
+            #     metier.duree_heures = duree_heures
             #     changed = True
-            if formation.cout != cout:
-                formation.cout = cout
+            if metier.cout != cout:
+                metier.cout = cout
                 changed = True
-            if formation.frais_participation != frais_participation:
-                formation.frais_participation = frais_participation
+            if metier.frais_participation != frais_participation:
+                metier.frais_participation = frais_participation
                 changed = True
-            if formation.frais_jury != frais_jury:
-                formation.frais_jury = frais_jury
+            if metier.frais_jury != frais_jury:
+                metier.frais_jury = frais_jury
                 changed = True
-            if formation.frais_materiels != frais_materiels:
-                formation.frais_materiels = frais_materiels
+            if metier.frais_materiels != frais_materiels:
+                metier.frais_materiels = frais_materiels
                 changed = True
-            if not formation.active: # Ensure it's active
-                formation.active = True
+            if not metier.active: # Ensure it's active
+                metier.active = True
                 changed = True
             if changed:
-                formation.save()
+                metier.save()
             
-            Module.objects.filter(formation=formation).delete()
+            Module.objects.filter(metier=metier).delete()
             
-            total_duree_heures_for_formation = 0 # Initialiser le total pour cette formation
+            total_duree_heures_for_metier = 0 # Initialiser le total pour ce métier
             for ordre, module_spec in enumerate(spec.get("modules", []), start=1):
-                titre, description, duree_module_heures = module_spec # Renommé pour éviter conflit
+                titre, description, duree_module_heures = module_spec
                 
                 formateur_to_assign = formateurs_list[formateur_index % len(formateurs_list)]
                 
                 Module.objects.create(
-                    formation=formation,
+                    metier=metier,
                     titre=titre,
                     description=description,
                     duree_heures=duree_module_heures,
                     formateur=formateur_to_assign,
                     ordre=ordre,
                 )
-                total_duree_heures_for_formation += duree_module_heures # Ajouter la durée du module
+                total_duree_heures_for_metier += duree_module_heures
                 formateur_index += 1 # Passer au formateur suivant pour le prochain module
             
-            # Mettre à jour la durée en heures de la formation après la création de tous les modules
-            if formation.duree_heures != total_duree_heures_for_formation:
-                formation.duree_heures = total_duree_heures_for_formation
-                formation.save(update_fields=['duree_heures'])
+            # Mettre à jour la durée en heures du métier après la création de tous les modules
+            if metier.duree_heures != total_duree_heures_for_metier:
+                metier.duree_heures = total_duree_heures_for_metier
+                metier.save(update_fields=['duree_heures'])
 
-            formations[nom] = formation
+            metiers[nom] = metier
 
         # Create demo Entreprise instances
         entreprises = {}
@@ -313,11 +323,11 @@ class Command(BaseCommand):
                 "sexe": "F",
                 "telephone": "0991000001",
                 "email": "aline.mukendi.demo@training.local",
-                "categorie": "dans l'emploi", # Updated category
+                "categorie": "dans l'emploi",
                 "niveau_etude": "Diplome d'Etat",
                 "adresse": "Kinshasa / Lemba",
                 "nationalite": "Congolaise",
-                "type_piece": "CE", # New field
+                "type_piece": "CE",
                 "numero_piece": "DEM-ST-001",
                 "date_naissance": date(2001, 4, 12),
                 "lieu_naissance": "Kinshasa",
@@ -333,20 +343,19 @@ class Command(BaseCommand):
                         "diplome_obtenu": "Diplome d'Etat",
                     }
                 ],
-                "autres_formations": [ # Added other formations
+                "autres_formations": [
                     {
                         "intitule": "Formation en Cybersécurité",
                         "etablissement": "Global Tech Academy",
                         "annee_fin": 2023,
                     }
                 ],
-                # New fields for "dans l'emploi"
                 "entreprise_nom": "Global Tech Solutions",
                 "fonction": "Technicien Électricien",
                 "anciennete_emploi": 3,
                 "anciennete_entreprise": 3,
-                "photo": "stagiaires/photo5.jpg", # Placeholder photo
-                "filiere_nom": "Electricite industrielle", # Ajout de la filière
+                "photo": "stagiaires/photo5.jpg",
+                "filiere_nom": "Développement des plates-formes informatiques", # Mappé à la nouvelle filière
             },
             {
                 "nom": "Tshibangu",
@@ -355,11 +364,11 @@ class Command(BaseCommand):
                 "sexe": "M",
                 "telephone": "0991000002",
                 "email": "patrick.tshibangu.demo@training.local",
-                "categorie": "sans emploi", # Updated category
+                "categorie": "sans emploi",
                 "niveau_etude": "Graduat",
                 "adresse": "Kinshasa / Ngaliema",
                 "nationalite": "Congolaise",
-                "type_piece": "PS", # New field
+                "type_piece": "PS",
                 "numero_piece": "DEM-ST-002",
                 "date_naissance": date(1999, 9, 5),
                 "lieu_naissance": "Matadi",
@@ -383,8 +392,8 @@ class Command(BaseCommand):
                         "diplome_obtenu": "Attestation",
                     },
                 ],
-                "photo": "stagiaires/photo6.jpg", # Placeholder photo
-                "filiere_nom": "Bureautique", # Ajout de la filière
+                "photo": "stagiaires/photo6.jpg",
+                "filiere_nom": "Bureautique", # Mappé à la nouvelle filière
             },
             {
                 "nom": "Ilunga",
@@ -393,11 +402,11 @@ class Command(BaseCommand):
                 "sexe": "F",
                 "telephone": "0991000003",
                 "email": "merveille.ilunga.demo@training.local",
-                "categorie": "non défini", # Updated category
+                "categorie": "non défini",
                 "niveau_etude": "Licence",
                 "adresse": "Kinshasa / Gombe",
                 "nationalite": "Congolaise",
-                "type_piece": "PC", # New field
+                "type_piece": "PC",
                 "numero_piece": "DEM-ST-003",
                 "date_naissance": date(1998, 1, 20),
                 "lieu_naissance": "Lubumbashi",
@@ -413,8 +422,8 @@ class Command(BaseCommand):
                         "diplome_obtenu": "Licence",
                     }
                 ],
-                "photo": "stagiaires/photo7.jpg", # Placeholder photo
-                "filiere_nom": "Gestion administrative", # Ajout de la filière
+                "photo": "stagiaires/photo7.jpg",
+                "filiere_nom": "Administration et Gestion", # Mappé à la nouvelle filière
             },
             {
                 "nom": "Kabongo",
@@ -427,7 +436,7 @@ class Command(BaseCommand):
                 "niveau_etude": "Graduat",
                 "adresse": "Kinshasa / Limete",
                 "nationalite": "Congolaise",
-                "type_piece": "CE", # New field
+                "type_piece": "CE",
                 "numero_piece": "DEM-ST-004",
                 "date_naissance": date(1995, 7, 1),
                 "lieu_naissance": "Kolwezi",
@@ -448,7 +457,7 @@ class Command(BaseCommand):
                 "anciennete_emploi": 6,
                 "anciennete_entreprise": 4,
                 "photo": "stagiaires/photo1.jpg",
-                "filiere_nom": "Maintenance des equipements", # Ajout de la filière
+                "filiere_nom": "Administration système et réseaux", # Mappé à la nouvelle filière
             },
             {
                 "nom": "Nzuzi",
@@ -461,7 +470,7 @@ class Command(BaseCommand):
                 "niveau_etude": "Diplome d'Etat",
                 "adresse": "Kinshasa / Ngaliema",
                 "nationalite": "Congolaise",
-                "type_piece": "PS", # New field
+                "type_piece": "PS",
                 "numero_piece": "DEM-ST-005",
                 "date_naissance": date(2000, 11, 25),
                 "lieu_naissance": "Boma",
@@ -478,7 +487,7 @@ class Command(BaseCommand):
                     }
                 ],
                 "photo": "stagiaires/photo2.jpg",
-                "filiere_nom": "Gestion administrative", # Ajout de la filière
+                "filiere_nom": "Administration et Gestion", # Mappé à la nouvelle filière
             },
             {
                 "nom": "Mbuyi",
@@ -491,7 +500,7 @@ class Command(BaseCommand):
                 "niveau_etude": "Licence",
                 "adresse": "Kinshasa / Kasa-Vubu",
                 "nationalite": "Congolaise",
-                "type_piece": "PC", # New field
+                "type_piece": "PC",
                 "numero_piece": "DEM-ST-006",
                 "date_naissance": date(1997, 3, 8),
                 "lieu_naissance": "Mbuji-Mayi",
@@ -508,7 +517,7 @@ class Command(BaseCommand):
                     }
                 ],
                 "photo": "stagiaires/photo3.jpg",
-                "filiere_nom": "Gestion administrative", # Ajout de la filière
+                "filiere_nom": "Administration et Gestion", # Mappé à la nouvelle filière
             },
             {
                 "nom": "Lufuma",
@@ -521,7 +530,7 @@ class Command(BaseCommand):
                 "niveau_etude": "Graduat",
                 "adresse": "Kinshasa / Bandal",
                 "nationalite": "Congolaise",
-                "type_piece": "PS", # New field
+                "type_piece": "PS",
                 "numero_piece": "DEM-ST-007",
                 "date_naissance": date(1999, 1, 15),
                 "lieu_naissance": "Kisangani",
@@ -542,7 +551,7 @@ class Command(BaseCommand):
                 "anciennete_emploi": 2,
                 "anciennete_entreprise": 2,
                 "photo": "stagiaires/photo4.jpg",
-                "filiere_nom": "Bureautique", # Ajout de la filière
+                "filiere_nom": "Bureautique", # Mappé à la nouvelle filière
             },
         ]
 
@@ -559,13 +568,13 @@ class Command(BaseCommand):
                 "date_naissance": spec["date_naissance"],
                 "lieu_naissance": spec["lieu_naissance"],
                 "nationalite": spec["nationalite"],
-                "type_piece": spec["type_piece"], # New field
+                "type_piece": spec["type_piece"],
                 "numero_piece": spec["numero_piece"],
                 "nom_pere": spec["nom_pere"],
                 "nom_mere": spec["nom_mere"],
                 "niveau_etude": spec["niveau_etude"],
-                "photo": spec["photo"], # New field
-                "filiere": filieres[spec["filiere_nom"]], # Assigner la filière
+                "photo": spec["photo"],
+                "filiere": filieres[spec["filiere_nom"]],
             }
 
             # Add new fields to defaults if category is "dans l'emploi"
@@ -615,7 +624,8 @@ class Command(BaseCommand):
 
 
         type_actions = {}
-        for code, libelle in [("PLAN", "Planification"), ("EXEC", "Execution"), ("EVAL", "Evaluation")]:
+        # Nouveaux types d'action
+        for code, libelle in [("INT", "Interné"), ("EXT", "Externé")]:
             type_action, _ = TypeAction.objects.get_or_create(code=code, defaults={"libelle": libelle})
             if type_action.libelle != libelle:
                 type_action.libelle = libelle
@@ -624,27 +634,28 @@ class Command(BaseCommand):
 
         actions = {}
         action_specs = [
-            {"description": "Session Electricite - Cohorte A", "date_debut": date(2026, 5, 20), "date_fin": date(2026, 11, 20), "formation_nom": "Electricite batiment", "formateur_matricules": ["FM001"]},
-            {"description": "Pack Office - Vague Mai", "date_debut": date(2026, 5, 18), "date_fin": date(2026, 8, 18), "formation_nom": "Pack Office professionnel", "formateur_matricules": ["FM002"]},
-            {"description": "Maintenance Preventive - Juin", "date_debut": date(2026, 6, 1), "date_fin": date(2026, 9, 1), "formation_nom": "Maintenance preventive", "formateur_matricules": ["FM001", "FM002"]}, # Corrected here
-            {"description": "Secretaire de Direction - Sept", "date_debut": date(2026, 9, 1), "date_fin": date(2027, 3, 1), "formation_nom": "Secretaire de direction", "formateur_matricules": ["FM002"]},
-            {"description": "Automatisme Avance - Juillet", "date_debut": date(2026, 7, 10), "date_fin": date(2026, 10, 10), "formation_nom": "Automatisme industriel", "formateur_matricules": ["FM001", "FM002"]},
+            {"description": "Session Electricite - Cohorte A", "date_debut": date(2026, 5, 20), "date_fin": date(2026, 11, 20), "metier_nom": "Electricite batiment", "formateur_matricules": ["FM001"], "type_action_code": "INT"},
+            {"description": "Pack Office - Vague Mai", "date_debut": date(2026, 5, 18), "date_fin": date(2026, 8, 18), "metier_nom": "Pack Office professionnel", "formateur_matricules": ["FM002"], "type_action_code": "EXT"},
+            {"description": "Maintenance Preventive - Juin", "date_debut": date(2026, 6, 1), "date_fin": date(2026, 9, 1), "metier_nom": "Maintenance preventive", "formateur_matricules": ["FM001", "FM002"], "type_action_code": "INT"},
+            {"description": "Secretaire de Direction - Sept", "date_debut": date(2026, 9, 1), "date_fin": date(2027, 3, 1), "metier_nom": "Secretaire de direction", "formateur_matricules": ["FM002"], "type_action_code": "EXT"},
+            {"description": "Automatisme Avance - Juillet", "date_debut": date(2026, 7, 10), "date_fin": date(2026, 10, 10), "metier_nom": "Automatisme industriel", "formateur_matricules": ["FM001", "FM002"], "type_action_code": "INT"},
+            {"description": "Gestion de Projets PME - Oct", "date_debut": date(2026, 10, 1), "date_fin": date(2027, 2, 1), "metier_nom": "Gestion de Projets PME", "formateur_matricules": ["FM004"], "type_action_code": "EXT"},
         ]
         for spec in action_specs:
-            formation_for_action = formations[spec["formation_nom"]] # Get the Formation object
+            metier_for_action = metiers[spec["metier_nom"]]
             
-            self.stdout.write(self.style.NOTICE(f"Processing Action: {spec['description']} for Formation: {formation_for_action.nom}"))
+            self.stdout.write(self.style.NOTICE(f"Processing Action: {spec['description']} for Metier: {metier_for_action.nom}"))
 
-            action, created = Action.objects.get_or_create( # Use get_or_create for action
+            action, created = Action.objects.get_or_create(
                 description=spec["description"],
                 defaults={
                     "date_debut": spec["date_debut"],
                     "date_fin": spec["date_fin"],
-                    "formation": formation_for_action,
+                    "metier": metier_for_action,
+                    "type_action": type_actions[spec["type_action_code"]],
                 },
             )
             
-            # Update logic for existing actions (similar to formations and stagiaires)
             changed = False
             if action.date_debut != spec["date_debut"]:
                 action.date_debut = spec["date_debut"]
@@ -652,25 +663,24 @@ class Command(BaseCommand):
             if action.date_fin != spec["date_fin"]:
                 action.date_fin = spec["date_fin"]
                 changed = True
-            if action.formation_id != formation_for_action.id:
-                action.formation = formation_for_action
+            if action.metier_id != metier_for_action.id:
+                action.metier = metier_for_action
+                changed = True
+            if action.type_action_id != type_actions[spec["type_action_code"]].id:
+                action.type_action = type_actions[spec["type_action_code"]]
                 changed = True
             if changed:
                 action.save()
 
-            # --- MODIFIED LOGIC: Assign ALL formateurs from modules of the associated formation ---
-            # Get formateurs assigned to modules of this specific formation
             formateurs_from_modules = Formateur.objects.filter(
-                modules_dispenses__formation=formation_for_action
+                modules_dispenses__metier=metier_for_action
             ).distinct()
             
-            # Convert to a list of Formateur objects
             assigned_formateurs_for_action = list(formateurs_from_modules)
 
-            self.stdout.write(self.style.NOTICE(f"  Assigning Formateurs from modules for '{formation_for_action.nom}': {[str(f) for f in assigned_formateurs_for_action]}"))
+            self.stdout.write(self.style.NOTICE(f"  Assigning Formateurs from modules for '{metier_for_action.nom}': {[str(f) for f in assigned_formateurs_for_action]}"))
             
             action.formateurs.set(assigned_formateurs_for_action)
-            # --- END MODIFIED LOGIC ---
 
             actions[spec["description"]] = action
 
@@ -683,6 +693,7 @@ class Command(BaseCommand):
             {"stagiaire_email": "christian.mbuyi.demo@training.local", "action_description": "Secretaire de Direction - Sept", "statut": "Inscrit", "date_inscription": date(2026, 8, 15)},
             {"stagiaire_email": "esther.lufuma.demo@training.local", "action_description": "Maintenance Preventive - Juin", "statut": "En cours", "date_inscription": date(2026, 5, 28)},
             {"stagiaire_email": "aline.mukendi.demo@training.local", "action_description": "Automatisme Avance - Juillet", "statut": "Inscrit", "date_inscription": date(2026, 6, 20)},
+            {"stagiaire_email": "aline.mukendi.demo@training.local", "action_description": "Gestion de Projets PME - Oct", "statut": "Inscrit", "date_inscription": date(2026, 9, 15)},
         ]
         for spec in detail_specs:
             DetailAction.objects.get_or_create(

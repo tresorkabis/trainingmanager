@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Actions de Formation{% endblock title %}
+{% block title %}Actions de formation{% endblock title %} {# Changed "Actions de Formation" to "Actions de formation" #}
 {% block page_header %}Suivi des actions de formation{% endblock page_header %}
 
 {% block style %}
@@ -228,8 +228,8 @@
                     <a href="{% url 'action_create' %}" class="btn btn-primary">
                         <i class="bi bi-clipboard-plus me-2"></i>Nouvelle action
                     </a>
-                    <a href="{% url 'formations' %}" class="btn btn-light-secondary">
-                        <i class="bi bi-journal-text me-2"></i>Voir les formations
+                    <a href="{% url 'metiers' %}" class="btn btn-light-secondary"> {# Changed formations to metiers #}
+                        <i class="bi bi-journal-text me-2"></i>Voir les métiers {# Changed formations to métiers #}
                     </a>
                 </div>
             </div>
@@ -278,7 +278,7 @@
             <div class="card-body">
                 {# Custom Search Input #}
                 <div class="custom-search-container">
-                    <input type="text" id="searchInput" class="custom-search-input form-control" placeholder="Recherche par description, formation...">
+                    <input type="text" id="searchInput" class="custom-search-input form-control" placeholder="Recherche par description, métier..."> {# Changed formation to métier #}
                 </div>
 
                 <div class="table-responsive">
@@ -287,7 +287,7 @@
                             <tr>
                                 <th style="width: 25%;">Description</th>
                                 <th style="width: 15%;">Période</th>
-                                <th style="width: 20%;">Formation</th>
+                                <th style="width: 20%;">Métier</th> {# Changed Formation to Métier #}
                                 <th style="width: 15%;">Formateurs</th>
                                 <th style="width: 10%;">Inscrits</th>
                                 <th style="width: 10%;">Statut</th>
@@ -307,8 +307,8 @@
                                     <span class="tm-action-row__meta">au {{ item.date_fin|date:"d/m/Y" }}</span>
                                 </td>
                                 <td>
-                                    {{ item.formation.nom }}<br>
-                                    <span class="tm-action-row__meta">{{ item.formation.filiere.nom|default:"Sans filière" }}</span>
+                                    {{ item.metier.nom }}<br> {# Changed formation.nom to metier.nom #}
+                                    <span class="tm-action-row__meta">{{ item.metier.filiere.nom|default:"Sans filière" }}</span> {# Changed formation.filiere.nom to metier.filiere.nom #}
                                 </td>
                                 <td>
                                     {% if item.formateurs.all %}
@@ -405,14 +405,14 @@
             let resultsFound = false;
 
             allRows.forEach(row => {
-                // Assuming Description is at index 0, Formation at index 2
+                // Assuming Description is at index 0, Métier is at index 2
                 const descriptionCell = row.cells[0];
-                const formationCell = row.cells[2];
+                const metierCell = row.cells[2];
 
                 const description = descriptionCell ? descriptionCell.textContent.toLowerCase() : '';
-                const formation = formationCell ? formationCell.textContent.toLowerCase() : '';
+                const metier = metierCell ? metierCell.textContent.toLowerCase() : '';
 
-                if (description.includes(searchTerm) || formation.includes(searchTerm)) {
+                if (description.includes(searchTerm) || metier.includes(searchTerm)) {
                     row.style.display = ''; // Show row
                     resultsFound = true;
                 } else {

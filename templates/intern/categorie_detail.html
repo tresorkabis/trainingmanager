@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Détail Catégorie{% endblock title %}
+{% block page_header %}Détail de la Catégorie{% endblock page_header %}
+
+{% block style %}
+<style>
+    .tm-categorie-detail-hero {
+        background:
+            radial-gradient(circle at top right, rgba(67, 94, 190, 0.18), transparent 35%),
+            linear-gradient(135deg, #f7f8fc 0%, #eef3ff 100%);
+        border: 1px solid rgba(67, 94, 190, 0.12);
+        border-radius: 1.25rem;
+    }
+
+    .tm-categorie-detail-card {
+        border: 1px solid rgba(15, 23, 42, 0.07);
+        border-radius: 1rem;
+        box-shadow: 0 16px 32px rgba(15, 23, 42, 0.05);
+    }
+
+    .tm-categorie-info-item {
+        padding: 0.75rem 0;
+        border-bottom: 1px dashed #e9ecef;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .tm-categorie-info-item:last-child {
+        border-bottom: none;
+    }
+
+    .tm-categorie-info-label {
+        font-weight: 600;
+        color: #6c757d;
+        flex-basis: 40%;
+    }
+
+    .tm-categorie-info-value {
+        color: #344767;
+        flex-basis: 60%;
+        text-align: right;
+    }
+
+    .tm-categorie-info-value .badge {
+        font-size: 0.85em;
+        padding: 0.4em 0.6em;
+    }
+</style>
+{% endblock style %}
+
+{% block content %}
+<div class="page-heading">
+    <section class="tm-categorie-detail-hero p-4 p-lg-5 mb-4">
+        <div class="row g-4 align-items-center">
+            <div class="col-12 col-lg-8">
+                <div class="tm-section-titlebar">
+                    <span class="tm-section-titlebar__icon"><i class="bi bi-tags"></i></span>
+                    <div class="tm-section-titlebar__text">
+                        <h3>{{ categorie.titre }}</h3>
+                        <p>Détails de la catégorie</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-lg-4 d-flex justify-content-lg-end">
+                <a href="{% url 'categories' %}" class="btn btn-light-secondary me-2">
+                    <i class="bi bi-arrow-left me-2"></i>Retour à la liste
+                </a>
+                <a href="{% url 'categorie_update' categorie.pk %}" class="btn btn-primary">
+                    <i class="bi bi-pencil me-2"></i>Modifier
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <section class="section px-3 px-md-4">
+        <div class="row g-3">
+            <div class="col-12 col-lg-6">
+                <div class="card tm-categorie-detail-card mb-4">
+                    <div class="card-header">
+                        <h4 class="card-title mb-0">Informations générales</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="tm-categorie-info-item">
+                            <span class="tm-categorie-info-label">Titre:</span>
+                            <span class="tm-categorie-info-value">{{ categorie.titre }}</span>
+                        </div>
+                        <div class="tm-categorie-info-item">
+                            <span class="tm-categorie-info-label">Statut:</span>
+                            <span class="tm-categorie-info-value">
+                                {% if categorie.active %}
+                                <span class="badge bg-success">Active</span>
+                                {% else %}
+                                <span class="badge bg-danger">Inactif</span>
+                                {% endif %}
+                            </span>
+                        </div>
+                        <div class="tm-categorie-info-item">
+                            <span class="tm-categorie-info-label">Date de création:</span>
+                            <span class="tm-categorie-info-value">{{ categorie.created_at|date:"d/m/Y H:i" }}</span>
+                        </div>
+                        <div class="tm-categorie-info-item">
+                            <span class="tm-categorie-info-label">Dernière mise à jour:</span>
+                            <span class="tm-categorie-info-value">{{ categorie.updated_at|date:"d/m/Y H:i" }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-lg-6">
+                <div class="card tm-categorie-detail-card mb-4">
+                    <div class="card-header">
+                        <h4 class="card-title mb-0">Stagiaires associés</h4>
+                    </div>
+                    <div class="card-body">
+                        {% if stagiaires_associes %}
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Nom complet</th>
+                                            <th>Email</th>
+                                            <th>Téléphone</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for stagiaire in stagiaires_associes %}
+                                        <tr>
+                                            <td><a href="{% url 'stagiaire' stagiaire.pk %}">{{ stagiaire.get_full_name }}</a></td>
+                                            <td>{{ stagiaire.email|default:"-" }}</td>
+                                            <td>{{ stagiaire.telephone|default:"-" }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <p class="text-muted">Aucun stagiaire associé à cette catégorie.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock content %}

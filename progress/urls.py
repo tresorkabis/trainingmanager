@@ -1,10 +1,8 @@
 from django.urls import path
 from progress.views.actions_views import ActionListViews, ActionDetailViews, ActionCreateView, ActionUpdateView, ActionDeleteView
-from progress.views.detailAction_views import DetailActionListViews
-from progress.views.formateur_views import FormateurListView, FormateurCreateUpdateView, FormateurDeleteView, FormateurDetailView # Importation de FormateurDetailView
-from progress.views.typeaction_views import TypeActionListView
-from progress.views.detailAction_views import DetailActionDetailView
-from progress.views.typeaction_views import TypeActionDetailView
+from progress.views.detailAction_views import DetailActionListViews, DetailActionDetailView # Importation de DetailActionDetailView
+from progress.views.formateur_views import FormateurListView, FormateurCreateUpdateView, FormateurDeleteView, FormateurDetailView
+from progress.views.typeaction_views import TypeActionListView, TypeActionDetailView, TypeActionCreateUpdateView, TypeActionDeleteView
 
 
 urlpatterns = [
@@ -18,12 +16,14 @@ urlpatterns = [
     path("detailactions/<int:pk>", DetailActionDetailView.as_view(), name="detailaction"),
     
     path("formateurs",FormateurListView.as_view(),name="formateurs"),
-    path("formateurs/create", FormateurCreateUpdateView.as_view(), name="formateur_create"), # URL pour la création
-    path("formateurs/<int:pk>", FormateurDetailView.as_view(), name="formateur"), # URL pour la vue de détail
-    path("formateurs/<int:pk>/update", FormateurCreateUpdateView.as_view(), name="formateur_update"), # URL pour la modification
-    path("formateurs/<int:pk>/delete", FormateurDeleteView.as_view(), name="formateur_delete"), # URL pour la suppression
+    path("formateurs/create", FormateurCreateUpdateView.as_view(), name="formateur_create"),
+    path("formateurs/<int:pk>", FormateurDetailView.as_view(), name="formateur"),
+    path("formateurs/<int:pk>/update", FormateurCreateUpdateView.as_view(), name="formateur_update"),
+    path("formateurs/<int:pk>/delete", FormateurDeleteView.as_view(), name="formateur_delete"),
 
     path("typeactions",TypeActionListView.as_view(),name="typeactions"),
-    path("typeactions/<int:pk>", TypeActionDetailView.as_view(), name="typeaction"), 
-  
+    path("typeactions/create", TypeActionCreateUpdateView.as_view(), name="typeaction_create"),
+    path("typeactions/<int:pk>", TypeActionDetailView.as_view(), name="typeaction"),
+    path("typeactions/<int:pk>/update", TypeActionCreateUpdateView.as_view(), name="typeaction_update"),
+    path("typeactions/<int:pk>/delete", TypeActionDeleteView.as_view(), name="typeaction_delete"),
 ]

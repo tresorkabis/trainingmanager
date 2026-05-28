@@ -16,8 +16,28 @@
     <link rel="stylesheet" href="{% static 'assets/vendors/perfect-scrollbar/perfect-scrollbar.css' %}">
     <link rel="stylesheet" href="{% static 'assets/vendors/bootstrap-icons/bootstrap-icons.css' %}">
     <link rel="stylesheet" href="{% static 'assets/css/app.css' %}">
-    <link rel="stylesheet" href="{% static 'css/style.css' %}"> {# Removed ?v=1 parameter #}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <link rel="shortcut icon" href="{% static 'assets/images/favicon.svg' %}" type="image/x-icon">
+
+    <style>
+        /* Custom styles for sidebar-title */
+        .sidebar-menu .sidebar-title {
+            font-size: 0.9rem; /* Slightly smaller font size */
+            font-weight: 700; /* Bolder */
+            color: #25396f; /* Darker text color */
+            padding: 0.75rem 1.5rem 0.25rem 1.5rem; /* Adjusted padding */
+            margin-top: 1rem; /* More space above */
+            margin-bottom: 0.5rem; /* Space below */
+            background-color: #eef3ff; /* Light background color */
+            border-left: 4px solid #435ebe; /* Left border for emphasis */
+            text-transform: uppercase; /* Uppercase text */
+            letter-spacing: 0.05em; /* Letter spacing */
+        }
+
+        .sidebar-menu .sidebar-title:first-of-type { /* Use first-of-type for the very first title */
+            margin-top: 0; /* No top margin for the very first title */
+        }
+    </style>
 </head>
 
 <body>
@@ -26,11 +46,13 @@
             <div class="sidebar-wrapper active">
 
                 <div class="sidebar-header">
-                    <div class="logo">
-                        <img src="{% static 'assets/images/logo.png' %}" width="30" height="30" alt="Logo"> {# Updated logo path #}
-                        <a href="{% url 'home' %}">Training Manager</a>
-                    </div>
-                    <div class="d-flex justify-content-between">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="logo d-flex align-items-center">
+                            <a href="{% url 'home' %}">
+                                <img src="{% static 'assets/images/logo.png' %}" alt="Logo" srcset="" style="height: 30px; margin-right: 10px;">
+                                <h5 class="mb-0">Training Manager</h5>
+                            </a>
+                        </div>
                         <div class="toggler">
                             <a href="#" class="sidebar-hide d-xl-none d-block"><i class="bi bi-x bi-middle"></i></a>
                         </div>
@@ -41,73 +63,36 @@
                     <br>
                     <hr>
                     <ul class="menu">
-                        <li class="sidebar-title">Pilotage</li>
+                        <li class="sidebar-title">Menu</li>
 
                         <li class="sidebar-item {% if link == 'home' %} active {% endif %} ">
                             <a href="{% url 'home' %}" class='sidebar-link'>
-                                <i class="bi bi-columns-gap"></i>
-                                <span>Tableau de bord</span>
+                                <i class="bi bi-grid-fill"></i>
+                                <span>Dashboard</span>
                             </a>
                         </li>
-                        {% if request.user.is_superuser or request.user.profile and request.user.profile.name == "Manager" %}
-                        <li class="sidebar-item">
-                            <a href="{% url 'admin:index' %}" class='sidebar-link'>
-                                <i class="bi bi-shield-lock"></i>
-                                <span>Administration</span>
-                            </a>
-                        </li>
-                        {% endif %}
 
-                        <li class="sidebar-title">Parcours</li>
+                        <li class="sidebar-title">Gestion des Apprenants et Formateurs</li>
 
-                        <li class="sidebar-item {% if link == 'stagiaires' %} active {% endif %} ">
+                        <li class="sidebar-item {% if link == 'stagiaires' %} active {% endif %}">
                             <a href="{% url 'stagiaires' %}" class='sidebar-link'>
                                 <i class="bi bi-people"></i>
                                 <span>Stagiaires</span>
                             </a>
                         </li>
-
-                        <li class="sidebar-item {% if link == 'actions' %} active {% endif %} ">
-                            <a href="{% url 'actions' %}" class='sidebar-link'>
-                                <i class="bi bi-clipboard-check"></i>
-                                <span>Actions de formation</span>
-                            </a>
-                        </a>
-                        </li>
-
-                        <li class="sidebar-title">Encadrement</li>
-
-                        <li class="sidebar-item {% if link == 'formateurs' %} active {% endif %} ">
+                        <li class="sidebar-item {% if link == 'formateurs' %} active {% endif %}">
                             <a href="{% url 'formateurs' %}" class='sidebar-link'>
                                 <i class="bi bi-person-badge"></i>
                                 <span>Formateurs</span>
                             </a>
                         </li>
 
-
-                        {% if request.user.is_superuser or request.user.profile and request.user.profile.name == "Manager" or request.user.profile.name == "Chef de service" or request.user.profile.name == "Chef de filière" %}
                         <li class="sidebar-title">Référentiels</li>
 
-                        <li class="sidebar-item {% if link == 'services' %} active {% endif %} ">
-                            <a href="{% url 'services' %}" class='sidebar-link'>
-                                <i class="bi bi-building"></i>
-                                <span>Services </span>
-                            </a>
-                        </li>
-
-                        {% if request.user.is_superuser or request.user.profile and request.user.profile.name != "Chef de service" %} {# Condition pour Types d'actions #}
-                        <li class="sidebar-item {% if link == 'typeactions' %} active {% endif %} ">
-                            <a href="{% url 'typeactions' %}" class='sidebar-link'>
-                                <i class="bi bi-diagram-3"></i>
-                                <span>Types d'actions</span>
-                            </a>
-                        </li>
-                        {% endif %}
-
-                        <li class="sidebar-item {% if link == 'formations' %} active {% endif %} ">
-                            <a href="{% url 'formations' %}" class='sidebar-link'>
+                        <li class="sidebar-item {% if link == 'metiers' %} active {% endif %}">
+                            <a href="{% url 'metiers' %}" class='sidebar-link'>
                                 <i class="bi bi-journal-text"></i>
-                                <span>Formations</span>
+                                <span>Métiers</span>
                             </a>
                         </li>
                         <li class="sidebar-item {% if link == 'filieres' %} active {% endif %}">
@@ -116,17 +101,33 @@
                                 <span>Filières</span>
                             </a>
                         </li>
-
-                        {% if request.user.is_superuser or request.user.profile and request.user.profile.name != "Chef de service" %} {# Nouvelle condition ici pour Catégories #}
-                        <li class="sidebar-item {% if link == 'categories' %} active {% endif %} ">
+                        <li class="sidebar-item {% if link == 'services' %} active {% endif %}">
+                            <a href="{% url 'services' %}" class='sidebar-link'>
+                                <i class="bi bi-building"></i>
+                                <span>Services</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item {% if link == 'categories' %} active {% endif %}">
                             <a href="{% url 'categories' %}" class='sidebar-link'>
-                                <i class="bi bi-bookmarks"></i>
+                                <i class="bi bi-tags"></i>
                                 <span>Catégories</span>
                             </a>
                         </li>
-                        {% endif %}
 
-                        {% endif %}
+                        <li class="sidebar-title">Suivi des Activités</li>
+
+                        <li class="sidebar-item {% if link == 'actions' %} active {% endif %}">
+                            <a href="{% url 'actions' %}" class='sidebar-link'>
+                                <i class="bi bi-clipboard-check"></i>
+                                <span>Actions de formation</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item {% if link == 'typeactions' %} active {% endif %}">
+                            <a href="{% url 'typeactions' %}" class='sidebar-link'>
+                                <i class="bi bi-tag"></i>
+                                <span>Types d'actions</span>
+                            </a>
+                        </li>
 
                     </ul>
                 </div>
@@ -143,7 +144,7 @@
             <section class="tm-topbar">
                 <div class="tm-topbar__meta">
                     <span class="tm-topbar__eyebrow">Centre de gestion</span>
-                    <h1 class="tm-topbar__title">{% block page_header %}Plateforme de suivi des formations{% endblock page_header %}</h1>
+                    <h1 class="tm-topbar__title">{% block page_header %}{% endblock page_header %}</h1>
                 </div>
                 <div class="tm-topbar__aside">
                     <span class="tm-chip tm-chip--strong">
@@ -151,10 +152,10 @@
                         INPP / ESFORCA
                     </span>
                     {% if request.user.is_authenticated %}
-                    {% if request.user.service %} {# Correction ici #}
+                    {% if request.user.service %}
                     <span class="tm-chip">
                         <i class="bi bi-briefcase"></i>
-                        {{ request.user.service.nom }} {# Correction ici #}
+                        {{ request.user.service.nom }}
                     </span>
                     {% endif %}
                     <span class="tm-chip">
@@ -176,10 +177,11 @@
             <footer>
                 <div class="footer clearfix mb-0 text-muted">
                     <div class="float-start">
-                        <p>2026 &copy; ESFORCA</p> {# Updated footer text #}
+                        <p>2026 &copy; Training Manager</p>
                     </div>
                     <div class="float-end">
-                        <p>Suivi des formations, filières et stagiaires</p>
+                        <p>Crafted with <span class="text-danger"><i class="bi bi-heart-fill icon-mid"></i></span>
+                            by <a href="https://github.com/tresorkabis">Trésor Kabis</a></p>
                     </div>
                 </div>
             </footer>

@@ -1,124 +1,371 @@
 {% extends "base.html" %}
 {% load static %}
-{% block style %}
-<link rel="stylesheet" href="{% static 'assets/vendors/simple-datatables/style.css' %}">
-{% endblock style %}
-{% block title %} Dashboard {% endblock title %}
+
+{% block title %}Référentiel des catégories{% endblock title %}
 {% block page_header %}Référentiel des catégories{% endblock page_header %}
+
+{% block style %}
+<style>
+    /* Custom styles for search input */
+    .custom-search-container {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+    .custom-search-input {
+        flex-grow: 1;
+        border: 1px solid #ced4da;
+        border-radius: 0.5rem;
+        padding: 0.5rem 1rem;
+        max-width: 300px;
+    }
+    .custom-search-input:focus {
+        border-color: #435ebe;
+        box-shadow: 0 0 0 0.2rem rgba(67, 94, 190, 0.25);
+        outline: none;
+    }
+    .no-results-message {
+        text-align: center;
+        padding: 1rem;
+        color: #6c757d;
+    }
+
+    /* Table styling */
+    .table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        border-radius: 1rem;
+        overflow: hidden;
+    }
+
+    .table thead th {
+        background-color: #f8f9fa;
+        color: #25396f;
+        font-weight: 700;
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+        text-align: left;
+    }
+
+    .table tbody tr {
+        transition: background-color 0.2s ease;
+    }
+
+    .table tbody tr:nth-of-type(odd) {
+        background-color: #ffffff;
+    }
+
+    .table tbody tr:nth-of-type(even) {
+        background-color: #fcfdff;
+    }
+
+    .table tbody tr:hover {
+        background-color: #eef2f7;
+    }
+
+    .table tbody td {
+        padding: 0.8rem 1.5rem;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.03);
+        color: #495057;
+    }
+
+    .table tbody td a {
+        color: #435ebe;
+        text-decoration: none;
+    }
+
+    .table tbody td a:hover {
+        text-decoration: underline;
+    }
+
+    /* Pagination styling */
+    .pagination {
+        margin-bottom: 0;
+    }
+
+    .pagination .page-item {
+        margin: 0 0.2rem;
+    }
+
+    .pagination .page-link {
+        border-radius: 0.5rem;
+        padding: 0.5rem 0.9rem;
+        font-size: 0.9rem;
+        color: #435ebe;
+        border: 1px solid #e9ecef;
+        transition: all 0.2s ease;
+    }
+
+    .pagination .page-item.active .page-link {
+        background-color: #435ebe;
+        border-color: #435ebe;
+        color: #fff;
+        box-shadow: 0 2px 8px rgba(67, 94, 190, 0.2);
+    }
+
+    .pagination .page-link:hover:not(.active) {
+        background-color: #f0f1f5;
+        border-color: #d8dce3;
+    }
+
+    .pagination .page-item.pager .page-link {
+        font-weight: bold;
+    }
+
+    .pagination .page-item.disabled .page-link {
+        color: #adb5bd;
+        pointer-events: none;
+        background-color: #ffffff;
+        border-color: #e9ecef;
+    }
+
+    /* Specific styles for categorie list */
+    .tm-categorie-hero {
+        background:
+            radial-gradient(circle at top right, rgba(67, 94, 190, 0.18), transparent 35%),
+            linear-gradient(135deg, #f7f8fc 0%, #eef3ff 100%);
+        border: 1px solid rgba(67, 94, 190, 0.12);
+        border-radius: 1.25rem;
+        overflow: hidden;
+    }
+
+    .tm-categorie-stat {
+        background: rgba(255, 255, 255, 0.76);
+        border: 1px solid rgba(67, 94, 190, 0.1);
+        border-radius: 1rem;
+        padding: 1rem;
+        box-shadow: 0 10px 24px rgba(17, 24, 39, 0.04);
+        height: 100%;
+    }
+
+    .tm-categorie-stat__label {
+        display: block;
+        font-size: 0.78rem;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: #6c757d;
+        margin-bottom: 0.35rem;
+    }
+
+    .tm-categorie-stat__value {
+        font-size: 1.35rem;
+        font-weight: 700;
+        color: #25396f;
+    }
+
+    .tm-categorie-row__title {
+        color: #25396f;
+        font-weight: 700;
+        text-decoration: none;
+    }
+
+    .tm-categorie-row__meta {
+        color: #7b8190;
+        font-size: 0.85rem;
+    }
+</style>
+{% endblock style %}
 
 {% block content %}
 <div class="page-heading">
-    <div class="page-title">
-        <div class="row">
-            <div class="col-12 col-md-6 order-md-1 order-last">
-                <div class="tm-section-titlebar">
-                    <span class="tm-section-titlebar__icon"><i class="bi bi-bookmarks"></i></span>
+    <section class="tm-categorie-hero p-4 p-lg-5 mb-4">
+        <div class="row g-4 align-items-center">
+            <div class="col-12 col-xl-6">
+                <div class="tm-section-titlebar mb-3">
+                    <span class="tm-section-titlebar__icon"><i class="bi bi-tags"></i></span>
                     <div class="tm-section-titlebar__text">
                         <h3>Catégories</h3>
-                        <p>Liste des catégories</p>
+                        <p>Gérez les catégories de stagiaires.</p>
+                    </div>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="{% url 'categorie_create' %}" class="btn btn-primary"> {# Changed categories_create to categorie_create #}
+                        <i class="bi bi-bookmark-plus me-2"></i>Nouvelle catégorie
+                    </a>
+                    {# Add other relevant buttons here if needed #}
+                </div>
+            </div>
+            <div class="col-12 col-xl-6">
+                <div class="row g-3">
+                    <div class="col-6 col-md-4">
+                        <div class="tm-categorie-stat">
+                            <span class="tm-categorie-stat__label">Total Catégories</span>
+                            <span class="tm-categorie-stat__value">{{ stats.total }}</span>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-4">
+                        <div class="tm-categorie-stat">
+                            <span class="tm-categorie-stat__label">Actives</span>
+                            <span class="tm-categorie-stat__value">{{ stats.active }}</span>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-4">
+                        <div class="tm-categorie-stat">
+                            <span class="tm-categorie-stat__label">Inactives</span>
+                            <span class="tm-categorie-stat__value">{{ stats.inactive }}</span>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-4">
+                        <div class="tm-categorie-stat">
+                            <span class="tm-categorie-stat__label">Total Stagiaires</span>
+                            <span class="tm-categorie-stat__value">{{ stats.total_stagiaires }}</span>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="col-12 col-md-6 order-md-2 order-first">
-                <nav aria-label="breadcrumb" class="breadcrumb-header float-start float-lg-end">
-                    <ol class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="% url 'home' %}">Dashboard</a></li>
-                        <li class="breadcrumb-item active" aria-current="page">catégories</li>
-                    </ol>
-                </nav>
-            </div>
         </div>
-    </div>
+    </section>
+
     <section class="section">
         <div class="card tm-listing-card">
-            <div class="card-header">
-                <a href="{% url 'categories_create' %}"><i class="bi bi-bookmark-plus me-2"></i>Nouvelle catégorie</a>
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="card-title mb-0">Catalogue des catégories</h4>
+                <a href="{% url 'categorie_create' %}" class="btn btn-primary btn-sm"> {# Changed categories_create to categorie_create #}
+                    <i class="bi bi-bookmark-plus me-2"></i>Nouvelle catégorie
+                </a>
             </div>
             <div class="card-body">
-                <div class="dataTable-wrapper dataTable-loading no-footer sortable searchable fixed-columns">
-                    <div class="dataTable-top">
-                        <div class="dataTable-search">
-                            <input class="dataTable-input" placeholder="Recherche..." type="text">
-                        </div>
-                    </div>
-                    <div class="dataTable-container">
-                        <table class="table table-striped dataTable-table" id="table1">
-                            <thead>
-                                <tr>
-                                    <th data-sortable="" style="width: 3.490%;"><a href="#"
-                                            class="dataTable-sorter">N°</a></th>
-                                    <th data-sortable="" style="width: 42.490%;"><a href="#" class="dataTable-sorter">Titre</a></th>
-                                    <th data-sortable="" style="width: 10.6547%;"><a href="#"
-                                            class="dataTable-sorter">Status</a></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% if categorie_list %}
-                                {% for item in object_list %}
-                                <tr>
-                                    <td>{{ forloop.counter }}</td>
-                                    <td><a href="{% url 'categorie' item.id %}">{{ item.titre }}</a></td>
-                                    <td>
-                                        {% if item.active %}
-                                        <span class="badge bg-success">Active</span>
-                                        {% else %}
-                                        <span class="badge bg-danger">Inactive</span>
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                                {% else %}
-                                <tr>
-                                    <td colspan="4">Pas de Categorie</td>
-                                </tr>
-                                {% endif %}
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="dataTable-bottom">
-                        <div class="dataTable-info">
-                            Page {{ page_obj.number }} sur {{ page_obj.paginator.num_pages }}
-                        </div>
-                        <ul class="pagination pagination-primary float-end dataTable-pagination">
-                            {% if page_obj.has_previous %}
-                            <li class="page-item pager"><a href="?page=1" class="page-link" data-page="1">&laquo;</a>
-                            </li>
-                            <li class="page-item">
-                                <a href="?page={{ page_obj.previous_page_number }}" class="page-link"
-                                    data-page="{{ page_obj.previous_page_number }}">
-                                    {{ page_obj.previous_page_number }}
-                                </a>
-                            </li>
-                            {% endif %}
-
-                            <li class="page-item active"><a href="#" class="page-link"
-                                    data-page="{{ page_obj.number }}">{{ page_obj.number }}</a></li>
-
-                            {% if page_obj.has_next %}
-                            <li class=" page-item">
-                                <a href="?page={{ page_obj.next_page_number }}" class="page-link"
-                                    data-page="{{ page_obj.next_page_number }}">
-
-                                    {{ page_obj.next_page_number }}
-                                </a>
-                            </li>
-                            <li class="page-item pager"><a href="?page={{ page_obj.paginator.num_pages }}"
-                                    class="page-link" data-page="{{ page_obj.paginator.num_pages }}">&raquo;</a></li>
-                            {% endif %}
-                        </ul>
-                    </div>
+                {# Custom Search Input #}
+                <div class="custom-search-container">
+                    <input type="text" id="searchInput" class="custom-search-input form-control" placeholder="Recherche par titre...">
                 </div>
+
+                <div class="table-responsive">
+                    <table class="table table-striped" id="categorieTable">
+                        <thead>
+                            <tr>
+                                <th style="width: 5%;">N°</th>
+                                <th style="width: 40%;">Titre</th>
+                                <th style="width: 15%;">Stagiaires</th>
+                                <th style="width: 10%;">Statut</th>
+                                <th style="width: 15%;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="categorieTableBody">
+                            {% if categorie_list %}
+                            {% for item in object_list %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td><a href="{% url 'categorie' item.pk %}" class="tm-categorie-row__title">{{ item.titre }}</a></td>
+                                <td><span class="badge bg-primary">{{ item.stagiaires_count }}</span></td>
+                                <td>
+                                    {% if item.active %}
+                                    <span class="badge bg-success">Actif</span>
+                                    {% else %}
+                                    <span class="badge bg-danger">Inactif</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="d-flex gap-2">
+                                        <a href="{% url 'categorie_update' item.pk %}" class="btn btn-sm btn-outline-primary" title="Modifier">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <a href="{% url 'categorie_delete' item.pk %}" class="btn btn-sm btn-outline-danger" title="Supprimer">
+                                            <i class="bi bi-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                            {% else %}
+                            <tr id="noResultsRow">
+                                <td colspan="5" class="no-results-message">Aucune catégorie enregistrée.</td>
+                            </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+
+                {# Custom Pagination (Django's pagination) #}
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <div class="dataTable-info">
+                        Page {{ page_obj.number }} sur {{ page_obj.paginator.num_pages }}
+                    </div>
+                    <ul class="pagination pagination-primary float-end">
+                        {% if page_obj.has_previous %}
+                        <li class="page-item pager"><a href="?page=1" class="page-link">&laquo;</a></li>
+                        <li class="page-item">
+                            <a href="?page={{ page_obj.previous_page_number }}" class="page-link">
+                                {{ page_obj.previous_page_number }}
+                            </a>
+                        </li>
+                        {% endif %}
+
+                        <li class="page-item active"><a href="#" class="page-link">{{ page_obj.number }}</a></li>
+
+                        {% if page_obj.has_next %}
+                        <li class=" page-item">
+                            <a href="?page={{ page_obj.next_page_number }}" class="page-link">
+                                {{ page_obj.next_page_number }}
+                            </a>
+                            </li>
+                        <li class="page-item pager"><a href="?page={{ page_obj.paginator.num_pages }}" class="page-link">&raquo;</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+
             </div>
         </div>
-
     </section>
 </div>
 {% endblock content %}
+
 {% block script %}
-<script src="{% static 'assets/vendors/simple-datatables/simple-datatables.js' %}"></script>
 <script>
-    // Simple Datatable
-    let table1 = document.querySelector('#table1');
-    let dataTable = new simpleDatatables.DataTable(table1);
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('searchInput');
+        const tableBody = document.getElementById('categorieTableBody');
+        const allRows = Array.from(tableBody.querySelectorAll('tr')); // Get all original rows
+        let noResultsRow = document.getElementById('noResultsRow');
+
+        // If noResultsRow doesn't exist initially, create a placeholder
+        if (!noResultsRow) {
+            noResultsRow = document.createElement('tr');
+            noResultsRow.id = 'noResultsRow';
+            const td = document.createElement('td');
+            td.colSpan = 5; // Adjusted colspan for new columns
+            td.className = 'no-results-message';
+            td.textContent = 'Aucune catégorie trouvée.';
+            noResultsRow.appendChild(td);
+            noResultsRow.style.display = 'none'; // Hide by default
+            tableBody.appendChild(noResultsRow);
+        }
+
+        function performSearch() {
+            const searchTerm = searchInput.value.toLowerCase().trim();
+            let resultsFound = false;
+
+            allRows.forEach(row => {
+                // Assuming Titre is at index 1
+                const titreCell = row.cells[1];
+                const titre = titreCell ? titreCell.textContent.toLowerCase() : '';
+
+                if (titre.includes(searchTerm)) {
+                    row.style.display = ''; // Show row
+                    resultsFound = true;
+                } else {
+                    row.style.display = 'none'; // Hide row
+                }
+            });
+
+            if (resultsFound) {
+                noResultsRow.style.display = 'none';
+            } else {
+                noResultsRow.style.display = '';
+            }
+        }
+
+        // Attach event listener for keyup on the search input
+        searchInput.addEventListener('keyup', performSearch);
+
+        // Initial display check for no results if the list is empty
+        if (allRows.length === 0 && !noResultsRow.textContent.includes('Aucune catégorie enregistrée.')) {
+             noResultsRow.style.display = '';
+             noResultsRow.textContent = 'Aucune catégorie enregistrée.';
+        } else if (allRows.length > 0) {
+            noResultsRow.style.display = 'none';
+        }
+    });
 </script>
 {% endblock script %}
