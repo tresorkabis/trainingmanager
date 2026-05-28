@@ -9,7 +9,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-03hv+-k@3w-i0_*-p&#i0*9-%j^!@@0kd^)^e6dw0v-v1nlgk^'
+# La clé secrète doit être chargée depuis une variable d'environnement en production.
+# La valeur par défaut ci-dessous est UNIQUEMENT pour le développement local.
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-03hv+-k@3w-i0_*-p&#i0*9-%j^!@@0kd^)^e6dw0v-v1nlgk^')
 
 # SECURITY WARNING: don't run on debug turned on in production!
 DEBUG = True
@@ -118,8 +120,9 @@ MEDIA_URL = '/media/'
 JAZZMIN_SETTINGS = {
     "site_title": "Training Manager",
     "site_header": "Training Manager",
-    "site_brand": "Training Manager",
-    "site_logo": "admin/img/logo.jpeg",
+    "site_brand": "Training Manager", # Sera potentiellement remplacé par site_brand_data pour la barre latérale
+    "site_logo": "admin/img/logo.jpeg", # Sera potentiellement remplacé par site_brand_data pour la barre latérale
+    "site_brand_data": '<div class="d-flex align-items-center"><img src="/static/admin/img/logo.jpeg" alt="Training Manager" class="brand-logo" style="height:30px; margin-right:10px;"> Training Manager</div>',
 
     "welcome_sign": "Bienvenue",
     "copyright": "SK",

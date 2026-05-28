@@ -1,1 +1,2 @@
-python manage.py runserver 0.0.0.0:8000
+#!/bin/bash
+DJANGO_SETTINGS_MODULE=settings.dev python manage.py runserver 0.0.0.0:8000

@@ -29,13 +29,60 @@
             margin-top: 1rem; /* More space above */
             margin-bottom: 0.5rem; /* Space below */
             background-color: #eef3ff; /* Light background color */
-            border-left: 4px solid #435ebe; /* Left border for emphasis */
-            text-transform: uppercase; /* Uppercase text */
+            /* border-left: 4px solid #435ebe; */ /* Removed left border */
+            /* text-transform: uppercase; */ /* Removed uppercase text transform */
             letter-spacing: 0.05em; /* Letter spacing */
         }
 
         .sidebar-menu .sidebar-title:first-of-type { /* Use first-of-type for the very first title */
             margin-top: 0; /* No top margin for the very first title */
+        }
+
+        /* Custom styles for tm-topbar__title */
+        .tm-topbar__title {
+            font-size: 2.2rem; /* Larger font size for main title */
+            font-weight: 800; /* Extra bold */
+            color: #25396f; /* Dark blue color */
+            margin-bottom: 0.5rem; /* Space below title */
+            line-height: 1.2; /* Adjust line height */
+        }
+
+        .tm-topbar__eyebrow {
+            font-size: 0.85rem; /* Smaller for eyebrow text */
+            color: #6c757d; /* Muted color */
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            display: block; /* Ensure it takes its own line */
+            margin-bottom: 0.25rem; /* Small space below eyebrow */
+        }
+
+        /* Styles for sidebar logo and title */
+        .sidebar-header .logo {
+            display: block;
+            text-align: left;
+            padding: 0;
+            gap: 0;
+        }
+
+        .sidebar-header .logo a {
+            display: flex; /* Utilise flexbox pour aligner le logo et le texte */
+            align-items: center; /* Centre verticalement les éléments */
+            text-decoration: none;
+        }
+
+        .sidebar-header .logo img {
+            height: 100px; /* Taille du logo doublée */
+            margin-right: 15px; /* Augmente l'espace entre le logo et le texte */
+        }
+
+        .sidebar-header .logo h5 {
+            font-size: 1.8rem; /* Taille de police augmentée pour le titre */
+            font-weight: 800; /* Rendu plus gras */
+            color: #25396f; /* Couleur plus prononcée */
+            margin-bottom: 0;
+            font-family: 'Nunito', sans-serif; /* Utilise la même police que le reste du site */
+            line-height: 1.2; /* Ajuste la hauteur de ligne */
+            max-width: 150px; /* Limite la largeur pour éviter le débordement */
         }
     </style>
 </head>
@@ -47,9 +94,9 @@
 
                 <div class="sidebar-header">
                     <div class="d-flex justify-content-between align-items-center">
-                        <div class="logo d-flex align-items-center">
-                            <a href="{% url 'home' %}">
-                                <img src="{% static 'assets/images/logo.png' %}" alt="Logo" srcset="" style="height: 30px; margin-right: 10px;">
+                        <div class="logo">
+                            <a href="{% url 'home' %}" class="d-flex align-items-center">
+                                <img src="{% static 'assets/images/logo.png' %}" alt="Logo" srcset="" class="me-2">
                                 <h5 class="mb-0">Training Manager</h5>
                             </a>
                         </div>
@@ -63,8 +110,6 @@
                     <br>
                     <hr>
                     <ul class="menu">
-                        <li class="sidebar-title">Menu</li>
-
                         <li class="sidebar-item {% if link == 'home' %} active {% endif %} ">
                             <a href="{% url 'home' %}" class='sidebar-link'>
                                 <i class="bi bi-grid-fill"></i>
@@ -106,7 +151,7 @@
                                 <i class="bi bi-building"></i>
                                 <span>Services</span>
                             </a>
-                        </li>
+                            </li>
                         <li class="sidebar-item {% if link == 'categories' %} active {% endif %}">
                             <a href="{% url 'categories' %}" class='sidebar-link'>
                                 <i class="bi bi-tags"></i>

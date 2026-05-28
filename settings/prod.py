@@ -1,5 +1,12 @@
 from .base import *
 
+# SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = False
+
+# SECURITY WARNING: replace this with your production host(s)!
+ALLOWED_HOSTS = ['your_production_domain.com', 'www.your_production_domain.com']
+
+
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
