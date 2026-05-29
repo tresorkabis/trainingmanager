@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ titre }}{% endblock title %}
+{% block page_header %}{{ titre }}{% endblock page_header %} {# Le titre seul reste ici #}
+
+{% block content %}
+<div class="page-heading">
+    <section class="tm-stagiaire-hero p-4 p-lg-5 mb-4"> {# Section hero pour le formulaire #}
+        <div class="d-flex justify-content-end mb-3">
+            <a href="{% url 'paiements' %}" class="btn btn-secondary btn-xs">
+                <i class="bi bi-arrow-left"></i> Retour à la liste
+            </a>
+        </div>
+        <div class="row g-4 align-items-center">
+            <div class="col-12">
+                <div class="tm-section-titlebar mb-3">
+                    <span class="tm-section-titlebar__icon"><i class="bi bi-wallet-fill"></i></span> {# Icône pour le formulaire paiement #}
+                    <div class="tm-section-titlebar__text">
+                        <h3>{{ titre }}</h3>
+                        <p>{% if object %}Modifier un paiement existant.{% else %}Enregistrer un nouveau paiement.{% endif %}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="card tm-detail-card"> {# Utilisation de tm-detail-card pour la cohérence #}
+            <div class="card-header">
+                <h4 class="card-title">Formulaire de paiement</h4>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    {% for field in form %}
+                        <div class="form-group mb-3">
+                            <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                            {{ field }}
+                            {% if field.help_text %}
+                                <div class="form-text">{{ field.help_text }}</div>
+                            {% endif %}
+                            {% for error in field.errors %}
+                                <div class="invalid-feedback d-block">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {% for error in form.non_field_errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    <div class="d-flex justify-content-end mt-3">
+                        <button type="submit" class="btn btn-primary me-2">Enregistrer</button>
+                        <a href="{% url 'paiements' %}" class="btn btn-light-secondary">Annuler</a> {# Changé en btn-light-secondary #}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock content %}

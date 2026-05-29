@@ -173,6 +173,12 @@
                                 <span>Types d'actions</span>
                             </a>
                         </li>
+                        <li class="sidebar-item {% if link == 'paiements' %} active {% endif %}">
+                            <a href="{% url 'paiements' %}" class='sidebar-link'>
+                                <i class="bi bi-wallet-fill"></i> {# Changé bi-cash-coin à bi-wallet-fill #}
+                                <span>Paiements</span>
+                            </a>
+                        </li>
 
                     </ul>
                 </div>

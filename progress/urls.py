@@ -3,6 +3,7 @@ from progress.views.actions_views import ActionListViews, ActionDetailViews, Act
 from progress.views.detailAction_views import DetailActionListViews, DetailActionDetailView # Importation de DetailActionDetailView
 from progress.views.formateur_views import FormateurListView, FormateurCreateUpdateView, FormateurDeleteView, FormateurDetailView
 from progress.views.typeaction_views import TypeActionListView, TypeActionDetailView, TypeActionCreateUpdateView, TypeActionDeleteView
+from progress.views.paiement_views import PaiementListView, PaiementCreateView, PaiementDetailView, PaiementUpdateView, PaiementDeleteView # Importation des vues de Paiement
 
 
 urlpatterns = [
@@ -26,4 +27,11 @@ urlpatterns = [
     path("typeactions/<int:pk>", TypeActionDetailView.as_view(), name="typeaction"),
     path("typeactions/<int:pk>/update", TypeActionCreateUpdateView.as_view(), name="typeaction_update"),
     path("typeactions/<int:pk>/delete", TypeActionDeleteView.as_view(), name="typeaction_delete"),
+
+    # URLs pour les paiements
+    path("paiements", PaiementListView.as_view(), name="paiements"),
+    path("paiements/create", PaiementCreateView.as_view(), name="paiement_create"),
+    path("paiements/<int:pk>", PaiementDetailView.as_view(), name="paiement"),
+    path("paiements/<int:pk>/update", PaiementUpdateView.as_view(), name="paiement_update"),
+    path("paiements/<int:pk>/delete", PaiementDeleteView.as_view(), name="paiement_delete"),
 ]

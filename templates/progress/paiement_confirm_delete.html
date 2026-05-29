@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Confirmer la suppression du paiement{% endblock title %}
+{% block page_header %}Confirmer la suppression du paiement{% endblock page_header %} {# Le titre seul reste ici #}
+
+{% block content %}
+<div class="page-heading">
+    <section class="tm-stagiaire-hero p-4 p-lg-5 mb-4"> {# Section hero pour la confirmation de suppression #}
+        <div class="d-flex justify-content-end mb-3">
+            <a href="{% url 'paiements' %}" class="btn btn-secondary btn-xs">
+                <i class="bi bi-arrow-left"></i> Retour à la liste
+            </a>
+        </div>
+        <div class="row g-4 align-items-center">
+            <div class="col-12">
+                <div class="tm-section-titlebar mb-3">
+                    <span class="tm-section-titlebar__icon"><i class="bi bi-trash"></i></span> {# Icône pour la suppression #}
+                    <div class="tm-section-titlebar__text">
+                        <h3>Confirmer la suppression du paiement</h3>
+                        <p>Cette action est irréversible.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="card tm-detail-card"> {# Utilisation de tm-detail-card pour la cohérence #}
+            <div class="card-header">
+                <h4 class="card-title">Supprimer le paiement #{{ paiement.pk }}</h4>
+            </div>
+            <div class="card-body">
+                <p>Êtes-vous sûr de vouloir supprimer le paiement suivant ?</p>
+                <ul>
+                    <li><strong>Stagiaire:</strong> {{ paiement.stagiaire.get_full_name }}</li>
+                    <li><strong>Montant:</strong> {{ paiement.montant }}</li>
+                    <li><strong>Date de paiement:</strong> {{ paiement.date_paiement|date:"d/m/Y" }}</li>
+                    <li><strong>Motif:</strong> {{ paiement.motif|default:"-" }}</li>
+                </ul>
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="d-flex justify-content-end mt-3">
+                        <button type="submit" class="btn btn-danger me-2">
+                            <i class="bi bi-trash"></i> Confirmer la suppression
+                        </button>
+                        <a href="{% url 'paiement' paiement.pk %}" class="btn btn-light">Annuler</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock content %}

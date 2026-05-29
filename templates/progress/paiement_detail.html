@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Détail du Paiement{% endblock title %}
+{% block page_header %}Détail du Paiement{% endblock page_header %} {# Le titre seul reste ici #}
+
+{% block style %}
+<style>
+    /* Styles pour la section hero (copié de stagiaires.html pour cohérence) */
+    .tm-stagiaire-hero {
+        background:
+            radial-gradient(circle at top right, rgba(67, 94, 190, 0.18), transparent 35%),
+            linear-gradient(135deg, #f7f8fc 0%, #eef3ff 100%);
+        border: 1px solid rgba(67, 94, 190, 0.12);
+        border-radius: 1.25rem;
+        overflow: hidden;
+    }
+
+    /* Styles pour les titres de section (copié de stagiaires.html) */
+    .tm-section-titlebar {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .tm-section-titlebar__icon {
+        font-size: 2.5rem;
+        color: #435ebe;
+    }
+
+    .tm-section-titlebar__text h3 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #25396f;
+        margin-bottom: 0.2rem;
+    }
+
+    .tm-section-titlebar__text p {
+        font-size: 0.9rem;
+        color: #6c757d;
+        margin-bottom: 0;
+    }
+
+    /* Styles pour les cartes de détail (copié de stagiaire.html) */
+    .tm-detail-card {
+        border: 1px solid rgba(15, 23, 42, 0.07);
+        border-radius: 1rem;
+        box-shadow: 0 16px 32px rgba(15, 23, 42, 0.05);
+    }
+
+    /* Custom extra-small button style (copié de stagiaire.html) */
+    .btn-xs {
+        padding: 0.2rem 0.5rem; /* Réduit le padding */
+        font-size: 0.75rem; /* Réduit la taille de la police */
+        line-height: 1.5;
+        border-radius: 0.2rem;
+    }
+</style>
+{% endblock style %}
+
+{% block content %}
+<div class="page-heading">
+    <section class="tm-stagiaire-hero p-4 p-lg-5 mb-4"> {# Utilisation de tm-stagiaire-hero pour la cohérence #}
+        <div class="d-flex justify-content-end mb-3">
+            <a href="{% url 'paiements' %}" class="btn btn-secondary btn-xs">
+                <i class="bi bi-arrow-left"></i> Retour à la liste
+            </a>
+        </div>
+        <div class="row g-4 align-items-center">
+            <div class="col-12">
+                <div class="tm-section-titlebar mb-3">
+                    <span class="tm-section-titlebar__icon"><i class="bi bi-wallet-fill"></i></span> {# Icône pour le détail paiement #}
+                    <div class="tm-section-titlebar__text">
+                        <h3>Paiement #{{ paiement.pk }}</h3> {# Titre plus spécifique #}
+                        <p>Détails du paiement effectué par <a href="{% url 'stagiaire' paiement.stagiaire.pk %}">{{ paiement.stagiaire.get_full_name }}</a>.</p> {# Description plus informative #}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="card tm-detail-card">
+            <div class="card-header">
+                <h4 class="card-title mb-1">Informations sur le paiement</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Stagiaire:</strong> <a href="{% url 'stagiaire' paiement.stagiaire.pk %}">{{ paiement.stagiaire.get_full_name }}</a></p>
+                        <p><strong>Action de formation:</strong>
+                            {% if paiement.action %}
+                                <a href="{% url 'action' paiement.action.pk %}">{{ paiement.action.description }}</a>
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </p>
+                        <p><strong>Montant:</strong> {{ paiement.montant }}</p>
+                        <p><strong>Date de paiement:</strong> {{ paiement.date_paiement|date:"d/m/Y" }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Mode de paiement:</strong> {{ paiement.get_mode_paiement_display }}</p>
+                        <p><strong>Référence:</strong> {{ paiement.reference|default:"-" }}</p>
+                        <p><strong>Motif:</strong> {{ paiement.motif|default:"-" }}</p>
+                        <p><strong>Créé le:</strong> {{ paiement.created_at|date:"d/m/Y H:i" }}</p>
+                        <p><strong>Mis à jour le:</strong> {{ paiement.updated_at|date:"d/m/Y H:i" }}</p>
+                    </div>
+                </div>
+                <hr>
+                <div class="d-flex justify-content-end">
+                    <a href="{% url 'paiement_update' paiement.pk %}" class="btn btn-outline-primary me-2"> {# Style cohérent #}
+                        <i class="bi bi-pencil"></i> Modifier
+                    </a>
+                    <a href="{% url 'paiement_delete' paiement.pk %}" class="btn btn-outline-danger"> {# Style cohérent #}
+                        <i class="bi bi-trash"></i> Supprimer
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock content %}
