@@ -110,6 +110,55 @@
         line-height: 1.5;
         border-radius: 0.2rem;
     }
+
+    /* Table styling (copié de paiements.html pour cohérence) */
+    .table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        border-radius: 1rem;
+        overflow: hidden;
+    }
+
+    .table thead th {
+        background-color: #f8f9fa;
+        color: #25396f;
+        font-weight: 700;
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+        text-align: left;
+    }
+
+    .table tbody tr {
+        transition: background-color 0.2s ease;
+    }
+
+    .table tbody tr:nth-of-type(odd) {
+        background-color: #ffffff;
+    }
+
+    .table tbody tr:nth-of-type(even) {
+        background-color: #fcfdff;
+    }
+
+    .table tbody tr:hover {
+        background-color: #eef2f7;
+    }
+
+    .table tbody td {
+        padding: 0.8rem 1.5rem;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.03);
+        color: #495057;
+    }
+
+    .table tbody td a {
+        color: #435ebe;
+        text-decoration: none;
+    }
+
+    .table tbody td a:hover {
+        text-decoration: underline;
+    }
 </style>
 {% endblock style %}
 
@@ -201,6 +250,9 @@
                     </li>
                     <li class="nav-item" role="presentation">
                         <a class="nav-link" id="other-trainings-tab" data-bs-toggle="tab" href="#other-trainings" role="tab" aria-controls="other-trainings" aria-selected="false">Autres formations</a>
+                    </li>
+                    <li class="nav-item" role="presentation"> {# Nouveau Tab pour les Paiements #}
+                        <a class="nav-link" id="payments-tab" data-bs-toggle="tab" href="#payments" role="tab" aria-controls="payments" aria-selected="false">Paiements</a>
                     </li>
                 </ul>
 
@@ -362,6 +414,67 @@
                                 </div>
                                 {% else %}
                                 <p class="text-muted mb-0">Aucune formation complémentaire enregistrée.</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-pane fade" id="payments" role="tabpanel" aria-labelledby="payments-tab"> {# Nouveau contenu pour les Paiements #}
+                        <div class="card tm-detail-card mt-4">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h4 class="card-title mb-1">Historique des paiements</h4>
+                                <a href="{% url 'paiement_create' %}?stagiaire={{ object.pk }}" class="btn btn-primary btn-sm">
+                                    <i class="bi bi-plus-circle me-2"></i>Enregistrer un paiement
+                                </a>
+                            </div>
+                            <div class="card-body">
+                                {% if paiements %}
+                                <div class="table-responsive">
+                                    <table class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Action de formation</th>
+                                                <th>Montant</th>
+                                                <th>Date de paiement</th>
+                                                <th>Mode de paiement</th>
+                                                <th>Référence</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for paiement in paiements %}
+                                            <tr>
+                                                <td>
+                                                    {% if paiement.action %}
+                                                        <a href="{% url 'action' paiement.action.pk %}">{{ paiement.action.description }}</a>
+                                                    {% else %}
+                                                        N/A
+                                                    {% endif %}
+                                                </td>
+                                                <td>{{ paiement.montant }}</td>
+                                                <td>{{ paiement.date_paiement|date:"d/m/Y" }}</td>
+                                                <td>{{ paiement.get_mode_paiement_display }}</td>
+                                                <td>{{ paiement.reference|default:"-" }}</td>
+                                                <td>
+                                                    <div class="d-flex gap-2">
+                                                        <a href="{% url 'paiement' paiement.pk %}" class="btn btn-sm btn-outline-info" title="Voir">
+                                                            <i class="bi bi-eye"></i>
+                                                        </a>
+                                                        <a href="{% url 'paiement_update' paiement.pk %}" class="btn btn-sm btn-outline-primary" title="Modifier">
+                                                            <i class="bi bi-pencil"></i>
+                                                        </a>
+                                                        <a href="{% url 'paiement_delete' paiement.pk %}" class="btn btn-sm btn-outline-danger" title="Supprimer">
+                                                            <i class="bi bi-trash"></i>
+                                                        </a>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                {% else %}
+                                <p class="text-muted mb-0">Aucun paiement enregistré pour ce stagiaire.</p>
                                 {% endif %}
                             </div>
                         </div>

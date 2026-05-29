@@ -26,8 +26,6 @@ a:hover {
     border-radius: 0; /* Removed border-radius to display full image */
     box-shadow: none; /* Removed box-shadow */
     object-fit: contain; /* Ensure the entire image is visible within its bounds */
-    max-width: 100px; /* Control max width */
-    max-height: 50px; /* Control max height */
 }
 
 .sidebar-wrapper .sidebar-header a {
@@ -69,6 +67,7 @@ a:hover {
 .card .card-header {
     border-bottom: 1px solid rgba(0, 0, 0, 0.05); /* Light separator */
     padding: 1.5rem;
+    background-color: #ffffff; /* Ensure header has a background */
 }
 
 .card .card-body {
@@ -446,86 +445,62 @@ footer {
     box-shadow: 0 -2px 10px rgba(0,0,0,0.02);
 }
 
-/* DataTable Enhancements (now custom search) */
-.dataTable-wrapper { /* This class is no longer used in HTML, but keeping for reference */
-    border-radius: 1rem;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-    border: 1px solid rgba(0, 0, 0, 0.05);
-    overflow: hidden;
+/* Photo thumbnail on detail page */
+.tm-avatar-card__preview img {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 4px solid #fff;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
-.dataTable-top { /* This class is no longer used in HTML, but keeping for reference */
-    padding: 1.5rem;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-    background-color: #ffffff;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 1rem;
-}
-
-.dataTable-search { /* This class is no longer used in HTML, but keeping for reference */
-    flex-grow: 1;
-    max-width: 400px;
-}
-
-.dataTable-input { /* This class is no longer used in HTML, but keeping for reference */
-    border: 1px solid #e9ecef;
-    border-radius: 0.75rem;
-    padding: 0.75rem 1rem;
-    font-size: 0.95rem;
-    transition: all 0.3s ease;
-}
-
-.dataTable-input:focus { /* This class is no longer used in HTML, but keeping for reference */
-    border-color: #435ebe;
-    box-shadow: 0 0 0 0.2rem rgba(67, 94, 190, 0.2);
-}
-
-.dataTable-table { /* This class is no longer used in HTML, but keeping for reference */
+/* Custom Table Styles (replacing simple-datatables defaults) */
+.table {
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
+    border-radius: 1rem; /* Match card border-radius */
+    overflow: hidden; /* Ensure rounded corners are visible */
 }
 
-.dataTable-table thead th { /* This class is no longer used in HTML, but keeping for reference */
-    background-color: #f8f9fa;
-    color: #25396f;
+.table thead th {
+    background-color: #f8f9fa; /* Light header background */
+    color: #25396f; /* Darker text */
     font-weight: 700;
-    padding: 1rem 1.5rem;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    padding: 1rem 1.5rem; /* Generous padding */
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08); /* Stronger separator */
     text-align: left;
 }
 
-.dataTable-table tbody tr { /* This class is no longer used in HTML, but keeping for reference */
+.table tbody tr {
     transition: background-color 0.2s ease;
 }
 
-.dataTable-table tbody tr:nth-of-type(odd) { /* This class is no longer used in HTML, but keeping for reference */
-    background-color: #ffffff;
+.table tbody tr:nth-of-type(odd) {
+    background-color: #ffffff; /* White background for odd rows */
 }
 
-.dataTable-table tbody tr:nth-of-type(even) { /* This class is no longer used in HTML, but keeping for reference */
-    background-color: #fcfdff;
+.table tbody tr:nth-of-type(even) {
+    background-color: #fcfdff; /* Very light blue for even rows */
 }
 
-.dataTable-table tbody tr:hover { /* This class is no longer used in HTML, but keeping for reference */
-    background-color: #eef2f7;
+.table tbody tr:hover {
+    background-color: #eef2f7; /* Subtle hover effect */
 }
 
-.dataTable-table tbody td { /* This class is no longer used in HTML, but keeping for reference */
-    padding: 0.8rem 1.5rem;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.03);
-    color: #495057;
+.table tbody td {
+    padding: 0.8rem 1.5rem; /* Consistent padding */
+    border-bottom: 1px solid rgba(0, 0, 0, 0.03); /* Lighter separator */
+    color: #495057; /* Slightly lighter text for body */
 }
 
-.dataTable-table tbody td a { /* This class is no longer used in HTML, but keeping for reference */
-    color: #435ebe;
+.table tbody td a {
+    color: #435ebe; /* Link color */
     text-decoration: none;
 }
 
-.dataTable-table tbody td a:hover {
+.table tbody td a:hover {
     text-decoration: underline;
 }
 
@@ -539,7 +514,7 @@ footer {
 }
 
 .pagination .page-link {
-    border-radius: 0.5rem;
+    border-radius: 0.5rem; /* Rounded pagination buttons */
     padding: 0.5rem 0.9rem;
     font-size: 0.9rem;
     color: #435ebe;
@@ -570,23 +545,26 @@ footer {
     border-color: #e9ecef;
 }
 
-/* Specific styles for the search button */
-.dataTable-search .btn-primary { /* This class is no longer used in HTML, but keeping for reference */
-    padding: 0.75rem 1.2rem;
-    font-size: 0.95rem;
-    border-radius: 0.75rem;
+/* Custom styles for search input */
+.custom-search-container {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
 }
-
-.dataTable-search .form-control { /* This class is no longer used in HTML, but keeping for reference */
-    height: auto;
+.custom-search-input {
+    flex-grow: 1;
+    border: 1px solid #ced4da;
+    border-radius: 0.5rem;
+    padding: 0.5rem 1rem;
+    max-width: 300px;
 }
-
-/* Photo thumbnail on detail page */
-.tm-avatar-card__preview img {
-    width: 150px;
-    height: 150px;
-    object-fit: cover;
-    border-radius: 50%;
-    border: 4px solid #fff;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+.custom-search-input:focus {
+    border-color: #435ebe;
+    box-shadow: 0 0 0 0.2rem rgba(67, 94, 190, 0.25);
+    outline: none;
+}
+.no-results-message {
+    text-align: center;
+    padding: 1rem;
+    color: #6c757d;
 }

@@ -69,7 +69,7 @@ class Stagiaire(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.nom +"(" + self.postnom +")" 
+        return self.get_full_name() # Utilise la méthode get_full_name pour l'affichage
 
     def get_full_name(self):
         """

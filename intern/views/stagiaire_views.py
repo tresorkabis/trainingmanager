@@ -10,7 +10,7 @@ from django.views import View
 from django.views.generic import DetailView, ListView, UpdateView, DeleteView # Import UpdateView and DeleteView
 
 from intern.models import AutreFormation, Categorie, Entreprise, EtudeStagiaire, Stagiaire
-from progress.models import DetailAction
+from progress.models import DetailAction, Paiement # Import Paiement
 from training.models import Filiere
 
 
@@ -110,6 +110,7 @@ class StagiaireDetailView(StagiairePermissionMixin, DetailView):
             stagiaire=current_stagiaire
         ).select_related("action__metier").order_by("action__date_debut") # Changé action__formation à action__metier
         ctx["autres_formations"] = AutreFormation.objects.filter(stagiaire=current_stagiaire)
+        ctx["paiements"] = Paiement.objects.filter(stagiaire=current_stagiaire).order_by('-date_paiement') # Ajout des paiements
         ctx["titre"] = "Voir"
         return ctx
 

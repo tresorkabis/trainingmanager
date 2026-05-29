@@ -37,6 +37,8 @@ INSTALLED_APPS = [
     'training',
     'users',
     'progress',
+    'widget_tweaks',
+    'django_select2', # Ajout de django-select2
 ]
 
 MIDDLEWARE = [

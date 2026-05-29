@@ -49,7 +49,7 @@ class Module(models.Model):
     titre = models.CharField(max_length=200)
     description = models.TextField(blank=True, null=True)
     duree_heures = models.PositiveIntegerField(default=0, verbose_name="Durée en heures")
-    formateur = models.ForeignKey('progress.Formateur', on_delete=models.SET_NULL, null=True, blank=True, related_name="modules_dispenses")
+    formateurs = models.ManyToManyField('progress.Formateur', related_name="modules_dispenses", blank=True) # Changé en ManyToManyField
     ordre = models.PositiveIntegerField(default=1)
 
     active = models.BooleanField(default=True)

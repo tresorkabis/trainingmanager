@@ -9,7 +9,7 @@ class Profile(models.Model):
         return self.name
 
 class User(AbstractUser):
-    email = models.CharField(max_length=255, unique=True,null=True)
+    email = models.EmailField(max_length=255, unique=True, null=True) # Changé CharField à EmailField
     password = models.CharField(max_length=255)
     username = models.CharField(max_length=255, unique=True)
     profile = models.ForeignKey(Profile, on_delete=models.DO_NOTHING, blank=True, null=True)

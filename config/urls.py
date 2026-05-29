@@ -9,6 +9,7 @@ from users.views.auth_views import LoginPageView, LogoutPageView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('select2/', include('django_select2.urls')), # Ajout des URLs de django-select2
     path("", HomeView.as_view(), name="home"),
 
     path("intern/", include('intern.urls')),

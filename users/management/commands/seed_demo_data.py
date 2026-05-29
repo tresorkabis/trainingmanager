@@ -1,11 +1,13 @@
 from datetime import date
+import random # Pour générer des montants aléatoires
+# import uuid # N'est plus nécessaire car la référence est générée par la méthode save du modèle
 
 from django.core.management import BaseCommand
 from django.db import transaction
 
-from intern.models import Categorie, EtudeStagiaire, Stagiaire, Entreprise, AutreFormation # Import AutreFormation
-from progress.models import Action, DetailAction, Formateur, TypeAction
-from training.models import Filiere, Metier, Module, Service # Changé Formation à Metier
+from intern.models import Categorie, EtudeStagiaire, Stagiaire, Entreprise, AutreFormation
+from progress.models import Action, DetailAction, Formateur, TypeAction, Paiement # Import Paiement
+from training.models import Filiere, Metier, Module, Service
 from users.models import Profile, User
 from users.utils import createprofile
 
@@ -17,6 +19,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         self.stdout.write(self.style.SUCCESS("Nettoyage des donnees existantes..."))
         # Supprimer les données existantes pour éviter les doublons et les conflits
+        Paiement.objects.all().delete() # Ajout du nettoyage des paiements
         DetailAction.objects.all().delete()
         Action.objects.all().delete()
         Formateur.objects.all().delete()
@@ -26,7 +29,7 @@ class Command(BaseCommand):
         Stagiaire.objects.all().delete()
         Entreprise.objects.all().delete()
         Module.objects.all().delete()
-        Metier.objects.all().delete() # Changé Formation à Metier
+        Metier.objects.all().delete()
         Filiere.objects.all().delete()
         Service.objects.all().delete()
         User.objects.all().delete()
@@ -39,64 +42,57 @@ class Command(BaseCommand):
         manager_profile = Profile.objects.filter(name="Manager").first()
         chef_filiere_profile = Profile.objects.filter(name="Chef de filière").first()
         chef_service_profile = Profile.objects.filter(name="Chef de service").first()
-        user_profile = Profile.objects.filter(name="User").first() # Assurez-vous que le profil "User" existe
+        user_profile = Profile.objects.filter(name="User").first()
+        formateur_profile = Profile.objects.filter(name="Formateur").first() # Récupérer le profil Formateur
 
-        # Changement de demo.manager en manager
         manager_user, created = User.objects.get_or_create(
-            username="manager", # Nom d'utilisateur changé ici
+            username="manager",
             defaults={
-                "email": "manager@training.local", # Email mis à jour
+                "email": "manager@training.local",
                 "first_name": "Demo",
                 "last_name": "Manager",
                 "profile": manager_profile,
             },
         )
-        if created or not manager_user.check_password("demo"): # Mot de passe changé à "demo"
+        if created or not manager_user.check_password("demo"):
             manager_user.set_password("demo")
-            manager_user.profile = manager_profile # Ensure profile is set even if user existed
+            manager_user.profile = manager_profile
             manager_user.save()
 
-        # --- Ajout de la création du superutilisateur admin ---
         admin_user, created = User.objects.get_or_create(
             username="admin",
             defaults={
                 "email": "admin@training.local",
                 "is_staff": True,
                 "is_superuser": True,
-                "profile": manager_profile, # Assigner un profil si nécessaire
+                "profile": manager_profile,
             },
         )
-        if created or not admin_user.check_password("demo"): # Mot de passe changé à "demo"
+        if created or not admin_user.check_password("demo"):
             admin_user.set_password("demo")
             admin_user.is_staff = True
             admin_user.is_superuser = True
-            admin_user.profile = manager_profile # Assigner un profil si nécessaire
+            admin_user.profile = manager_profile
             admin_user.save()
-        # --- Fin de l'ajout ---
 
         categories = {}
-        # Updated categories as per user's request
         for titre in ["dans l'emploi", "sans emploi", "non défini"]:
             categorie, _ = Categorie.objects.get_or_create(titre=titre)
             categories[titre] = categorie
 
         services = {}
-        # Nouveaux services
         for nom in ["Informatique", "Comptabilité et Administration", "Petites et moyennes entreprises"]:
             service, _ = Service.objects.get_or_create(nom=nom)
             services[nom] = service
 
         filieres = {}
         filiere_specs = [
-            # Filières pour "Informatique"
             ("Bureautique", "Informatique"),
             ("Développement des plates-formes informatiques", "Informatique"),
             ("Administration système et réseaux", "Informatique"),
-            # Filières pour "Comptabilité et Administration"
             ("Finances et Comptabilité", "Comptabilité et Administration"),
             ("Administration et Gestion", "Comptabilité et Administration"),
             ("Relations Publiques et Communication", "Comptabilité et Administration"),
-            # Filières pour "Petites et moyennes entreprises"
             ("Logistique et Douane", "Petites et moyennes entreprises"),
             ("Gestion de projets", "Petites et moyennes entreprises"),
             ("Petites et Moyennes Entreprises (PME)", "Petites et moyennes entreprises"),
@@ -111,7 +107,6 @@ class Command(BaseCommand):
                 filiere.save(update_fields=["service"])
             filieres[nom] = filiere
 
-        # --- Ajout des utilisateurs Chef de filière et Chef de service ---
         chef_filiere_user, created = User.objects.get_or_create(
             username="chef.filiere",
             defaults={
@@ -119,10 +114,10 @@ class Command(BaseCommand):
                 "first_name": "Chef",
                 "last_name": "Filiere",
                 "profile": chef_filiere_profile,
-                "filiere": filieres["Développement des plates-formes informatiques"], # Assigner une filière pertinente
+                "filiere": filieres["Développement des plates-formes informatiques"],
             },
         )
-        if created or not chef_filiere_user.check_password("demo"): # Mot de passe changé à "demo"
+        if created or not chef_filiere_user.check_password("demo"):
             chef_filiere_user.set_password("demo")
             chef_filiere_user.profile = chef_filiere_profile
             chef_filiere_user.filiere = filieres["Développement des plates-formes informatiques"]
@@ -135,17 +130,32 @@ class Command(BaseCommand):
                 "first_name": "Chef",
                 "last_name": "Service",
                 "profile": chef_service_profile,
-                "service": services["Informatique"], # Assigner à un service pertinent
+                "service": services["Informatique"],
             },
         )
-        if created or not chef_service_user.check_password("demo"): # Mot de passe changé à "demo"
+        if created or not chef_service_user.check_password("demo"):
             chef_service_user.set_password("demo")
             chef_service_user.profile = chef_service_profile
-            chef_service_user.service = services["Informatique"] # Assigner à un service pertinent
+            chef_service_user.service = services["Informatique"]
             chef_service_user.save()
-        # --- Fin de l'ajout des utilisateurs Chef ---
 
-        # Ajout d'un utilisateur standard
+        # Nouvel utilisateur Formateur
+        formateur_user, created = User.objects.get_or_create(
+            username="formateur",
+            defaults={
+                "email": "formateur@training.local",
+                "first_name": "Demo",
+                "last_name": "Formateur",
+                "profile": formateur_profile, # Assigner le profil Formateur
+                "filiere": filieres["Développement des plates-formes informatiques"], # Correction ici: utiliser une filière existante
+            },
+        )
+        if created or not formateur_user.check_password("demo"):
+            formateur_user.set_password("demo")
+            formateur_user.profile = formateur_profile
+            formateur_user.filiere = filieres["Développement des plates-formes informatiques"] # Correction ici
+            formateur_user.save()
+
         standard_user, created = User.objects.get_or_create(
             username="user.standard",
             defaults={
@@ -160,7 +170,6 @@ class Command(BaseCommand):
             standard_user.profile = user_profile
             standard_user.save()
 
-        # --- Début de la section Formateurs ---
         formateurs = {}
         formateur_specs_data = [
             ("FM001", "Kabasele", "Mwamba", "Jean", "Kinshasa / Kintambo", "0817000001", "kabasele.demo@training.local", "Electricité"),
@@ -206,18 +215,13 @@ class Command(BaseCommand):
             formateur2, _ = Formateur.objects.get_or_create(matricule="FM002", defaults={"nom": "Ngoy", "postnom": "Kabeya", "prenom": "Marie", "adresse": "Kinshasa / Limete", "telephone": "0817000002", "email": "ngoy.demo@training.local", "specialite": "Informatique"})
             formateurs_list = [formateur1, formateur2]
 
-        formateur_index = 0
-
         metiers = {}
         metier_specs = [
-            # Métiers pour "Informatique"
             {"nom": "Electricite batiment", "duree": 6, "filiere_nom": "Développement des plates-formes informatiques", "frais_materiels": 120.0, "frais_participation": 0.0, "frais_jury": 0.0, "cout": 1500.00, "modules": [("Fondamentaux électriques", "Notions de base et sécurité", 40), ("Installations domestiques", "Circuits et équipements du bâtiment", 80)]},
             {"nom": "Automatisme industriel", "duree": 8, "filiere_nom": "Administration système et réseaux", "frais_materiels": 180.0, "frais_participation": 0.0, "frais_jury": 0.0, "cout": 2000.00, "modules": [("API et capteurs", "Automates programmables et instrumentation", 60), ("Supervision", "Interfaces et contrôle industriel", 50)]},
             {"nom": "Maintenance preventive", "duree": 5, "filiere_nom": "Administration système et réseaux", "frais_materiels": 95.0, "frais_participation": 0.0, "frais_jury": 0.0, "cout": 1200.00, "modules": [("Diagnostic", "Méthodes de contrôle et inspection", 35), ("Planification", "Organisation des maintenances périodiques", 25)]},
             {"nom": "Pack Office professionnel", "duree": 3, "filiere_nom": "Bureautique", "frais_materiels": 60.0, "frais_participation": 0.0, "frais_jury": 0.0, "cout": 800.00, "modules": [("Word avancé", "Mise en forme et publipostage", 20), ("Excel métier", "Tableaux, formules et graphiques", 30)]},
-            # Métiers pour "Comptabilité et Administration"
             {"nom": "Secretaire de direction", "duree": 6, "filiere_nom": "Administration et Gestion", "frais_materiels": 110.0, "frais_participation": 0.0, "frais_jury": 0.0, "cout": 1300.00, "modules": [("Communication professionnelle", "Rédaction et accueil", 35), ("Organisation administrative", "Classement, agenda et suivi", 45)]},
-            # Nouveau métier pour "Petites et moyennes entreprises"
             {"nom": "Gestion de Projets PME", "duree": 4, "filiere_nom": "Gestion de projets", "frais_materiels": 75.0, "frais_participation": 0.0, "frais_jury": 0.0, "cout": 950.00, "modules": [("Fondamentaux de la gestion de projet", "Initiation aux méthodes agiles", 30), ("Outils de planification", "MS Project et Trello", 40)]},
         ]
         for spec in metier_specs:
@@ -228,19 +232,18 @@ class Command(BaseCommand):
             frais_participation = spec["frais_participation"]
             frais_jury = spec["frais_jury"]
             cout = spec["cout"]
-            # duree_heures sera calculée à partir des modules
 
             metier, _ = Metier.objects.get_or_create(
                 nom=nom,
                 defaults={
                     "duree": duree,
-                    "duree_heures": 0, # Initialiser à 0, sera mis à jour après les modules
+                    "duree_heures": 0,
                     "filiere": filieres[filiere_nom],
                     "cout": cout,
                     "frais_participation": frais_participation,
                     "frais_jury": frais_jury,
                     "frais_materiels": frais_materiels,
-                    "active": True, # Explicitly set active
+                    "active": True,
                 },
             )
             changed = False
@@ -250,9 +253,6 @@ class Command(BaseCommand):
             if metier.duree != duree:
                 metier.duree = duree
                 changed = True
-            # if metier.duree_heures != duree_heures: # Cette ligne est supprimée car duree_heures est calculée
-            #     metier.duree_heures = duree_heures
-            #     changed = True
             if metier.cout != cout:
                 metier.cout = cout
                 changed = True
@@ -265,7 +265,7 @@ class Command(BaseCommand):
             if metier.frais_materiels != frais_materiels:
                 metier.frais_materiels = frais_materiels
                 changed = True
-            if not metier.active: # Ensure it's active
+            if not metier.active:
                 metier.active = True
                 changed = True
             if changed:
@@ -273,31 +273,31 @@ class Command(BaseCommand):
             
             Module.objects.filter(metier=metier).delete()
             
-            total_duree_heures_for_metier = 0 # Initialiser le total pour ce métier
+            total_duree_heures_for_metier = 0
             for ordre, module_spec in enumerate(spec.get("modules", []), start=1):
                 titre, description, duree_module_heures = module_spec
                 
                 formateur_to_assign = formateurs_list[formateur_index % len(formateurs_list)]
                 
-                Module.objects.create(
+                module_obj = Module.objects.create( # Créer le module d'abord
                     metier=metier,
                     titre=titre,
                     description=description,
                     duree_heures=duree_module_heures,
-                    formateur=formateur_to_assign,
+                    # formateur=formateur_to_assign, # Ne pas passer ici
                     ordre=ordre,
                 )
+                module_obj.formateurs.add(formateur_to_assign) # Ajouter le formateur au ManyToManyField
+
                 total_duree_heures_for_metier += duree_module_heures
-                formateur_index += 1 # Passer au formateur suivant pour le prochain module
+                formateur_index += 1
             
-            # Mettre à jour la durée en heures du métier après la création de tous les modules
             if metier.duree_heures != total_duree_heures_for_metier:
                 metier.duree_heures = total_duree_heures_for_metier
                 metier.save(update_fields=['duree_heures'])
 
             metiers[nom] = metier
 
-        # Create demo Entreprise instances
         entreprises = {}
         entreprise_specs = [
             {"nom": "Global Tech Solutions", "adresse": "123 Rue de l'Innovation, Kinshasa", "telephone": "0811234567", "email": "contact@globaltech.com"},
@@ -355,7 +355,7 @@ class Command(BaseCommand):
                 "anciennete_emploi": 3,
                 "anciennete_entreprise": 3,
                 "photo": "stagiaires/photo5.jpg",
-                "filiere_nom": "Développement des plates-formes informatiques", # Mappé à la nouvelle filière
+                "filiere_nom": "Développement des plates-formes informatiques",
             },
             {
                 "nom": "Tshibangu",
@@ -393,7 +393,7 @@ class Command(BaseCommand):
                     },
                 ],
                 "photo": "stagiaires/photo6.jpg",
-                "filiere_nom": "Bureautique", # Mappé à la nouvelle filière
+                "filiere_nom": "Bureautique",
             },
             {
                 "nom": "Ilunga",
@@ -423,7 +423,7 @@ class Command(BaseCommand):
                     }
                 ],
                 "photo": "stagiaires/photo7.jpg",
-                "filiere_nom": "Administration et Gestion", # Mappé à la nouvelle filière
+                "filiere_nom": "Administration et Gestion",
             },
             {
                 "nom": "Kabongo",
@@ -457,7 +457,7 @@ class Command(BaseCommand):
                 "anciennete_emploi": 6,
                 "anciennete_entreprise": 4,
                 "photo": "stagiaires/photo1.jpg",
-                "filiere_nom": "Administration système et réseaux", # Mappé à la nouvelle filière
+                "filiere_nom": "Administration système et réseaux",
             },
             {
                 "nom": "Nzuzi",
@@ -487,7 +487,7 @@ class Command(BaseCommand):
                     }
                 ],
                 "photo": "stagiaires/photo2.jpg",
-                "filiere_nom": "Administration et Gestion", # Mappé à la nouvelle filière
+                "filiere_nom": "Administration et Gestion",
             },
             {
                 "nom": "Mbuyi",
@@ -517,7 +517,7 @@ class Command(BaseCommand):
                     }
                 ],
                 "photo": "stagiaires/photo3.jpg",
-                "filiere_nom": "Administration et Gestion", # Mappé à la nouvelle filière
+                "filiere_nom": "Administration et Gestion",
             },
             {
                 "nom": "Lufuma",
@@ -551,7 +551,7 @@ class Command(BaseCommand):
                 "anciennete_emploi": 2,
                 "anciennete_entreprise": 2,
                 "photo": "stagiaires/photo4.jpg",
-                "filiere_nom": "Bureautique", # Mappé à la nouvelle filière
+                "filiere_nom": "Bureautique",
             },
         ]
 
@@ -577,14 +577,12 @@ class Command(BaseCommand):
                 "filiere": filieres[spec["filiere_nom"]],
             }
 
-            # Add new fields to defaults if category is "dans l'emploi"
             if spec["categorie"] == "dans l'emploi":
                 defaults["entreprise"] = entreprises[spec["entreprise_nom"]]
                 defaults["fonction"] = spec["fonction"]
                 defaults["anciennete_emploi"] = spec["anciennete_emploi"]
                 defaults["anciennete_entreprise"] = spec["anciennete_entreprise"]
             else:
-                # Ensure these fields are explicitly None if not "dans l'emploi"
                 defaults["entreprise"] = None
                 defaults["fonction"] = None
                 defaults["anciennete_emploi"] = None
@@ -596,10 +594,9 @@ class Command(BaseCommand):
                 defaults=defaults,
             )
             
-            # Update logic for existing stagiaires
             changed = False
             for field, value in defaults.items():
-                if field == "filiere": # Gérer la mise à jour de la filière
+                if field == "filiere":
                     if getattr(stagiaire, field) != value:
                         setattr(stagiaire, field, value)
                         changed = True
@@ -624,7 +621,6 @@ class Command(BaseCommand):
 
 
         type_actions = {}
-        # Nouveaux types d'action
         for code, libelle in [("INT", "Interné"), ("EXT", "Externé")]:
             type_action, _ = TypeAction.objects.get_or_create(code=code, defaults={"libelle": libelle})
             if type_action.libelle != libelle:
@@ -704,6 +700,35 @@ class Command(BaseCommand):
                     "date_inscription": spec["date_inscription"],
                 }
             )
+
+        # --- Ajout des paiements de démonstration ---
+        self.stdout.write(self.style.SUCCESS("Generation des paiements de demonstration..."))
+        paiement_specs = [
+            {"stagiaire_email": "aline.mukendi.demo@training.local", "action_description": "Session Electricite - Cohorte A", "montant": 500.00, "date_paiement": date(2026, 5, 15), "motif": "Acompte formation", "mode_paiement": "ESPECES"},
+            {"stagiaire_email": "aline.mukendi.demo@training.local", "action_description": "Session Electricite - Cohorte A", "montant": 1000.00, "date_paiement": date(2026, 6, 10), "motif": "Solde formation", "mode_paiement": "VIREMENT"},
+            {"stagiaire_email": "patrick.tshibangu.demo@training.local", "action_description": "Pack Office - Vague Mai", "montant": 800.00, "date_paiement": date(2026, 5, 10), "motif": "Paiement complet", "mode_paiement": "MOBILE_MONEY"},
+            {"stagiaire_email": "merveille.ilunga.demo@training.local", "action_description": "Pack Office - Vague Mai", "montant": 400.00, "date_paiement": date(2026, 5, 12), "motif": "Acompte", "mode_paiement": "ESPECES"},
+            {"stagiaire_email": "david.kabongo.demo@training.local", "action_description": "Session Electricite - Cohorte A", "montant": 750.00, "date_paiement": date(2026, 5, 20), "motif": "Paiement partiel", "mode_paiement": "VIREMENT"},
+            {"stagiaire_email": "esther.lufuma.demo@training.local", "action_description": "Maintenance Preventive - Juin", "montant": 600.00, "date_paiement": date(2026, 6, 5), "motif": "Acompte", "mode_paiement": "ESPECES"},
+            {"stagiaire_email": "christian.mbuyi.demo@training.local", "action_description": "Secretaire de Direction - Sept", "montant": 1300.00, "date_paiement": date(2026, 8, 20), "motif": "Paiement complet", "mode_paiement": "MOBILE_MONEY"},
+        ]
+
+        for spec in paiement_specs:
+            stagiaire_obj = stagiaires[spec["stagiaire_email"]]
+            action_obj = actions.get(spec["action_description"]) # Utiliser .get() car l'action peut être None
+
+            Paiement.objects.get_or_create(
+                stagiaire=stagiaire_obj,
+                action=action_obj,
+                montant=spec["montant"],
+                date_paiement=spec["date_paiement"],
+                motif=spec["motif"],
+                mode_paiement=spec["mode_paiement"],
+                # La référence est générée automatiquement par le modèle
+            )
+        self.stdout.write(self.style.SUCCESS("Paiements de demonstration generes."))
+        # --- Fin de l'ajout des paiements ---
+
 
         self.stdout.write(self.style.SUCCESS("Donnees de demonstration generees avec succes."))
         self.stdout.write("Comptes de test:")

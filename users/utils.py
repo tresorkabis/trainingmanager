@@ -5,8 +5,9 @@ def createprofile():
     profiles = [
         "Manager",
         "User",
-        "Chef de filière",  # Nouveau profil
-        "Chef de service"   # Nouveau profil
+        "Chef de filière",
+        "Chef de service",
+        "Formateur" # Ajout du profil Formateur
     ]
     for profileName in profiles:
         temp = Profile.objects.filter(name=profileName).first()

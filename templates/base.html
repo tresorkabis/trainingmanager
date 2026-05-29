@@ -131,6 +131,12 @@
                                 <span>Formateurs</span>
                             </a>
                         </li>
+                        <li class="sidebar-item {% if link == 'users' %} active {% endif %}"> {# Nouveau lien pour les utilisateurs #}
+                            <a href="{% url 'users' %}" class='sidebar-link'>
+                                <i class="bi bi-person-lines-fill"></i> {# Icône pour les utilisateurs #}
+                                <span>Utilisateurs</span>
+                            </a>
+                        </li>
 
                         <li class="sidebar-title">Référentiels</li>
 
@@ -239,6 +245,8 @@
         </div>
     </div>
 
+    {# Chargement de jQuery avant les autres scripts #}
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
 
     <script src="{% static 'assets/vendors/perfect-scrollbar/perfect-scrollbar.min.js' %}"></script>
     <script src="{% static 'assets/js/bootstrap.bundle.min.js' %}"></script>
