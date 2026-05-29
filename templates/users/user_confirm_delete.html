@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Confirmer la suppression de l'utilisateur{% endblock title %}
+{% block page_header %}Confirmer la suppression de l'utilisateur{% endblock page_header %} {# Le titre seul reste ici #}
+
+{% block style %}
+<style>
+    /* Styles pour la section hero (cohérent avec stagiaires.html) */
+    .tm-user-hero {
+        background:
+            radial-gradient(circle at top right, rgba(67, 94, 190, 0.18), transparent 35%),
+            linear-gradient(135deg, #f7f8fc 0%, #eef3ff 100%);
+        border: 1px solid rgba(67, 94, 190, 0.12);
+        border-radius: 1.25rem;
+        overflow: hidden;
+    }
+
+    /* Styles pour les titres de section */
+    .tm-section-titlebar {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .tm-section-titlebar__icon {
+        font-size: 2.5rem;
+        color: #435ebe;
+    }
+
+    .tm-section-titlebar__text h3 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #25396f;
+        margin-bottom: 0.2rem;
+    }
+
+    .tm-section-titlebar__text p {
+        font-size: 0.9rem;
+        color: #6c757d;
+        margin-bottom: 0;
+    }
+
+    /* Styles pour les cartes de détail (copié de stagiaire.html) */
+    .tm-detail-card {
+        border: 1px solid rgba(15, 23, 42, 0.07);
+        border-radius: 1rem;
+        box-shadow: 0 16px 32px rgba(15, 23, 42, 0.05);
+    }
+
+    /* Custom extra-small button style (copié de stagiaire.html) */
+    .btn-xs {
+        padding: 0.2rem 0.5rem; /* Réduit le padding */
+        font-size: 0.75rem; /* Réduit la taille de la police */
+        line-height: 1.5;
+        border-radius: 0.2rem;
+    }
+</style>
+{% endblock style %}
+
+{% block content %}
+<div class="page-heading">
+    <section class="tm-user-hero p-4 p-lg-5 mb-4"> {# Section hero pour la confirmation de suppression #}
+        <div class="d-flex justify-content-end mb-3">
+            <a href="{% url 'users' %}" class="btn btn-secondary btn-xs">
+                <i class="bi bi-arrow-left"></i> Retour à la liste
+            </a>
+        </div>
+        <div class="row g-4 align-items-center">
+            <div class="col-12">
+                <div class="tm-section-titlebar mb-3">
+                    <span class="tm-section-titlebar__icon"><i class="bi bi-person-x-fill"></i></span> {# Icône pour la suppression utilisateur #}
+                    <div class="tm-section-titlebar__text">
+                        <h3>Confirmer la suppression</h3>
+                        <p>Cette action est irréversible.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="card tm-detail-card">
+            <div class="card-header">
+                <h4 class="card-title">Supprimer l'utilisateur "{{ user_object.username }}"</h4>
+            </div>
+            <div class="card-body">
+                <p>Êtes-vous sûr de vouloir supprimer l'utilisateur suivant ?</p>
+                <ul>
+                    <li><strong>Nom d'utilisateur:</strong> {{ user_object.username }}</li>
+                    <li><strong>Nom complet:</strong> {{ user_object.get_full_name }}</li>
+                    <li><strong>Email:</strong> {{ user_object.email }}</li>
+                </ul>
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="d-flex justify-content-end mt-3">
+                        <button type="submit" class="btn btn-danger me-2">
+                            <i class="bi bi-trash"></i> Confirmer la suppression
+                        </button>
+                        <a href="{% url 'user_detail' user_object.pk %}" class="btn btn-light">Annuler</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock content %}

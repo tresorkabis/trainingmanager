@@ -1,0 +1,250 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Liste des Utilisateurs{% endblock title %}
+{% block page_header %}Liste des Utilisateurs{% endblock page_header %}
+
+{% block style %}
+<style>
+    /* Styles pour la section hero (cohérent avec stagiaires.html) */
+    .tm-user-hero {
+        background:
+            radial-gradient(circle at top right, rgba(67, 94, 190, 0.18), transparent 35%),
+            linear-gradient(135deg, #f7f8fc 0%, #eef3ff 100%);
+        border: 1px solid rgba(67, 94, 190, 0.12);
+        border-radius: 1.25rem;
+        overflow: hidden;
+    }
+
+    /* Styles pour les titres de section */
+    .tm-section-titlebar {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .tm-section-titlebar__icon {
+        font-size: 2.5rem;
+        color: #435ebe;
+    }
+
+    .tm-section-titlebar__text h3 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #25396f;
+        margin-bottom: 0.2rem;
+    }
+
+    .tm-section-titlebar__text p {
+        font-size: 0.9rem;
+        color: #6c757d;
+        margin-bottom: 0;
+    }
+
+    /* Styles pour les cartes de liste */
+    .tm-listing-card {
+        border: 1px solid rgba(15, 23, 42, 0.07);
+        border-radius: 1rem;
+        box-shadow: 0 16px 32px rgba(15, 23, 42, 0.05);
+    }
+
+    /* Table styling (copié de stagiaires.html) */
+    .table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        border-radius: 1rem;
+        overflow: hidden;
+    }
+
+    .table thead th {
+        background-color: #f8f9fa;
+        color: #25396f;
+        font-weight: 700;
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+        text-align: left;
+    }
+
+    .table tbody tr {
+        transition: background-color 0.2s ease;
+    }
+
+    .table tbody tr:nth-of-type(odd) {
+        background-color: #ffffff;
+    }
+
+    .table tbody tr:nth-of-type(even) {
+        background-color: #fcfdff;
+    }
+
+    .table tbody tr:hover {
+        background-color: #eef2f7;
+    }
+
+    .table tbody td {
+        padding: 0.8rem 1.5rem;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.03);
+        color: #495057;
+    }
+
+    .table tbody td a {
+        color: #435ebe;
+        text-decoration: none;
+    }
+
+    .table tbody td a:hover {
+        text-decoration: underline;
+    }
+
+    /* Pagination styling (copié de stagiaires.html) */
+    .pagination {
+        margin-bottom: 0;
+    }
+
+    .pagination .page-item {
+        margin: 0 0.2rem;
+    }
+
+    .pagination .page-link {
+        border-radius: 0.5rem;
+        padding: 0.5rem 0.9rem;
+        font-size: 0.9rem;
+        color: #435ebe;
+        border: 1px solid #e9ecef;
+        transition: all 0.2s ease;
+    }
+
+    .pagination .page-item.active .page-link {
+        background-color: #435ebe;
+        border-color: #435ebe;
+        color: #fff;
+        box-shadow: 0 2px 8px rgba(67, 94, 190, 0.2);
+    }
+
+    .pagination .page-link:hover:not(.active) {
+        background-color: #f0f1f5;
+        border-color: #d8dce3;
+    }
+
+    .pagination .page-item.pager .page-link {
+        font-weight: bold;
+    }
+
+    .pagination .page-item.disabled .page-link {
+        color: #adb5bd;
+        pointer-events: none;
+        background-color: #ffffff;
+        border-color: #e9ecef;
+    }
+</style>
+{% endblock style %}
+
+{% block content %}
+<div class="page-heading">
+    <section class="tm-user-hero p-4 p-lg-5 mb-4">
+        <div class="row g-4 align-items-center">
+            <div class="col-12">
+                <div class="tm-section-titlebar mb-3">
+                    <span class="tm-section-titlebar__icon"><i class="bi bi-people-fill"></i></span>
+                    <div class="tm-section-titlebar__text">
+                        <h3>Utilisateurs</h3>
+                        <p>Gérez les comptes utilisateurs et leurs rôles.</p>
+                    </div>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="{% url 'user_create' %}" class="btn btn-primary">
+                        <i class="bi bi-person-plus me-2"></i>Créer un utilisateur
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="card tm-listing-card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="card-title mb-0">Liste des utilisateurs</h4>
+                <a href="{% url 'user_create' %}" class="btn btn-primary btn-sm">
+                    <i class="bi bi-person-plus me-2"></i>Nouvel utilisateur
+                </a>
+            </div>
+            <div class="card-body">
+                {% if user_list %}
+                <div class="table-responsive">
+                    <table class="table table-striped" id="table1">
+                        <thead>
+                            <tr>
+                                <th>Nom d'utilisateur</th>
+                                <th>Email</th>
+                                <th>Nom complet</th>
+                                <th>Profil</th>
+                                <th>Filière</th>
+                                <th>Service</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user_object in user_list %}
+                            <tr>
+                                <td><a href="{% url 'user_detail' user_object.pk %}">{{ user_object.username }}</a></td>
+                                <td>{{ user_object.email }}</td>
+                                <td>{{ user_object.get_full_name }}</td>
+                                <td>{{ user_object.profile|default:"-" }}</td>
+                                <td>{{ user_object.filiere|default:"-" }}</td>
+                                <td>{{ user_object.service|default:"-" }}</td>
+                                <td>
+                                    <div class="d-flex gap-2">
+                                        <a href="{% url 'user_detail' user_object.pk %}" class="btn btn-sm btn-outline-info" title="Voir">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a href="{% url 'user_update' user_object.pk %}" class="btn btn-sm btn-outline-primary" title="Modifier">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <a href="{% url 'user_delete' user_object.pk %}" class="btn btn-sm btn-outline-danger" title="Supprimer">
+                                            <i class="bi bi-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted text-center">Aucun utilisateur enregistré pour le moment.</p>
+                {% endif %}
+
+                {% if is_paginated %}
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <div class="dataTable-info">
+                        Page {{ page_obj.number }} sur {{ page_obj.paginator.num_pages }}
+                    </div>
+                    <ul class="pagination pagination-primary float-end">
+                        {% if page_obj.has_previous %}
+                        <li class="page-item pager"><a href="?page=1" class="page-link">&laquo;</a></li>
+                        <li class="page-item">
+                            <a href="?page={{ page_obj.previous_page_number }}" class="page-link">
+                                {{ page_obj.previous_page_number }}
+                            </a>
+                        </li>
+                        {% endif %}
+
+                        <li class="page-item active"><a href="#" class="page-link">{{ page_obj.number }}</a></li>
+
+                        {% if page_obj.has_next %}
+                        <li class=" page-item">
+                            <a href="?page={{ page_obj.next_page_number }}" class="page-link">
+                                {{ page_obj.next_page_number }}
+                            </a>
+                        </li>
+                        <li class="page-item pager"><a href="?page={{ page_obj.paginator.num_pages }}" class="page-link">&raquo;</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock content %}

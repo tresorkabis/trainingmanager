@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Détail de l'Utilisateur{% endblock title %}
+{% block page_header %}Détail de l'Utilisateur{% endblock page_header %} {# Le titre seul reste ici #}
+
+{% block style %}
+<style>
+    /* Styles pour la section hero (cohérent avec stagiaires.html) */
+    .tm-user-hero {
+        background:
+            radial-gradient(circle at top right, rgba(67, 94, 190, 0.18), transparent 35%),
+            linear-gradient(135deg, #f7f8fc 0%, #eef3ff 100%);
+        border: 1px solid rgba(67, 94, 190, 0.12);
+        border-radius: 1.25rem;
+        overflow: hidden;
+    }
+
+    /* Styles pour les titres de section */
+    .tm-section-titlebar {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .tm-section-titlebar__icon {
+        font-size: 2.5rem;
+        color: #435ebe;
+    }
+
+    .tm-section-titlebar__text h3 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #25396f;
+        margin-bottom: 0.2rem;
+    }
+
+    .tm-section-titlebar__text p {
+        font-size: 0.9rem;
+        color: #6c757d;
+        margin-bottom: 0;
+    }
+
+    /* Styles pour les cartes de détail (copié de stagiaire.html) */
+    .tm-detail-card {
+        border: 1px solid rgba(15, 23, 42, 0.07);
+        border-radius: 1rem;
+        box-shadow: 0 16px 32px rgba(15, 23, 42, 0.05);
+    }
+
+    /* Custom extra-small button style (copié de stagiaire.html) */
+    .btn-xs {
+        padding: 0.2rem 0.5rem; /* Réduit le padding */
+        font-size: 0.75rem; /* Réduit la taille de la police */
+        line-height: 1.5;
+        border-radius: 0.2rem;
+    }
+</style>
+{% endblock style %}
+
+{% block content %}
+<div class="page-heading">
+    <section class="tm-user-hero p-4 p-lg-5 mb-4"> {# Section hero pour le détail #}
+        <div class="d-flex justify-content-end mb-3">
+            <a href="{% url 'users' %}" class="btn btn-secondary btn-xs">
+                <i class="bi bi-arrow-left"></i> Retour à la liste
+            </a>
+        </div>
+        <div class="row g-4 align-items-center">
+            <div class="col-12">
+                <div class="tm-section-titlebar mb-3">
+                    <span class="tm-section-titlebar__icon"><i class="bi bi-person-fill"></i></span> {# Icône pour le détail utilisateur #}
+                    <div class="tm-section-titlebar__text">
+                        <h3>{{ user_object.username }}</h3> {# Titre plus spécifique #}
+                        <p>Détails du compte utilisateur.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="card tm-detail-card">
+            <div class="card-header">
+                <h4 class="card-title mb-1">Informations utilisateur</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Nom d'utilisateur:</strong> {{ user_object.username }}</p>
+                        <p><strong>Email:</strong> {{ user_object.email }}</p>
+                        <p><strong>Nom:</strong> {{ user_object.last_name|default:"-" }}</p>
+                        <p><strong>Prénom:</strong> {{ user_object.first_name|default:"-" }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Profil:</strong> {{ user_object.profile|default:"-" }}</p>
+                        <p><strong>Filière:</strong> {{ user_object.filiere|default:"-" }}</p>
+                        <p><strong>Service:</strong> {{ user_object.service|default:"-" }}</p>
+                        <p><strong>Date de création:</strong> {{ user_object.date_joined|date:"d/m/Y H:i" }}</p>
+                        <p><strong>Dernière connexion:</strong> {{ user_object.last_login|date:"d/m/Y H:i"|default:"Jamais" }}</p>
+                    </div>
+                </div>
+                <hr>
+                <div class="d-flex justify-content-end">
+                    <a href="{% url 'user_update' user_object.pk %}" class="btn btn-outline-primary me-2">
+                        <i class="bi bi-pencil"></i> Modifier
+                    </a>
+                    <a href="{% url 'user_delete' user_object.pk %}" class="btn btn-outline-danger">
+                        <i class="bi bi-trash"></i> Supprimer
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock content %}
+
+{% block script %}
+    {{ form.media }} {# Charge les fichiers JS et CSS de Select2 si le formulaire est passé au contexte #}
+{% endblock script %}
