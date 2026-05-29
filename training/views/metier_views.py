@@ -1,6 +1,7 @@
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
-from django.db.models import Count # Import Count
+from django.db.models import Count
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse_lazy
@@ -8,6 +9,7 @@ from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.generic import DetailView, ListView, UpdateView, DeleteView # Import UpdateView and DeleteView
 
+from django import forms # Import forms
 from training.models import Filiere, Metier, Module # Changé Formation à Metier
 from progress.models import Formateur, Action as ProgressAction # Import Action from progress app
 
@@ -81,95 +83,134 @@ class MetierDetailView(MetierPermissionMixin, DetailView): # Renommé de Formati
     template_name = "training/metier.html" # Changé formation.html à metier.html
 
     def get_queryset(self):
-        return self.get_metier_queryset().select_related("filiere", "filiere__service").prefetch_related("modules__formateur") # Changé get_formation_queryset à get_metier_queryset
+        return self.get_metier_queryset().select_related("filiere", "filiere__service").prefetch_related("modules__formateurs") # Changé get_formation_queryset à get_metier_queryset
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx["filieres"] = self.get_allowed_filieres()
         ctx["formateurs"] = Formateur.objects.all()
         ctx["titre"] = "Voir"
+        ctx["mode"] = "view"
         return ctx
 
 
+class MetierForm(forms.ModelForm):
+    class Meta:
+        model = Metier
+        fields = ["nom", "duree", "filiere", "cout", "frais_participation", "frais_jury", "frais_materiels"]
+        widgets = {
+            'nom': forms.TextInput(attrs={'class': 'form-control'}),
+            'duree': forms.NumberInput(attrs={'class': 'form-control'}),
+            'filiere': forms.Select(attrs={'class': 'form-control'}),
+            'cout': forms.NumberInput(attrs={'class': 'form-control'}),
+            'frais_participation': forms.NumberInput(attrs={'class': 'form-control'}),
+            'frais_jury': forms.NumberInput(attrs={'class': 'form-control'}),
+            'frais_materiels': forms.NumberInput(attrs={'class': 'form-control'}),
+        }
+
 @method_decorator(login_required, name="dispatch")
 class MetierCreateView(MetierPermissionMixin, View): # Renommé de FormationCreateView à MetierCreateView
+    template_name = "training/metier.html"
+
     def get(self, request):
         self.enforce_manage_permission()
         ctx = {
             "filieres": self.get_allowed_filieres(),
             "formateurs": Formateur.objects.all(),
-            "titre": "Saisie d'un métier", # Changé formation à métier
+            "titre": "Créer un métier", # Changé formation à métier
             "mode": "new",
+            "form": MetierForm(), # Passer un formulaire vide
+            "existing_modules": [], # Pas de modules existants pour la création
         }
-        return render(request, "training/metier.html", ctx) # Changé formation.html à metier.html
+        return render(request, self.template_name, ctx) # Changé formation.html à metier.html
 
     def post(self, request):
         self.enforce_manage_permission()
+        form = MetierForm(request.POST)
+        
+        if form.is_valid():
+            metier = form.save(commit=False)
+            filiere_id = form.cleaned_data["filiere"].pk
+            if not self.get_allowed_filieres().filter(pk=filiere_id).exists():
+                form.add_error('filiere', "Vous ne pouvez pas rattacher ce métier à cette filière.")
+                return self.form_invalid(form)
+            
+            metier.save()
 
-        nom = request.POST["nom"]
-        duree = request.POST["duree"]
-        filiere_id = request.POST["filiere"]
-        cout = request.POST.get("cout") or 0
-        frais_participation = request.POST.get("frais_participation") or 0
-        frais_jury = request.POST.get("frais_jury") or 0
-        frais_materiels = request.POST.get("frais_materiels") or 0
+            total_duree_heures = 0
+            module_titres = request.POST.getlist("module_titre[]")
+            module_descriptions = request.POST.getlist("module_description[]")
+            module_durees = request.POST.getlist("module_duree_heures[]")
+            module_formateurs = request.POST.getlist("module_formateur[]")
 
-        if not self.get_allowed_filieres().filter(pk=filiere_id).exists():
-            raise PermissionDenied("Vous ne pouvez pas rattacher ce métier à cette filière.") # Changé formation à métier
+            for index, titre in enumerate(module_titres, start=1):
+                titre = (titre or "").strip()
+                if not titre:
+                    continue
 
-        total_duree_heures = 0
+                duree_module_str = module_durees[index - 1].strip() if index - 1 < len(module_durees) else "0"
+                duree_module = int(duree_module_str) if duree_module_str.isdigit() else 0
+                description_module = module_descriptions[index - 1].strip() if index - 1 < len(module_descriptions) else ""
+                formateur_id = module_formateurs[index - 1].strip() if index - 1 < len(module_formateurs) else None
 
-        metier = Metier( # Changé formation à metier
-            nom=nom,
-            duree=duree,
-            filiere_id=filiere_id,
-            cout=cout,
-            frais_participation=frais_participation,
-            frais_jury=frais_jury,
-            frais_materiels=frais_materiels,
-        )
-        metier.save() # Changé formation.save() à metier.save()
+                module_obj = Module.objects.create(
+                    metier=metier,
+                    titre=titre,
+                    description=description_module or None,
+                    duree_heures=duree_module,
+                    ordre=index,
+                )
+                if formateur_id:
+                    module_obj.formateurs.add(formateur_id)
+                total_duree_heures += duree_module
 
-        module_titres = request.POST.getlist("module_titre[]")
-        module_descriptions = request.POST.getlist("module_description[]")
-        module_durees = request.POST.getlist("module_duree_heures[]")
-        module_formateurs = request.POST.getlist("module_formateur[]")
+            metier.duree_heures = total_duree_heures
+            metier.save(update_fields=['duree_heures'])
 
-        for index, titre in enumerate(module_titres, start=1):
-            titre = (titre or "").strip()
-            if not titre:
-                continue
+            messages.success(request, "Le métier a été créé avec succès.")
+            return HttpResponseRedirect(reverse_lazy("metiers"))
+        else:
+            return self.form_invalid(form)
 
-            duree_module_str = module_durees[index - 1].strip() if index - 1 < len(module_durees) else "0"
-            duree_module = int(duree_module_str) if duree_module_str.isdigit() else 0
-            description_module = module_descriptions[index - 1].strip() if index - 1 < len(module_descriptions) else ""
-            formateur_id = module_formateurs[index - 1].strip() if index - 1 < len(module_formateurs) else None
+    def form_invalid(self, form):
+        ctx = {
+            "filieres": self.get_allowed_filieres(),
+            "formateurs": Formateur.objects.all(),
+            "titre": "Créer un métier",
+            "mode": "new",
+            "form": form,
+            "submitted": self.request.POST,
+            "form_errors": form.errors,
+        }
+        # Reconstruire les modules pour repopuler le formulaire
+        module_titres = self.request.POST.getlist("module_titre[]")
+        module_descriptions = self.request.POST.getlist("module_description[]")
+        module_durees = self.request.POST.getlist("module_duree_heures[]")
+        module_formateurs = self.request.POST.getlist("module_formateur[]")
 
-            Module.objects.create(
-                metier=metier, # Changé formation à metier
-                titre=titre,
-                description=description_module or None,
-                duree_heures=duree_module,
-                formateur_id=formateur_id if formateur_id else None,
-                ordre=index,
-            )
-            total_duree_heures += duree_module
-
-        metier.duree_heures = total_duree_heures # Changé formation.duree_heures à metier.duree_heures
-        metier.save(update_fields=['duree_heures']) # Changé formation.save() à metier.save()
-
-        return HttpResponseRedirect(reverse_lazy("metiers")) # Changé formations à metiers
+        reconstructed_modules = []
+        for index, titre in enumerate(module_titres):
+            if titre.strip():
+                reconstructed_modules.append({
+                    'id': '', # Pas d'ID pour les nouveaux modules en erreur
+                    'titre': titre,
+                    'description': module_descriptions[index] if index < len(module_descriptions) else '',
+                    'duree_heures': module_durees[index] if index < len(module_durees) else '',
+                    'formateur_id': module_formateurs[index] if index < len(module_formateurs) else '',
+                })
+        ctx["existing_modules"] = reconstructed_modules
+        return render(self.request, self.template_name, ctx, status=400)
 
 
 @method_decorator(login_required, name="dispatch")
 class MetierUpdateView(MetierPermissionMixin, UpdateView): # Renommé de FormationUpdateView à MetierUpdateView
     model = Metier # Changé Formation à Metier
     template_name = "training/metier.html" # Changé formation.html à metier.html
-    fields = ["nom", "duree", "filiere", "cout", "frais_participation", "frais_jury", "frais_materiels"]
+    form_class = MetierForm # Utiliser le ModelForm défini
     success_url = reverse_lazy("metiers") # Changé formations à metiers
 
     def get_queryset(self):
-        return self.get_metier_queryset().select_related("filiere", "filiere__service").prefetch_related("modules__formateur") # Changé get_formation_queryset à get_metier_queryset
+        return self.get_metier_queryset().select_related("filiere", "filiere__service").prefetch_related("modules__formateurs") # Changé get_formation_queryset à get_metier_queryset
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
@@ -185,21 +226,13 @@ class MetierUpdateView(MetierPermissionMixin, UpdateView): # Renommé de Formati
     def form_valid(self, form):
         self.enforce_manage_permission()
         
-        # Récupérer les données du formulaire
-        nom = form.cleaned_data["nom"]
-        duree = form.cleaned_data["duree"]
-        filiere = form.cleaned_data["filiere"]
-        cout = form.cleaned_data["cout"]
-        frais_participation = form.cleaned_data["frais_participation"]
-        frais_jury = form.cleaned_data["frais_jury"]
-        frais_materiels = form.cleaned_data["frais_materiels"]
-
         # Validation de la filière
+        filiere = form.cleaned_data["filiere"]
         if not self.get_allowed_filieres().filter(pk=filiere.pk).exists():
             raise PermissionDenied("Vous ne pouvez pas rattacher ce métier à cette filière.") # Changé formation à métier
-
+        
         # Mettre à jour l'objet Metier
-        metier = form.save(commit=False) # Changé formation à metier
+        metier = form.save() # Sauvegarde directe simplifiée
         
         # Gérer les modules
         module_titres = self.request.POST.getlist("module_titre[]")
@@ -209,7 +242,7 @@ class MetierUpdateView(MetierPermissionMixin, UpdateView): # Renommé de Formati
         module_ids = self.request.POST.getlist("module_id[]") # Pour identifier les modules existants
 
         # Supprimer les modules qui ne sont plus dans le formulaire
-        existing_module_ids = [int(mid) for mid in module_ids if mid.isdigit()]
+        existing_module_ids = [int(mid) for mid in module_ids if mid and mid.isdigit()]
         metier.modules.exclude(pk__in=existing_module_ids).delete() # Changé formation.modules à metier.modules
 
         total_duree_heures = 0
@@ -224,25 +257,33 @@ class MetierUpdateView(MetierPermissionMixin, UpdateView): # Renommé de Formati
             formateur_id = module_formateurs[index - 1].strip() if index - 1 < len(module_formateurs) else None
             module_pk = module_ids[index - 1].strip() if index - 1 < len(module_ids) else None
 
-            module_data = {
-                'metier': metier, # Changé formation à metier
-                'titre': titre,
-                'description': description_module or None,
-                'duree_heures': duree_module,
-                'formateur_id': formateur_id if formateur_id else None,
-                'ordre': index,
-            }
-
             if module_pk and module_pk.isdigit(): # Module existant
-                Module.objects.filter(pk=module_pk).update(**module_data)
+                module_obj = get_object_or_404(Module, pk=module_pk, metier=metier)
+                module_obj.titre = titre
+                module_obj.description = description_module or None
+                module_obj.duree_heures = duree_module
+                module_obj.ordre = index
+                module_obj.save()
             else: # Nouveau module
-                Module.objects.create(**module_data)
+                module_obj = Module.objects.create(
+                    metier=metier,
+                    titre=titre,
+                    description=description_module or None,
+                    duree_heures=duree_module,
+                    ordre=index,
+                )
+            
+            if formateur_id:
+                module_obj.formateurs.set([formateur_id])
+            else:
+                module_obj.formateurs.clear()
             
             total_duree_heures += duree_module
 
         metier.duree_heures = total_duree_heures # Changé formation.duree_heures à metier.duree_heures
         metier.save() # Sauvegarder le métier avec la nouvelle duree_heures
 
+        messages.success(self.request, "Le métier a été mis à jour avec succès.")
         return HttpResponseRedirect(self.get_success_url())
 
     def form_invalid(self, form):
@@ -287,3 +328,26 @@ class MetierDeleteView(MetierPermissionMixin, DeleteView): # Renommé de Formati
         ctx = super().get_context_data(**kwargs)
         ctx["titre"] = "Supprimer"
         return ctx
+
+@method_decorator(login_required, name="dispatch")
+class ModuleFormateursUpdateView(MetierPermissionMixin, View):
+    """Vue pour mettre à jour uniquement les formateurs d'un module spécifique."""
+    def post(self, request, pk):
+        self.enforce_manage_permission()
+        module = get_object_or_404(Module, pk=pk)
+        
+        # Sécurité : on vérifie que le métier associé au module est modifiable par l'utilisateur
+        allowed_metiers = self.get_metier_queryset()
+        if not allowed_metiers.filter(pk=module.metier.pk).exists():
+            raise PermissionDenied("Vous n'avez pas la permission de modifier ce module.")
+
+        # Récupération des IDs sélectionnés (filtre les valeurs vides)
+        formateur_ids = [fid for fid in request.POST.getlist('formateur_ids') if fid]
+        
+        # Mise à jour de la relation ManyToMany
+        module.formateurs.set(formateur_ids)
+        
+        messages.success(request, f"Les formateurs du module '{module.titre}' ont été mis à jour avec succès.")
+        
+        # Redirection vers le détail du métier
+        return HttpResponseRedirect(reverse_lazy("metier", kwargs={'pk': module.metier.pk}))

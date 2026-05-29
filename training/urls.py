@@ -1,6 +1,6 @@
 from django.urls import path
 
-from training.views.metier_views import MetierCreateView, MetierListView, MetierDetailView, MetierUpdateView, MetierDeleteView # Importation des vues Metier
+from training.views.metier_views import MetierCreateView, MetierListView, MetierDetailView, MetierUpdateView, MetierDeleteView, ModuleFormateursUpdateView # Importation des vues Metier
 from training.views.filiere_views import FiliereListView, FiliereDetailView, FiliereCreateUpdateView, FiliereDeleteView
 from training.views.service_views import ServiceListView, ServiceDetailView, ServiceCreateUpdateView, ServiceDeleteView
 
@@ -11,6 +11,7 @@ urlpatterns = [
     path("metiers/<int:pk>", MetierDetailView.as_view(), name="metier"),
     path("metiers/<int:pk>/update", MetierUpdateView.as_view(), name="metier_update"),
     path("metiers/<int:pk>/delete", MetierDeleteView.as_view(), name="metier_delete"),
+    path("modules/<int:pk>/update-formateurs/", ModuleFormateursUpdateView.as_view(), name="update_module_formateurs"),
 
     path("filieres", FiliereListView.as_view(), name="filieres"),
     path("filieres/create", FiliereCreateUpdateView.as_view(), name="filiere_create"),

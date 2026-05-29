@@ -21,7 +21,7 @@ class ActionPermissionMixin:
 
     def get_allowed_metiers(self): # Changé get_allowed_formations à get_allowed_metiers
         user = self.request.user
-        queryset = Metier.objects.all().prefetch_related('modules__formateur') # Changé Formation à Metier, et related_name de Module
+        queryset = Metier.objects.all().prefetch_related('modules__formateurs') # Changé Formation à Metier, et related_name de Module
         
         if user.is_superuser or (user.profile and user.profile.name == "Manager"):
             return queryset
@@ -72,14 +72,15 @@ class ActionPermissionMixin:
             # Get unique formateurs for this metier's modules
             formateurs_for_metier = set() # Changé formateurs_for_formation à formateurs_for_metier
             for module in metier.modules.all(): # Changé formation.modules.all() à metier.modules.all()
-                if module.formateur:
-                    formateurs_for_metier.add(module.formateur) # Changé formateurs_for_formation à formateurs_for_metier
+                module_formateurs = module.formateurs.all()
+                for f in module_formateurs:
+                    formateurs_for_metier.add(f)
                 modules_data.append({
                     'id': module.id,
                     'titre': module.titre,
                     'duree_heures': module.duree_heures,
-                    'formateur_id': module.formateur.id if module.formateur else None,
-                    'formateur_name': str(module.formateur) if module.formateur else 'Non assigné',
+                    'formateur_id': module_formateurs[0].id if module_formateurs.exists() else None,
+                    'formateur_name': str(module_formateurs[0]) if module_formateurs.exists() else 'Non assigné',
                 })
             
             metiers_data.append({ # Changé formations_data à metiers_data
@@ -116,8 +117,8 @@ class ActionPermissionMixin:
                 # Get formateurs assigned to modules of this specific metier
                 allowed_formateur_ids_for_metier = set( # Changé allowed_formateur_ids_for_formation à allowed_formateur_ids_for_metier
                     Module.objects.filter(metier=selected_metier) # Changé formation à metier
-                    .exclude(formateur__isnull=True)
-                    .values_list('formateur__id', flat=True)
+                    .exclude(formateurs__isnull=True)
+                    .values_list('formateurs__id', flat=True)
                 )
                 
                 requested_formateurs_pks = set(self.normalize_formateur_ids(formateur_ids))
