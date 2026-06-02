@@ -1,7 +1,7 @@
 from django.urls import path
 
 from intern.views.categorie_views import CategorieListView, CategorieDetailView, CategorieCreateUpdateView, CategorieDeleteView # Importation des nouvelles vues
-from intern.views.stagiaire_views import StagiaireListView, StagiaireCreateUpdateView, StagiaireDetailView, StagiaireDeleteView
+from intern.views.stagiaire_views import StagiaireListView, StagiaireCreateUpdateView, StagiaireDetailView, StagiaireDeleteView, stagiaire_cards_print
 
 
 urlpatterns = [
