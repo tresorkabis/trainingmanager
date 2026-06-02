@@ -1,8 +1,8 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Détail Métier - {% if object %}{{ object.nom }}{% else %}Nouveau{% endif %}{% endblock title %}
-{% block page_header %}Détail du Métier - {% if object %}{{ object.nom }}{% else %}Nouveau{% endif %}{% endblock page_header %}
+{% block title %}Détail Formation - {% if object %}{{ object.nom }}{% else %}Nouveau{% endif %}{% endblock title %}
+{% block page_header %}Détail de la Formation - {% if object %}{{ object.nom }}{% else %}Nouveau{% endif %}{% endblock page_header %}
 
 {% block style %}
 <style>
@@ -99,8 +99,8 @@
                 <div class="tm-section-titlebar"> {# Added tm-section-titlebar #}
                     <span class="tm-section-titlebar__icon"><i class="bi bi-journal-text"></i></span> {# Icon for Metier #}
                     <div class="tm-section-titlebar__text">
-                        <h3>{% if object %}{{ object.nom }}{% else %}Nouveau Métier{% endif %}</h3>
-                        <p>{% if object %}Fiche de consultation complète pour le métier, ses modules et ses coûts.{% else %}Formulaire de création d'un nouveau métier.{% endif %}</p>
+                        <h3>{% if object %}{{ object.nom }}{% else %}Nouvelle Formation{% endif %}</h3>
+                        <p>{% if object %}Fiche de consultation complète pour la formation, ses modules et ses coûts.{% else %}Formulaire de création d'une nouvelle formation.{% endif %}</p>
                     </div>
                 </div>
             </div>
@@ -241,7 +241,7 @@
                             </form>
                         {% else %} {# Mode vue #}
                             <div class="tm-detail-grid">
-                                <div class="tm-detail-item"><span class="tm-detail-item__label">Nom du métier</span><div class="tm-detail-item__value">{{ object.nom }}</div></div>
+                                <div class="tm-detail-item"><span class="tm-detail-item__label">Nom de la formation</span><div class="tm-detail-item__value">{{ object.nom }}</div></div>
                                 <div class="tm-detail-item"><span class="tm-detail-item__label">Filière associée</span><div class="tm-detail-item__value">{{ object.filiere.nom|default:"Non renseignée" }}</div></div>
                                 <div class="tm-detail-item"><span class="tm-detail-item__label">Durée (mois)</span><div class="tm-detail-item__value">{{ object.duree }}</div></div>
                                 <div class="tm-detail-item"><span class="tm-detail-item__label">Durée (heures)</span><div class="tm-detail-item__value">{{ object.duree_heures }}</div></div>
@@ -255,7 +255,7 @@
             <div class="col-12 col-lg-6">
                 <div class="card tm-detail-card mb-4">
                     <div class="card-header">
-                        <h4 class="card-title mb-0">Modules du métier</h4>
+                        <h4 class="card-title mb-0">Modules de la formation</h4>
                         <p class="text-muted mb-0">Liste des modules qui composent ce métier.</p>
                     </div>
                     <div class="card-body">
@@ -289,7 +289,7 @@
                             </table>
                         </div>
                         {% else %}
-                        <p class="text-muted mb-0">Aucun module n'est rattaché à ce métier.</p>
+                        <p class="text-muted mb-0">Aucun module n'est rattaché à cette formation.</p>
                         {% endif %}
                     </div>
                 </div>

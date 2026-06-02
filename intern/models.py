@@ -1,6 +1,6 @@
 from django.db import models
 
-from training.models import Filiere, Metier, Service # Changé Formation à Metier
+from training.models import Filiere, Formation, Service # Changé Formation à Metier
 
 class Categorie(models.Model):
     titre = models.CharField(max_length=100)
@@ -55,8 +55,8 @@ class Stagiaire(models.Model):
     photo = models.ImageField(upload_to='stagiaires/', blank=True, null=True)
     categorie = models.ForeignKey(Categorie, on_delete=models.CASCADE)
     
-    # Nouveau champ pour lier le stagiaire à une filière
-    filiere = models.ForeignKey(Filiere, on_delete=models.SET_NULL, null=True, blank=True)
+    # Ancien champ filiere supprimé car le stagiaire n'est pas directement lié à une filière
+    # filiere = models.ForeignKey(Filiere, on_delete=models.SET_NULL, null=True, blank=True)
 
     # New fields for "dans l'emploi" category
     entreprise = models.ForeignKey(Entreprise, on_delete=models.SET_NULL, null=True, blank=True)

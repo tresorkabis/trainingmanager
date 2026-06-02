@@ -35,11 +35,23 @@ class StagiairePermissionMixin:
 
         if user.is_superuser or (user.profile and user.profile.name == "Manager"):
             return queryset
+        
         if user.profile and user.profile.name == "Chef de filière" and user.filiere:
-            return queryset.filter(filiere=user.filiere)
+            # Filtrer les stagiaires inscrits à des actions dont le métier est dans la filière de l'utilisateur
+            detail_actions_in_filiere = DetailAction.objects.filter(
+                action__metier__filiere=user.filiere
+            ).values_list('stagiaire__pk', flat=True)
+            return queryset.filter(pk__in=detail_actions_in_filiere).distinct()
+
         if user.profile and user.profile.name == "Chef de service" and user.service:
-            return queryset.filter(filiere__service=user.service)
+            # Filtrer les stagiaires inscrits à des actions dont le métier est dans un service de l'utilisateur
+            detail_actions_in_service = DetailAction.objects.filter(
+                action__metier__filiere__service=user.service
+            ).values_list('stagiaire__pk', flat=True)
+            return queryset.filter(pk__in=detail_actions_in_service).distinct()
+        
         return Stagiaire.objects.none()
+
 
     def enforce_manage_permission(self):
         user = self.request.user
@@ -55,11 +67,27 @@ class StagiaireListView(StagiairePermissionMixin, ListView):
 
     def get_queryset(self):
         self.enforce_manage_permission()
-        queryset = self.get_stagiaire_queryset().select_related("categorie", "entreprise", "filiere")
+        # Suppression de 'filiere' de select_related
+        queryset = self.get_stagiaire_queryset().select_related("categorie", "entreprise")
+
+        from django.utils import timezone
+        from django.db.models.functions import Coalesce
+
+        today = timezone.now().date()
 
         latest_detail_action_pk = DetailAction.objects.filter(
             stagiaire=OuterRef("pk")
         ).order_by("-action__date_debut").values("pk")[:1]
+
+        active_detail_action_pk = DetailAction.objects.filter(
+            stagiaire=OuterRef("pk"),
+            action__date_debut__lte=today,
+            action__date_fin__gte=today
+        ).order_by("-action__date_debut").values("pk")[:1]
+
+        active_metier_name = DetailAction.objects.filter(
+            pk=Subquery(active_detail_action_pk)
+        ).values("action__metier__nom")[:1]
 
         latest_metier_name = DetailAction.objects.filter(
             pk=Subquery(latest_detail_action_pk)
@@ -71,7 +99,10 @@ class StagiaireListView(StagiairePermissionMixin, ListView):
         )
 
         return queryset.annotate(
-            current_formation_name=Subquery(latest_metier_name, output_field=models.CharField())
+            current_formation_name=Coalesce(
+                Subquery(active_metier_name, output_field=models.CharField()),
+                Subquery(latest_metier_name, output_field=models.CharField())
+            )
         )
 
     def get_context_data(self, **kwargs):
@@ -91,12 +122,13 @@ class StagiaireListView(StagiairePermissionMixin, ListView):
 
 
 @method_decorator(login_required, name="dispatch")
-class StagiaireDetailView(StagiairePermissionMixin, DetailView):
+class StagiaireDetailView(StagiairePermissionMixin, DetailView): # Correction de la faute de frappe ici
     model = Stagiaire
     template_name = "intern/stagiaire.html"
 
     def get_queryset(self):
-        return self.get_stagiaire_queryset().select_related("categorie", "entreprise", "filiere")
+        # Suppression de 'filiere' de select_related
+        return self.get_stagiaire_queryset().select_related("categorie", "entreprise")
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
@@ -112,7 +144,7 @@ class StagiaireDetailView(StagiairePermissionMixin, DetailView):
         ctx["autres_formations"] = AutreFormation.objects.filter(stagiaire=current_stagiaire)
         ctx["paiements"] = Paiement.objects.filter(stagiaire=current_stagiaire).order_by('-date_paiement')
         ctx["titre"] = "Voir"
-        ctx["mode"] = None  # Mode falsey pour activer le mode lecture dans le template
+        ctx["mode"] = None
         return ctx
 
 
@@ -135,8 +167,8 @@ class StagiaireCreateUpdateView(StagiairePermissionMixin, View):
 
         ctx = {
             "form": form,
-            "categories": Categorie.objects.all(), # Encore nécessaire pour le JS de l'onglet pro
-            "entreprises": Entreprise.objects.all(), # Encore nécessaire pour le JS de l'onglet pro
+            "categories": Categorie.objects.all(),
+            "entreprises": Entreprise.objects.all(),
             "filieres": self.get_allowed_filieres(),
             "actions": Action.objects.filter(active=True).select_related('metier'),
             "titre": titre,
@@ -161,15 +193,12 @@ class StagiaireCreateUpdateView(StagiairePermissionMixin, View):
         if form.is_valid():
             with transaction.atomic():
                 stagiaire = form.save(commit=False)
+                
+                # Le champ filiere a été supprimé du modèle Stagiaire, donc cette validation n'est plus nécessaire
+                # if stagiaire.filiere and not self.get_allowed_filieres().filter(pk=stagiaire.filiere.pk).exists():
+                #     form.add_error('filiere', "Vous ne pouvez pas rattacher ce stagiaire à cette filière.")
+                #     return self.form_invalid(request, form, stagiaire, mode, titre)
 
-                # Validation de la filière si elle est fournie
-                if stagiaire.filiere and not self.get_allowed_filieres().filter(pk=stagiaire.filiere.pk).exists():
-                    form.add_error('filiere', "Vous ne pouvez pas rattacher ce stagiaire à cette filière.")
-                    return self.form_invalid(request, form, stagiaire, mode, titre)
-
-                # Gérer les champs spécifiques à la catégorie "dans l'emploi"
-                # La logique de clean_entreprise dans le form gère déjà la création de l'entreprise
-                # Il faut juste s'assurer que les champs fonction, anciennete_emploi, anciennete_entreprise sont None si pas "dans l'emploi"
                 if stagiaire.categorie and stagiaire.categorie.titre != "dans l'emploi":
                     stagiaire.entreprise = None
                     stagiaire.fonction = None
@@ -178,7 +207,6 @@ class StagiaireCreateUpdateView(StagiairePermissionMixin, View):
 
                 stagiaire.save()
 
-                # Gérer les études et autres formations (logique existante)
                 EtudeStagiaire.objects.filter(stagiaire=stagiaire).delete()
                 etude_intitules = request.POST.getlist("etude_intitule[]")
                 etude_etablissements = request.POST.getlist("etude_etablissement[]")
@@ -239,10 +267,8 @@ class StagiaireCreateUpdateView(StagiairePermissionMixin, View):
             "titre": titre,
             "mode": mode,
             "object": stagiaire,
-            "form_errors": form.errors, # Passer les erreurs du formulaire
+            "form_errors": form.errors,
         }
-        # Reconstruire les études et autres formations pour repopuler le formulaire
-        # Cette logique est nécessaire car nous n'utilisons pas de formsets pour ces éléments
         reconstructed_studies = []
         etude_intitules = request.POST.getlist("etude_intitule[]")
         etude_etablissements = request.POST.getlist("etude_etablissement[]")
@@ -261,7 +287,7 @@ class StagiaireCreateUpdateView(StagiairePermissionMixin, View):
                     'annee_fin': etude_annee_fins[index] if index < len(etude_annee_fins) else '',
                     'diplome_obtenu': etude_diplomes[index] if index < len(etude_diplomes) else '',
                 })
-        ctx["existing_studies"] = reconstructed_studies # Utiliser un nom différent pour éviter conflit avec object.etudes.all
+        ctx["existing_studies"] = reconstructed_studies
 
         reconstructed_other_trainings = []
         autre_formation_intitules = request.POST.getlist("autre_formation_intitule[]")
@@ -275,7 +301,7 @@ class StagiaireCreateUpdateView(StagiairePermissionMixin, View):
                     'etablissement': autre_formation_etablissements[index] if index < len(autre_formation_etablissements) else '',
                     'annee_fin': autre_formation_annee_fins[index] if index < len(autre_formation_annee_fins) else '',
                 })
-        ctx["existing_other_trainings"] = reconstructed_other_trainings # Utiliser un nom différent
+        ctx["existing_other_trainings"] = reconstructed_other_trainings
 
         return render(request, self.template_name, ctx, status=400)
 
@@ -300,7 +326,9 @@ def stagiaire_cards_print(request):
     # reuse list view helpers by creating an instance and binding request
     list_view = StagiaireListView()
     list_view.request = request
-    qs = list_view.get_stagiaire_queryset().select_related('categorie', 'entreprise', 'filiere')
+    # Use the ListView.get_queryset() to preserve the annotations (current_formation_name)
+    # Suppression de 'filiere' de select_related
+    qs = list_view.get_queryset().select_related('categorie', 'entreprise')
 
     # Optional: filter by selected ids (ids=1,2,3)
     ids = request.GET.get('ids')

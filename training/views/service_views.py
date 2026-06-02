@@ -8,7 +8,7 @@ from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.generic import ListView, DetailView, UpdateView, DeleteView # Import UpdateView and DeleteView
 
-from training.models import Service, Filiere, Metier # Import Filiere, Metier
+from training.models import Service, Filiere, Formation
 
 
 class ServicePermissionMixin:

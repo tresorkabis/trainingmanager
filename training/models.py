@@ -24,7 +24,7 @@ class Filiere(models.Model):
     
 # Le modèle Formateur est défini dans progress.models, nous n'avons pas besoin de le définir ici.
 
-class Metier(models.Model): # Renommé de Formation à Metier
+class Formation(models.Model): # Renamed to Formation
     nom = models.CharField(max_length=200)
     duree = models.IntegerField(default=0)
     duree_heures = models.PositiveIntegerField(default=0, verbose_name="Durée en heures")
@@ -45,7 +45,7 @@ class Metier(models.Model): # Renommé de Formation à Metier
 
 
 class Module(models.Model):
-    metier = models.ForeignKey(Metier, on_delete=models.CASCADE, related_name="modules") # Changé de formation à metier
+    metier = models.ForeignKey(Formation, on_delete=models.CASCADE, related_name="modules") # Changé de formation à metier
     titre = models.CharField(max_length=200)
     description = models.TextField(blank=True, null=True)
     duree_heures = models.PositiveIntegerField(default=0, verbose_name="Durée en heures")

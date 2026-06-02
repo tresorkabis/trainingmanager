@@ -10,7 +10,7 @@ from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.generic import DetailView, ListView, DeleteView
 
-from training.models import Filiere, Metier, Module
+from training.models import Filiere, Formation, Module
 from progress.models import Formateur
 from training.forms import MetierForm, ModuleFormSet # Import des formulaires et formset
 
@@ -30,7 +30,7 @@ class MetierPermissionMixin:
 
     def get_metier_queryset(self):
         user = self.request.user
-        queryset = Metier.objects.all()
+        queryset = Formation.objects.all()
 
         if user.is_superuser or (user.profile and user.profile.name == "Manager"):
             return queryset
@@ -38,7 +38,7 @@ class MetierPermissionMixin:
             return queryset.filter(filiere=user.filiere)
         if user.profile and user.profile.name == "Chef de service" and user.service:
             return queryset.filter(filiere__service=user.service)
-        return Metier.objects.none()
+        return Formation.objects.none()
 
     def enforce_manage_permission(self):
         user = self.request.user
@@ -79,7 +79,7 @@ class MetierListView(MetierPermissionMixin, ListView):
 
 @method_decorator(login_required, name="dispatch")
 class MetierDetailView(MetierPermissionMixin, DetailView):
-    model = Metier
+    model = Formation
     template_name = "training/metier.html"
     context_object_name = "object" # Utilise 'object' comme nom de contexte par défaut
 
@@ -103,7 +103,7 @@ class MetierCreateUpdateView(MetierPermissionMixin, View): # Vue unifiée pour c
         self.enforce_manage_permission()
         metier = None
         if pk:
-            metier = get_object_or_404(Metier, pk=pk)
+            metier = get_object_or_404(Formation, pk=pk)
             form = MetierForm(instance=metier)
             formset = ModuleFormSet(instance=metier)
             mode = "edit"
@@ -129,7 +129,7 @@ class MetierCreateUpdateView(MetierPermissionMixin, View): # Vue unifiée pour c
         self.enforce_manage_permission()
         metier = None
         if pk:
-            metier = get_object_or_404(Metier, pk=pk)
+            metier = get_object_or_404(Formation, pk=pk)
             form = MetierForm(request.POST, instance=metier)
             formset = ModuleFormSet(request.POST, instance=metier)
             mode = "edit"
@@ -182,7 +182,7 @@ class MetierCreateUpdateView(MetierPermissionMixin, View): # Vue unifiée pour c
 
 @method_decorator(login_required, name="dispatch")
 class MetierDeleteView(MetierPermissionMixin, DeleteView):
-    model = Metier
+    model = Formation
     template_name = "training/metier_confirm_delete.html"
     success_url = reverse_lazy("metiers")
     context_object_name = "object"

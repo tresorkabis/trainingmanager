@@ -12,7 +12,7 @@ from django.views import View
 from django.views.generic import DeleteView, DetailView, ListView, UpdateView
 
 from progress.models import Action, Formateur
-from training.models import Metier, Module # Changé Formation à Metier
+from training.models import Formation, Module # Changé Formation à Metier
 
 
 class ActionPermissionMixin:
@@ -21,7 +21,7 @@ class ActionPermissionMixin:
 
     def get_allowed_metiers(self): # Changé get_allowed_formations à get_allowed_metiers
         user = self.request.user
-        queryset = Metier.objects.all().prefetch_related('modules__formateurs') # Changé Formation à Metier, et related_name de Module
+        queryset = Formation.objects.all().prefetch_related('modules__formateurs') # Changé Formation à Metier, et related_name de Module
         
         if user.is_superuser or (user.profile and user.profile.name == "Manager"):
             return queryset
@@ -29,7 +29,7 @@ class ActionPermissionMixin:
             return queryset.filter(filiere=user.filiere)
         if user.profile and user.profile.name == "Chef de service" and user.service:
             return queryset.filter(filiere__service=user.service)
-        return Metier.objects.none() # Changé Formation à Metier
+        return Formation.objects.none() # Changé Formation à Metier
 
     def get_queryset(self):
         allowed_metiers = self.get_allowed_metiers() # Changé allowed_formations à allowed_metiers
@@ -113,7 +113,7 @@ class ActionPermissionMixin:
         # --- Nouvelle logique de validation des formateurs ---
         if metier_id: # Changé formation_id à metier_id
             try:
-                selected_metier = Metier.objects.get(pk=metier_id) # Changé Formation à Metier, formation_id à metier_id
+                selected_metier = Formation.objects.get(pk=metier_id) # Changé Formation à Metier, formation_id à metier_id
                 # Get formateurs assigned to modules of this specific metier
                 allowed_formateur_ids_for_metier = set( # Changé allowed_formateur_ids_for_formation à allowed_formateur_ids_for_metier
                     Module.objects.filter(metier=selected_metier) # Changé formation à metier

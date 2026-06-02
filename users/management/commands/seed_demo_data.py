@@ -7,7 +7,7 @@ from django.db import transaction
 
 from intern.models import Categorie, EtudeStagiaire, Stagiaire, Entreprise, AutreFormation
 from progress.models import Action, DetailAction, Formateur, TypeAction, Paiement # Import Paiement
-from training.models import Filiere, Metier, Module, Service
+from training.models import Filiere, Formation, Module, Service
 from users.models import Profile, User
 from users.utils import createprofile
 
@@ -29,7 +29,7 @@ class Command(BaseCommand):
         Stagiaire.objects.all().delete()
         Entreprise.objects.all().delete()
         Module.objects.all().delete()
-        Metier.objects.all().delete()
+        Formation.objects.all().delete()
         Filiere.objects.all().delete()
         Service.objects.all().delete()
         User.objects.all().delete()
@@ -234,7 +234,7 @@ class Command(BaseCommand):
             frais_jury = spec["frais_jury"]
             cout = spec["cout"]
 
-            metier, _ = Metier.objects.get_or_create(
+            metier, _ = Formation.objects.get_or_create(
                 nom=nom,
                 defaults={
                     "duree": duree,

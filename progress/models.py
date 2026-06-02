@@ -5,7 +5,7 @@ import string   # Importez le module string
 from django.db.models import Max # Import Max pour la logique de référence
 
 from intern.models import Stagiaire
-from training.models import Metier
+from training.models import Formation
 
 class TypeAction(models.Model):
     code = models.CharField(max_length=10, unique=True)
@@ -39,7 +39,7 @@ class Action(models.Model):
     description = models.CharField(max_length=50)
     date_debut = models.DateField()
     date_fin = models.DateField()
-    metier = models.ForeignKey(Metier, on_delete=models.CASCADE, related_name="actions")
+    metier = models.ForeignKey(Formation, on_delete=models.CASCADE, related_name="actions")
     formateurs = models.ManyToManyField("Formateur", blank=True, related_name="actions")
     type_action = models.ForeignKey(TypeAction, on_delete=models.SET_NULL, null=True, blank=True, related_name="actions_liees")
 

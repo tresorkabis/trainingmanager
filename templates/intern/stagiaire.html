@@ -169,6 +169,9 @@
             <a href="{% url 'stagiaires' %}" class="btn btn-secondary btn-xs">
                 <i class="bi bi-arrow-left"></i> Retour à la liste
             </a>
+            <a href="{% url 'stagiaires_print' %}?ids={{ object.pk }}" target="_blank" class="btn btn-outline-secondary btn-xs">
+                <i class="bi bi-printer"></i> Imprimer la carte
+            </a>
             {% if not mode %} {# Afficher les boutons Modifier/Supprimer seulement en mode vue #}
             <a href="{% url 'stagiaire_update' object.pk %}" class="btn btn-primary btn-xs">
                 <i class="bi bi-pencil"></i> Modifier
@@ -190,9 +193,7 @@
                         <div>
                             <div class="tm-pill-list mb-3">
                                 <span class="tm-pill"><i class="bi bi-person-badge"></i>{{ object.categorie }}</span>
-                                {% if object.filiere %}
-                                <span class="tm-pill"><i class="bi bi-signpost"></i>{{ object.filiere.nom }}</span>
-                                {% endif %}
+                                {# Suppression du pill filiere #}
                                 {% if object.entreprise %}
                                 <span class="tm-pill"><i class="bi bi-building"></i>{{ object.entreprise.nom }}</span>
                                 {% endif %}
@@ -364,13 +365,10 @@
                                         <label class="tm-detail-item__label" for="categorie">Catégorie</label>
                                         {{ form.categorie }}
                                     </div>
-                                    <div class="tm-detail-item">
-                                        <label class="tm-detail-item__label" for="filiere">Filière</label>
-                                        {{ form.filiere|add_class:"form-select"|attr:"id:filiere" }}
-                                    </div>
+                                    {# Suppression du champ filiere du formulaire #}
                                     {% else %}
                                     <div class="tm-detail-item"><span class="tm-detail-item__label">Catégorie</span><div class="tm-detail-item__value">{{ object.categorie }}</div></div>
-                                    <div class="tm-detail-item"><span class="tm-detail-item__label">Filière</span><div class="tm-detail-item__value">{{ object.filiere.nom|default:"Non renseignée" }}</div></div>
+                                    {# Suppression de l'affichage de la filiere en mode lecture seule #}
                                     {% endif %}
                                 </div>
                                 <h5 class="mb-3">Métiers internes suivis</h5>

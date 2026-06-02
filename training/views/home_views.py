@@ -4,7 +4,7 @@ from django.db.models import Count
 
 from intern.models import Stagiaire
 from progress.models import Action
-from training.models import Filiere, Metier, Service # Changé Formation à Metier
+from training.models import Filiere, Formation, Service
 from users.models import User, Profile # Importation de Profile
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
@@ -19,7 +19,7 @@ class HomeView(View):
         # Initialisation des querysets de base
         stagiaires_queryset = Stagiaire.objects.all()
         actions_queryset = Action.objects.all()
-        metiers_queryset = Metier.objects.all() # Changé formations_queryset à metiers_queryset
+        metiers_queryset = Formation.objects.all() # Changé formations_queryset à metiers_queryset
         filieres_queryset = Filiere.objects.all()
 
         # Filtrage basé sur le rôle de l'utilisateur
@@ -42,7 +42,7 @@ class HomeView(View):
             # Pour les autres profils (ex: "User") ou si pas de lien, ne voient aucune donnée
             stagiaires_queryset = Stagiaire.objects.none()
             actions_queryset = Action.objects.none()
-            metiers_queryset = Metier.objects.none() # Changé formations_queryset à metiers_queryset
+            metiers_queryset = Formation.objects.none() # Changé formations_queryset à metiers_queryset
             filieres_queryset = Filiere.objects.none()
 
 

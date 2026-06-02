@@ -1,8 +1,8 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Catalogue des métiers{% endblock title %}
-{% block page_header %}Catalogue des métiers{% endblock page_header %}
+{% block title %}Catalogue des formations{% endblock title %}
+{% block page_header %}Catalogue des formations{% endblock page_header %}
 
 {% block style %}
 <style>
@@ -175,13 +175,13 @@
                 <div class="tm-section-titlebar mb-3">
                     <span class="tm-section-titlebar__icon"><i class="bi bi-journal-text"></i></span>
                     <div class="tm-section-titlebar__text">
-                        <h3>Métiers</h3>
-                        <p>Gérez le catalogue de métiers et leurs modules.</p>
+                        <h3>Formations</h3>
+                        <p>Gérez le catalogue des formations et leurs modules.</p>
                     </div>
                 </div>
                 <div class="d-flex flex-wrap gap-2">
                     <a href="{% url 'metier_create' %}" class="btn btn-primary">
-                        <i class="bi bi-folder-plus me-2"></i>Nouveau métier
+                        <i class="bi bi-folder-plus me-2"></i>Nouvelle formation
                     </a>
                     <a href="{% url 'formateurs' %}" class="btn btn-light-secondary">
                         <i class="bi bi-person-badge me-2"></i>Voir les formateurs
@@ -192,7 +192,7 @@
                 <div class="row g-3">
                     <div class="col-6 col-md-4">
                         <div class="tm-metier-stat">
-                            <span class="tm-metier-stat__label">Total Métiers</span>
+                            <span class="tm-metier-stat__label">Total Formations</span>
                             <span class="tm-metier-stat__value">{{ stats.total }}</span>
                         </div>
                     </div>
@@ -228,9 +228,9 @@
     <section class="section">
         <div class="card tm-listing-card"> {# Applied premium card styling #}
             <div class="card-header d-flex justify-content-between align-items-center"> {# Added d-flex for alignment #}
-                <h4 class="card-title mb-0">Catalogue des métiers</h4>
+                <h4 class="card-title mb-0">Catalogue des formations</h4>
                 <a href="{% url 'metier_create' %}" class="btn btn-primary btn-sm">
-                    <i class="bi bi-folder-plus me-2"></i>Nouveau métier
+                    <i class="bi bi-folder-plus me-2"></i>Nouvelle formation
                 </a>
             </div>
             <div class="card-body">
@@ -278,7 +278,7 @@
                             {% endfor %}
                             {% else %}
                             <tr id="noResultsRow">
-                                <td colspan="8" class="no-results-message">Aucun métier enregistré.</td>
+                                <td colspan="8" class="no-results-message">Aucune formation enregistrée.</td>
                             </tr>
                             {% endif %}
                         </tbody>
@@ -335,7 +335,7 @@
             const td = document.createElement('td');
             td.colSpan = 8; // Adjusted colspan for new columns
             td.className = 'no-results-message';
-            td.textContent = 'Aucun métier trouvé.';
+            td.textContent = 'Aucune formation trouvée.';
             noResultsRow.appendChild(td);
             noResultsRow.style.display = 'none'; // Hide by default
             tableBody.appendChild(noResultsRow);
@@ -372,9 +372,9 @@
         searchInput.addEventListener('keyup', performSearch);
 
         // Initial display check for no results if the list is empty
-        if (allRows.length === 0 && !noResultsRow.textContent.includes('Aucun métier enregistré.')) {
+        if (allRows.length === 0 && !noResultsRow.textContent.includes('Aucune formation enregistrée.')) {
              noResultsRow.style.display = '';
-             noResultsRow.textContent = 'Aucun métier enregistré.';
+             noResultsRow.textContent = 'Aucune formation enregistrée.';
         } else if (allRows.length > 0) {
             noResultsRow.style.display = 'none';
         }

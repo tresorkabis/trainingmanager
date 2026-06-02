@@ -2,8 +2,8 @@
 {% load static %}
 {% load widget_tweaks %} {# Chargement du filtre widget_tweaks #}
 
-{% block title %}Détail Métier - {% if object %}{{ object.nom }}{% else %}Nouveau{% endif %}{% endblock title %}
-{% block page_header %}Détail du Métier - {% if object %}{{ object.nom }}{% else %}Nouveau{% endif %}{% endblock page_header %}
+{% block title %}Détail Formation - {% if object %}{{ object.nom }}{% else %}Nouveau{% endif %}{% endblock title %}
+{% block page_header %}Détail de la Formation - {% if object %}{{ object.nom }}{% else %}Nouveau{% endif %}{% endblock page_header %}
 
 {% block style %}
 <style>
@@ -157,8 +157,8 @@
                 <div class="tm-section-titlebar mb-3">
                     <span class="tm-section-titlebar__icon"><i class="bi bi-journal-text"></i></span>
                     <div class="tm-section-titlebar__text">
-                        <h3>{% if object %}{{ object.nom }}{% else %}Nouveau Métier{% endif %}</h3>
-                        <p>{% if object %}Modifier le métier et ses modules.{% else %}Formulaire de création d'un nouveau métier et de ses modules.{% endif %}</p>
+                        <h3>{% if object %}{{ object.nom }}{% else %}Nouvelle Formation{% endif %}</h3>
+                        <p>{% if object %}Modifier la formation et ses modules.{% else %}Formulaire de création d'une nouvelle formation et de ses modules.{% endif %}</p>
                     </div>
                 </div>
             </div>
@@ -281,7 +281,7 @@
                                     </div>
                                 {% endif %}
 
-                                <h5 class="mt-4 mb-3">Modules du métier</h5>
+                                <h5 class="mt-4 mb-3">Modules de la formation</h5>
                                 <div id="module-formset-container">
                                     {{ formset.management_form }}
                                     {% for module_form in formset %}
@@ -365,7 +365,7 @@
                             </form>
                         {% else %} {# Mode vue #}
                             <div class="tm-detail-grid">
-                                <div class="tm-detail-item"><span class="tm-detail-item__label">Nom du métier</span><div class="tm-detail-item__value">{{ object.nom }}</div></div>
+                                <div class="tm-detail-item"><span class="tm-detail-item__label">Nom de la formation</span><div class="tm-detail-item__value">{{ object.nom }}</div></div>
                                 <div class="tm-detail-item"><span class="tm-detail-item__label">Filière associée</span><div class="tm-detail-item__value">{{ object.filiere.nom|default:"Non renseignée" }}</div></div>
                                 <div class="tm-detail-item"><span class="tm-detail-item__label">Durée (mois)</span><div class="tm-detail-item__value">{{ object.duree }}</div></div>
                                 <div class="tm-detail-item"><span class="tm-detail-item__label">Durée (heures)</span><div class="tm-detail-item__value">{{ object.duree_heures }}</div></div>
@@ -413,7 +413,7 @@
                             </table>
                         </div>
                         {% else %}
-                        <p class="text-muted mb-0">Aucun module n'est rattaché à ce métier.</p>
+                        <p class="text-muted mb-0">Aucun module n'est rattaché à cette formation.</p>
                         {% endif %}
                     </div>
                 </div>

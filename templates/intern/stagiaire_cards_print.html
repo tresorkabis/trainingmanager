@@ -3,29 +3,106 @@
 
 {% block title %}Impression Cartes Stagiaires{% endblock title %}
 
+{% block page_header %}Cartes des stagiaires{% endblock page_header %}
+
 {% block style %}
 <style>
+    /* Premium cards — A4 landscape (3 columns x 3 rows of 9cm x 6cm cards) */
+    @page { size: A4 landscape; margin: 1cm; }
+
+    /* Hide site chrome when printing */
     @media print {
-        .no-print { display: none !important; }
+        .no-print, header, footer, .tm-topbar, .tm-topbar__meta, .tm-topbar__aside { display: none !important; }
+        body { margin: 0; -webkit-print-color-adjust: exact; }
     }
+
     .print-grid {
         display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 1rem;
+        grid-template-columns: repeat(3, 9cm);
+        grid-auto-rows: 6cm;
+        gap: 0.5cm 0.35cm;
+        justify-content: center;
+        align-content: start;
     }
+
     .print-card {
+        position: relative;
+        box-sizing: border-box;
+        width: 9cm;
+        height: 6cm;
         display: flex;
-        gap: 1rem;
+        gap: 0.4rem;
         align-items: center;
-        padding: 0.75rem;
-        border: 1px solid #ddd;
-        border-radius: 0.5rem;
-        min-height: 110px;
+        padding: 0.35cm;
+        border-radius: 6px;
+        page-break-inside: avoid;
+        break-inside: avoid;
+        background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+        box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+        border-left: 0.15cm solid #435ebe; /* accent color (reduced further) */
+        overflow: hidden;
     }
-    .print-photo { width: 90px; height: 90px; object-fit: cover; border-radius: 8px; }
-    .print-name { font-weight: 700; color: #25396f; font-size: 1.05rem; }
-    .print-meta { color: #6c757d; font-size: 0.95rem; }
-    .print-actions { text-align: right; }
+
+    /* Logo watermark on card (background) */
+    .print-card::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background-image: url('{% static "assets/images/logo.png" %}');
+        background-repeat: no-repeat;
+        background-position: right center;
+        background-size: 45% auto;
+        opacity: 0.06;
+        pointer-events: none;
+        z-index: 0;
+        mix-blend-mode: normal;
+    }
+
+    /* Ensure card content is above the watermark */
+    .print-card > * {
+        position: relative;
+        z-index: 1;
+    }
+
+    .print-photo {
+        width: 3.6cm;
+        height: 4cm;
+        object-fit: cover;
+        border-radius: 4px;
+        flex-shrink: 0;
+        border: 1px solid rgba(0,0,0,0.06);
+    }
+
+    .print-content {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 0.12rem;
+        padding-right: 0.2cm;
+        flex-grow: 1;
+    }
+
+    .print-name { font-weight: 800; color: #12224b; font-size: 1.15rem; letter-spacing: 0.01em; }
+    .print-title { font-weight: 600; color: #435ebe; font-size: 0.85rem; text-transform: capitalize; }
+    .print-company { color: #4e5a6b; font-size: 0.8rem; }
+    .print-contact { color: #4e5a6b; font-size: 0.8rem; }
+
+    .print-badge {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.15rem;
+        width: 2.1cm;
+        flex-shrink: 0;
+        text-align: center;
+    }
+
+    .print-photo-wrap { display:flex; flex-direction:column; align-items:center; gap:0.15rem; width:3.6cm; flex-shrink:0; }
+    .print-id { font-size: 0.75rem; color: #6c757d; margin-top:0.15rem; }
+
+    .page-content { padding: 0; }
+
 </style>
 {% endblock style %}
 
@@ -41,20 +118,27 @@
 <div class="print-grid">
     {% for s in object_list %}
     <div class="print-card">
-        {% if s.photo %}
-        <img src="{{ s.photo.url }}" alt="Photo" class="print-photo" />
-        {% else %}
-        <img src="{% static 'assets/images/faces/1.jpg' %}" alt="Photo" class="print-photo" />
-        {% endif %}
-        <div class="flex-grow-1">
-            <div class="print-name">{{ s.nom }} {{ s.postnom }} {{ s.prenom }}</div>
-            <div class="print-meta">Catégorie: {{ s.categorie }}</div>
-            {% if s.categorie and s.categorie.titre != 'sans emploi' and s.entreprise %}
-            <div class="print-meta">Entreprise: {{ s.entreprise.nom }}</div>
+        <div class="print-photo-wrap">
+            {% if s.photo %}
+            <img src="{{ s.photo.url }}" alt="Photo" class="print-photo" />
+            {% else %}
+            <img src="{% static 'assets/images/faces/1.jpg' %}" alt="Photo" class="print-photo" />
             {% endif %}
-            <div class="print-meta">Téléphone: {{ s.telephone|default:"-" }}</div>
-            <div class="print-meta">Email: {{ s.email|default:"-" }}</div>
+            <div class="print-id">ID {{ s.pk }}</div>
         </div>
+
+        <div class="print-content">
+            <div class="print-name">{{ s.nom }} {{ s.postnom }} {{ s.prenom }}</div>
+            {% if s.fonction %}
+            <div class="print-title">{{ s.fonction }}</div>
+            {% endif %}
+            <div class="print-company">Métier: {{ s.current_formation_name|default:"" }}</div>
+            {% if s.entreprise and s.categorie and s.categorie.titre != 'sans emploi' %}
+            <div class="print-company">{{ s.entreprise.nom }}</div>
+            {% endif %}
+            <div class="print-contact">Tél: {{ s.telephone|default:"-" }}</div>
+        </div>
+
     </div>
     {% endfor %}
 </div>

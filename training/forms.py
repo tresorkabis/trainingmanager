@@ -2,7 +2,7 @@ from django import forms
 from django.forms import inlineformset_factory
 from django_select2.forms import Select2Widget
 
-from .models import Metier, Module, Filiere
+from .models import Formation, Module, Filiere
 from progress.models import Formateur
 
 class MetierForm(forms.ModelForm):
@@ -13,7 +13,7 @@ class MetierForm(forms.ModelForm):
     )
 
     class Meta:
-        model = Metier
+        model = Formation
         fields = ["nom", "duree", "filiere", "cout", "frais_participation", "frais_jury", "frais_materiels"]
         widgets = {
             'nom': forms.TextInput(attrs={'class': 'form-control'}),
@@ -61,7 +61,7 @@ class ModuleForm(forms.ModelForm):
                     field.widget.attrs.update({'class': 'form-control'})
 
 ModuleFormSet = inlineformset_factory(
-    Metier,
+    Formation,
     Module,
     form=ModuleForm,
     extra=1,
