@@ -267,7 +267,7 @@
                                     <div class="flex-grow-1">
                                         <a href="{% url 'stagiaire' item.id %}" class="tm-stagiaire-row__title d-block mb-1">{{ item.nom }} {{ item.postnom }} {{ item.prenom }}</a>
                                         <div class="tm-stagiaire-row__meta">{{ item.current_formation_name|default:"-" }}</div>
-                                        <div class="tm-stagiaire-row__meta">{{ item.categorie }} • {{ item.entreprise.nom|default:"N/A" }}</div>
+                                        <div class="tm-stagiaire-row__meta">{{ item.categorie }}{% if item.categorie and item.categorie.titre != "sans emploi" %}{% if item.entreprise %} &nbsp;•&nbsp; {{ item.entreprise.nom }}{% endif %}{% endif %}</div>
                                         <div class="mt-2"><small class="text-muted">{{ item.telephone|default:"-" }} · {{ item.email|default:"-" }}</small></div>
                                     </div>
                                     <div class="d-flex flex-column align-items-end">
@@ -321,7 +321,7 @@
                                 <td>{{ item.email|default:"N/A" }}</td>
                                 <td>{{ item.current_formation_name|default:"N/A" }}</td> {# Display current formation name #}
                                 <td>{{ item.categorie }}</td>
-                                <td>{{ item.entreprise.nom|default:"N/A" }}</td>
+                                <td>{% if item.categorie and item.categorie.titre == "sans emploi" %}{% else %}{{ item.entreprise.nom|default:"" }}{% endif %}</td>
                                 <td>
                                     <div class="d-flex gap-2">
                                         <a href="{% url 'stagiaire_update' item.pk %}" class="btn btn-sm btn-outline-primary" title="Modifier">
