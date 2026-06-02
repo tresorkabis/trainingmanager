@@ -165,10 +165,18 @@
 {% block content %}
 <div class="page-heading">
     <section class="tm-stagiaire-hero p-4 p-lg-5 mb-4">
-        <div class="d-flex justify-content-end mb-3"> {# Nouvelle div pour le bouton retour #}
-            <a href="{% url 'stagiaires' %}" class="btn btn-secondary btn-xs"> {# Changé btn-sm à btn-xs #}
+        <div class="d-flex justify-content-end mb-3 gap-2"> {# Nouvelle div pour les boutons d'action #}
+            <a href="{% url 'stagiaires' %}" class="btn btn-secondary btn-xs">
                 <i class="bi bi-arrow-left"></i> Retour à la liste
             </a>
+            {% if not mode %} {# Afficher les boutons Modifier/Supprimer seulement en mode vue #}
+            <a href="{% url 'stagiaire_update' object.pk %}" class="btn btn-primary btn-xs">
+                <i class="bi bi-pencil"></i> Modifier
+            </a>
+            <a href="{% url 'stagiaire_delete' object.pk %}" class="btn btn-danger btn-xs">
+                <i class="bi bi-trash"></i> Supprimer
+            </a>
+            {% endif %}
         </div>
         <div class="row g-4 align-items-center">
             <div class="col-12 col-xl-7"> {# Left column for photo, name, pills, description #}
