@@ -280,6 +280,7 @@
                                 <td><a href="{% url 'stagiaire' item.id %}" class="tm-stagiaire-row__title">{{ item.nom }} {{ item.postnom }} {{ item.prenom }}</a></td> {# Combined full name #}
                                 <td>{{ item.sexe }}</td>
                                 <td>{{ item.telephone }}</td>
+
                                 <td>{{ item.email|default:"N/A" }}</td>
                                 <td>{{ item.current_formation_name|default:"N/A" }}</td> {# Display current formation name #}
                                 <td>{{ item.categorie }}</td>

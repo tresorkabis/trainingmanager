@@ -7,7 +7,8 @@
 
 {% block style %}
 <style>
-    .tm-metier-hero {
+    /* Styles pour la section hero (Harmonisé avec user_form.html) */
+    .tm-form-hero { /* Renommé pour être plus générique et cohérent */
         background:
             radial-gradient(circle at top right, rgba(67, 94, 190, 0.18), transparent 35%),
             linear-gradient(135deg, #f7f8fc 0%, #eef3ff 100%);
@@ -145,7 +146,7 @@
 
 {% block content %}
 <div class="page-heading">
-    <section class="tm-metier-hero p-4 p-lg-5 mb-4">
+    <section class="tm-form-hero p-4 p-lg-5 mb-4"> {# Changé tm-metier-hero à tm-form-hero #}
         <div class="d-flex justify-content-end mb-3">
             <a href="{% url 'metiers' %}" class="btn btn-secondary btn-xs">
                 <i class="bi bi-arrow-left"></i> Retour à la liste
@@ -208,7 +209,7 @@
                             <form method="post" id="metier_form">
                                 {% csrf_token %}
                                 <div class="row">
-                                    <div class="col-md-4 col-12"> {# Changé col-md-6 à col-md-4 #}
+                                    <div class="col-md-6 col-12"> {# Changé col-md-4 à col-md-6 #}
                                         <div class="form-group mb-3">
                                             <label for="{{ form.nom.id_for_label }}" class="form-label">{{ form.nom.label }}</label>
                                             {{ form.nom|add_class:"form-control" }}
@@ -217,28 +218,28 @@
                                             {% endfor %}
                                         </div>
                                     </div>
-                                    <div class="col-md-4 col-12"> {# Changé col-md-6 à col-md-4 #}
+                                    <div class="col-md-6 col-12"> {# Changé col-md-4 à col-md-6 #}
                                         <div class="form-group mb-3">
                                             <label for="{{ form.duree.id_for_label }}" class="form-label">{{ form.duree.label }}</label>
-                                            {{ form.duree|add_class:"form-control input-sm-width" }} {# Ajout de la classe input-sm-width #}
+                                            {{ form.duree|add_class:"form-control input-sm-width" }}
                                             {% for error in form.duree.errors %}
                                                 <div class="invalid-feedback d-block">{{ error }}</div>
                                             {% endfor %}
                                         </div>
                                     </div>
-                                    <div class="col-md-4 col-12"> {# Changé col-md-6 à col-md-4 #}
+                                    <div class="col-md-6 col-12"> {# Changé col-md-4 à col-md-6 #}
                                         <div class="form-group mb-3">
                                             <label for="{{ form.filiere.id_for_label }}" class="form-label">{{ form.filiere.label }}</label>
-                                            {{ form.filiere }} {# Select2Widget gère ses classes #}
+                                            {{ form.filiere }}
                                             {% for error in form.filiere.errors %}
                                                 <div class="invalid-feedback d-block">{{ error }}</div>
                                             {% endfor %}
                                         </div>
                                     </div>
-                                    <div class="col-md-4 col-12"> {# Changé col-md-6 à col-md-4 #}
+                                    <div class="col-md-6 col-12"> {# Changé col-md-4 à col-md-6 #}
                                         <div class="form-group mb-3">
                                             <label for="{{ form.cout.id_for_label }}" class="form-label">{{ form.cout.label }}</label>
-                                            {{ form.cout|add_class:"form-control input-sm-width" }} {# Ajout de la classe input-sm-width #}
+                                            {{ form.cout|add_class:"form-control input-sm-width" }}
                                             {% for error in form.cout.errors %}
                                                 <div class="invalid-feedback d-block">{{ error }}</div>
                                             {% endfor %}
@@ -247,7 +248,7 @@
                                     <div class="col-md-4 col-12">
                                         <div class="form-group mb-3">
                                             <label for="{{ form.frais_participation.id_for_label }}" class="form-label">{{ form.frais_participation.label }}</label>
-                                            {{ form.frais_participation|add_class:"form-control input-sm-width" }} {# Ajout de la classe input-sm-width #}
+                                            {{ form.frais_participation|add_class:"form-control input-sm-width" }}
                                             {% for error in form.frais_participation.errors %}
                                                 <div class="invalid-feedback d-block">{{ error }}</div>
                                             {% endfor %}
@@ -256,7 +257,7 @@
                                     <div class="col-md-4 col-12">
                                         <div class="form-group mb-3">
                                             <label for="{{ form.frais_jury.id_for_label }}" class="form-label">{{ form.frais_jury.label }}</label>
-                                            {{ form.frais_jury|add_class:"form-control input-sm-width" }} {# Ajout de la classe input-sm-width #}
+                                            {{ form.frais_jury|add_class:"form-control input-sm-width" }}
                                             {% for error in form.frais_jury.errors %}
                                                 <div class="invalid-feedback d-block">{{ error }}</div>
                                             {% endfor %}
@@ -265,7 +266,7 @@
                                     <div class="col-md-4 col-12">
                                         <div class="form-group mb-3">
                                             <label for="{{ form.frais_materiels.id_for_label }}" class="form-label">{{ form.frais_materiels.label }}</label>
-                                            {{ form.frais_materiels|add_class:"form-control input-sm-width" }} {# Ajout de la classe input-sm-width #}
+                                            {{ form.frais_materiels|add_class:"form-control input-sm-width" }}
                                             {% for error in form.frais_materiels.errors %}
                                                 <div class="invalid-feedback d-block">{{ error }}</div>
                                             {% endfor %}
@@ -301,7 +302,7 @@
                                             <div class="col-md-4 col-12">
                                                 <div class="form-group">
                                                     <label for="{{ module_form.duree_heures.id_for_label }}" class="form-label">{{ module_form.duree_heures.label }}</label>
-                                                    {{ module_form.duree_heures|add_class:"form-control input-sm-width" }} {# Ajout de la classe input-sm-width #}
+                                                    {{ module_form.duree_heures|add_class:"form-control input-sm-width" }}
                                                     {% for error in module_form.duree_heures.errors %}
                                                         <div class="invalid-feedback d-block">{{ error }}</div>
                                                     {% endfor %}
@@ -310,13 +311,13 @@
                                             <div class="col-md-4 col-12">
                                                 <div class="form-group">
                                                     <label for="{{ module_form.ordre.id_for_label }}" class="form-label">{{ module_form.ordre.label }}</label>
-                                                    {{ module_form.ordre|add_class:"form-control input-sm-width" }} {# Ajout de la classe input-sm-width #}
+                                                    {{ module_form.ordre|add_class:"form-control input-sm-width" }}
                                                     {% for error in module_form.ordre.errors %}
                                                         <div class="invalid-feedback d-block">{{ error }}</div>
                                                     {% endfor %}
                                                 </div>
                                             </div>
-                                            <div class="col-md-6 col-12"> {# Changé col-12 à col-md-6 #}
+                                            <div class="col-md-6 col-12">
                                                 <div class="form-group">
                                                     <label for="{{ module_form.description.id_for_label }}" class="form-label">{{ module_form.description.label }}</label>
                                                     {{ module_form.description|add_class:"form-control" }}
@@ -325,7 +326,7 @@
                                                     {% endfor %}
                                                 </div>
                                             </div>
-                                            <div class="col-md-6 col-12"> {# Changé col-12 à col-md-6 #}
+                                            <div class="col-md-6 col-12">
                                                 <div class="form-group">
                                                     <label for="{{ module_form.formateurs.id_for_label }}" class="form-label">{{ module_form.formateurs.label }}</label>
                                                     {{ module_form.formateurs }}

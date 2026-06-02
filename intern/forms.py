@@ -18,7 +18,7 @@ class StagiaireForm(forms.ModelForm):
         queryset=Entreprise.objects.all().order_by('nom'),
         label="Entreprise",
         required=False,
-        widget=Select2Widget(attrs={'data-width': '100%', 'class': 'form-select'})
+        widget=Select2Widget(attrs={'data-width': '100%', 'class': 'form-select', 'data-tags': 'true', 'data-minimum-input-length': '0'}) # Ajout de data-tags
     )
     date_naissance = forms.DateField(
         widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
@@ -57,7 +57,6 @@ class StagiaireForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Assurez-vous que tous les champs ont la classe form-control ou form-select
         for field_name, field in self.fields.items():
             if not isinstance(field.widget, Select2Widget):
                 if isinstance(field.widget, forms.Select):
@@ -66,3 +65,40 @@ class StagiaireForm(forms.ModelForm):
                     field.widget.attrs.update({'class': 'form-check-input'})
                 else:
                     field.widget.attrs.update({'class': 'form-control'})
+
+    def clean_entreprise(self):
+        entreprise_data = self.cleaned_data.get('entreprise')
+        # Si Select2 a créé une nouvelle option (qui n'est pas un ID numérique),
+        # sa valeur sera le texte tapé par l'utilisateur.
+        # Select2 renvoie la valeur sous forme de chaîne, même pour les IDs existants.
+        # Nous devons vérifier si la valeur est un ID numérique ou un nouveau nom.
+        
+        # Si entreprise_data est déjà une instance d'Entreprise (cas d'une sélection existante)
+        if isinstance(entreprise_data, Entreprise):
+            return entreprise_data
+        
+        # Si entreprise_data est None ou vide, et que le champ n'est pas requis, on retourne None
+        if not entreprise_data and not self.fields['entreprise'].required:
+            return None
+
+        # Si c'est une chaîne, cela peut être un nouveau nom ou un ID existant sous forme de chaîne
+        if isinstance(entreprise_data, str):
+            # Tente de convertir en int pour voir si c'est un ID existant
+            try:
+                entreprise_id = int(entreprise_data)
+                # Si c'est un ID, récupère l'entreprise existante
+                return Entreprise.objects.get(pk=entreprise_id)
+            except (ValueError, Entreprise.DoesNotExist):
+                # Si ce n'est pas un ID numérique ou si l'entreprise n'existe pas,
+                # c'est un nouveau nom d'entreprise à créer.
+                new_entreprise_name = entreprise_data.strip()
+                if new_entreprise_name:
+                    entreprise, created = Entreprise.objects.get_or_create(
+                        nom=new_entreprise_name,
+                        defaults={'active': True} # Définir d'autres valeurs par défaut si nécessaire
+                    )
+                    return entreprise
+                else:
+                    raise forms.ValidationError("Le nom de l'entreprise ne peut pas être vide.")
+        
+        return entreprise_data # Retourne la donnée nettoyée si c'est déjà une instance ou None
