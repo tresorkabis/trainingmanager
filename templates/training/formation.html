@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 {% block title %} Formations {% endblock title %}
+{% block page_header %}{% if object and object.id %}{{ object.nom }}{% else %}{{ titre|default:"Formations" }}{% endif %}{% endblock page_header %}
 
 {% block content %}
 <div class="page-heading">
