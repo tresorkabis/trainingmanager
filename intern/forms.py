@@ -6,7 +6,7 @@ class StagiaireForm(forms.ModelForm):
     categorie = forms.ModelChoiceField(
         queryset=Categorie.objects.all().order_by('titre'),
         label="Catégorie",
-        widget=Select2Widget(attrs={'data-width': '100%', 'class': 'form-select'})
+        widget=forms.Select(attrs={'class': 'form-select'})
     )
     filiere = forms.ModelChoiceField(
         queryset=Filiere.objects.all().order_by('nom'),
