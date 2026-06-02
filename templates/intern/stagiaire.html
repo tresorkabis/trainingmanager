@@ -816,8 +816,11 @@ document.addEventListener('DOMContentLoaded', function () {
             body: `stagiaire=${encodeURIComponent(stagiaireId)}&action=${encodeURIComponent(actionId)}`
         }).then(resp => {
             if (resp.ok) {
-                // Redirect back to stagiaire page
-                const stagiaireUrl = "{% url 'stagiaire' pk=object.pk %}";
+                // Redirect back to stagiaire page (only if object.pk is available)
+                var stagiaireUrl = null;
+                {% if object.pk %}
+                stagiaireUrl = "{% url 'stagiaire' pk=object.pk %}";
+                {% endif %}
                 if (stagiaireUrl) {
                     window.location.href = stagiaireUrl;
                 } else {
