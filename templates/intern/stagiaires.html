@@ -227,7 +227,7 @@
                             <span class="tm-stagiaire-stat__value">{{ stats.masculin }}</span>
                         </div>
                     </div>
-                    <div class="6 col-md-4"> {# New stat for Féminin #}
+                    <div class="col-6 col-md-4"> {# New stat for Féminin #}
                         <div class="tm-stagiaire-stat">
                             <span class="tm-stagiaire-stat__label">Féminin</span>
                             <span class="tm-stagiaire-stat__value">{{ stats.feminin }}</span>
@@ -302,7 +302,7 @@
                             </tr>
                         </thead>
                         <tbody id="stagiaireTableBody">
-                            {% if stagiaire_list %}
+                            {% if object_list %}
                             {% for item in object_list %}
                             <tr>
                                 <td>{{ forloop.counter }}</td>
