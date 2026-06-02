@@ -34,8 +34,21 @@ class PaiementCreateView(CreateView):
     form_class = PaiementForm
     template_name = 'progress/paiement_form.html'
     
+    def get_initial(self):
+        initial = super().get_initial()
+        stagiaire_id = self.request.GET.get('stagiaire')
+        if stagiaire_id:
+            try:
+                initial['stagiaire'] = int(stagiaire_id)
+            except ValueError:
+                pass
+        return initial
+
     def get_success_url(self):
-        return reverse_lazy('paiements') # Rediriger vers la liste des paiements après création
+        # Après création, rediriger vers la fiche du stagiaire si possible
+        if hasattr(self, 'object') and self.object and self.object.stagiaire:
+            return reverse_lazy('stagiaire', kwargs={'pk': self.object.stagiaire.pk})
+        return reverse_lazy('paiements')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

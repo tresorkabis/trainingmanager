@@ -14,6 +14,7 @@ urlpatterns = [
     path("actions/<int:pk>/delete", ActionDeleteView.as_view(), name="action_delete"),
 
     path("detailactions",DetailActionListViews.as_view(),name="detailactions"),
+    path("detailactions/create", DetailActionCreateView.as_view(), name="detailaction_create"),
     path("detailactions/<int:pk>", DetailActionDetailView.as_view(), name="detailaction"),
     
     path("formateurs",FormateurListView.as_view(),name="formateurs"),

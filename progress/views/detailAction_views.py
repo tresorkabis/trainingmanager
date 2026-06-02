@@ -18,21 +18,33 @@ class DetailActionListViews(ListView):
 class DetailActionDetailView(DetailView):
     model = DetailAction
     template_name = "progress/detailaction.html"
-class detailActionCreateView(View):
-    def get(self, request):
-        detailaction = DetailAction.objects.all()
-        ctx = {
-            "detailaction":detailaction
-        }
-        return render(request, 'progress/detailaction.html', ctx)
-    
-    def post(self, request):
-        stagiaire= request.POST['statgiaire']
-        action = request.POST['action']    
-        detailaction= DetailAction(
-        stagiaire = stagiaire, 
-        action=action   
-        )
-        detailaction.save()
 
-        return HttpResponseRedirect("/progress/action")
+from django.utils.decorators import method_decorator
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import get_object_or_404
+from django.urls import reverse_lazy
+
+@method_decorator(login_required, name='dispatch')
+class DetailActionCreateView(View):
+    """Create a DetailAction (assign a stagiaire to an action).
+    Accepts POST with 'stagiaire' and 'action' (ids). If provided via GET, a simple form can be shown (not used here).
+    After creation, redirects to the stagiaire detail page.
+    """
+    def post(self, request):
+        stagiaire_id = request.POST.get('stagiaire') or request.GET.get('stagiaire')
+        action_id = request.POST.get('action') or request.GET.get('action')
+
+        if not stagiaire_id or not action_id:
+            # Bad request; redirect back
+            return HttpResponseRedirect(request.META.get('HTTP_REFERER', reverse_lazy('detailactions')))
+
+        from intern.models import Stagiaire
+        from progress.models import Action
+
+        stagiaire = get_object_or_404(Stagiaire, pk=stagiaire_id)
+        action = get_object_or_404(Action, pk=action_id)
+
+        # Avoid duplicate inscriptions
+        DetailAction.objects.get_or_create(stagiaire=stagiaire, action=action, defaults={'statut': 'Inscrit'})
+
+        return HttpResponseRedirect(reverse_lazy('stagiaire', kwargs={'pk': stagiaire.pk}))

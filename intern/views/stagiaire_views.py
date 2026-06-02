@@ -10,7 +10,7 @@ from django.views import View
 from django.views.generic import DetailView, ListView, UpdateView, DeleteView # Import UpdateView and DeleteView
 
 from intern.models import AutreFormation, Categorie, Entreprise, EtudeStagiaire, Stagiaire
-from progress.models import DetailAction, Paiement # Import Paiement
+from progress.models import DetailAction, Paiement, Action # Import Paiement and Action
 from training.models import Filiere
 
 
@@ -132,6 +132,7 @@ class StagiaireCreateUpdateView(StagiairePermissionMixin, View): # Nouvelle vue 
             "categories": Categorie.objects.all(),
             "entreprises": Entreprise.objects.all(),
             "filieres": self.get_allowed_filieres(),
+            "actions": Action.objects.filter(active=True).select_related('metier'),
             "titre": "Modifier un stagiaire" if pk else "Saisie d'un stagiaire",
             "mode": "edit" if pk else "new",
             "object": stagiaire,

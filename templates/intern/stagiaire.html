@@ -371,6 +371,23 @@
                                 {% else %}
                                 <p class="text-muted mb-0">Ce stagiaire n'est inscrit à aucune action de formation interne.</p>
                                 {% endif %}
+
+                                {# Formulaire d'inscription à une action - disponible en mode création/édition ou en visualisation #}
+                                <div class="mt-3">
+                                    <form method="post" action="{% url 'detailaction_create' %}">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="stagiaire" value="{{ object.pk }}">
+                                        <div class="input-group">
+                                            <select name="action" class="form-select">
+                                                <option value="">-- Choisir une action --</option>
+                                                {% for act in actions %}
+                                                <option value="{{ act.id }}">{{ act.description }} ({{ act.metier.nom }}) - {{ act.date_debut|date:"d/m/Y" }}</option>
+                                                {% endfor %}
+                                            </select>
+                                            <button class="btn btn-primary" type="submit">Inscrire à l'action</button>
+                                        </div>
+                                    </form>
+                                </div>
                             </div>
                         </div>
                     </div>
