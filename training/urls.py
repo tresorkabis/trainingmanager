@@ -25,4 +25,11 @@ urlpatterns = [
     path("metiers/<int:pk>", MetierDetailView.as_view(), name="metier"),
     path("metiers/<int:pk>/update", MetierCreateUpdateView.as_view(), name="metier_update"), # Utilise la vue unifiée
     path("metiers/<int:pk>/delete", MetierDeleteView.as_view(), name="metier_delete"),
+
+    # Aliases using 'formation' names for templates and external links (backwards compatible)
+    path("metiers", MetierListView.as_view(), name="formations"),
+    path("metiers/create", MetierCreateUpdateView.as_view(), name="formation_create"),
+    path("metiers/<int:pk>", MetierDetailView.as_view(), name="formation"),
+    path("metiers/<int:pk>/update", MetierCreateUpdateView.as_view(), name="formation_update"),
+    path("metiers/<int:pk>/delete", MetierDeleteView.as_view(), name="formation_delete"),
 ]
