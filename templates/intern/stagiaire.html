@@ -406,18 +406,23 @@
                             </div>
                             <div class="card-body">
                                 <div class="tm-detail-grid">
-                                    {% if mode %}
-                                    <div class="tm-detail-item"><label class="tm-detail-item__label">Entreprise</label>
-                                        <select class="form-select" name="entreprise">
-                                            <option value="">-- Choisir --</option>
-                                            {% for ent in entreprises %}
-                                            <option value="{{ ent.id }}" {% if submitted.entreprise|default:object.entreprise.id == ent.id %}selected{% endif %}>{{ ent.nom }}</option>
-                                            {% endfor %}
-                                        </select>
+                                    {% if form %}
+                                    <div class="tm-detail-item">
+                                        <label for="id_entreprise" class="tm-detail-item__label">Entreprise</label>
+                                        {{ form.entreprise }}
                                     </div>
-                                    <div class="tm-detail-item"><label class="tm-detail-item__label">Fonction</label><input class="form-control" name="fonction" value="{{ submitted.fonction|default:object.fonction }}"></div>
-                                    <div class="tm-detail-item"><label class="tm-detail-item__label">Ancienneté dans l'emploi</label><input type="number" min="0" class="form-control" name="anciennete_emploi" value="{{ submitted.anciennete_emploi|default:object.anciennete_emploi }}"></div>
-                                    <div class="tm-detail-item"><label class="tm-detail-item__label">Ancienneté dans l'entreprise</label><input type="number" min="0" class="form-control" name="anciennete_entreprise" value="{{ submitted.anciennete_entreprise|default:object.anciennete_entreprise }}"></div>
+                                    <div class="tm-detail-item">
+                                        <label for="id_fonction" class="tm-detail-item__label">Fonction</label>
+                                        {{ form.fonction }}
+                                    </div>
+                                    <div class="tm-detail-item">
+                                        <label for="id_anciennete_emploi" class="tm-detail-item__label">Ancienneté dans l'emploi</label>
+                                        {{ form.anciennete_emploi }}
+                                    </div>
+                                    <div class="tm-detail-item">
+                                        <label for="id_anciennete_entreprise" class="tm-detail-item__label">Ancienneté dans l'entreprise</label>
+                                        {{ form.anciennete_entreprise }}
+                                    </div>
                                     {% else %}
                                     <div class="tm-detail-item"><span class="tm-detail-item__label">Entreprise</span><div class="tm-detail-item__value">{{ object.entreprise.nom|default:"Non renseignée" }}</div></div>
                                     <div class="tm-detail-item"><span class="tm-detail-item__label">Fonction</span><div class="tm-detail-item__value">{{ object.fonction|default:"Non renseignée" }}</div></div>
@@ -622,6 +627,7 @@
 </div>
 {% endblock content %}
 {% block script %}
+{% if form %}{{ form.media }}{% endif %}
 {% if mode %}
 <script>
     const studiesContainer = document.getElementById('studies-container');
