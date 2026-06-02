@@ -317,36 +317,23 @@
                             </div>
                             <div class="card-body">
                                 <div class="tm-detail-grid">
-                                    {% if mode %}
-                                    <div class="tm-detail-item"><label class="tm-detail-item__label">Nom</label><input class="form-control" name="nom" value="{{ submitted.nom|default:object.nom }}"></div>
-                                    <div class="tm-detail-item"><label class="tm-detail-item__label">Postnom</label><input class="form-control" name="postnom" value="{{ submitted.postnom|default:object.postnom }}"></div>
-                                    <div class="tm-detail-item"><label class="tm-detail-item__label">Prénom</label><input class="form-control" name="prenom" value="{{ submitted.prenom|default:object.prenom }}"></div>
-                                    <div class="tm-detail-item"><label class="tm-detail-item__label">Date de naissance</label><input type="date" class="form-control" name="date_naissance" value="{{ submitted.date_naissance|default:object.date_naissance }}"></div>
-                                    <div class="tm-detail-item"><label class="tm-detail-item__label">Lieu de naissance</label><input class="form-control" name="lieu_naissance" value="{{ submitted.lieu_naissance|default:object.lieu_naissance }}"></div>
-                                    <div class="tm-detail-item"><label class="tm-detail-item__label">Nationalité</label><input class="form-control" name="nationalite" value="{{ submitted.nationalite|default:object.nationalite }}"></div>
-                                    <div class="tm-detail-item"><label class="tm-detail-item__label">Niveau d'étude</label><input class="form-control" name="niveau_etude" value="{{ submitted.niveau_etude|default:object.niveau_etude }}"></div>
-                                    <div class="tm-detail-item"><label class="tm-detail-item__label">Type de pièce</label>
-                                        <select class="form-select" name="type_piece">
-                                            <option value="">-- Choisir --</option>
-                                            <option value="CE" {% if submitted.type_piece|default:object.type_piece == 'CE' %}selected{% endif %}>Carte d'électeur</option>
-                                            <option value="PS" {% if submitted.type_piece|default:object.type_piece == 'PS' %}selected{% endif %}>Passeport</option>
-                                            <option value="PC" {% if submitted.type_piece|default:object.type_piece == 'PC' %}selected{% endif %}>Permis de conduire</option>
-                                        </select>
-                                    </div>
-                                    <div class="tm-detail-item"><label class="tm-detail-item__label">Numéro de pièce</label><input class="form-control" name="numero_piece" value="{{ submitted.numero_piece|default:object.numero_piece }}"></div>
-                                    <div class="tm-detail-item"><label class="tm-detail-item__label">Nom du père</label><input class="form-control" name="nom_pere" value="{{ submitted.nom_pere|default:object.nom_pere }}"></div>
-                                    <div class="tm-detail-item"><label class="tm-detail-item__label">Nom de la mère</label><input class="form-control" name="nom_mere" value="{{ submitted.nom_mere|default:object.nom_mere }}"></div>
-                                    <div class="tm-detail-item"><label class="tm-detail-item__label">Adresse</label><textarea class="form-control" name="adresse">{{ submitted.adresse|default:object.adresse }}</textarea></div>
-                                    <div class="tm-detail-item"><label class="tm-detail-item__label">Sexe</label>
-                                        <select class="form-select" name="sexe">
-                                            <option value="M" {% if submitted.sexe|default:object.sexe == 'M' %}selected{% endif %}>Masculin</option>
-                                            <option value="F" {% if submitted.sexe|default:object.sexe == 'F' %}selected{% endif %}>Féminin</option>
-                                            <option value="ND" {% if submitted.sexe|default:object.sexe == 'ND' %}selected{% endif %}>Non défini</option>
-                                        </select>
-                                    </div>
-                                    <div class="tm-detail-item"><label class="tm-detail-item__label">Téléphone</label><input class="form-control" name="telephone" value="{{ submitted.telephone|default:object.telephone }}"></div>
-                                    <div class="tm-detail-item"><label class="tm-detail-item__label">Email</label><input type="email" class="form-control" name="email" value="{{ submitted.email|default:object.email }}"></div>
-                                    <div class="tm-detail-item"><label class="tm-detail-item__label">Photo</label><input id="photo" type="file" class="form-control" name="photo"></div>
+                                    {% if form %}
+                                    <div class="tm-detail-item"><label class="tm-detail-item__label" for="id_nom">Nom</label>{{ form.nom }}</div>
+                                    <div class="tm-detail-item"><label class="tm-detail-item__label" for="id_postnom">Postnom</label>{{ form.postnom }}</div>
+                                    <div class="tm-detail-item"><label class="tm-detail-item__label" for="id_prenom">Prénom</label>{{ form.prenom }}</div>
+                                    <div class="tm-detail-item"><label class="tm-detail-item__label" for="id_date_naissance">Date de naissance</label>{{ form.date_naissance }}</div>
+                                    <div class="tm-detail-item"><label class="tm-detail-item__label" for="id_lieu_naissance">Lieu de naissance</label>{{ form.lieu_naissance }}</div>
+                                    <div class="tm-detail-item"><label class="tm-detail-item__label" for="id_nationalite">Nationalité</label>{{ form.nationalite }}</div>
+                                    <div class="tm-detail-item"><label class="tm-detail-item__label" for="id_niveau_etude">Niveau d'étude</label>{{ form.niveau_etude }}</div>
+                                    <div class="tm-detail-item"><label class="tm-detail-item__label" for="id_type_piece">Type de pièce</label>{{ form.type_piece }}</div>
+                                    <div class="tm-detail-item"><label class="tm-detail-item__label" for="id_numero_piece">Numéro de pièce</label>{{ form.numero_piece }}</div>
+                                    <div class="tm-detail-item"><label class="tm-detail-item__label" for="id_nom_pere">Nom du père</label>{{ form.nom_pere }}</div>
+                                    <div class="tm-detail-item"><label class="tm-detail-item__label" for="id_nom_mere">Nom de la mère</label>{{ form.nom_mere }}</div>
+                                    <div class="tm-detail-item"><label class="tm-detail-item__label" for="id_adresse">Adresse</label>{{ form.adresse }}</div>
+                                    <div class="tm-detail-item"><label class="tm-detail-item__label" for="id_sexe">Sexe</label>{{ form.sexe }}</div>
+                                    <div class="tm-detail-item"><label class="tm-detail-item__label" for="id_telephone">Téléphone</label>{{ form.telephone }}</div>
+                                    <div class="tm-detail-item"><label class="tm-detail-item__label" for="id_email">Email</label>{{ form.email }}</div>
+                                    <div class="tm-detail-item"><label class="tm-detail-item__label" for="id_photo">Photo</label>{{ form.photo }}</div>
                                     {% else %}
                                     <div class="tm-detail-item"><span class="tm-detail-item__label">Nom</span><div class="tm-detail-item__value">{{ object.nom }}</div></div>
                                     <div class="tm-detail-item"><span class="tm-detail-item__label">Postnom</span><div class="tm-detail-item__value">{{ object.postnom }}</div></div>
@@ -372,22 +359,14 @@
                             </div>
                             <div class="card-body">
                                 <div class="tm-detail-grid mb-4">
-                                    {% if mode %}
-                                    <div class="tm-detail-item"><label class="tm-detail-item__label">Catégorie</label>
-                                        <select id="categorie" name="categorie" class="form-select">
-                                            <option value="">-- Choisir --</option>
-                                            {% for cat in categories %}
-                                            <option value="{{ cat.id }}" data-category-name="{{ cat.titre }}" {% if submitted.categorie|default:object.categorie.id == cat.id %}selected{% endif %}>{{ cat.titre }}</option>
-                                            {% endfor %}
-                                        </select>
+                                    {% if form %}
+                                    <div class="tm-detail-item">
+                                        <label class="tm-detail-item__label" for="categorie">Catégorie</label>
+                                        {{ form.categorie.as_widget(attrs={'id':'categorie'}) }}
                                     </div>
-                                    <div class="tm-detail-item"><label class="tm-detail-item__label">Filière</label>
-                                        <select id="filiere" name="filiere" class="form-select">
-                                            <option value="">-- Choisir --</option>
-                                            {% for f in filieres %}
-                                            <option value="{{ f.id }}" {% if submitted.filiere|default:object.filiere.id == f.id %}selected{% endif %}>{{ f.nom }}</option>
-                                            {% endfor %}
-                                        </select>
+                                    <div class="tm-detail-item">
+                                        <label class="tm-detail-item__label" for="filiere">Filière</label>
+                                        {{ form.filiere.as_widget(attrs={'id':'filiere'}) }}
                                     </div>
                                     {% else %}
                                     <div class="tm-detail-item"><span class="tm-detail-item__label">Catégorie</span><div class="tm-detail-item__value">{{ object.categorie }}</div></div>
@@ -766,7 +745,7 @@
             return;
         }
         const selectedOption = categorieSelect.options[categorieSelect.selectedIndex];
-        const categoryName = selectedOption.getAttribute('data-category-name');
+        const categoryName = selectedOption ? (selectedOption.getAttribute('data-category-name') || selectedOption.textContent.trim()) : null;
         const isDansEmploi = (categoryName === categoryDansEmploiName);
 
         if (isDansEmploi) {
