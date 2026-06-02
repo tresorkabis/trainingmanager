@@ -1,8 +1,8 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Détail Métier - {{ object.nom }}{% endblock title %}
-{% block page_header %}Détail du Métier - {{ object.nom }}{% endblock page_header %}
+{% block title %}Détail Métier - {% if object %}{{ object.nom }}{% else %}Nouveau{% endif %}{% endblock title %}
+{% block page_header %}Détail du Métier - {% if object %}{{ object.nom }}{% else %}Nouveau{% endif %}{% endblock page_header %}
 
 {% block style %}
 <style>
@@ -99,12 +99,13 @@
                 <div class="tm-section-titlebar"> {# Added tm-section-titlebar #}
                     <span class="tm-section-titlebar__icon"><i class="bi bi-journal-text"></i></span> {# Icon for Metier #}
                     <div class="tm-section-titlebar__text">
-                        <h3>{{ object.nom }}</h3>
-                        <p>Fiche de consultation complète pour le métier, ses modules et ses coûts.</p>
+                        <h3>{% if object %}{{ object.nom }}{% else %}Nouveau Métier{% endif %}</h3>
+                        <p>{% if object %}Fiche de consultation complète pour le métier, ses modules et ses coûts.{% else %}Formulaire de création d'un nouveau métier.{% endif %}</p>
                     </div>
                 </div>
             </div>
             <div class="col-12 col-lg-4 d-flex justify-content-lg-end"> {# Adjusted column size #}
+                {% if object %} {# Afficher les pills seulement si l'objet existe (mode vue/édition) #}
                 <div class="tm-pill-list"> {# Moved pills here for context #}
                     {% if object.filiere %}
                     <span class="tm-pill"><i class="bi bi-signpost"></i>{{ object.filiere.nom }}</span>
@@ -113,11 +114,13 @@
                     <span class="tm-pill"><i class="bi bi-building"></i>{{ object.filiere.service.nom }}</span>
                     {% endif %}
                 </div>
+                {% endif %}
             </div>
         </div>
     </section>
 
     {# New section for KPI cards (formerly in hero) #}
+    {% if object %} {# Afficher les KPI seulement si l'objet existe (mode vue/édition) #}
     <section class="section px-3 px-md-4">
         <div class="row g-3 mb-4"> {# Added mb-4 for spacing #}
             <div class="col-12 col-md-6 col-lg-3">
@@ -146,25 +149,109 @@
             </div>
         </div>
     </section>
+    {% endif %}
 
     <section class="section px-3 px-md-4"> {# Added px-3 px-md-4 for horizontal padding #}
         <div class="row g-3"> {# Added g-3 for consistent gutter spacing #}
-            <div class="col-12 col-lg-6">
+            <div class="col-12 {% if object %}col-lg-6{% else %}col-lg-12{% endif %}"> {# Ajusté la taille de colonne #}
                 <div class="card tm-detail-card mb-4">
                     <div class="card-header">
                         <h4 class="card-title mb-0">Informations générales</h4>
                     </div>
                     <div class="card-body">
-                        <div class="tm-detail-grid">
-                            <div class="tm-detail-item"><span class="tm-detail-item__label">Nom du métier</span><div class="tm-detail-item__value">{{ object.nom }}</div></div>
-                            <div class="tm-detail-item"><span class="tm-detail-item__label">Filière associée</span><div class="tm-detail-item__value">{{ object.filiere.nom|default:"Non renseignée" }}</div></div>
-                            <div class="tm-detail-item"><span class="tm-detail-item__label">Durée (mois)</span><div class="tm-detail-item__value">{{ object.duree }}</div></div>
-                            <div class="tm-detail-item"><span class="tm-detail-item__label">Durée (heures)</span><div class="tm-detail-item__value">{{ object.duree_heures }}</div></div>
-                            <div class="tm-detail-item"><span class="tm-detail-item__label">Statut</span><div class="tm-detail-item__value">{% if object.active %}<span class="badge bg-success">Actif</span>{% else %}<span class="badge bg-danger">Inactif</span>{% endif %}</div></div>
-                        </div>
+                        {% if mode == 'new' or mode == 'edit' %} {# Mode création ou édition #}
+                            <form method="post">
+                                {% csrf_token %}
+                                <div class="row">
+                                    <div class="col-md-6 col-12">
+                                        <div class="form-group mb-3">
+                                            <label for="{{ form.nom.id_for_label }}" class="form-label">{{ form.nom.label }}</label>
+                                            {{ form.nom|add_class:"form-control" }}
+                                            {% for error in form.nom.errors %}
+                                                <div class="invalid-feedback d-block">{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 col-12">
+                                        <div class="form-group mb-3">
+                                            <label for="{{ form.duree.id_for_label }}" class="form-label">{{ form.duree.label }}</label>
+                                            {{ form.duree|add_class:"form-control" }}
+                                            {% for error in form.duree.errors %}
+                                                <div class="invalid-feedback d-block">{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 col-12">
+                                        <div class="form-group mb-3">
+                                            <label for="{{ form.filiere.id_for_label }}" class="form-label">{{ form.filiere.label }}</label>
+                                            {{ form.filiere }} {# Select2Widget gère ses classes #}
+                                            {% for error in form.filiere.errors %}
+                                                <div class="invalid-feedback d-block">{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 col-12">
+                                        <div class="form-group mb-3">
+                                            <label for="{{ form.cout.id_for_label }}" class="form-label">{{ form.cout.label }}</label>
+                                            {{ form.cout|add_class:"form-control" }}
+                                            {% for error in form.cout.errors %}
+                                                <div class="invalid-feedback d-block">{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 col-12">
+                                        <div class="form-group mb-3">
+                                            <label for="{{ form.frais_participation.id_for_label }}" class="form-label">{{ form.frais_participation.label }}</label>
+                                            {{ form.frais_participation|add_class:"form-control" }}
+                                            {% for error in form.frais_participation.errors %}
+                                                <div class="invalid-feedback d-block">{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 col-12">
+                                        <div class="form-group mb-3">
+                                            <label for="{{ form.frais_jury.id_for_label }}" class="form-label">{{ form.frais_jury.label }}</label>
+                                            {{ form.frais_jury|add_class:"form-control" }}
+                                            {% for error in form.frais_jury.errors %}
+                                                <div class="invalid-feedback d-block">{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 col-12">
+                                        <div class="form-group mb-3">
+                                            <label for="{{ form.frais_materiels.id_for_label }}" class="form-label">{{ form.frais_materiels.label }}</label>
+                                            {{ form.frais_materiels|add_class:"form-control" }}
+                                            {% for error in form.frais_materiels.errors %}
+                                                <div class="invalid-feedback d-block">{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                                {% if form.non_field_errors %}
+                                    <div class="alert alert-danger">
+                                        {% for error in form.non_field_errors %}
+                                            <p>{{ error }}</p>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                <div class="d-flex justify-content-end gap-2 mt-4">
+                                    <a href="{% url 'metiers' %}" class="btn btn-light-secondary">Annuler</a>
+                                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                                </div>
+                            </form>
+                        {% else %} {# Mode vue #}
+                            <div class="tm-detail-grid">
+                                <div class="tm-detail-item"><span class="tm-detail-item__label">Nom du métier</span><div class="tm-detail-item__value">{{ object.nom }}</div></div>
+                                <div class="tm-detail-item"><span class="tm-detail-item__label">Filière associée</span><div class="tm-detail-item__value">{{ object.filiere.nom|default:"Non renseignée" }}</div></div>
+                                <div class="tm-detail-item"><span class="tm-detail-item__label">Durée (mois)</span><div class="tm-detail-item__value">{{ object.duree }}</div></div>
+                                <div class="tm-detail-item"><span class="tm-detail-item__label">Durée (heures)</span><div class="tm-detail-item__value">{{ object.duree_heures }}</div></div>
+                                <div class="tm-detail-item"><span class="tm-detail-item__label">Statut</span><div class="tm-detail-item__value">{% if object.active %}<span class="badge bg-success">Actif</span>{% else %}<span class="badge bg-danger">Inactif</span>{% endif %}</div></div>
+                            </div>
+                        {% endif %}
                     </div>
                 </div>
             </div>
+            {% if object %} {# Afficher les modules seulement si l'objet existe (mode vue/édition) #}
             <div class="col-12 col-lg-6">
                 <div class="card tm-detail-card mb-4">
                     <div class="card-header">
@@ -180,7 +267,7 @@
                                         <th>Ordre</th>
                                         <th>Titre</th>
                                         <th>Durée (h)</th>
-                                        <th>Formateur</th>
+                                        <th>Formateur(s)</th> {# Changé Formateur à Formateur(s) #}
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -189,7 +276,13 @@
                                         <td>{{ module.ordre }}</td>
                                         <td>{{ module.titre }}</td>
                                         <td>{{ module.duree_heures }}</td>
-                                        <td>{{ module.formateur|default:"Non assigné" }}</td>
+                                        <td>
+                                            {% for formateur in module.formateurs.all %} {# Itérer sur les formateurs #}
+                                                {{ formateur.get_full_name }}{% if not forloop.last %}, {% endif %}
+                                            {% empty %}
+                                                Non assigné
+                                            {% endfor %}
+                                        </td>
                                     </tr>
                                     {% endfor %}
                                 </tbody>
@@ -201,7 +294,9 @@
                     </div>
                 </div>
             </div>
+            {% endif %}
         </div>
+        {% if object %} {# Boutons d'action seulement en mode vue/édition #}
         <div class="d-flex justify-content-end gap-2 mt-4"> {# Moved action buttons here #}
             <a href="{% url 'metiers' %}" class="btn btn-light-secondary">
                 <i class="bi bi-arrow-left me-2"></i>Retour à la liste
@@ -213,6 +308,31 @@
                 <i class="bi bi-trash me-2"></i>Supprimer
             </a>
         </div>
+        {% endif %}
     </section>
 </div>
 {% endblock content %}
+
+{% block script %}
+    {{ form.media }} {# Charge les fichiers JS et CSS de Select2 #}
+    <script>
+        $(document).ready(function() {
+            // Initialisation manuelle de Select2 pour le champ filiere
+            $('#id_filiere').select2({
+                placeholder: "Sélectionnez une filière",
+                allowClear: true,
+                width: '100%'
+            });
+            // Initialisation manuelle de Select2 pour les champs formateurs dans les modules
+            // Ceci est un exemple, la logique pour les formsets sera plus complexe
+            // et devra cibler dynamiquement les éléments Select2 générés par le formset.
+            // Pour l'instant, cela s'applique si vous avez un seul champ formateurs
+            // ou si vous adaptez le sélecteur.
+            $('select[name$="-formateurs"]').select2({
+                placeholder: "Sélectionnez un ou plusieurs formateurs",
+                allowClear: true,
+                width: '100%'
+            });
+        });
+    </script>
+{% endblock script %}

@@ -1,17 +1,12 @@
 from django.urls import path
-
-from training.views.metier_views import MetierCreateView, MetierListView, MetierDetailView, MetierUpdateView, MetierDeleteView, ModuleFormateursUpdateView # Importation des vues Metier
+from training.views.home_views import HomeView
 from training.views.filiere_views import FiliereListView, FiliereDetailView, FiliereCreateUpdateView, FiliereDeleteView
 from training.views.service_views import ServiceListView, ServiceDetailView, ServiceCreateUpdateView, ServiceDeleteView
+from training.views.metier_views import MetierListView, MetierDetailView, MetierCreateUpdateView, MetierDeleteView # Import MetierCreateUpdateView
 
 
 urlpatterns = [
-    path("metiers/", MetierListView.as_view(), name="metiers"),
-    path("metiers/create", MetierCreateView.as_view(), name="metier_create"),
-    path("metiers/<int:pk>", MetierDetailView.as_view(), name="metier"),
-    path("metiers/<int:pk>/update", MetierUpdateView.as_view(), name="metier_update"),
-    path("metiers/<int:pk>/delete", MetierDeleteView.as_view(), name="metier_delete"),
-    path("modules/<int:pk>/update-formateurs/", ModuleFormateursUpdateView.as_view(), name="update_module_formateurs"),
+    path("", HomeView.as_view(), name="home"),
 
     path("filieres", FiliereListView.as_view(), name="filieres"),
     path("filieres/create", FiliereCreateUpdateView.as_view(), name="filiere_create"),
@@ -24,4 +19,10 @@ urlpatterns = [
     path("services/<int:pk>", ServiceDetailView.as_view(), name="service"),
     path("services/<int:pk>/update", ServiceCreateUpdateView.as_view(), name="service_update"),
     path("services/<int:pk>/delete", ServiceDeleteView.as_view(), name="service_delete"),
+
+    path("metiers", MetierListView.as_view(), name="metiers"),
+    path("metiers/create", MetierCreateUpdateView.as_view(), name="metier_create"), # Utilise la vue unifiée
+    path("metiers/<int:pk>", MetierDetailView.as_view(), name="metier"),
+    path("metiers/<int:pk>/update", MetierCreateUpdateView.as_view(), name="metier_update"), # Utilise la vue unifiée
+    path("metiers/<int:pk>/delete", MetierDeleteView.as_view(), name="metier_delete"),
 ]

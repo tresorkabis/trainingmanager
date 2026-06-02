@@ -97,6 +97,7 @@
         border-radius: 0.5rem;
         padding: 1rem;
         margin-bottom: 1rem;
+        position: relative; /* Pour positionner le bouton de suppression */
     }
 
     .module-formset-row .form-group {
@@ -118,7 +119,26 @@
         cursor: pointer;
         color: #dc3545;
         font-size: 1.2rem;
-        margin-top: 2rem; /* Align with fields */
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+        background: none;
+        border: none;
+        padding: 0.25rem;
+        line-height: 1;
+        opacity: 0.7;
+        transition: opacity 0.2s ease;
+    }
+    .delete-row-button:hover {
+        opacity: 1;
+    }
+
+    /* Nouveaux styles pour réduire la largeur des inputs spécifiques */
+    .form-control.input-sm-width {
+        max-width: 150px; /* Largeur réduite pour les petits inputs */
+    }
+    .form-control.input-md-width {
+        max-width: 250px; /* Largeur moyenne pour certains inputs */
     }
 </style>
 {% endblock style %}
@@ -144,177 +164,280 @@
         </div>
     </section>
 
-    <section class="section">
-        <div class="card tm-detail-card">
-            <div class="card-header">
-                <h4 class="card-title">Informations du métier</h4>
+    {# New section for KPI cards (formerly in hero) #}
+    {% if object %} {# Afficher les KPI seulement si l'objet existe (mode vue/édition) #}
+    <section class="section px-3 px-md-4">
+        <div class="row g-3 mb-4"> {# Added mb-4 for spacing #}
+            <div class="col-12 col-md-6 col-lg-3">
+                <div class="tm-metier-kpi-card">
+                    <span class="tm-metier-kpi-card__label">Coût total</span>
+                    <span class="tm-metier-kpi-card__value">{{ object.cout }}</span>
+                </div>
             </div>
-            <div class="card-body">
-                <form method="post" id="metier_form">
-                    {% csrf_token %}
-                    <div class="row">
-                        <div class="col-md-6 col-12">
-                            <div class="form-group mb-3">
-                                <label for="{{ form.nom.id_for_label }}" class="form-label">{{ form.nom.label }}</label>
-                                {{ form.nom|add_class:"form-control" }}
-                                {% for error in form.nom.errors %}
-                                    <div class="invalid-feedback d-block">{{ error }}</div>
-                                {% endfor %}
-                            </div>
-                        </div>
-                        <div class="col-md-6 col-12">
-                            <div class="form-group mb-3">
-                                <label for="{{ form.duree.id_for_label }}" class="form-label">{{ form.duree.label }}</label>
-                                {{ form.duree|add_class:"form-control" }}
-                                {% for error in form.duree.errors %}
-                                    <div class="invalid-feedback d-block">{{ error }}</div>
-                                {% endfor %}
-                            </div>
-                        </div>
-                        <div class="col-md-6 col-12">
-                            <div class="form-group mb-3">
-                                <label for="{{ form.filiere.id_for_label }}" class="form-label">{{ form.filiere.label }}</label>
-                                {{ form.filiere }}
-                                {% for error in form.filiere.errors %}
-                                    <div class="invalid-feedback d-block">{{ error }}</div>
-                                {% endfor %}
-                            </div>
-                        </div>
-                        <div class="col-md-6 col-12">
-                            <div class="form-group mb-3">
-                                <label for="{{ form.cout.id_for_label }}" class="form-label">{{ form.cout.label }}</label>
-                                {{ form.cout|add_class:"form-control" }}
-                                {% for error in form.cout.errors %}
-                                    <div class="invalid-feedback d-block">{{ error }}</div>
-                                {% endfor %}
-                            </div>
-                        </div>
-                        <div class="col-md-4 col-12">
-                            <div class="form-group mb-3">
-                                <label for="{{ form.frais_participation.id_for_label }}" class="form-label">{{ form.frais_participation.label }}</label>
-                                {{ form.frais_participation|add_class:"form-control" }}
-                                {% for error in form.frais_participation.errors %}
-                                    <div class="invalid-feedback d-block">{{ error }}</div>
-                                {% endfor %}
-                            </div>
-                        </div>
-                        <div class="col-md-4 col-12">
-                            <div class="form-group mb-3">
-                                <label for="{{ form.frais_jury.id_for_label }}" class="form-label">{{ form.frais_jury.label }}</label>
-                                {{ form.frais_jury|add_class:"form-control" }}
-                                {% for error in form.frais_jury.errors %}
-                                    <div class="invalid-feedback d-block">{{ error }}</div>
-                                {% endfor %}
-                            </div>
-                        </div>
-                        <div class="col-md-4 col-12">
-                            <div class="form-group mb-3">
-                                <label for="{{ form.frais_materiels.id_for_label }}" class="form-label">{{ form.frais_materiels.label }}</label>
-                                {{ form.frais_materiels|add_class:"form-control" }}
-                                {% for error in form.frais_materiels.errors %}
-                                    <div class="invalid-feedback d-block">{{ error }}</div>
-                                {% endfor %}
-                            </div>
-                        </div>
-                    </div>
-                    {% if form.non_field_errors %}
-                        <div class="alert alert-danger">
-                            {% for error in form.non_field_errors %}
-                                <p>{{ error }}</p>
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-
-                    <h5 class="mt-4 mb-3">Modules du métier</h5>
-                    <div id="module-formset-container">
-                        {{ formset.management_form }}
-                        {% for module_form in formset %}
-                            <div class="module-formset-row row g-3 mb-3 {% if module_form.instance.pk %}existing-module{% else %}new-module{% endif %}">
-                                {% if module_form.instance.pk %}{{ module_form.id }}{% endif %}
-                                {% for hidden_field in module_form.hidden_fields %}
-                                    {{ hidden_field }}
-                                {% endfor %}
-                                <div class="col-md-4 col-12">
-                                    <div class="form-group">
-                                        <label for="{{ module_form.titre.id_for_label }}" class="form-label">{{ module_form.titre.label }}</label>
-                                        {{ module_form.titre|add_class:"form-control" }}
-                                        {% for error in module_form.titre.errors %}
-                                            <div class="invalid-feedback d-block">{{ error }}</div>
-                                        {% endfor %}
-                                    </div>
-                                </div>
-                                <div class="col-md-4 col-12">
-                                    <div class="form-group">
-                                        <label for="{{ module_form.duree_heures.id_for_label }}" class="form-label">{{ module_form.duree_heures.label }}</label>
-                                        {{ module_form.duree_heures|add_class:"form-control" }}
-                                        {% for error in module_form.duree_heures.errors %}
-                                            <div class="invalid-feedback d-block">{{ error }}</div>
-                                        {% endfor %}
-                                    </div>
-                                </div>
-                                <div class="col-md-4 col-12">
-                                    <div class="form-group">
-                                        <label for="{{ module_form.ordre.id_for_label }}" class="form-label">{{ module_form.ordre.label }}</label>
-                                        {{ module_form.ordre|add_class:"form-control" }}
-                                        {% for error in module_form.ordre.errors %}
-                                            <div class="invalid-feedback d-block">{{ error }}</div>
-                                        {% endfor %}
-                                    </div>
-                                </div>
-                                <div class="col-12">
-                                    <div class="form-group">
-                                        <label for="{{ module_form.description.id_for_label }}" class="form-label">{{ module_form.description.label }}</label>
-                                        {{ module_form.description|add_class:"form-control" }}
-                                        {% for error in module_form.description.errors %}
-                                            <div class="invalid-feedback d-block">{{ error }}</div>
-                                        {% endfor %}
-                                    </div>
-                                </div>
-                                <div class="col-12">
-                                    <div class="form-group">
-                                        <label for="{{ module_form.formateurs.id_for_label }}" class="form-label">{{ module_form.formateurs.label }}</label>
-                                        {{ module_form.formateurs }}
-                                        {% for error in module_form.formateurs.errors %}
-                                            <div class="invalid-feedback d-block">{{ error }}</div>
-                                        {% endfor %}
-                                    </div>
-                                </div>
-                                {% if module_form.DELETE %}
-                                <div class="col-12 d-flex justify-content-end">
-                                    <div class="form-check form-check-inline">
-                                        {{ module_form.DELETE }}
-                                        <label class="form-check-label" for="{{ module_form.DELETE.id_for_label }}">Supprimer ce module</label>
-                                    </div>
-                                </div>
-                                {% endif %}
-                            </div>
-                        {% endfor %}
-                    </div>
-                    <button type="button" id="add-module-button" class="btn btn-info btn-sm mt-3">
-                        <i class="bi bi-plus-circle me-2"></i>Ajouter un module
-                    </button>
-
-                    {% if formset.non_form_errors %}
-                        <div class="alert alert-danger mt-3">
-                            {% for error in formset.non_form_errors %}
-                                <p>{{ error }}</p>
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-
-                    <div class="d-flex justify-content-end gap-2 mt-4">
-                        <a href="{% url 'metiers' %}" class="btn btn-light-secondary">Annuler</a>
-                        <button type="submit" class="btn btn-primary">Enregistrer</button>
-                    </div>
-                </form>
+            <div class="col-12 col-md-6 col-lg-3">
+                <div class="tm-metier-kpi-card">
+                    <span class="tm-metier-kpi-card__label">Frais participation</span>
+                    <span class="tm-metier-kpi-card__value">{{ object.frais_participation }}</span>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-3">
+                <div class="tm-metier-kpi-card">
+                    <span class="tm-metier-kpi-card__label">Frais jury</span>
+                    <span class="tm-metier-kpi-card__value">{{ object.frais_jury }}</span>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-3">
+                <div class="tm-metier-kpi-card">
+                    <span class="tm-metier-kpi-card__label">Frais matériels</span>
+                    <span class="tm-metier-kpi-card__value">{{ object.frais_materiels }}</span>
+                </div>
             </div>
         </div>
+    </section>
+    {% endif %}
+
+    <section class="section px-3 px-md-4"> {# Added px-3 px-md-4 for horizontal padding #}
+        <div class="row g-3"> {# Added g-3 for consistent gutter spacing #}
+            <div class="col-12 {% if object %}col-lg-6{% else %}col-lg-12{% endif %}"> {# Ajusté la taille de colonne #}
+                <div class="card tm-detail-card mb-4">
+                    <div class="card-header">
+                        <h4 class="card-title mb-0">Informations générales</h4>
+                    </div>
+                    <div class="card-body">
+                        {% if mode == 'new' or mode == 'edit' %} {# Mode création ou édition #}
+                            <form method="post" id="metier_form">
+                                {% csrf_token %}
+                                <div class="row">
+                                    <div class="col-md-4 col-12"> {# Changé col-md-6 à col-md-4 #}
+                                        <div class="form-group mb-3">
+                                            <label for="{{ form.nom.id_for_label }}" class="form-label">{{ form.nom.label }}</label>
+                                            {{ form.nom|add_class:"form-control" }}
+                                            {% for error in form.nom.errors %}
+                                                <div class="invalid-feedback d-block">{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 col-12"> {# Changé col-md-6 à col-md-4 #}
+                                        <div class="form-group mb-3">
+                                            <label for="{{ form.duree.id_for_label }}" class="form-label">{{ form.duree.label }}</label>
+                                            {{ form.duree|add_class:"form-control input-sm-width" }} {# Ajout de la classe input-sm-width #}
+                                            {% for error in form.duree.errors %}
+                                                <div class="invalid-feedback d-block">{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 col-12"> {# Changé col-md-6 à col-md-4 #}
+                                        <div class="form-group mb-3">
+                                            <label for="{{ form.filiere.id_for_label }}" class="form-label">{{ form.filiere.label }}</label>
+                                            {{ form.filiere }} {# Select2Widget gère ses classes #}
+                                            {% for error in form.filiere.errors %}
+                                                <div class="invalid-feedback d-block">{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 col-12"> {# Changé col-md-6 à col-md-4 #}
+                                        <div class="form-group mb-3">
+                                            <label for="{{ form.cout.id_for_label }}" class="form-label">{{ form.cout.label }}</label>
+                                            {{ form.cout|add_class:"form-control input-sm-width" }} {# Ajout de la classe input-sm-width #}
+                                            {% for error in form.cout.errors %}
+                                                <div class="invalid-feedback d-block">{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 col-12">
+                                        <div class="form-group mb-3">
+                                            <label for="{{ form.frais_participation.id_for_label }}" class="form-label">{{ form.frais_participation.label }}</label>
+                                            {{ form.frais_participation|add_class:"form-control input-sm-width" }} {# Ajout de la classe input-sm-width #}
+                                            {% for error in form.frais_participation.errors %}
+                                                <div class="invalid-feedback d-block">{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 col-12">
+                                        <div class="form-group mb-3">
+                                            <label for="{{ form.frais_jury.id_for_label }}" class="form-label">{{ form.frais_jury.label }}</label>
+                                            {{ form.frais_jury|add_class:"form-control input-sm-width" }} {# Ajout de la classe input-sm-width #}
+                                            {% for error in form.frais_jury.errors %}
+                                                <div class="invalid-feedback d-block">{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 col-12">
+                                        <div class="form-group mb-3">
+                                            <label for="{{ form.frais_materiels.id_for_label }}" class="form-label">{{ form.frais_materiels.label }}</label>
+                                            {{ form.frais_materiels|add_class:"form-control input-sm-width" }} {# Ajout de la classe input-sm-width #}
+                                            {% for error in form.frais_materiels.errors %}
+                                                <div class="invalid-feedback d-block">{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                                {% if form.non_field_errors %}
+                                    <div class="alert alert-danger">
+                                        {% for error in form.non_field_errors %}
+                                            <p>{{ error }}</p>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+
+                                <h5 class="mt-4 mb-3">Modules du métier</h5>
+                                <div id="module-formset-container">
+                                    {{ formset.management_form }}
+                                    {% for module_form in formset %}
+                                        <div class="module-formset-row row g-3 mb-3 {% if module_form.instance.pk %}existing-module{% else %}new-module{% endif %}">
+                                            {% if module_form.instance.pk %}{{ module_form.id }}{% endif %}
+                                            {% for hidden_field in module_form.hidden_fields %}
+                                                {{ hidden_field }}
+                                            {% endfor %}
+                                            <div class="col-md-4 col-12">
+                                                <div class="form-group">
+                                                    <label for="{{ module_form.titre.id_for_label }}" class="form-label">{{ module_form.titre.label }}</label>
+                                                    {{ module_form.titre|add_class:"form-control" }}
+                                                    {% for error in module_form.titre.errors %}
+                                                        <div class="invalid-feedback d-block">{{ error }}</div>
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4 col-12">
+                                                <div class="form-group">
+                                                    <label for="{{ module_form.duree_heures.id_for_label }}" class="form-label">{{ module_form.duree_heures.label }}</label>
+                                                    {{ module_form.duree_heures|add_class:"form-control input-sm-width" }} {# Ajout de la classe input-sm-width #}
+                                                    {% for error in module_form.duree_heures.errors %}
+                                                        <div class="invalid-feedback d-block">{{ error }}</div>
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4 col-12">
+                                                <div class="form-group">
+                                                    <label for="{{ module_form.ordre.id_for_label }}" class="form-label">{{ module_form.ordre.label }}</label>
+                                                    {{ module_form.ordre|add_class:"form-control input-sm-width" }} {# Ajout de la classe input-sm-width #}
+                                                    {% for error in module_form.ordre.errors %}
+                                                        <div class="invalid-feedback d-block">{{ error }}</div>
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6 col-12"> {# Changé col-12 à col-md-6 #}
+                                                <div class="form-group">
+                                                    <label for="{{ module_form.description.id_for_label }}" class="form-label">{{ module_form.description.label }}</label>
+                                                    {{ module_form.description|add_class:"form-control" }}
+                                                    {% for error in module_form.description.errors %}
+                                                        <div class="invalid-feedback d-block">{{ error }}</div>
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6 col-12"> {# Changé col-12 à col-md-6 #}
+                                                <div class="form-group">
+                                                    <label for="{{ module_form.formateurs.id_for_label }}" class="form-label">{{ module_form.formateurs.label }}</label>
+                                                    {{ module_form.formateurs }}
+                                                    {% for error in module_form.formateurs.errors %}
+                                                        <div class="invalid-feedback d-block">{{ error }}</div>
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                            {% if module_form.DELETE %}
+                                            <div class="col-12 d-flex justify-content-end">
+                                                <div class="form-check form-check-inline">
+                                                    {{ module_form.DELETE }}
+                                                    <label class="form-check-label" for="{{ module_form.DELETE.id_for_label }}">Supprimer ce module</label>
+                                                </div>
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                                <button type="button" id="add-module-button" class="btn btn-info btn-sm mt-3">
+                                    <i class="bi bi-plus-circle me-2"></i>Ajouter un module
+                                </button>
+
+                                {% if formset.non_form_errors %}
+                                    <div class="alert alert-danger mt-3">
+                                        {% for error in formset.non_form_errors %}
+                                            <p>{{ error }}</p>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+
+                                <div class="d-flex justify-content-end gap-2 mt-4">
+                                    <a href="{% url 'metiers' %}" class="btn btn-light-secondary">Annuler</a>
+                                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                                </div>
+                            </form>
+                        {% else %} {# Mode vue #}
+                            <div class="tm-detail-grid">
+                                <div class="tm-detail-item"><span class="tm-detail-item__label">Nom du métier</span><div class="tm-detail-item__value">{{ object.nom }}</div></div>
+                                <div class="tm-detail-item"><span class="tm-detail-item__label">Filière associée</span><div class="tm-detail-item__value">{{ object.filiere.nom|default:"Non renseignée" }}</div></div>
+                                <div class="tm-detail-item"><span class="tm-detail-item__label">Durée (mois)</span><div class="tm-detail-item__value">{{ object.duree }}</div></div>
+                                <div class="tm-detail-item"><span class="tm-detail-item__label">Durée (heures)</span><div class="tm-detail-item__value">{{ object.duree_heures }}</div></div>
+                                <div class="tm-detail-item"><span class="tm-detail-item__label">Statut</span><div class="tm-detail-item__value">{% if object.active %}<span class="badge bg-success">Actif</span>{% else %}<span class="badge bg-danger">Inactif</span>{% endif %}</div></div>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% if object %} {# Afficher les modules seulement si l'objet existe (mode vue/édition) #}
+            <div class="col-12 col-lg-6">
+                <div class="card tm-detail-card mb-4">
+                    <div class="card-header">
+                        <h4 class="card-title mb-0">Modules du métier</h4>
+                        <p class="text-muted mb-0">Liste des modules qui composent ce métier.</p>
+                    </div>
+                    <div class="card-body">
+                        {% if object.modules.all %}
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Ordre</th>
+                                        <th>Titre</th>
+                                        <th>Durée (h)</th>
+                                        <th>Formateur(s)</th> {# Changé Formateur à Formateur(s) #}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for module in object.modules.all %}
+                                    <tr>
+                                        <td>{{ module.ordre }}</td>
+                                        <td>{{ module.titre }}</td>
+                                        <td>{{ module.duree_heures }}</td>
+                                        <td>
+                                            {% for formateur in module.formateurs.all %} {# Itérer sur les formateurs #}
+                                                {{ formateur.get_full_name }}{% if not forloop.last %}, {% endif %}
+                                            {% empty %}
+                                                Non assigné
+                                            {% endfor %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <p class="text-muted mb-0">Aucun module n'est rattaché à ce métier.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        {% if object %} {# Boutons d'action seulement en mode vue/édition #}
+        <div class="d-flex justify-content-end gap-2 mt-4"> {# Moved action buttons here #}
+            <a href="{% url 'metiers' %}" class="btn btn-light-secondary">
+                <i class="bi bi-arrow-left me-2"></i>Retour à la liste
+            </a>
+            <a href="{% url 'metier_update' object.pk %}" class="btn btn-primary">
+                <i class="bi bi-pencil me-2"></i>Modifier
+            </a>
+            <a href="{% url 'metier_delete' object.pk %}" class="btn btn-danger">
+                <i class="bi bi-trash me-2"></i>Supprimer
+            </a>
+        </div>
+        {% endif %}
     </section>
 </div>
 {% endblock content %}
 
 {% block script %}
-    {{ form.media }} {# Charge les fichiers JS et CSS de Select2 pour le formulaire principal #}
+    {{ form.media }} {# Charge les fichiers JS et CSS de Select2 #}
     {{ formset.media }} {# Charge les fichiers JS et CSS de Select2 pour le formset #}
     <script>
         $(document).ready(function() {
