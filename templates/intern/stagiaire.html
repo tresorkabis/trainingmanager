@@ -293,6 +293,7 @@
                                         <select class="form-select" name="sexe">
                                             <option value="M" {% if submitted.sexe|default:object.sexe == 'M' %}selected{% endif %}>Masculin</option>
                                             <option value="F" {% if submitted.sexe|default:object.sexe == 'F' %}selected{% endif %}>Féminin</option>
+                                            <option value="ND" {% if submitted.sexe|default:object.sexe == 'ND' %}selected{% endif %}>Non défini</option>
                                         </select>
                                     </div>
                                     <div class="tm-detail-item"><label class="tm-detail-item__label">Téléphone</label><input class="form-control" name="telephone" value="{{ submitted.telephone|default:object.telephone }}"></div>
