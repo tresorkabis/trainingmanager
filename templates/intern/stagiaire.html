@@ -174,9 +174,9 @@
             <div class="col-12 col-xl-7"> {# Left column for photo, name, pills, description #}
                 <div class="d-flex flex-column flex-sm-row align-items-start align-items-sm-center gap-4">
                     {% if object.photo %}
-                    <img src="{{ object.photo.url }}" alt="Photo du stagiaire" class="tm-stagiaire-hero__photo">
+                    <img id="photo-preview" src="{{ object.photo.url }}" alt="Photo du stagiaire" class="tm-stagiaire-hero__photo">
                     {% else %}
-                    <img src="{% static 'assets/images/faces/1.jpg' %}" alt="Photo du stagiaire" class="tm-stagiaire-hero__photo">
+                    <img id="photo-preview" src="{% static 'assets/images/faces/1.jpg' %}" alt="Photo du stagiaire" class="tm-stagiaire-hero__photo">
                     {% endif %}
                     <div>
                         <div class="tm-pill-list mb-3">
@@ -233,6 +233,10 @@
                 <p class="text-muted mb-0">Informations complètes et parcours de formation.</p>
             </div>
             <div class="card-body">
+                {% if mode %}
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                {% endif %}
                 <ul class="nav nav-tabs nav-fill" id="myTab" role="tablist">
                     <li class="nav-item" role="presentation">
                         <a class="nav-link active" id="identity-tab" data-bs-toggle="tab" href="#identity" role="tab" aria-controls="identity" aria-selected="true">Identité</a>
@@ -265,6 +269,27 @@
                             </div>
                             <div class="card-body">
                                 <div class="tm-detail-grid">
+                                    {% if mode %}
+                                    <div class="tm-detail-item"><label class="tm-detail-item__label">Nom</label><input class="form-control" name="nom" value="{{ submitted.nom|default:object.nom }}"></div>
+                                    <div class="tm-detail-item"><label class="tm-detail-item__label">Postnom</label><input class="form-control" name="postnom" value="{{ submitted.postnom|default:object.postnom }}"></div>
+                                    <div class="tm-detail-item"><label class="tm-detail-item__label">Prénom</label><input class="form-control" name="prenom" value="{{ submitted.prenom|default:object.prenom }}"></div>
+                                    <div class="tm-detail-item"><label class="tm-detail-item__label">Date de naissance</label><input type="date" class="form-control" name="date_naissance" value="{{ submitted.date_naissance|default:object.date_naissance }}"></div>
+                                    <div class="tm-detail-item"><label class="tm-detail-item__label">Lieu de naissance</label><input class="form-control" name="lieu_naissance" value="{{ submitted.lieu_naissance|default:object.lieu_naissance }}"></div>
+                                    <div class="tm-detail-item"><label class="tm-detail-item__label">Nationalité</label><input class="form-control" name="nationalite" value="{{ submitted.nationalite|default:object.nationalite }}"></div>
+                                    <div class="tm-detail-item"><label class="tm-detail-item__label">Numéro de pièce</label><input class="form-control" name="numero_piece" value="{{ submitted.numero_piece|default:object.numero_piece }}"></div>
+                                    <div class="tm-detail-item"><label class="tm-detail-item__label">Nom du père</label><input class="form-control" name="nom_pere" value="{{ submitted.nom_pere|default:object.nom_pere }}"></div>
+                                    <div class="tm-detail-item"><label class="tm-detail-item__label">Nom de la mère</label><input class="form-control" name="nom_mere" value="{{ submitted.nom_mere|default:object.nom_mere }}"></div>
+                                    <div class="tm-detail-item"><label class="tm-detail-item__label">Adresse</label><textarea class="form-control" name="adresse">{{ submitted.adresse|default:object.adresse }}</textarea></div>
+                                    <div class="tm-detail-item"><label class="tm-detail-item__label">Sexe</label>
+                                        <select class="form-select" name="sexe">
+                                            <option value="M" {% if submitted.sexe|default:object.sexe == 'M' %}selected{% endif %}>Masculin</option>
+                                            <option value="F" {% if submitted.sexe|default:object.sexe == 'F' %}selected{% endif %}>Féminin</option>
+                                        </select>
+                                    </div>
+                                    <div class="tm-detail-item"><label class="tm-detail-item__label">Téléphone</label><input class="form-control" name="telephone" value="{{ submitted.telephone|default:object.telephone }}"></div>
+                                    <div class="tm-detail-item"><label class="tm-detail-item__label">Email</label><input type="email" class="form-control" name="email" value="{{ submitted.email|default:object.email }}"></div>
+                                    <div class="tm-detail-item"><label class="tm-detail-item__label">Photo</label><input id="photo" type="file" class="form-control" name="photo"></div>
+                                    {% else %}
                                     <div class="tm-detail-item"><span class="tm-detail-item__label">Nom</span><div class="tm-detail-item__value">{{ object.nom }}</div></div>
                                     <div class="tm-detail-item"><span class="tm-detail-item__label">Postnom</span><div class="tm-detail-item__value">{{ object.postnom }}</div></div>
                                     <div class="tm-detail-item"><span class="tm-detail-item__label">Prénom</span><div class="tm-detail-item__value">{{ object.prenom }}</div></div>
@@ -275,6 +300,7 @@
                                     <div class="tm-detail-item"><span class="tm-detail-item__label">Nom du père</span><div class="tm-detail-item__value">{{ object.nom_pere|default:"Non renseignée" }}</div></div>
                                     <div class="tm-detail-item"><span class="tm-detail-item__label">Nom de la mère</span><div class="tm-detail-item__value">{{ object.nom_mere|default:"Non renseignée" }}</div></div>
                                     <div class="tm-detail-item"><span class="tm-detail-item__label">Adresse</span><div class="tm-detail-item__value">{{ object.adresse|default:"Non renseignée" }}</div></div>
+                                    {% endif %}
                                 </div>
                             </div>
                         </div>
@@ -288,8 +314,27 @@
                             </div>
                             <div class="card-body">
                                 <div class="tm-detail-grid mb-4">
+                                    {% if mode %}
+                                    <div class="tm-detail-item"><label class="tm-detail-item__label">Catégorie</label>
+                                        <select id="categorie" name="categorie" class="form-select">
+                                            <option value="">-- Choisir --</option>
+                                            {% for cat in categories %}
+                                            <option value="{{ cat.id }}" data-category-name="{{ cat.titre }}" {% if submitted.categorie|default:object.categorie.id == cat.id %}selected{% endif %}>{{ cat.titre }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="tm-detail-item"><label class="tm-detail-item__label">Filière</label>
+                                        <select id="filiere" name="filiere" class="form-select">
+                                            <option value="">-- Choisir --</option>
+                                            {% for f in filieres %}
+                                            <option value="{{ f.id }}" {% if submitted.filiere|default:object.filiere.id == f.id %}selected{% endif %}>{{ f.nom }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    {% else %}
                                     <div class="tm-detail-item"><span class="tm-detail-item__label">Catégorie</span><div class="tm-detail-item__value">{{ object.categorie }}</div></div>
                                     <div class="tm-detail-item"><span class="tm-detail-item__label">Filière</span><div class="tm-detail-item__value">{{ object.filiere.nom|default:"Non renseignée" }}</div></div>
+                                    {% endif %}
                                 </div>
                                 <h5 class="mb-3">Métiers internes suivis</h5>
                                 {% if actions_suivies %}
@@ -329,10 +374,24 @@
                             </div>
                             <div class="card-body">
                                 <div class="tm-detail-grid">
+                                    {% if mode %}
+                                    <div class="tm-detail-item"><label class="tm-detail-item__label">Entreprise</label>
+                                        <select class="form-select" name="entreprise">
+                                            <option value="">-- Choisir --</option>
+                                            {% for ent in entreprises %}
+                                            <option value="{{ ent.id }}" {% if submitted.entreprise|default:object.entreprise.id == ent.id %}selected{% endif %}>{{ ent.nom }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="tm-detail-item"><label class="tm-detail-item__label">Fonction</label><input class="form-control" name="fonction" value="{{ submitted.fonction|default:object.fonction }}"></div>
+                                    <div class="tm-detail-item"><label class="tm-detail-item__label">Ancienneté dans l'emploi</label><input type="number" min="0" class="form-control" name="anciennete_emploi" value="{{ submitted.anciennete_emploi|default:object.anciennete_emploi }}"></div>
+                                    <div class="tm-detail-item"><label class="tm-detail-item__label">Ancienneté dans l'entreprise</label><input type="number" min="0" class="form-control" name="anciennete_entreprise" value="{{ submitted.anciennete_entreprise|default:object.anciennete_entreprise }}"></div>
+                                    {% else %}
                                     <div class="tm-detail-item"><span class="tm-detail-item__label">Entreprise</span><div class="tm-detail-item__value">{{ object.entreprise.nom|default:"Non renseignée" }}</div></div>
                                     <div class="tm-detail-item"><span class="tm-detail-item__label">Fonction</span><div class="tm-detail-item__value">{{ object.fonction|default:"Non renseignée" }}</div></div>
                                     <div class="tm-detail-item"><span class="tm-detail-item__label">Ancienneté dans l'emploi</span><div class="tm-detail-item__value">{{ object.anciennete_emploi|default:"Non renseignée" }}</div></div>
                                     <div class="tm-detail-item"><span class="tm-detail-item__label">Ancienneté dans l'entreprise</span><div class="tm-detail-item__value">{{ object.anciennete_entreprise|default:"Non renseignée" }}</div></div>
+                                    {% endif %}
                                 </div>
                             </div>
                         </div>
@@ -480,6 +539,12 @@
                         </div>
                     </div>
                 </div>
+                    {% if mode %}
+                    <div class="d-flex justify-content-end mt-3">
+                        <button type="submit" class="btn btn-primary">Enregistrer</button>
+                    </div>
+                    </form>
+                    {% endif %}
             </div>
         </div>
     </section>
