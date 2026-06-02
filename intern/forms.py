@@ -16,8 +16,8 @@ class StagiaireForm(forms.ModelForm):
     )
     # Use a CharField with Select2 tagging enabled so users can type a new company name.
     # clean_entreprise will return an Entreprise instance so ModelForm assigns the FK correctly.
-    entreprise = forms.ModelChoiceField(
-        queryset=Entreprise.objects.all().order_by('nom'),
+    # Use a CharField with a ModelSelect2TagWidget so both existing PKs and free-text names are accepted.
+    entreprise = forms.CharField(
         label="Entreprise",
         required=False,
         widget=ModelSelect2TagWidget(model=Entreprise, search_fields=["nom__icontains"], attrs={'data-width': '100%', 'class': 'form-select', 'data-tags': 'true', 'data-minimum-input-length': '0'})
