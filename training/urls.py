@@ -1,5 +1,4 @@
 from django.urls import path
-from django.views.generic.base import RedirectView
 from training.views.home_views import HomeView
 from training.views.filiere_views import FiliereListView, FiliereDetailView, FiliereCreateUpdateView, FiliereDeleteView
 from training.views.service_views import ServiceListView, ServiceDetailView, ServiceCreateUpdateView, ServiceDeleteView
@@ -38,10 +37,4 @@ urlpatterns = [
     path("formations/<int:pk>/delete", MetierDeleteView.as_view(), name="formation_delete"),
     path("formations/<int:pk>/delete", MetierDeleteView.as_view(), name="metier_delete"),
 
-    # Backwards-compatible redirects from old /metiers/* to /formations/*
-    path("metiers", RedirectView.as_view(pattern_name='formations', permanent=True)),
-    path("metiers/create", RedirectView.as_view(pattern_name='formation_create', permanent=True)),
-    path("metiers/<int:pk>", RedirectView.as_view(pattern_name='formation', permanent=True)),
-    path("metiers/<int:pk>/update", RedirectView.as_view(pattern_name='formation_update', permanent=True)),
-    path("metiers/<int:pk>/delete", RedirectView.as_view(pattern_name='formation_delete', permanent=True)),
 ]
