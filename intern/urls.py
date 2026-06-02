@@ -16,4 +16,5 @@ urlpatterns = [
     path("stagiaires/<int:pk>/update", StagiaireCreateUpdateView.as_view(), name="stagiaire_update"),
     path("stagiaires/<int:pk>/delete", StagiaireDeleteView.as_view(), name="stagiaire_delete"),
     path("stagiaires/<int:pk>", StagiaireDetailView.as_view(), name="stagiaire"),
+    path("stagiaires/print", stagiaire_cards_print, name="stagiaires_print"),
 ]

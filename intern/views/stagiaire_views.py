@@ -290,3 +290,37 @@ class StagiaireDeleteView(DeleteView):
         ctx = super().get_context_data(**kwargs)
         ctx["titre"] = "Supprimer"
         return ctx
+
+
+# Print cards view
+from django.core.paginator import Paginator
+
+@login_required
+def stagiaire_cards_print(request):
+    # reuse list view helpers by creating an instance and binding request
+    list_view = StagiaireListView()
+    list_view.request = request
+    qs = list_view.get_stagiaire_queryset().select_related('categorie', 'entreprise', 'filiere')
+
+    # Optional: filter by selected ids (ids=1,2,3)
+    ids = request.GET.get('ids')
+    if ids:
+        try:
+            id_list = [int(x) for x in ids.split(',') if x.strip().isdigit()]
+            qs = qs.filter(pk__in=id_list)
+        except Exception:
+            pass
+
+    # Support printing a specific page: ?page=1
+    page = request.GET.get('page')
+    try:
+        page_num = int(page) if page else 1
+    except Exception:
+        page_num = 1
+
+    paginator = Paginator(qs, list_view.paginate_by or 20)
+    page_obj = paginator.get_page(page_num)
+    ctx = {
+        'object_list': page_obj.object_list,
+    }
+    return render(request, 'intern/stagiaire_cards_print.html', ctx)

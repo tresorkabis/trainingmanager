@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Impression Cartes Stagiaires{% endblock title %}
+
+{% block style %}
+<style>
+    @media print {
+        .no-print { display: none !important; }
+    }
+    .print-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+    .print-card {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 0.5rem;
+        min-height: 110px;
+    }
+    .print-photo { width: 90px; height: 90px; object-fit: cover; border-radius: 8px; }
+    .print-name { font-weight: 700; color: #25396f; font-size: 1.05rem; }
+    .print-meta { color: #6c757d; font-size: 0.95rem; }
+    .print-actions { text-align: right; }
+</style>
+{% endblock style %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3 no-print">
+    <h3>Cartes des stagiaires</h3>
+    <div>
+        <a href="#" onclick="window.print(); return false;" class="btn btn-primary">Imprimer</a>
+        <a href="{% url 'stagiaires' %}" class="btn btn-secondary">Retour</a>
+    </div>
+</div>
+
+<div class="print-grid">
+    {% for s in object_list %}
+    <div class="print-card">
+        {% if s.photo %}
+        <img src="{{ s.photo.url }}" alt="Photo" class="print-photo" />
+        {% else %}
+        <img src="{% static 'assets/images/faces/1.jpg' %}" alt="Photo" class="print-photo" />
+        {% endif %}
+        <div class="flex-grow-1">
+            <div class="print-name">{{ s.nom }} {{ s.postnom }} {{ s.prenom }}</div>
+            <div class="print-meta">Catégorie: {{ s.categorie }}</div>
+            {% if s.categorie and s.categorie.titre != 'sans emploi' and s.entreprise %}
+            <div class="print-meta">Entreprise: {{ s.entreprise.nom }}</div>
+            {% endif %}
+            <div class="print-meta">Téléphone: {{ s.telephone|default:"-" }}</div>
+            <div class="print-meta">Email: {{ s.email|default:"-" }}</div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% endblock content %}
