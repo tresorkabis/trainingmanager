@@ -70,15 +70,27 @@ class StagiaireForm(forms.ModelForm):
 
     def clean_entreprise(self):
         entreprise_data = self.cleaned_data.get('entreprise')
-        # Si Select2 a créé une nouvelle option (qui n'est pas un ID numérique),
-        # sa valeur sera le texte tapé par l'utilisateur.
-        # Select2 renvoie la valeur sous forme de chaîne, même pour les IDs existants.
-        # Nous devons vérifier si la valeur est un ID numérique ou un nouveau nom.
-        
+
+        # Normalize: Select2 may return a list/tuple, or a JSON array string like '["SNEL"]'.
+        if isinstance(entreprise_data, (list, tuple)):
+            entreprise_data = entreprise_data[0] if entreprise_data else None
+
+        if isinstance(entreprise_data, str):
+            s = entreprise_data.strip()
+            # try to parse JSON array
+            if s.startswith('[') and s.endswith(']'):
+                try:
+                    import json
+                    parsed = json.loads(s)
+                    if isinstance(parsed, (list, tuple)) and parsed:
+                        entreprise_data = parsed[0]
+                except Exception:
+                    pass
+
         # Si entreprise_data est déjà une instance d'Entreprise (cas d'une sélection existante)
         if isinstance(entreprise_data, Entreprise):
             return entreprise_data
-        
+
         # Si entreprise_data est None ou vide, et que le champ n'est pas requis, on retourne None
         if not entreprise_data and not self.fields['entreprise'].required:
             return None
@@ -102,5 +114,6 @@ class StagiaireForm(forms.ModelForm):
                     return entreprise
                 else:
                     raise forms.ValidationError("Le nom de l'entreprise ne peut pas être vide.")
-        
-        return entreprise_data # Retourne la donnée nettoyée si c'est déjà une instance ou None
+
+        # If we reach here, return None to avoid storing unexpected types
+        return None
