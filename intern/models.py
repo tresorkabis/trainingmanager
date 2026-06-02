@@ -55,8 +55,8 @@ class Stagiaire(models.Model):
     photo = models.ImageField(upload_to='stagiaires/', blank=True, null=True)
     categorie = models.ForeignKey(Categorie, on_delete=models.CASCADE)
     
-    # Ancien champ filiere supprimé car le stagiaire n'est pas directement lié à une filière
-    # filiere = models.ForeignKey(Filiere, on_delete=models.SET_NULL, null=True, blank=True)
+    # Filière (stagiaire peut être rattaché à une filière/formation)
+    filiere = models.ForeignKey(Filiere, on_delete=models.SET_NULL, null=True, blank=True)
 
     # New fields for "dans l'emploi" category
     entreprise = models.ForeignKey(Entreprise, on_delete=models.SET_NULL, null=True, blank=True)
