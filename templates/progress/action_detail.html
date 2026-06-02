@@ -93,8 +93,8 @@
             <div class="card-body">
                 <div class="tm-detail-grid">
                     <div class="tm-detail-item"><span class="tm-detail-item__label">Description</span><div class="tm-detail-item__value">{{ object.description }}</div></div>
-                    <div class="tm-detail-item"><span class="tm-detail-item__label">Métier</span><div class="tm-detail-item__value">{{ object.metier.nom }}</div></div> {# Changed Formation to Métier, object.formation.nom to object.metier.nom #}
-                    <div class="tm-detail-item"><span class="tm-detail-item__label">Filière</span><div class="tm-detail-item__value">{{ object.metier.filiere.nom|default:"Sans filière" }}</div></div> {# Changed object.formation.filiere.nom to object.metier.filiere.nom #}
+                    <div class="tm-detail-item"><span class="tm-detail-item__label">Formation</span><div class="tm-detail-item__value">{{ object.metier.nom }}</div></div>
+                    <div class="tm-detail-item"><span class="tm-detail-item__label">Filière</span><div class="tm-detail-item__value">{{ object.metier.filiere.nom|default:"Sans filière" }}</div></div>
                     <div class="tm-detail-item"><span class="tm-detail-item__label">Date de début</span><div class="tm-detail-item__value">{{ object.date_debut|date:"d/m/Y" }}</div></div>
                     <div class="tm-detail-item"><span class="tm-detail-item__label">Date de fin</span><div class="tm-detail-item__value">{{ object.date_fin|date:"d/m/Y" }}</div></div>
                     <div class="tm-detail-item"><span class="tm-detail-item__label">Inscrits</span><div class="tm-detail-item__value">{{ inscription_count }}</div></div>
