@@ -362,7 +362,7 @@
                                     {% if form %}
                                     <div class="tm-detail-item">
                                         <label class="tm-detail-item__label" for="categorie">Catégorie</label>
-                                        {{ form.categorie|add_class:"form-select"|attr:"id:categorie" }}
+                                        {{ form.categorie }}
                                     </div>
                                     <div class="tm-detail-item">
                                         <label class="tm-detail-item__label" for="filiere">Filière</label>
@@ -731,7 +731,7 @@
     }
 
     // Conditional display for professional info
-    const categorieSelect = document.getElementById('categorie');
+    const categorieSelect = document.getElementById('categorie') || document.getElementById('id_categorie');
     const professionalTabLi = document.getElementById('professional-tab-li'); // The li element for the tab
     const professionalTabLink = document.getElementById('professional-tab'); // The a element for the tab
     const professionalInfoSection = document.getElementById('professional-info-section'); // The content div
