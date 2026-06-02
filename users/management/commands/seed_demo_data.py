@@ -218,16 +218,17 @@ class Command(BaseCommand):
         formateur_index = 0
         metiers = {}
         metier_specs = [
-            {"nom": "Electricite batiment", "duree": 6, "filiere_nom": "Développement des plates-formes informatiques", "frais_materiels": 120.0, "frais_participation": 0.0, "frais_jury": 0.0, "cout": 1500.00, "modules": [("Fondamentaux électriques", "Notions de base et sécurité", 40), ("Installations domestiques", "Circuits et équipements du bâtiment", 80)]},
-            {"nom": "Automatisme industriel", "duree": 8, "filiere_nom": "Administration système et réseaux", "frais_materiels": 180.0, "frais_participation": 0.0, "frais_jury": 0.0, "cout": 2000.00, "modules": [("API et capteurs", "Automates programmables et instrumentation", 60), ("Supervision", "Interfaces et contrôle industriel", 50)]},
-            {"nom": "Maintenance preventive", "duree": 5, "filiere_nom": "Administration système et réseaux", "frais_materiels": 95.0, "frais_participation": 0.0, "frais_jury": 0.0, "cout": 1200.00, "modules": [("Diagnostic", "Méthodes de contrôle et inspection", 35), ("Planification", "Organisation des maintenances périodiques", 25)]},
-            {"nom": "Pack Office professionnel", "duree": 3, "filiere_nom": "Bureautique", "frais_materiels": 60.0, "frais_participation": 0.0, "frais_jury": 0.0, "cout": 800.00, "modules": [("Word avancé", "Mise en forme et publipostage", 20), ("Excel métier", "Tableaux, formules et graphiques", 30)]},
-            {"nom": "Secretaire de direction", "duree": 6, "filiere_nom": "Administration et Gestion", "frais_materiels": 110.0, "frais_participation": 0.0, "frais_jury": 0.0, "cout": 1300.00, "modules": [("Communication professionnelle", "Rédaction et accueil", 35), ("Organisation administrative", "Classement, agenda et suivi", 45)]},
-            {"nom": "Gestion de Projets PME", "duree": 4, "filiere_nom": "Gestion de projets", "frais_materiels": 75.0, "frais_participation": 0.0, "frais_jury": 0.0, "cout": 950.00, "modules": [("Fondamentaux de la gestion de projet", "Initiation aux méthodes agiles", 30), ("Outils de planification", "MS Project et Trello", 40)]},
+            {"nom": "Electricite batiment", "duree": 6, "type_formation": "qualifiante", "filiere_nom": "Développement des plates-formes informatiques", "frais_materiels": 120.0, "frais_participation": 0.0, "frais_jury": 0.0, "cout": 1500.00, "modules": [("Fondamentaux électriques", "Notions de base et sécurité", 40), ("Installations domestiques", "Circuits et équipements du bâtiment", 80)]},
+            {"nom": "Automatisme industriel", "duree": 8, "type_formation": "qualifiante", "filiere_nom": "Administration système et réseaux", "frais_materiels": 180.0, "frais_participation": 0.0, "frais_jury": 0.0, "cout": 2000.00, "modules": [("API et capteurs", "Automates programmables et instrumentation", 60), ("Supervision", "Interfaces et contrôle industriel", 50)]},
+            {"nom": "Maintenance preventive", "duree": 5, "type_formation": "continue", "filiere_nom": "Administration système et réseaux", "frais_materiels": 95.0, "frais_participation": 0.0, "frais_jury": 0.0, "cout": 1200.00, "modules": [("Diagnostic", "Méthodes de contrôle et inspection", 35), ("Planification", "Organisation des maintenances périodiques", 25)]},
+            {"nom": "Pack Office professionnel", "duree": 3, "type_formation": "continue", "filiere_nom": "Bureautique", "frais_materiels": 60.0, "frais_participation": 0.0, "frais_jury": 0.0, "cout": 800.00, "modules": [("Word avancé", "Mise en forme et publipostage", 20), ("Excel métier", "Tableaux, formules et graphiques", 30)]},
+            {"nom": "Secretaire de direction", "duree": 6, "type_formation": "continue", "filiere_nom": "Administration et Gestion", "frais_materiels": 110.0, "frais_participation": 0.0, "frais_jury": 0.0, "cout": 1300.00, "modules": [("Communication professionnelle", "Rédaction et accueil", 35), ("Organisation administrative", "Classement, agenda et suivi", 45)]},
+            {"nom": "Gestion de Projets PME", "duree": 4, "type_formation": "qualifiante", "filiere_nom": "Gestion de projets", "frais_materiels": 75.0, "frais_participation": 0.0, "frais_jury": 0.0, "cout": 950.00, "modules": [("Fondamentaux de la gestion de projet", "Initiation aux méthodes agiles", 30), ("Outils de planification", "MS Project et Trello", 40)]},
         ]
         for spec in metier_specs:
             nom = spec["nom"]
             duree = spec["duree"]
+            type_formation = spec.get("type_formation", "qualifiante")
             filiere_nom = spec["filiere_nom"]
             frais_materiels = spec["frais_materiels"]
             frais_participation = spec["frais_participation"]
@@ -239,6 +240,7 @@ class Command(BaseCommand):
                 defaults={
                     "duree": duree,
                     "duree_heures": 0,
+                    "type_formation": type_formation,
                     "filiere": filieres[filiere_nom],
                     "cout": cout,
                     "frais_participation": frais_participation,
@@ -265,6 +267,9 @@ class Command(BaseCommand):
                 changed = True
             if metier.frais_materiels != frais_materiels:
                 metier.frais_materiels = frais_materiels
+                changed = True
+            if hasattr(metier, 'type_formation') and metier.type_formation != type_formation:
+                metier.type_formation = type_formation
                 changed = True
             if not metier.active:
                 metier.active = True
