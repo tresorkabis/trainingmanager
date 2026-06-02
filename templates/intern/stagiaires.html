@@ -185,11 +185,14 @@
                         <p>Gérez le répertoire des stagiaires et leurs parcours.</p>
                     </div>
                 </div>
-                <div class="d-flex flex-wrap gap-2">
+                <div class="d-flex flex-wrap gap-2 align-items-center">
                     <a href="{% url 'stagiaire_create' %}" class="btn btn-primary">
                         <i class="bi bi-person-plus me-2"></i>Nouveau stagiaire
                     </a>
-                    {# Add other relevant buttons here if needed #}
+                    <div class="btn-group ms-2" role="group" aria-label="Affichage">
+                        <button type="button" id="toggleCardsBtn" class="btn btn-outline-secondary active" title="Cartes"><i class="bi bi-grid-3x3-gap-fill"></i></button>
+                        <button type="button" id="toggleTableBtn" class="btn btn-outline-secondary" title="Tableau"><i class="bi bi-table"></i></button>
+                    </div>
                 </div>
             </div>
             <div class="col-12 col-xl-6">
@@ -282,7 +285,7 @@
                     {% endif %}
                 </div>
 
-                <div class="table-responsive"> {# Added table-responsive for better mobile display #}
+                <div id="stagiaireTableContainer" class="table-responsive"> {# Added table-responsive for better mobile display #}
                     <table class="table table-striped" id="table1"> {# Removed dataTable-table class #}
                         <thead>
                             <tr>
@@ -454,4 +457,39 @@
         }
     });
 </script>
+
+// Toggle view: cartes / tableau
+(function(){
+    document.addEventListener('DOMContentLoaded', function(){
+        const cardsContainer = document.getElementById('stagiaireCards');
+        const tableContainer = document.getElementById('stagiaireTableContainer');
+        const toggleCardsBtn = document.getElementById('toggleCardsBtn');
+        const toggleTableBtn = document.getElementById('toggleTableBtn');
+        const VIEW_KEY = 'stagiaire_view';
+
+        function setView(view){
+            if(view === 'table'){
+                if(cardsContainer) cardsContainer.style.display = 'none';
+                if(tableContainer) tableContainer.style.display = '';
+                if(toggleCardsBtn) toggleCardsBtn.classList.remove('active');
+                if(toggleTableBtn) toggleTableBtn.classList.add('active');
+            } else {
+                if(cardsContainer) cardsContainer.style.display = '';
+                if(tableContainer) tableContainer.style.display = 'none';
+                if(toggleCardsBtn) toggleCardsBtn.classList.add('active');
+                if(toggleTableBtn) toggleTableBtn.classList.remove('active');
+            }
+            try{ localStorage.setItem(VIEW_KEY, view); } catch(e){}
+        }
+
+        // initialize from storage or default to cards
+        var saved = null;
+        try{ saved = localStorage.getItem(VIEW_KEY); } catch(e){}
+        setView(saved === 'table' ? 'table' : 'cards');
+
+        if(toggleCardsBtn) toggleCardsBtn.addEventListener('click', function(){ setView('cards'); });
+        if(toggleTableBtn) toggleTableBtn.addEventListener('click', function(){ setView('table'); });
+    });
+})();
+
 {% endblock script %}
