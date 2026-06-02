@@ -362,11 +362,11 @@
                                     {% if form %}
                                     <div class="tm-detail-item">
                                         <label class="tm-detail-item__label" for="categorie">Catégorie</label>
-                                        {{ form.categorie.as_widget(attrs={'id':'categorie'}) }}
+                                        {{ form.categorie|add_class:"form-select"|attr:"id:categorie" }}
                                     </div>
                                     <div class="tm-detail-item">
                                         <label class="tm-detail-item__label" for="filiere">Filière</label>
-                                        {{ form.filiere.as_widget(attrs={'id':'filiere'}) }}
+                                        {{ form.filiere|add_class:"form-select"|attr:"id:filiere" }}
                                     </div>
                                     {% else %}
                                     <div class="tm-detail-item"><span class="tm-detail-item__label">Catégorie</span><div class="tm-detail-item__value">{{ object.categorie }}</div></div>
