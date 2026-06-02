@@ -409,7 +409,7 @@
                                     <span class="tm-detail-item__label">Niveau d'étude général</span>
                                     <div class="tm-detail-item__value">{{ object.niveau_etude|default:"Non renseigné" }}</div>
                                 </div>
-                                {% if object.etudes.all %}
+                                {% if object.pk and object.etudes.all %}
                                 <div class="table-responsive">
                                     <table class="table table-striped">
                                         <thead>
@@ -450,7 +450,7 @@
                                 <p class="text-muted mb-0">Formations externes, certifications et perfectionnements suivis en dehors des actions internes.</p>
                             </div>
                             <div class="card-body">
-                                {% if object.autres_formations.all %}
+                                {% if object.pk and object.autres_formations.all %}
                                 <div class="table-responsive">
                                     <table class="table table-striped">
                                         <thead>
