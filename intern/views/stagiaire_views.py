@@ -124,7 +124,10 @@ class StagiaireCreateUpdateView(StagiairePermissionMixin, View): # Nouvelle vue 
         stagiaire = None
         if pk:
             stagiaire = get_object_or_404(Stagiaire, pk=pk)
-        
+        else:
+            # Provide an empty instance so template attribute lookups don't fail
+            stagiaire = Stagiaire()
+
         ctx = {
             "categories": Categorie.objects.all(),
             "entreprises": Entreprise.objects.all(),
