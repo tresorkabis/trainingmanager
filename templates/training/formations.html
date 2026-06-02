@@ -237,7 +237,6 @@
                                 <th style="width: 10%;">Durée (heures)</th>
                                 <th style="width: 15%;">Filière</th>
                                 <th style="width: 10%;">Coût</th>
-                                <th style="width: 10%;">Frais matériels</th>
                                 <th style="width: 15%;">Actions</th> {# New column for actions #}
                             </tr>
                         </thead>
@@ -251,7 +250,6 @@
                                 <td>{{ item.duree_heures }} h</td>
                                 <td>{{ item.filiere.nom|default:"-" }}</td>
                                 <td>{{ item.cout }}</td>
-                                <td>{{ item.frais_materiels }}</td>
                                 <td>
                                     <div class="d-flex gap-2">
                                         <a href="{% url 'formation_update' item.pk %}" class="btn btn-sm btn-outline-primary" title="Modifier">
@@ -266,7 +264,7 @@
                             {% endfor %}
                             {% else %}
                             <tr id="noResultsRow">
-                                <td colspan="8" class="no-results-message">Aucune formation enregistrée.</td> {# Adjusted colspan #}
+                                <td colspan="7" class="no-results-message">Aucune formation enregistrée.</td> {# Adjusted colspan #}
                             </tr>
                             {% endif %}
                         </tbody>
@@ -321,7 +319,7 @@
             noResultsRow = document.createElement('tr');
             noResultsRow.id = 'noResultsRow';
             const td = document.createElement('td');
-            td.colSpan = 8; // Adjusted colspan for new columns
+        td.colSpan = 7; // Adjusted colspan after removing 'Frais matériels'
             td.className = 'no-results-message';
             td.textContent = 'Aucune formation trouvée.';
             noResultsRow.appendChild(td);
