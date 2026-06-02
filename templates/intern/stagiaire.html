@@ -764,6 +764,17 @@
 </script>
 {% endif %}
 <script>
+// Debug: log main form submissions
+document.addEventListener('DOMContentLoaded', function () {
+    const mainForm = document.querySelector('form[method="post"]');
+    if (mainForm) {
+        mainForm.addEventListener('submit', function (e) {
+            try { console.log('Stagiaire main form submit event fired'); } catch (err) {}
+            // do not prevent default; just log
+        });
+    }
+});
+
 // Assign action via AJAX to avoid nested forms and ensure button works in view mode
 document.addEventListener('DOMContentLoaded', function () {
     const assignBtn = document.getElementById('assign-action-btn');
