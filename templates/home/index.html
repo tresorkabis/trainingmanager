@@ -24,9 +24,9 @@
                             <i class="bi bi-people"></i>
                             Voir les stagiaires
                         </a>
-                        <a href="{% url 'metiers' %}" class="tm-btn-soft">
+                        <a href="{% url 'formations' %}" class="tm-btn-soft">
                             <i class="bi bi-journal-text"></i>
-                            Voir les métiers
+                            Voir les formations
                         </a>
                         {% if request.user.is_superuser or request.user.profile and request.user.profile.name == "Manager" %}
                         <a href="{% url 'admin:index' %}" class="tm-btn-soft">
@@ -47,7 +47,7 @@
                             <div class="tm-hero-metric__content">
                                 <span class="tm-hero-metric__label">Catalogue</span>
                                 <strong class="tm-hero-metric__value">{{ nbmetiers }}</strong>
-                                <span class="tm-hero-metric__text">métiers actifs</span>
+                                <span class="tm-hero-metric__text">formations actives</span>
                             </div>
                         </a>
                     </div>
@@ -70,8 +70,8 @@
 </div>
 <section class="row g-4 tm-dashboard-layout">
     {# New Row 1: Métiers, Filières, Stagiaires, Actions on one line #}
-    <div class="col-12 col-md-3"> {# Column for Métiers Stat Card #}
-        <a href="{% url 'metiers' %}" class="tm-stat-card-link">
+    <div class="col-12 col-md-3"> {# Column for Formations Stat Card #}
+        <a href="{% url 'formations' %}" class="tm-stat-card-link">
             <div class="card tm-stat-card">
                 <div class="card-body">
                     <div class="tm-stat-card__inner">
@@ -79,9 +79,9 @@
                             <i class="bi bi-journal-bookmark"></i>
                         </div>
                         <div class="tm-stat-card__content">
-                            <div class="tm-stat-label">Métiers</div>
+                            <div class="tm-stat-label">Formations</div>
                             <div class="tm-stat-value">{{ nbmetiers }}</div>
-                            <div class="tm-stat-meta">Offres actuellement suivies</div>
+                            <div class="tm-stat-meta">Formations actuellement suivies</div>
                         </div>
                     </div>
                 </div>
@@ -172,10 +172,10 @@
                         </span>
                     </a>
                     {% if request.user.is_superuser or request.user.profile and request.user.profile.name == "Manager" %}
-                    <a href="{% url 'metier_create' %}" class="tm-quick-link">
+                    <a href="{% url 'formation_create' %}" class="tm-quick-link">
                         <span class="tm-quick-link__icon"><i class="bi bi-folder-plus"></i></span>
                         <span>
-                            <span class="tm-quick-link__title">Nouveau métier</span>
+                            <span class="tm-quick-link__title">Nouvelle formation</span>
                             <span class="tm-quick-link__text">Ajouter une offre au catalogue.</span>
                         </span>
                     </a>
@@ -207,7 +207,7 @@
             </div>
             <div class="card-body">
                 <div class="tm-panel-note">
-                    Suivi centralisé des métiers, des filières et des stagiaires.
+                    Suivi centralisé des formations, des filières et des stagiaires.
                     Pour une présentation encore plus professionnelle, l'étape suivante
                     sera d'uniformiser aussi les formulaires et tableaux du module `progress`.
                 </div>
