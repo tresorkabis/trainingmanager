@@ -1,4 +1,5 @@
 from django.urls import path
+from django.views.generic.base import RedirectView
 from training.views.home_views import HomeView
 from training.views.filiere_views import FiliereListView, FiliereDetailView, FiliereCreateUpdateView, FiliereDeleteView
 from training.views.service_views import ServiceListView, ServiceDetailView, ServiceCreateUpdateView, ServiceDeleteView
@@ -20,16 +21,17 @@ urlpatterns = [
     path("services/<int:pk>/update", ServiceCreateUpdateView.as_view(), name="service_update"),
     path("services/<int:pk>/delete", ServiceDeleteView.as_view(), name="service_delete"),
 
-    path("metiers", MetierListView.as_view(), name="metiers"),
-    path("metiers/create", MetierCreateUpdateView.as_view(), name="metier_create"), # Utilise la vue unifiée
-    path("metiers/<int:pk>", MetierDetailView.as_view(), name="metier"),
-    path("metiers/<int:pk>/update", MetierCreateUpdateView.as_view(), name="metier_update"), # Utilise la vue unifiée
-    path("metiers/<int:pk>/delete", MetierDeleteView.as_view(), name="metier_delete"),
+    # Canonical 'formations' routes (replace /metiers)
+    path("formations", MetierListView.as_view(), name="formations"),
+    path("formations/create", MetierCreateUpdateView.as_view(), name="formation_create"), # Utilise la vue unifiée
+    path("formations/<int:pk>", MetierDetailView.as_view(), name="formation"),
+    path("formations/<int:pk>/update", MetierCreateUpdateView.as_view(), name="formation_update"), # Utilise la vue unifiée
+    path("formations/<int:pk>/delete", MetierDeleteView.as_view(), name="formation_delete"),
 
-    # Aliases using 'formation' names for templates and external links (backwards compatible)
-    path("metiers", MetierListView.as_view(), name="formations"),
-    path("metiers/create", MetierCreateUpdateView.as_view(), name="formation_create"),
-    path("metiers/<int:pk>", MetierDetailView.as_view(), name="formation"),
-    path("metiers/<int:pk>/update", MetierCreateUpdateView.as_view(), name="formation_update"),
-    path("metiers/<int:pk>/delete", MetierDeleteView.as_view(), name="formation_delete"),
+    # Backwards-compatible redirects from old /metiers/* to /formations/*
+    path("metiers", RedirectView.as_view(pattern_name='formations', permanent=True)),
+    path("metiers/create", RedirectView.as_view(pattern_name='formation_create', permanent=True)),
+    path("metiers/<int:pk>", RedirectView.as_view(pattern_name='formation', permanent=True)),
+    path("metiers/<int:pk>/update", RedirectView.as_view(pattern_name='formation_update', permanent=True)),
+    path("metiers/<int:pk>/delete", RedirectView.as_view(pattern_name='formation_delete', permanent=True)),
 ]
