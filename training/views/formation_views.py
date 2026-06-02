@@ -64,7 +64,7 @@ class MetierListView(MetierPermissionMixin, ListView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        ctx["link"] = "metiers"
+        ctx["link"] = "formations"
 
         all_metiers = self.get_queryset()
         ctx['stats'] = {
@@ -107,12 +107,12 @@ class MetierCreateUpdateView(MetierPermissionMixin, View): # Vue unifiée pour c
             form = MetierForm(instance=metier)
             formset = ModuleFormSet(instance=metier)
             mode = "edit"
-            titre = "Modifier un métier"
+            titre = "Modifier une formation"
         else:
             form = MetierForm()
             formset = ModuleFormSet()
             mode = "new"
-            titre = "Créer un métier"
+            titre = "Créer une formation"
 
         ctx = {
             "form": form,
@@ -133,12 +133,12 @@ class MetierCreateUpdateView(MetierPermissionMixin, View): # Vue unifiée pour c
             form = MetierForm(request.POST, instance=metier)
             formset = ModuleFormSet(request.POST, instance=metier)
             mode = "edit"
-            titre = "Modifier un métier"
+            titre = "Modifier une formation"
         else:
             form = MetierForm(request.POST)
             formset = ModuleFormSet(request.POST)
             mode = "new"
-            titre = "Créer un métier"
+            titre = "Créer une formation"
 
         if form.is_valid() and formset.is_valid():
             with transaction.atomic():
@@ -147,7 +147,7 @@ class MetierCreateUpdateView(MetierPermissionMixin, View): # Vue unifiée pour c
                 # Validation de la filière
                 filiere_id = form.cleaned_data["filiere"].pk
                 if not self.get_allowed_filieres().filter(pk=filiere_id).exists():
-                    messages.error(request, "Vous n'avez pas la permission de rattacher ce métier à cette filière.")
+                    messages.error(request, "Vous n'avez pas la permission de rattacher cette formation à cette filière.")
                     return self.form_invalid(request, form, formset, metier, mode, titre)
 
                 metier.save()
@@ -160,8 +160,8 @@ class MetierCreateUpdateView(MetierPermissionMixin, View): # Vue unifiée pour c
                     metier.duree_heures = total_duree_heures
                     metier.save(update_fields=['duree_heures'])
 
-            messages.success(request, f"Le métier '{metier.nom}' a été {'mis à jour' if pk else 'créé'} avec succès.")
-            return HttpResponseRedirect(reverse_lazy("metier", kwargs={'pk': metier.pk}))
+            messages.success(request, f"La formation '{metier.nom}' a été {'mise à jour' if pk else 'créée'} avec succès.")
+            return HttpResponseRedirect(reverse_lazy("formation", kwargs={'pk': metier.pk}))
         else:
             return self.form_invalid(request, form, formset, metier, mode, titre)
 
@@ -184,7 +184,7 @@ class MetierCreateUpdateView(MetierPermissionMixin, View): # Vue unifiée pour c
 class MetierDeleteView(MetierPermissionMixin, DeleteView):
     model = Formation
     template_name = "training/formation_confirm_delete.html"
-    success_url = reverse_lazy("metiers")
+    success_url = reverse_lazy("formations")
     context_object_name = "object"
 
     def get_context_data(self, **kwargs):
