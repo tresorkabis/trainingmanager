@@ -50,7 +50,7 @@ class StagiairePermissionMixin:
 @method_decorator(login_required, name="dispatch")
 class StagiaireListView(StagiairePermissionMixin, ListView):
     context_object_name = "stagiaire_list"
-    paginate_by = 5
+    paginate_by = 6
     template_name = "intern/stagiaires.html"
 
     def get_queryset(self):
