@@ -276,6 +276,15 @@
                                     <div class="tm-detail-item"><label class="tm-detail-item__label">Date de naissance</label><input type="date" class="form-control" name="date_naissance" value="{{ submitted.date_naissance|default:object.date_naissance }}"></div>
                                     <div class="tm-detail-item"><label class="tm-detail-item__label">Lieu de naissance</label><input class="form-control" name="lieu_naissance" value="{{ submitted.lieu_naissance|default:object.lieu_naissance }}"></div>
                                     <div class="tm-detail-item"><label class="tm-detail-item__label">Nationalité</label><input class="form-control" name="nationalite" value="{{ submitted.nationalite|default:object.nationalite }}"></div>
+                                    <div class="tm-detail-item"><label class="tm-detail-item__label">Niveau d'étude</label><input class="form-control" name="niveau_etude" value="{{ submitted.niveau_etude|default:object.niveau_etude }}"></div>
+                                    <div class="tm-detail-item"><label class="tm-detail-item__label">Type de pièce</label>
+                                        <select class="form-select" name="type_piece">
+                                            <option value="">-- Choisir --</option>
+                                            <option value="CE" {% if submitted.type_piece|default:object.type_piece == 'CE' %}selected{% endif %}>Carte d'électeur</option>
+                                            <option value="PS" {% if submitted.type_piece|default:object.type_piece == 'PS' %}selected{% endif %}>Passeport</option>
+                                            <option value="PC" {% if submitted.type_piece|default:object.type_piece == 'PC' %}selected{% endif %}>Permis de conduire</option>
+                                        </select>
+                                    </div>
                                     <div class="tm-detail-item"><label class="tm-detail-item__label">Numéro de pièce</label><input class="form-control" name="numero_piece" value="{{ submitted.numero_piece|default:object.numero_piece }}"></div>
                                     <div class="tm-detail-item"><label class="tm-detail-item__label">Nom du père</label><input class="form-control" name="nom_pere" value="{{ submitted.nom_pere|default:object.nom_pere }}"></div>
                                     <div class="tm-detail-item"><label class="tm-detail-item__label">Nom de la mère</label><input class="form-control" name="nom_mere" value="{{ submitted.nom_mere|default:object.nom_mere }}"></div>
@@ -409,6 +418,26 @@
                                     <span class="tm-detail-item__label">Niveau d'étude général</span>
                                     <div class="tm-detail-item__value">{{ object.niveau_etude|default:"Non renseigné" }}</div>
                                 </div>
+                                {% if mode %}
+                                <div id="studies-container">
+                                    <div class="study-row mb-3 p-3 border rounded">
+                                        <div class="row g-2">
+                                            <div class="col-md-4"><input class="form-control" name="etude_intitule[]" placeholder="Intitulé" value=""></div>
+                                            <div class="col-md-3"><input class="form-control" name="etude_etablissement[]" placeholder="Établissement" value=""></div>
+                                            <div class="col-md-2"><input class="form-control" name="etude_niveau[]" placeholder="Niveau" value=""></div>
+                                            <div class="col-md-1"><input type="number" min="1900" class="form-control" name="etude_annee_debut[]" placeholder="Début"></div>
+                                            <div class="col-md-1"><input type="number" min="1900" class="form-control" name="etude_annee_fin[]" placeholder="Fin"></div>
+                                            <div class="col-md-1 d-flex align-items-center">
+                                                <button type="button" class="btn btn-danger remove-study-row">&times;</button>
+                                            </div>
+                                            <div class="col-12 mt-2"><input class="form-control" name="etude_diplome[]" placeholder="Diplôme obtenu" value=""></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mt-2">
+                                    <button id="add-study-row" type="button" class="btn btn-sm btn-outline-primary">Ajouter une étude</button>
+                                </div>
+                                {% else %}
                                 {% if object.pk and object.etudes.all %}
                                 <div class="table-responsive">
                                     <table class="table table-striped">
@@ -439,6 +468,7 @@
                                 {% else %}
                                 <p class="text-muted mb-0">Aucune étude enregistrée.</p>
                                 {% endif %}
+                                {% endif %}
                             </div>
                         </div>
                     </div>
@@ -450,6 +480,23 @@
                                 <p class="text-muted mb-0">Formations externes, certifications et perfectionnements suivis en dehors des actions internes.</p>
                             </div>
                             <div class="card-body">
+                                {% if mode %}
+                                <div id="other-trainings-container">
+                                    <div class="other-training-row mb-3 p-3 border rounded">
+                                        <div class="row g-2">
+                                            <div class="col-md-6"><input class="form-control" name="autre_formation_intitule[]" placeholder="Intitulé" value=""></div>
+                                            <div class="col-md-4"><input class="form-control" name="autre_formation_etablissement[]" placeholder="Établissement" value=""></div>
+                                            <div class="col-md-1"><input type="number" min="1900" class="form-control" name="autre_formation_annee_fin[]" placeholder="Année"></div>
+                                            <div class="col-md-1 d-flex align-items-center">
+                                                <button type="button" class="btn btn-danger remove-other-training-row">&times;</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mt-2">
+                                    <button id="add-other-training-row" type="button" class="btn btn-sm btn-outline-primary">Ajouter une formation</button>
+                                </div>
+                                {% else %}
                                 {% if object.pk and object.autres_formations.all %}
                                 <div class="table-responsive">
                                     <table class="table table-striped">
@@ -473,6 +520,7 @@
                                 </div>
                                 {% else %}
                                 <p class="text-muted mb-0">Aucune formation complémentaire enregistrée.</p>
+                                {% endif %}
                                 {% endif %}
                             </div>
                         </div>
