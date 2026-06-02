@@ -92,19 +92,29 @@
                         <div class="col-md-6 col-12">
                             <div class="form-group mb-3">
                                 <label for="{{ form.stagiaire.id_for_label }}" class="form-label">{{ form.stagiaire.label }}</label>
-                                {{ form.stagiaire }} {# Select2Widget gère déjà ses classes #}
-                                {% for error in form.stagiaire.errors %}
-                                    <div class="invalid-feedback d-block">{{ error }}</div>
-                                {% endfor %}
+                                {% if prefill_stagiaire and stagiaire_obj %}
+                                    <input type="hidden" name="stagiaire" value="{{ stagiaire_obj.pk }}">
+                                    <div class="form-control-plaintext">{{ stagiaire_obj.get_full_name }}</div>
+                                {% else %}
+                                    {{ form.stagiaire }} {# Select2Widget gère déjà ses classes #}
+                                    {% for error in form.stagiaire.errors %}
+                                        <div class="invalid-feedback d-block">{{ error }}</div>
+                                    {% endfor %}
+                                {% endif %}
                             </div>
                         </div>
                         <div class="col-md-6 col-12">
                             <div class="form-group mb-3">
                                 <label for="{{ form.action.id_for_label }}" class="form-label">{{ form.action.label }}</label>
-                                {{ form.action }} {# Select2Widget gère déjà ses classes #}
-                                {% for error in form.action.errors %}
-                                    <div class="invalid-feedback d-block">{{ error }}</div>
-                                {% endfor %}
+                                {% if prefill_action and action_obj %}
+                                    <input type="hidden" name="action" value="{{ action_obj.pk }}">
+                                    <div class="form-control-plaintext">{{ action_obj.description }} ({{ action_obj.metier.nom }})</div>
+                                {% else %}
+                                    {{ form.action }} {# Select2Widget gère déjà ses classes #}
+                                    {% for error in form.action.errors %}
+                                        <div class="invalid-feedback d-block">{{ error }}</div>
+                                    {% endfor %}
+                                {% endif %}
                             </div>
                         </div>
                         <div class="col-md-6 col-12">

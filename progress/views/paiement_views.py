@@ -39,7 +39,13 @@ class PaiementCreateView(CreateView):
         stagiaire_id = self.request.GET.get('stagiaire')
         if stagiaire_id:
             try:
-                initial['stagiaire'] = int(stagiaire_id)
+                sid = int(stagiaire_id)
+                initial['stagiaire'] = sid
+                # Try to prefill the action based on stagiaire's latest DetailAction
+                from progress.models import DetailAction
+                latest = DetailAction.objects.filter(stagiaire_id=sid).order_by('-action__date_debut').select_related('action').first()
+                if latest and latest.action_id:
+                    initial['action'] = latest.action_id
             except ValueError:
                 pass
         return initial
@@ -54,6 +60,31 @@ class PaiementCreateView(CreateView):
         context = super().get_context_data(**kwargs)
         context['link'] = 'paiements'
         context['titre'] = 'Enregistrer un paiement'
+        # Pass information to template so we can render hidden inputs and display labels
+        stagiaire_id = self.request.GET.get('stagiaire')
+        if stagiaire_id:
+            from intern.models import Stagiaire
+            try:
+                stagiaire_obj = Stagiaire.objects.get(pk=int(stagiaire_id))
+                context['prefill_stagiaire'] = True
+                context['stagiaire_obj'] = stagiaire_obj
+            except Exception:
+                context['prefill_stagiaire'] = False
+        else:
+            context['prefill_stagiaire'] = False
+
+        # If initial has action set, pass it
+        initial_action = self.get_initial().get('action')
+        if initial_action:
+            from progress.models import Action
+            try:
+                context['prefill_action'] = True
+                context['action_obj'] = Action.objects.get(pk=initial_action)
+            except Exception:
+                context['prefill_action'] = False
+        else:
+            context['prefill_action'] = False
+
         return context
 
 @method_decorator(login_required, name='dispatch')
