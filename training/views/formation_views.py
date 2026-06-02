@@ -48,7 +48,8 @@ class MetierPermissionMixin:
 
 @method_decorator(login_required, name="dispatch")
 class MetierListView(MetierPermissionMixin, ListView):
-    context_object_name = "metier_list"
+    # Expose as 'formation_list' for templates that expect that name
+    context_object_name = "formation_list"
     paginate_by = 4
     template_name = "training/formations.html"
 
