@@ -1,5 +1,5 @@
 from django import forms
-from django_select2.forms import Select2Widget
+from django_select2.forms import Select2Widget, ModelSelect2TagWidget
 from .models import Stagiaire, Categorie, Filiere, Entreprise
 
 class StagiaireForm(forms.ModelForm):
@@ -16,10 +16,11 @@ class StagiaireForm(forms.ModelForm):
     )
     # Use a CharField with Select2 tagging enabled so users can type a new company name.
     # clean_entreprise will return an Entreprise instance so ModelForm assigns the FK correctly.
-    entreprise = forms.CharField(
+    entreprise = forms.ModelChoiceField(
+        queryset=Entreprise.objects.all().order_by('nom'),
         label="Entreprise",
         required=False,
-        widget=Select2Widget(attrs={'data-width': '100%', 'class': 'form-select', 'data-tags': 'true', 'data-minimum-input-length': '0'})
+        widget=ModelSelect2TagWidget(model=Entreprise, search_fields=["nom__icontains"], attrs={'data-width': '100%', 'class': 'form-select', 'data-tags': 'true', 'data-minimum-input-length': '0'})
     )
     date_naissance = forms.DateField(
         widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
