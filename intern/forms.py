@@ -77,15 +77,27 @@ class StagiaireForm(forms.ModelForm):
 
         if isinstance(entreprise_data, str):
             s = entreprise_data.strip()
-            # try to parse JSON array
+            # Normalize common array-like representations, e.g. "['SNEL']", '["SNEL"]', or plain 'SNEL'
+            # If it's a Python-like list with single quotes, json.loads will fail — try to strip brackets/quotes manually.
             if s.startswith('[') and s.endswith(']'):
-                try:
-                    import json
-                    parsed = json.loads(s)
-                    if isinstance(parsed, (list, tuple)) and parsed:
-                        entreprise_data = parsed[0]
-                except Exception:
-                    pass
+                # Remove outer brackets
+                inner = s[1:-1].strip()
+                # If inner looks like a quoted string, strip quotes
+                if (inner.startswith("'") and inner.endswith("'")) or (inner.startswith('"') and inner.endswith('"')):
+                    entreprise_data = inner[1:-1].strip()
+                else:
+                    # try json.loads for well-formed JSON
+                    try:
+                        import json
+                        parsed = json.loads(s)
+                        if isinstance(parsed, (list, tuple)) and parsed:
+                            entreprise_data = parsed[0]
+                    except Exception:
+                        # fallback: split by comma and take first token
+                        entreprise_data = inner.split(',')[0].strip().strip('"\'')
+            else:
+                # not bracketed, keep trimmed string
+                entreprise_data = s
 
         # Si entreprise_data est déjà une instance d'Entreprise (cas d'une sélection existante)
         if isinstance(entreprise_data, Entreprise):
