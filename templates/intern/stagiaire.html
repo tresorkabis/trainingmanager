@@ -374,19 +374,16 @@
 
                                 {# Formulaire d'inscription à une action - disponible en mode création/édition ou en visualisation #}
                                 <div class="mt-3">
-                                    <form method="post" action="{% url 'detailaction_create' %}">
-                                        {% csrf_token %}
-                                        <input type="hidden" name="stagiaire" value="{{ object.pk }}">
-                                        <div class="input-group">
-                                            <select name="action" class="form-select">
-                                                <option value="">-- Choisir une action --</option>
-                                                {% for act in actions %}
-                                                <option value="{{ act.id }}">{{ act.description }} ({{ act.metier.nom }}) - {{ act.date_debut|date:"d/m/Y" }}</option>
-                                                {% endfor %}
-                                            </select>
-                                            <button class="btn btn-primary" type="submit">Inscrire à l'action</button>
-                                        </div>
-                                    </form>
+                                    <div class="input-group">
+                                        <input type="hidden" id="stagiaire-id" value="{{ object.pk }}">
+                                        <select id="assign-action-select" name="action" class="form-select">
+                                            <option value="">-- Choisir une action --</option>
+                                            {% for act in actions %}
+                                            <option value="{{ act.id }}">{{ act.description }} ({{ act.metier.nom }}) - {{ act.date_debut|date:"d/m/Y" }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <button id="assign-action-btn" class="btn btn-primary" type="button">Inscrire à l'action</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -766,4 +763,62 @@
 
 </script>
 {% endif %}
+<script>
+// Assign action via AJAX to avoid nested forms and ensure button works in view mode
+document.addEventListener('DOMContentLoaded', function () {
+    const assignBtn = document.getElementById('assign-action-btn');
+    const assignSelect = document.getElementById('assign-action-select');
+    const stagiaireIdInput = document.getElementById('stagiaire-id');
+    const url = "{% url 'detailaction_create' %}";
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    if (!assignBtn) return;
+    assignBtn.addEventListener('click', function () {
+        const actionId = assignSelect ? assignSelect.value : null;
+        const stagiaireId = stagiaireIdInput ? stagiaireIdInput.value : null;
+        if (!actionId || !stagiaireId) {
+            alert('Sélectionner une action valide et un stagiaire existant.');
+            return;
+        }
+
+        const csrftoken = getCookie('csrftoken');
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+                'X-CSRFToken': csrftoken,
+            },
+            body: `stagiaire=${encodeURIComponent(stagiaireId)}&action=${encodeURIComponent(actionId)}`
+        }).then(resp => {
+            if (resp.ok) {
+                // Redirect back to stagiaire page
+                const stagiaireUrl = "{% url 'stagiaire' pk=object.pk %}";
+                if (stagiaireUrl) {
+                    window.location.href = stagiaireUrl;
+                } else {
+                    window.location.reload();
+                }
+            } else {
+                resp.text().then(t => alert('Erreur lors de l\'inscription : ' + t));
+            }
+        }).catch(err => {
+            alert('Erreur réseau: ' + err.message);
+        });
+    });
+});
+</script>
 {% endblock script %}
