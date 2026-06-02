@@ -181,29 +181,41 @@
         <div class="row g-4 align-items-center">
             <div class="col-12 col-xl-7"> {# Left column for photo, name, pills, description #}
                 <div class="d-flex flex-column flex-sm-row align-items-start align-items-sm-center gap-4">
-                    {% if object.photo %}
-                    <img id="photo-preview" src="{{ object.photo.url }}" alt="Photo du stagiaire" class="tm-stagiaire-hero__photo">
-                    {% else %}
-                    <img id="photo-preview" src="{% static 'assets/images/faces/1.jpg' %}" alt="Photo du stagiaire" class="tm-stagiaire-hero__photo">
-                    {% endif %}
-                    <div>
-                        <div class="tm-pill-list mb-3">
-                            <span class="tm-pill"><i class="bi bi-person-badge"></i>{{ object.categorie }}</span>
-                            {% if object.filiere %}
-                            <span class="tm-pill"><i class="bi bi-signpost"></i>{{ object.filiere.nom }}</span>
-                            {% endif %}
-                            {% if object.entreprise %}
-                            <span class="tm-pill"><i class="bi bi-building"></i>{{ object.entreprise.nom }}</span>
-                            {% endif %}
+                    {% if object %}
+                        {% if object.photo %}
+                        <img id="photo-preview" src="{{ object.photo.url }}" alt="Photo du stagiaire" class="tm-stagiaire-hero__photo">
+                        {% else %}
+                        <img id="photo-preview" src="{% static 'assets/images/faces/1.jpg' %}" alt="Photo du stagiaire" class="tm-stagiaire-hero__photo">
+                        {% endif %}
+                        <div>
+                            <div class="tm-pill-list mb-3">
+                                <span class="tm-pill"><i class="bi bi-person-badge"></i>{{ object.categorie }}</span>
+                                {% if object.filiere %}
+                                <span class="tm-pill"><i class="bi bi-signpost"></i>{{ object.filiere.nom }}</span>
+                                {% endif %}
+                                {% if object.entreprise %}
+                                <span class="tm-pill"><i class="bi bi-building"></i>{{ object.entreprise.nom }}</span>
+                                {% endif %}
+                            </div>
+                            <h2 class="mb-2">{{ object.get_full_name }}</h2>
+                            <p class="text-muted mb-0"> 
+                                Fiche de consultation avec identité complète, affectation, parcours académique et suivi des formations.
+                            </p>
                         </div>
-                        <h2 class="mb-2">{{ object.get_full_name }}</h2>
-                        <p class="text-muted mb-0">
-                            Fiche de consultation avec identité complète, affectation, parcours académique et suivi des formations.
-                        </p>
-                    </div>
+                    {% else %}
+                        <img id="photo-preview" src="{% static 'assets/images/faces/1.jpg' %}" alt="Photo du stagiaire" class="tm-stagiaire-hero__photo">
+                        <div>
+                            <div class="tm-pill-list mb-3">
+                                <span class="tm-pill"><i class="bi bi-person-badge"></i>Nouvel·le stagiaire</span>
+                            </div>
+                            <h2 class="mb-2">Création d'un stagiaire</h2>
+                            <p class="text-muted mb-0">Remplir le formulaire pour ajouter un nouveau stagiaire.</p>
+                        </div>
+                    {% endif %}
                 </div>
             </div>
             <div class="col-12 col-xl-5"> {# Right column for KPI cards #}
+                {% if object %}
                 <div class="row g-3">
                     <div class="col-6">
                         <div class="tm-stagiaire-kpi-card">
@@ -230,6 +242,34 @@
                         </div>
                     </div>
                 </div>
+                {% else %}
+                <div class="row g-3">
+                    <div class="col-6">
+                        <div class="tm-stagiaire-kpi-card">
+                            <span class="tm-stagiaire-kpi-card__label">Téléphone</span>
+                            <span class="tm-stagiaire-kpi-card__value">Non renseigné</span>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="tm-stagiaire-kpi-card">
+                            <span class="tm-stagiaire-kpi-card__label">Sexe</span>
+                            <span class="tm-stagiaire-kpi-card__value">-</span>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="tm-stagiaire-kpi-card">
+                            <span class="tm-stagiaire-kpi-card__label">Type de pièce</span>
+                            <span class="tm-stagiaire-kpi-card__value">Non renseigné</span>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="tm-stagiaire-kpi-card">
+                            <span class="tm-stagiaire-kpi-card__label">Niveau d'étude</span>
+                            <span class="tm-stagiaire-kpi-card__value">Non renseigné</span>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
             </div>
         </div>
     </section>
