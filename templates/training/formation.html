@@ -68,6 +68,20 @@
                                             </div>
                                         </div>
                                     </div>
+
+                                    <div class="col-6">
+                                        <div class="row">
+                                            <div class="col-4">
+                                                <label for="type_formation">Type de formation</label>
+                                            </div>
+                                            <div class="col-8 form-group">
+                                                <select {% if object.id %} disabled {% endif %} name="type_formation" id="type_formation" class="form-control">
+                                                    <option value="qualifiante" {% if object and object.type_formation == 'qualifiante' %} selected {% endif %}>Qualifiante</option>
+                                                    <option value="continue" {% if object and object.type_formation == 'continue' %} selected {% endif %}>Continue</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
                                     <div class="col-6">
                                         <div class="row">
                                             <div class="col-4">

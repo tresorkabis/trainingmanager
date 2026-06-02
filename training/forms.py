@@ -14,10 +14,11 @@ class MetierForm(forms.ModelForm):
 
     class Meta:
         model = Formation
-        fields = ["nom", "duree", "filiere", "cout", "frais_participation", "frais_jury", "frais_materiels"]
+        fields = ["nom", "duree", "type_formation", "filiere", "cout", "frais_participation", "frais_jury", "frais_materiels"]
         widgets = {
             'nom': forms.TextInput(attrs={'class': 'form-control'}),
             'duree': forms.NumberInput(attrs={'class': 'form-control'}),
+            'type_formation': forms.Select(choices=Formation.TYPE_CHOICES, attrs={'class': 'form-select'}),
             'cout': forms.NumberInput(attrs={'class': 'form-control'}),
             'frais_participation': forms.NumberInput(attrs={'class': 'form-control'}),
             'frais_jury': forms.NumberInput(attrs={'class': 'form-control'}),
