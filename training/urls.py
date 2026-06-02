@@ -23,10 +23,20 @@ urlpatterns = [
 
     # Canonical 'formations' routes (replace /metiers)
     path("formations", MetierListView.as_view(), name="formations"),
+    # Legacy name aliases for compatibility with older templates/code
+    path("formations", MetierListView.as_view(), name="metiers"),
+
     path("formations/create", MetierCreateUpdateView.as_view(), name="formation_create"), # Utilise la vue unifiée
+    path("formations/create", MetierCreateUpdateView.as_view(), name="metier_create"),
+
     path("formations/<int:pk>", MetierDetailView.as_view(), name="formation"),
+    path("formations/<int:pk>", MetierDetailView.as_view(), name="metier"),
+
     path("formations/<int:pk>/update", MetierCreateUpdateView.as_view(), name="formation_update"), # Utilise la vue unifiée
+    path("formations/<int:pk>/update", MetierCreateUpdateView.as_view(), name="metier_update"),
+
     path("formations/<int:pk>/delete", MetierDeleteView.as_view(), name="formation_delete"),
+    path("formations/<int:pk>/delete", MetierDeleteView.as_view(), name="metier_delete"),
 
     # Backwards-compatible redirects from old /metiers/* to /formations/*
     path("metiers", RedirectView.as_view(pattern_name='formations', permanent=True)),
