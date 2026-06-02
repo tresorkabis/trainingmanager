@@ -50,7 +50,7 @@ class MetierPermissionMixin:
 class MetierListView(MetierPermissionMixin, ListView):
     context_object_name = "metier_list"
     paginate_by = 4
-    template_name = "training/metiers.html"
+    template_name = "training/formations.html"
 
     def get_queryset(self):
         self.enforce_manage_permission()
@@ -80,7 +80,7 @@ class MetierListView(MetierPermissionMixin, ListView):
 @method_decorator(login_required, name="dispatch")
 class MetierDetailView(MetierPermissionMixin, DetailView):
     model = Formation
-    template_name = "training/metier.html"
+    template_name = "training/formation.html"
     context_object_name = "object" # Utilise 'object' comme nom de contexte par défaut
 
     def get_queryset(self):
@@ -97,7 +97,7 @@ class MetierDetailView(MetierPermissionMixin, DetailView):
 
 @method_decorator(login_required, name="dispatch")
 class MetierCreateUpdateView(MetierPermissionMixin, View): # Vue unifiée pour créer et modifier
-    template_name = "training/metier_form.html" # Nouveau template pour le formulaire
+    template_name = "training/formation_form.html" # Nouveau template pour le formulaire
 
     def get(self, request, pk=None):
         self.enforce_manage_permission()
@@ -183,7 +183,7 @@ class MetierCreateUpdateView(MetierPermissionMixin, View): # Vue unifiée pour c
 @method_decorator(login_required, name="dispatch")
 class MetierDeleteView(MetierPermissionMixin, DeleteView):
     model = Formation
-    template_name = "training/metier_confirm_delete.html"
+    template_name = "training/formation_confirm_delete.html"
     success_url = reverse_lazy("metiers")
     context_object_name = "object"
 

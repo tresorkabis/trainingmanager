@@ -2,7 +2,7 @@ from django.urls import path
 from training.views.home_views import HomeView
 from training.views.filiere_views import FiliereListView, FiliereDetailView, FiliereCreateUpdateView, FiliereDeleteView
 from training.views.service_views import ServiceListView, ServiceDetailView, ServiceCreateUpdateView, ServiceDeleteView
-from training.views.metier_views import MetierListView, MetierDetailView, MetierCreateUpdateView, MetierDeleteView # Import MetierCreateUpdateView
+from training.views.formation_views import MetierListView, MetierDetailView, MetierCreateUpdateView, MetierDeleteView # Import MetierCreateUpdateView
 
 
 urlpatterns = [
