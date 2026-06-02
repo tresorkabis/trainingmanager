@@ -377,56 +377,80 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const searchInput = document.getElementById('searchInput');
+
+        // Table elements
         const tableBody = document.getElementById('stagiaireTableBody');
-        const allRows = Array.from(tableBody.querySelectorAll('tr')); // Get all original rows
+        const allRows = tableBody ? Array.from(tableBody.querySelectorAll('tr')).filter(r => r.id !== 'noResultsRow') : [];
         let noResultsRow = document.getElementById('noResultsRow');
 
-        // If noResultsRow doesn't exist initially, create a placeholder
-        if (!noResultsRow) {
+        if (tableBody && !noResultsRow) {
             noResultsRow = document.createElement('tr');
             noResultsRow.id = 'noResultsRow';
             const td = document.createElement('td');
-            td.colSpan = 10; // Adjusted colspan for new columns
+            td.colSpan = 10;
             td.className = 'no-results-message';
             td.textContent = 'Aucun stagiaire trouvé.';
             noResultsRow.appendChild(td);
-            noResultsRow.style.display = 'none'; // Hide by default
+            noResultsRow.style.display = 'none';
             tableBody.appendChild(noResultsRow);
         }
 
-        function performSearch() {
-            const searchTerm = searchInput.value.toLowerCase().trim();
-            let resultsFound = false;
+        // Cards elements
+        const cardsContainer = document.getElementById('stagiaireCards');
+        const cardElements = cardsContainer ? Array.from(cardsContainer.querySelectorAll('.card')).map(c => c.closest('div[class*="col-"]') || c) : [];
+        // Remove potential card placeholder if present
+        const allCards = cardElements.filter(el => el && el.id !== 'cardNoResults');
 
-            allRows.forEach(row => {
-                // Assuming Nom complet is at index 2
-                const fullNameCell = row.cells[2];
-                const fullName = fullNameCell ? fullNameCell.textContent.toLowerCase() : '';
-
-                if (fullName.includes(searchTerm)) {
-                    row.style.display = ''; // Show row
-                    resultsFound = true;
-                } else {
-                    row.style.display = 'none'; // Hide row
-                }
-            });
-
-            if (resultsFound) {
-                noResultsRow.style.display = 'none';
-            } else {
-                noResultsRow.style.display = '';
-            }
+        let cardNoResults = document.getElementById('cardNoResults');
+        if (cardsContainer && !cardNoResults) {
+            cardNoResults = document.createElement('div');
+            cardNoResults.id = 'cardNoResults';
+            cardNoResults.className = 'col-12 no-results-message';
+            cardNoResults.style.display = 'none';
+            cardNoResults.innerHTML = '<p class="text-muted">Aucun stagiaire trouvé.</p>';
+            cardsContainer.appendChild(cardNoResults);
         }
 
-        // Attach event listener for keyup on the search input
-        searchInput.addEventListener('keyup', performSearch);
+        function performSearch() {
+            const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
+            let tableFound = false;
+            let cardsFound = false;
 
-        // Initial display check for no results if the list is empty
-        if (allRows.length === 0 && !noResultsRow.textContent.includes('Aucun stagiaire enregistré.')) {
-             noResultsRow.style.display = '';
-             noResultsRow.textContent = 'Aucun stagiaire enregistré.';
-        } else if (allRows.length > 0) {
-            noResultsRow.style.display = 'none';
+            // Filter table rows
+            allRows.forEach(row => {
+                const fullNameCell = row.cells && row.cells[2];
+                const fullName = fullNameCell ? fullNameCell.textContent.toLowerCase() : row.textContent.toLowerCase();
+                const matches = searchTerm === '' || fullName.includes(searchTerm);
+                row.style.display = matches ? '' : 'none';
+                if (matches) tableFound = true;
+            });
+
+            // Filter cards
+            allCards.forEach(cardCol => {
+                const titleEl = cardCol.querySelector('.tm-stagiaire-row__title');
+                const metaEl = cardCol.querySelector('.tm-stagiaire-row__meta');
+                const title = titleEl ? titleEl.textContent.toLowerCase() : '';
+                const meta = metaEl ? metaEl.textContent.toLowerCase() : '';
+                const combined = (title + ' ' + meta).trim();
+                const matches = searchTerm === '' || combined.includes(searchTerm);
+                cardCol.style.display = matches ? '' : 'none';
+                if (matches) cardsFound = true;
+            });
+
+            if (noResultsRow) noResultsRow.style.display = tableFound ? 'none' : '';
+            if (cardNoResults) cardNoResults.style.display = cardsFound ? 'none' : '';
+        }
+
+        if (searchInput) {
+            searchInput.addEventListener('keyup', performSearch);
+        }
+
+        // Initial check
+        if (allRows.length === 0 && noResultsRow) {
+            noResultsRow.style.display = '';
+        }
+        if (allCards.length === 0 && cardNoResults) {
+            cardNoResults.style.display = '';
         }
     });
 </script>
