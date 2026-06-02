@@ -1,6 +1,6 @@
 from django.urls import path
 from progress.views.actions_views import ActionListViews, ActionDetailViews, ActionCreateView, ActionUpdateView, ActionDeleteView
-from progress.views.detailAction_views import DetailActionListViews, DetailActionDetailView # Importation de DetailActionDetailView
+from progress.views.detailAction_views import DetailActionListViews, DetailActionDetailView, DetailActionCreateView # Importation de DetailActionDetailView
 from progress.views.formateur_views import FormateurListView, FormateurCreateUpdateView, FormateurDeleteView, FormateurDetailView
 from progress.views.typeaction_views import TypeActionListView, TypeActionDetailView, TypeActionCreateUpdateView, TypeActionDeleteView
 from progress.views.paiement_views import PaiementListView, PaiementCreateView, PaiementDetailView, PaiementUpdateView, PaiementDeleteView # Importation des vues de Paiement
