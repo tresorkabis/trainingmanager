@@ -92,6 +92,7 @@ class MetierDetailView(MetierPermissionMixin, DetailView):
         ctx["formateurs"] = Formateur.objects.all()
         ctx["titre"] = "Voir"
         ctx["mode"] = "view"
+        ctx["link"] = "formations"
         return ctx
 
 
