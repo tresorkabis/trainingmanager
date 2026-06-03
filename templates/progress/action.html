@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
+{% load widget_tweaks %} {# Ensure widget_tweaks is loaded for form field styling #}
 
 {% block title %}{{ titre }} une Formation{% endblock title %}
 {% block page_header %}{{ titre }} une Action de Formation{% endblock page_header %}
@@ -19,6 +20,7 @@
         box-shadow: 0 16px 32px rgba(15, 23, 42, 0.05);
     }
 </style>
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 {% endblock style %}
 
 {% block content %}
@@ -94,13 +96,7 @@
                                     {% endfor %}
                                 </select>
                             </div>
-                            <div class="form-group">
-                                <label for="formateurs">Formateurs affectés</label>
-                                <select id="formateurs" class="form-select" name="formateurs" multiple size="6">
-                                    {# Options will be populated by JavaScript #}
-                                </select>
-                                <small class="text-muted d-block mt-2">Maintenez `Ctrl` ou `Cmd` pour sélectionner plusieurs formateurs.</small>
-                            </div>
+                            {# Removed the old form-group for Action.formateurs #}
                         </div>
                         <div class="col-12 col-lg-6">
                             <div class="form-group">
@@ -128,6 +124,16 @@
                             </div>
                         </div>
                     </div>
+
+                    {# New section for module-specific formateur assignment #}
+                    <div class="col-12 mt-4" id="module-formateur-assignment-section">
+                        <h4>Assignation des formateurs aux modules</h4>
+                        <p class="text-muted mb-3">Sélectionnez les formateurs pour chaque module de la formation choisie.</p>
+                        <div id="modules-assignment-container">
+                            {# Modules and their formateur selects will be rendered here by JavaScript #}
+                        </div>
+                    </div>
+
                     <div class="d-flex justify-content-end gap-2 mt-4">
                         <a href="{% url 'actions' %}" class="btn btn-light-secondary">Annuler</a>
                         <button type="submit" class="btn btn-primary">{{ titre }}</button>
@@ -141,68 +147,83 @@
 {# JSON data for JavaScript #}
 {{ formations_json|json_script:"formations-data" }}
 {{ formateurs_json|json_script:"formateurs-data" }}
-{{ selected_formateur_ids|json_script:"selected-formateurs-data" }}
+{# Removed selected_formateur_ids_json as it's no longer for action-level formateurs #}
+{{ modules_formateurs_assignment_json|json_script:"modules-formateurs-assignment-data" }} {# New JSON data #}
 
 {% endblock content %}
 
 {% block script %}
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const formationSelect = document.getElementById('formation');
-        const formateursSelect = document.getElementById('formateurs');
+        const modulesAssignmentContainer = document.getElementById('modules-assignment-container');
 
         // Get JSON data from the template
         const allFormationsData = JSON.parse(document.getElementById('formations-data').textContent);
         const allFormateursData = JSON.parse(document.getElementById('formateurs-data').textContent);
-        const initialSelectedFormateurs = JSON.parse(document.getElementById('selected-formateurs-data').textContent);
+        const initialModulesFormateursAssignment = JSON.parse(document.getElementById('modules-formateurs-assignment-data').textContent);
 
-        function updateFormateursDropdown() {
-            const selectedFormationId = formationSelect.value;
-            formateursSelect.innerHTML = ''; // Clear current options
+        function renderModuleFormateurAssignments(selectedFormation) {
+            modulesAssignmentContainer.innerHTML = ''; // Clear previous modules
 
-            if (!selectedFormationId) {
-                const option = document.createElement('option');
-                option.value = '';
-                option.textContent = 'Sélectionnez une formation d\'abord';
-                formateursSelect.appendChild(option);
-                formateursSelect.disabled = true;
+            if (!selectedFormation || !selectedFormation.modules || selectedFormation.modules.length === 0) {
+                modulesAssignmentContainer.innerHTML = '<p class="text-muted">Aucun module disponible pour cette formation ou formation non sélectionnée.</p>';
                 return;
             }
 
-            formateursSelect.disabled = false;
-            const selectedFormation = allFormationsData.find(f => String(f.id) === selectedFormationId);
+            selectedFormation.modules.forEach(module => {
+                const moduleDiv = document.createElement('div');
+                moduleDiv.classList.add('mb-3', 'p-3', 'border', 'rounded');
 
-            if (selectedFormation && selectedFormation.formateurs_ids.length > 0) {
-                const allowedFormateurIds = new Set(selectedFormation.formateurs_ids);
+                const moduleTitle = document.createElement('h6');
+                moduleTitle.textContent = `Module: ${module.titre} (${module.duree_heures} heures)`;
+                moduleDiv.appendChild(moduleTitle);
 
+                const formateursSelect = document.createElement('select');
+                formateursSelect.classList.add('form-select', 'select2-enabled'); // Add a class for Select2 initialization
+                formateursSelect.name = `module_formateurs_${module.id}`;
+                formateursSelect.multiple = true;
+                formateursSelect.size = 3; // Adjust size as needed
+
+                // Populate with all available formateurs
                 allFormateursData.forEach(formateur => {
-                    if (allowedFormateurIds.has(formateur.id)) {
-                        const option = document.createElement('option');
-                        option.value = formateur.id;
-                        option.textContent = `${formateur.nom} ${formateur.postnom}`;
+                    const option = document.createElement('option');
+                    option.value = formateur.id;
+                    option.textContent = `${formateur.nom} ${formateur.postnom}`;
+                    formateursSelect.appendChild(option);
+                });
 
-                        // Pre-select formateurs if in edit mode or submitted with errors
-                        if (initialSelectedFormateurs.includes(formateur.id)) {
-                            option.selected = true;
-                        }
-                        formateursSelect.appendChild(option);
+                // Pre-select formateurs for this module based on initial data (for edit mode)
+                const assignedFormateursForModule = initialModulesFormateursAssignment[module.id] || [];
+                assignedFormateursForModule.forEach(formateurId => {
+                    const optionToSelect = formateursSelect.querySelector(`option[value="${formateurId}"]`);
+                    if (optionToSelect) {
+                        optionToSelect.selected = true;
                     }
                 });
-            } else {
-                const option = document.createElement('option');
-                option.value = '';
-                option.textContent = 'Aucun formateur disponible pour cette formation';
-                formateursSelect.appendChild(option);
-                formateursSelect.disabled = true;
-            }
+
+                moduleDiv.appendChild(formateursSelect);
+                modulesAssignmentContainer.appendChild(moduleDiv);
+            });
+
+            // Initialize Select2 for newly created selects
+            $('.select2-enabled').select2();
+        }
+
+        function updateFormFieldsBasedOnFormation() {
+            const selectedFormationId = formationSelect.value;
+            const selectedFormation = allFormationsData.find(f => String(f.id) === selectedFormationId);
+
+            // Render module-formateur assignment section
+            renderModuleFormateurAssignments(selectedFormation);
         }
 
         // Attach event listener
-        formationSelect.addEventListener('change', updateFormateursDropdown);
+        formationSelect.addEventListener('change', updateFormFieldsBasedOnFormation);
 
-        // Initial call to populate formateurs based on pre-selected formation (if any)
-        // and to handle the initial state (e.g., in edit mode)
-        updateFormateursDropdown();
+        // Initial call to populate fields based on pre-selected formation (if any)
+        updateFormFieldsBasedOnFormation();
     });
 </script>
 {% endblock script %}

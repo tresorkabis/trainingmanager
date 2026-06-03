@@ -1,9 +1,15 @@
 from django.urls import path
 from progress.views.actions_views import ActionListViews, ActionDetailViews, ActionCreateView, ActionUpdateView, ActionDeleteView
-from progress.views.detailAction_views import DetailActionListViews, DetailActionDetailView, DetailActionCreateView # Importation de DetailActionDetailView
+from progress.views.detailAction_views import DetailActionListViews, DetailActionDetailView, DetailActionCreateView
 from progress.views.formateur_views import FormateurListView, FormateurCreateUpdateView, FormateurDeleteView, FormateurDetailView
 from progress.views.typeaction_views import TypeActionListView, TypeActionDetailView, TypeActionCreateUpdateView, TypeActionDeleteView
-from progress.views.paiement_views import PaiementListView, PaiementCreateView, PaiementDetailView, PaiementUpdateView, PaiementDeleteView # Importation des vues de Paiement
+from progress.views.paiement_views import PaiementListView, PaiementCreateView, PaiementDetailView, PaiementUpdateView, PaiementDeleteView
+from progress.views.module_progress_views import (
+    ModuleProgressListView, ModuleProgressDetailView, ModuleProgressCreateView,
+    ModuleProgressUpdateView, ModuleProgressDeleteView,
+    SessionProgressCreateView, SessionProgressUpdateView, SessionProgressDeleteView
+)
+# Removed import for Performance views
 
 
 urlpatterns = [
@@ -35,4 +41,17 @@ urlpatterns = [
     path("paiements/<int:pk>", PaiementDetailView.as_view(), name="paiement"),
     path("paiements/<int:pk>/update", PaiementUpdateView.as_view(), name="paiement_update"),
     path("paiements/<int:pk>/delete", PaiementDeleteView.as_view(), name="paiement_delete"),
+
+    # URLs pour la progression des modules et des séances
+    path("module_progressions", ModuleProgressListView.as_view(), name="module_progressions"),
+    path("module_progressions/create", ModuleProgressCreateView.as_view(), name="module_progress_create"),
+    path("module_progressions/<int:pk>", ModuleProgressDetailView.as_view(), name="module_progress_detail"),
+    path("module_progressions/<int:pk>/update", ModuleProgressUpdateView.as_view(), name="module_progress_update"),
+    path("module_progressions/<int:pk>/delete", ModuleProgressDeleteView.as_view(), name="module_progress_delete"),
+    
+    path("module_progressions/<int:module_progress_pk>/sessions/create", SessionProgressCreateView.as_view(), name="session_progress_create"),
+    path("sessions/<int:pk>/update", SessionProgressUpdateView.as_view(), name="session_progress_update"),
+    path("sessions/<int:pk>/delete", SessionProgressDeleteView.as_view(), name="session_progress_delete"),
+
+    # Removed URLs for FormateurPerformance
 ]

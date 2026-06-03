@@ -8,7 +8,7 @@ from django.core.management import BaseCommand
 from django.db import transaction
 
 from intern.models import Categorie, EtudeStagiaire, Stagiaire, Entreprise, AutreFormation
-from progress.models import Action, DetailAction, Formateur, TypeAction, Paiement # Import Paiement
+from progress.models import Action, DetailAction, Formateur, TypeAction, Paiement, ModuleProgress # Import ModuleProgress
 from training.models import Filiere, Formation, Module, Service # Renommé Metier en Formation
 from users.models import Profile, User
 from users.utils import createprofile
@@ -21,6 +21,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         self.stdout.write(self.style.SUCCESS("Nettoyage des donnees existantes..."))
         # Supprimer les données existantes pour éviter les doublons et les conflits
+        ModuleProgress.objects.all().delete() # Add ModuleProgress to cleanup
         Paiement.objects.all().delete() # Ajout du nettoyage des paiements
         DetailAction.objects.all().delete()
         Action.objects.all().delete()
@@ -694,6 +695,25 @@ class Command(BaseCommand):
             self.stdout.write(self.style.NOTICE(f"  Assigning Formateurs from modules for '{formation_for_action.nom}': {[str(f) for f in assigned_formateurs_for_action]}")) # Changé metier_for_action à formation_for_action
 
             action.formateurs.set(assigned_formateurs_for_action)
+
+            # --- Start: Automatic ModuleProgress creation for seeded actions ---
+            # Get all modules associated with the action's formation
+            modules_in_formation = Module.objects.filter(formation=action.formation)
+            
+            # Get the formateurs assigned to this action
+            # Note: assigned_formateurs_for_action is already populated above
+            
+            for module in modules_in_formation:
+                for formateur in assigned_formateurs_for_action:
+                    ModuleProgress.objects.get_or_create( # Use get_or_create to prevent duplicates on re-seeding
+                        formateur=formateur,
+                        action=action,
+                        module=module,
+                        defaults={
+                            # Other fields will take their default values (e.g., statut_module='NC')
+                        }
+                    )
+            # --- End: Automatic ModuleProgress creation ---
 
             actions[action_key] = action
 

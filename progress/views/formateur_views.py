@@ -63,6 +63,7 @@ class FormateurDetailView(FormateurPermissionMixin, DetailView): # Nouvelle vue 
         
         ctx["modules_dispenses"] = formateur.modules_dispenses.all().select_related("formation").order_by("formation__nom", "ordre")
         ctx["actions_assignees"] = formateur.actions.all().select_related("formation").order_by("-date_debut")
+        ctx["performances"] = formateur.performances.all().select_related("action", "module").order_by("-action__date_debut")
         ctx['titre'] = "Détail du formateur"
         return ctx
 

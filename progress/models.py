@@ -40,12 +40,21 @@ class Formateur(models.Model):
         return f"{self.nom} {self.postnom} {self.prenom or ''}".strip()
 
 class Action(models.Model):
+    STATUT_CHOICES = [
+        ('PLANIFIEE', 'Planifiée'),
+        ('EN_COURS', 'En cours'),
+        ('TERMINEE', 'Terminée'),
+        ('ANNULEE', 'Annulée'),
+    ]
+
     description = models.CharField(max_length=50)
     date_debut = models.DateField()
     date_fin = models.DateField()
     formation = models.ForeignKey(Formation, on_delete=models.CASCADE, related_name="actions")
     formateurs = models.ManyToManyField("Formateur", blank=True, related_name="actions")
     type_action = models.ForeignKey(TypeAction, on_delete=models.SET_NULL, null=True, blank=True, related_name="actions_liees")
+    lieu = models.CharField(max_length=100, blank=True, null=True) # Nouveau champ lieu
+    statut = models.CharField(max_length=10, choices=STATUT_CHOICES, default='PLANIFIEE') # Nouveau champ statut
 
     active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -73,9 +82,10 @@ class ModuleProgress(models.Model):
         ('EC', 'En cours'),
         ('TE', 'Terminé'),
         ('VA', 'Validé'),
-        ('EC', 'Échec'),
+        ('EF', 'Échec'), # Changed 'EC' to 'EF' to avoid conflict with 'En cours'
     )
-    detail_action = models.ForeignKey(DetailAction, on_delete=models.CASCADE, related_name='modules_progress')
+    formateur = models.ForeignKey(Formateur, on_delete=models.CASCADE, related_name='module_progressions')
+    action = models.ForeignKey(Action, on_delete=models.CASCADE, related_name='module_progressions')
     module = models.ForeignKey(Module, on_delete=models.CASCADE)
     date_debut_reelle = models.DateField(blank=True, null=True)
     date_fin_reelle = models.DateField(blank=True, null=True)
@@ -88,16 +98,41 @@ class ModuleProgress(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        unique_together = ('detail_action', 'module') # Un stagiaire ne peut avoir qu'une progression par module et par action
-        ordering = ['module__ordre']
+        unique_together = ('formateur', 'action', 'module') # Updated unique_together
+        ordering = ['action__date_debut', 'module__ordre', 'formateur__nom'] # Updated ordering
+        verbose_name = "Progression du Module"
+        verbose_name_plural = "Progression des Modules"
 
     def __str__(self):
-        return f"{self.detail_action.stagiaire.get_full_name()} - {self.module.titre} ({self.get_statut_module_display()})"
+        return f"Progression de {self.formateur.get_full_name()} pour {self.module.titre} dans {self.action.description} ({self.get_statut_module_display()})"
+
+class SessionProgress(models.Model):
+    module_progress = models.ForeignKey(ModuleProgress, on_delete=models.CASCADE, related_name='sessions_progress')
+    session_date = models.DateField(verbose_name="Date de la séance")
+    start_time = models.TimeField(blank=True, null=True, verbose_name="Heure de début")
+    end_time = models.TimeField(blank=True, null=True, verbose_name="Heure de fin")
+    topics_covered = models.TextField(blank=True, null=True, verbose_name="Sujets couverts")
+    formateur = models.ForeignKey(Formateur, on_delete=models.SET_NULL, null=True, blank=True, related_name='sessions_animees')
+    is_completed = models.BooleanField(default=False, verbose_name="Séance terminée")
+    notes = models.TextField(blank=True, null=True, verbose_name="Notes additionnelles")
+
+    active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Progression de la Séance"
+        verbose_name_plural = "Progression des Séances"
+        ordering = ['session_date', 'start_time']
+
+    def __str__(self):
+        return f"Séance du {self.session_date} pour {self.module_progress.module.titre} par {self.formateur or 'N/A'}"
+
 
 class FormateurPerformance(models.Model):
     formateur = models.ForeignKey(Formateur, on_delete=models.CASCADE, related_name='performances')
     action = models.ForeignKey(Action, on_delete=models.CASCADE, related_name='formateur_performances')
-    module = models.ForeignKey(Module, on_delete=models.CASCADE)
+    module = models.ForeignKey(Module, on_delete=models.CASCADE, related_name='seances')
     
     # Dates prévues (issues du module de la formation)
     # date_debut_previsionnelle = models.DateField() # Ces dates seront dérivées du module lui-même ou de l'action
@@ -121,13 +156,12 @@ class FormateurPerformance(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        unique_together = ('formateur', 'action', 'module')
-        verbose_name = "Performance du Formateur"
-        verbose_name_plural = "Performances des Formateurs"
-        ordering = ['action__date_debut', 'module__ordre', 'formateur__nom']
+        verbose_name = "Séance du Formateur"
+        verbose_name_plural = "Séances des Formateurs"
+        ordering = ['action__date_debut', 'module__ordre', 'date_debut_reelle', 'formateur__nom']
 
     def __str__(self):
-        return f"Performance de {self.formateur.get_full_name()} pour {self.action.description} - {self.module.titre}"
+        return f"Séance de {self.formateur} pour {self.action.description} - {self.module.titre}"
 
 
 class Paiement(models.Model):

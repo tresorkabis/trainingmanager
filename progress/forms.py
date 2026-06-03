@@ -1,7 +1,9 @@
 from django import forms
+from django.core.exceptions import ValidationError
 from django_select2.forms import Select2Widget # Importez Select2Widget
-from .models import Paiement, Stagiaire, Action, FormateurPerformance, Formateur # Import FormateurPerformance et Formateur
+from .models import Paiement, Stagiaire, Action, Formateur, ModuleProgress, SessionProgress, DetailAction # Removed FormateurPerformance
 from training.models import Module # Import Module
+from users.models import User # Import User pour le formulaire
 
 class PaiementForm(forms.ModelForm):
     # Permet de filtrer les stagiaires et actions si nécessaire, ou de les afficher tous
@@ -45,27 +47,20 @@ class PaiementForm(forms.ModelForm):
             # Soit via le widget directement, soit via Meta.widgets
             pass # Plus besoin de boucle générique ici car tout est géré explicitement
 
-class FormateurPerformanceForm(forms.ModelForm):
-    formateur = forms.ModelChoiceField(
-        queryset=Formateur.objects.all().order_by('nom', 'postnom'),
-        label="Formateur",
-        widget=Select2Widget(attrs={'data-width': '100%', 'class': 'form-select'})
-    )
-    action = forms.ModelChoiceField(
-        queryset=Action.objects.all().order_by('description'),
-        label="Action de formation",
-        widget=Select2Widget(attrs={'data-width': '100%', 'class': 'form-select'})
+# Removed FormateurPerformanceForm class
+
+class ModuleProgressForm(forms.ModelForm):
+    detail_action = forms.ModelChoiceField(
+        queryset=DetailAction.objects.select_related('stagiaire', 'action').order_by('stagiaire__nom', 'action__description'),
+        label="Stagiaire et Action de formation",
+        widget=Select2Widget(attrs={'data-width': '100%', 'class': 'form-select'}),
+        help_text="Sélectionnez le stagiaire et l'action de formation associée."
     )
     module = forms.ModelChoiceField(
         queryset=Module.objects.all().order_by('formation__nom', 'ordre'),
         label="Module",
-        widget=Select2Widget(attrs={'data-width': '100%', 'class': 'form-select'})
-    )
-    evaluateur = forms.ModelChoiceField(
-        queryset=forms.User.objects.all().order_by('first_name', 'last_name'), # Assurez-vous que User est importé
-        label="Évaluateur",
-        required=False,
-        widget=Select2Widget(attrs={'data-width': '100%', 'class': 'form-select'})
+        widget=Select2Widget(attrs={'data-width': '100%', 'class': 'form-select'}),
+        help_text="Sélectionnez le module concerné par cette progression."
     )
     date_debut_reelle = forms.DateField(
         widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
@@ -77,34 +72,97 @@ class FormateurPerformanceForm(forms.ModelForm):
         label="Date réelle de fin",
         required=False
     )
-    date_evaluation = forms.DateField(
-        widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
-        label="Date d'évaluation",
+    statut_module = forms.ChoiceField(
+        choices=ModuleProgress.STATUT_CHOICES,
+        label="Statut du module",
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+    note = forms.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        required=False,
+        label="Note",
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'min': '0', 'max': '20'})
+    )
+    commentaires = forms.CharField(
+        widget=forms.Textarea(attrs={'rows': 3, 'class': 'form-control'}),
+        label="Commentaires",
         required=False
     )
 
     class Meta:
-        model = FormateurPerformance
+        model = ModuleProgress
         fields = [
-            'formateur', 'action', 'module', 'date_debut_reelle', 'date_fin_reelle',
-            'heures_effectuees', 'date_evaluation', 'evaluateur', 'note_pedagogique',
-            'note_contenu', 'note_organisation', 'commentaires'
+            'detail_action', 'module', 'date_debut_reelle', 'date_fin_reelle',
+            'statut_module', 'note', 'commentaires'
         ]
-        widgets = {
-            'heures_effectuees': forms.NumberInput(attrs={'class': 'form-control'}),
-            'note_pedagogique': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.1', 'min': '0', 'max': '5'}),
-            'note_contenu': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.1', 'min': '0', 'max': '5'}),
-            'note_organisation': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.1', 'min': '0', 'max': '5'}),
-            'commentaires': forms.Textarea(attrs={'rows': 3, 'class': 'form-control'}),
-        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        # Dynamically filter modules based on the selected action's formation
+        if 'detail_action' in self.data:
+            try:
+                detail_action_id = int(self.data.get('detail_action'))
+                detail_action = DetailAction.objects.get(pk=detail_action_id)
+                self.fields['module'].queryset = Module.objects.filter(
+                    formation=detail_action.action.formation
+                ).order_by('ordre')
+            except (ValueError, TypeError, DetailAction.DoesNotExist):
+                pass # Fallback to default queryset if selection is invalid
+
+class SessionProgressForm(forms.ModelForm):
+    session_date = forms.DateField(
+        widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+        label="Date de la séance"
+    )
+    start_time = forms.TimeField(
+        widget=forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
+        label="Heure de début",
+        required=False
+    )
+    end_time = forms.TimeField(
+        widget=forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
+        label="Heure de fin",
+        required=False
+    )
+    topics_covered = forms.CharField(
+        widget=forms.Textarea(attrs={'rows': 3, 'class': 'form-control'}),
+        label="Sujets couverts",
+        required=False
+    )
+    formateur = forms.ModelChoiceField(
+        queryset=Formateur.objects.all().order_by('nom', 'postnom'),
+        label="Formateur",
+        required=False,
+        widget=Select2Widget(attrs={'data-width': '100%', 'class': 'form-select'})
+    )
+    is_completed = forms.BooleanField(
+        label="Séance terminée",
+        required=False,
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
+    )
+    notes = forms.CharField(
+        widget=forms.Textarea(attrs={'rows': 3, 'class': 'form-control'}),
+        label="Notes additionnelles",
+        required=False
+    )
+
+    class Meta:
+        model = SessionProgress
+        fields = [
+            'session_date', 'start_time', 'end_time', 'topics_covered',
+            'formateur', 'is_completed', 'notes'
+        ]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Apply form-control class to all fields by default, if not already set by widget
         for field_name, field in self.fields.items():
-            if not isinstance(field.widget, Select2Widget):
-                if isinstance(field.widget, forms.Select):
-                    field.widget.attrs.update({'class': 'form-select'})
-                elif isinstance(field.widget, forms.CheckboxInput):
-                    field.widget.attrs.update({'class': 'form-check-input'})
-                else:
-                    field.widget.attrs.update({'class': 'form-control'})
+            if not isinstance(field.widget, (Select2Widget, forms.CheckboxInput, forms.DateInput, forms.TimeInput, forms.Textarea, forms.Select)):
+                field.widget.attrs.update({'class': 'form-control'})
+            elif isinstance(field.widget, forms.Select) and 'class' not in field.widget.attrs:
+                field.widget.attrs.update({'class': 'form-select'})
+            elif isinstance(field.widget, forms.DateInput) and 'class' not in field.widget.attrs:
+                field.widget.attrs.update({'class': 'form-control'})
+            elif isinstance(field.widget, forms.TimeInput) and 'class' not in field.widget.attrs:
+                field.widget.attrs.update({'class': 'form-control'})

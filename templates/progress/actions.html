@@ -345,6 +345,7 @@
                     </table>
                 </div>
 
+                {% if is_paginated %}
                 {# Custom Pagination (Django's pagination) #}
                 <div class="d-flex justify-content-between align-items-center mt-3">
                     <div class="dataTable-info">
@@ -372,6 +373,7 @@
                         {% endif %}
                     </ul>
                 </div>
+                {% endif %}
 
             </div>
         </div>
