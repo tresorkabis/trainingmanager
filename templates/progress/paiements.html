@@ -198,7 +198,13 @@
                                 <td>{{ paiement.montant }}</td>
                                 <td>{{ paiement.date_paiement|date:"d/m/Y" }}</td>
                                 <td>{{ paiement.get_mode_paiement_display }}</td>
-                                <td>{{ paiement.reference|default:"-" }}</td>
+                                <td>
+                                    {% if paiement.reference %}
+                                        <a href="{% url 'paiement' paiement.pk %}" class="tm-action-row__title">{{ paiement.reference }}</a>
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
                                 <td>
                                     <div class="d-flex gap-2">
                                         <a href="{% url 'paiement' paiement.pk %}" class="btn btn-sm btn-outline-info" title="Voir"> {# Style cohérent #}

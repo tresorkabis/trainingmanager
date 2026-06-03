@@ -28,10 +28,10 @@ class ServiceListView(ServicePermissionMixin, ListView):
         self.enforce_manage_permission() # Vérifier la permission avant de construire le queryset
         queryset = Service.objects.all().order_by('nom')
         
-        # Annoter chaque service avec le nombre de filières et de métiers
+        # Annoter chaque service avec le nombre de filières et de formations
         queryset = queryset.annotate(
             filieres_count=Count('filieres', distinct=True), # CHANGÉ 'filiere' à 'filieres'
-            metiers_count=Count('filieres__metiers', distinct=True) # CHANGÉ 'filiere__formation' à 'filieres__metiers'
+            metiers_count=Count('filieres__formations', distinct=True)
         )
         return queryset
 
@@ -46,7 +46,7 @@ class ServiceListView(ServicePermissionMixin, ListView):
             'active': all_services.filter(active=True).count(),
             'inactive': all_services.filter(active=False).count(),
             'total_filieres': all_services.aggregate(total_filieres=Count('filieres', distinct=True))['total_filieres'], # CHANGÉ 'filiere' à 'filieres'
-            'total_metiers': all_services.aggregate(total_metiers=Count('filieres__metiers', distinct=True))['total_metiers'], # CHANGÉ 'filiere__formation' à 'filieres__metiers'
+            'total_metiers': all_services.aggregate(total_metiers=Count('filieres__formations', distinct=True))['total_metiers'],
         }
         return ctx
 
@@ -57,13 +57,13 @@ class ServiceDetailView(ServicePermissionMixin, DetailView):
     context_object_name = "service"
 
     def get_queryset(self):
-        return super().get_queryset().prefetch_related('filieres__metiers') # CHANGÉ 'filiere_set__formation_set' à 'filieres__metiers'
+        return super().get_queryset().prefetch_related('filieres__formations')
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         service = ctx['service']
         
-        ctx['filieres_associees'] = service.filieres.all().prefetch_related('metiers').order_by('nom') # CHANGÉ 'filiere_set' à 'filieres', 'formation_set' à 'metiers'
+        ctx['filieres_associees'] = service.filieres.all().prefetch_related('formations').order_by('nom')
         ctx['titre'] = "Détail du service"
         return ctx
 

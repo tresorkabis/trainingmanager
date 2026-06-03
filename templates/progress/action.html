@@ -1,8 +1,8 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}{{ titre }} un Métier{% endblock title %} {# Changed "Action" to "Métier" #}
-{% block page_header %}{{ titre }} une Action de Métier{% endblock page_header %} {# Changed "Formation" to "Métier" #}
+{% block title %}{{ titre }} une Formation{% endblock title %}
+{% block page_header %}{{ titre }} une Action de Formation{% endblock page_header %}
 {% block style %}
 <style>
     .tm-action-form-hero {
@@ -30,7 +30,7 @@
                     <span class="tm-section-titlebar__icon"><i class="bi bi-clipboard-check"></i></span>
                     <div class="tm-section-titlebar__text">
                         <h3>{{ titre }} une action</h3>
-                        <p>Renseignez une session de métier avec ses dates, son métier de rattachement et son libellé opérationnel.</p> {# Changed "formation" to "métier" #}
+                        <p>Renseignez une session de formation avec ses dates, sa formation de rattachement et son libellé opérationnel.</p>
                     </div>
                 </div>
             </div>
@@ -46,7 +46,7 @@
         <div class="card tm-action-form-card">
             <div class="card-header">
                 <h4 class="card-title mb-1">Paramètres de l'action</h4>
-                <p class="text-muted mb-0">Les champs ci-dessous permettent de planifier précisément l'action de métier.</p> {# Changed "formation" to "métier" #}
+                <p class="text-muted mb-0">Les champs ci-dessous permettent de planifier précisément l'action de formation.</p>
             </div>
             <div class="card-body">
                 {% if form_errors %}
@@ -81,15 +81,15 @@
                                 >
                             </div>
                             <div class="form-group">
-                                <label for="metier">Métier associé</label> {# Changed "formation" to "métier" #}
-                                <select id="metier" class="form-select" name="metier" required> {# Changed id and name to metier #}
-                                    <option value="">Sélectionnez un métier</option> {# Changed "formation" to "métier" #}
-                                    {% for metier in metiers %} {# Changed formation in formations to metier in metiers #}
+                                <label for="formation">Formation associée</label>
+                                <select id="formation" class="form-select" name="formation" required>
+                                    <option value="">Sélectionnez une formation</option>
+                                    {% for formation in formations %}
                                     <option
-                                        value="{{ metier.pk }}"
-                                        {% if submitted.metier == metier.pk|stringformat:"s" or object.metier.pk == metier.pk %}selected{% endif %} {# Changed formation to metier #}
+                                        value="{{ formation.pk }}"
+                                        {% if submitted.formation == formation.pk|stringformat:"s" or object.formation.pk == formation.pk %}selected{% endif %}
                                     >
-                                        {{ metier.nom }}{% if metier.filiere %} - {{ metier.filiere.nom }}{% endif %}
+                                        {{ formation.nom }}{% if formation.filiere %} - {{ formation.filiere.nom }}{% endif %}
                                     </option>
                                     {% endfor %}
                                 </select>
@@ -139,7 +139,7 @@
 </div>
 
 {# JSON data for JavaScript #}
-{{ metiers_json|json_script:"metiers-data" }} {# Changed formations_json to metiers_json #}
+{{ formations_json|json_script:"formations-data" }}
 {{ formateurs_json|json_script:"formateurs-data" }}
 {{ selected_formateur_ids|json_script:"selected-formateurs-data" }}
 
@@ -148,33 +148,32 @@
 {% block script %}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const metierSelect = document.getElementById('metier'); // Changed formationSelect to metierSelect
+        const formationSelect = document.getElementById('formation');
         const formateursSelect = document.getElementById('formateurs');
 
         // Get JSON data from the template
-        const allMetiersData = JSON.parse(document.getElementById('metiers-data').textContent); // Changed allFormationsData to allMetiersData
+        const allFormationsData = JSON.parse(document.getElementById('formations-data').textContent);
         const allFormateursData = JSON.parse(document.getElementById('formateurs-data').textContent);
         const initialSelectedFormateurs = JSON.parse(document.getElementById('selected-formateurs-data').textContent);
 
         function updateFormateursDropdown() {
-            const selectedMetierId = metierSelect.value; // Changed selectedFormationId to selectedMetierId
+            const selectedFormationId = formationSelect.value;
             formateursSelect.innerHTML = ''; // Clear current options
 
-            if (!selectedMetierId) { // Changed selectedFormationId to selectedMetierId
-                // If no metier is selected, disable and show a default option
+            if (!selectedFormationId) {
                 const option = document.createElement('option');
                 option.value = '';
-                option.textContent = 'Sélectionnez un métier d\'abord'; // Changed "formation" to "métier"
+                option.textContent = 'Sélectionnez une formation d\'abord';
                 formateursSelect.appendChild(option);
                 formateursSelect.disabled = true;
                 return;
             }
 
             formateursSelect.disabled = false;
-            const selectedMetier = allMetiersData.find(f => String(f.id) === selectedMetierId); // Changed selectedFormation to selectedMetier, allFormationsData to allMetiersData, f.id to metier.id
+            const selectedFormation = allFormationsData.find(f => String(f.id) === selectedFormationId);
 
-            if (selectedMetier && selectedMetier.formateurs_ids.length > 0) { // Changed selectedFormation to selectedMetier
-                const allowedFormateurIds = new Set(selectedMetier.formateurs_ids); // Changed selectedFormation to selectedMetier
+            if (selectedFormation && selectedFormation.formateurs_ids.length > 0) {
+                const allowedFormateurIds = new Set(selectedFormation.formateurs_ids);
 
                 allFormateursData.forEach(formateur => {
                     if (allowedFormateurIds.has(formateur.id)) {
@@ -192,16 +191,16 @@
             } else {
                 const option = document.createElement('option');
                 option.value = '';
-                option.textContent = 'Aucun formateur disponible pour ce métier'; // Changed "formation" to "métier"
+                option.textContent = 'Aucun formateur disponible pour cette formation';
                 formateursSelect.appendChild(option);
                 formateursSelect.disabled = true;
             }
         }
 
         // Attach event listener
-        metierSelect.addEventListener('change', updateFormateursDropdown); // Changed formationSelect to metierSelect
+        formationSelect.addEventListener('change', updateFormateursDropdown);
 
-        // Initial call to populate formateurs based on pre-selected metier (if any)
+        // Initial call to populate formateurs based on pre-selected formation (if any)
         // and to handle the initial state (e.g., in edit mode)
         updateFormateursDropdown();
     });

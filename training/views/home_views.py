@@ -29,13 +29,13 @@ class HomeView(View):
         elif user.profile and user.profile.name == "Chef de filière" and user.filiere:
             # Un chef de filière voit les données de sa filière
             stagiaires_queryset = stagiaires_queryset.filter(filiere=user.filiere)
-            actions_queryset = actions_queryset.filter(metier__filiere=user.filiere) # Changé formation__filiere à metier__filiere
+            actions_queryset = actions_queryset.filter(formation__filiere=user.filiere)
             metiers_queryset = metiers_queryset.filter(filiere=user.filiere) # Changé formations_queryset à metiers_queryset
             filieres_queryset = filieres_queryset.filter(pk=user.filiere.pk) # Ne voit que sa propre filière
         elif user.profile and user.profile.name == "Chef de service" and user.service:
             # Un chef de service voit les données des filières de son service
             stagiaires_queryset = stagiaires_queryset.filter(filiere__service=user.service)
-            actions_queryset = actions_queryset.filter(metier__filiere__service=user.service) # Changé formation__filiere__service à metier__filiere__service
+            actions_queryset = actions_queryset.filter(formation__filiere__service=user.service)
             metiers_queryset = metiers_queryset.filter(filiere__service=user.service) # Changé formations_queryset à metiers_queryset
             filieres_queryset = filieres_queryset.filter(service=user.service)
         else:
@@ -54,27 +54,45 @@ class HomeView(View):
             .annotate(total=Count("id"))
         }
         action_counts = {
-            item["metier__filiere__nom"]: item["total"] # Changé formation__filiere__nom à metier__filiere__nom
-            for item in actions_queryset.exclude(metier__filiere__nom__isnull=True) # Changé formation__filiere__nom à metier__filiere__nom
-            .values("metier__filiere__nom") # Changé formation__filiere__nom à metier__filiere__nom
+            item["formation__filiere__nom"]: item["total"] # Changé formation__filiere__nom à metier__filiere__nom
+            for item in actions_queryset.exclude(formation__filiere__nom__isnull=True) # Changé formation__filiere__nom à metier__filiere__nom
+            .values("formation__filiere__nom") # Changé formation__filiere__nom à metier__filiere__nom
             .annotate(total=Count("id"))
         }
 
-        filiere_categories = sorted(
-            set(stagiaire_counts.keys()) | set(action_counts.keys()),
-            key=lambda name: (-(stagiaire_counts.get(name, 0) + action_counts.get(name, 0)), name),
+        filiere_totals = {
+            name: stagiaire_counts.get(name, 0) + action_counts.get(name, 0)
+            for name in set(stagiaire_counts.keys()) | set(action_counts.keys())
+        }
+        sorted_filieres = sorted(
+            filiere_totals.items(),
+            key=lambda item: (-item[1], item[0]),
         )
 
+        top_limit = 6
+        top_filiere_names = [name for name, _ in sorted_filieres[:top_limit]]
+        other_names = [name for name, _ in sorted_filieres[top_limit:]]
+
+        categories = top_filiere_names[:]
+        stagiaire_data = [stagiaire_counts.get(name, 0) for name in top_filiere_names]
+        action_data = [action_counts.get(name, 0) for name in top_filiere_names]
+
+        if other_names:
+            categories.append("Autres")
+            stagiaire_data.append(sum(stagiaire_counts.get(name, 0) for name in other_names))
+            action_data.append(sum(action_counts.get(name, 0) for name in other_names))
+
         dashboard_chart = {
-            "categories": filiere_categories,
+            "title": "Répartition par filière",
+            "categories": categories,
             "series": [
                 {
                     "name": "Stagiaires",
-                    "data": [stagiaire_counts.get(name, 0) for name in filiere_categories],
+                    "data": stagiaire_data,
                 },
                 {
-                    "name": "Actions planifiées",
-                    "data": [action_counts.get(name, 0) for name in filiere_categories],
+                    "name": "Actions",
+                    "data": action_data,
                 },
             ],
         }

@@ -127,7 +127,7 @@
                                     <thead>
                                         <tr>
                                             <th>Description</th>
-                                            <th>Métier</th>
+                                            <th>Formation</th>
                                             <th>Filière</th>
                                             <th>Période</th>
                                         </tr>
@@ -136,8 +136,8 @@
                                         {% for action in actions_associees %}
                                         <tr>
                                             <td><a href="{% url 'action' action.pk %}">{{ action.description }}</a></td>
-                                            <td>{{ action.metier.nom }}</td>
-                                            <td>{{ action.metier.filiere.nom|default:"-" }}</td>
+                                            <td>{{ action.formation.nom }}</td>
+                                            <td>{{ action.formation.filiere.nom|default:"-" }}</td>
                                             <td>{{ action.date_debut|date:"d/m/Y" }} au {{ action.date_fin|date:"d/m/Y" }}</td>
                                         </tr>
                                         {% endfor %}

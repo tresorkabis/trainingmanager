@@ -26,9 +26,11 @@ class TypeActionListView(TypeActionPermissionMixin, ListView):
 
     def get_queryset(self):
         self.enforce_manage_permission() # Vérifier la permission avant de construire le queryset
-        queryset = TypeAction.objects.all().order_by('code')
-        # Si TypeAction était lié à Action, on pourrait annoter ici. Pour l'instant, juste les TypeActions.
-        return queryset
+        return (
+            TypeAction.objects.all()
+            .annotate(actions_count=Count("actions_liees", distinct=True))
+            .order_by("code")
+        )
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
@@ -40,6 +42,7 @@ class TypeActionListView(TypeActionPermissionMixin, ListView):
             'total': all_typeactions.count(),
             'active': all_typeactions.filter(active=True).count(),
             'inactive': all_typeactions.filter(active=False).count(),
+            'actions_total': all_typeactions.aggregate(total=Count("actions_liees", distinct=True))["total"],
         }
         return ctx
 
@@ -56,7 +59,7 @@ class TypeActionDetailView(TypeActionPermissionMixin, DetailView):
         ctx = super().get_context_data(**kwargs)
         typeaction = ctx['typeaction']
 
-        ctx['actions_associees'] = typeaction.actions_liees.all().select_related('metier', 'metier__filiere').order_by('-date_debut') # Récupérer les actions associées
+        ctx['actions_associees'] = typeaction.actions_liees.all().select_related("formation", "formation__filiere").order_by("-date_debut") # Récupérer les actions associées
         ctx['titre'] = "Détail du type d'action"
         ctx['link'] = "typeactions" # Ajout de la variable link pour le menu latéral
         return ctx

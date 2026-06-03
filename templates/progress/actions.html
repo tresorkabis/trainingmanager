@@ -307,8 +307,8 @@
                                     <span class="tm-action-row__meta">au {{ item.date_fin|date:"d/m/Y" }}</span>
                                 </td>
                                 <td>
-                                    {{ item.metier.nom }}<br> {# Changed formation.nom to metier.nom #}
-                                    <span class="tm-action-row__meta">{{ item.metier.filiere.nom|default:"Sans filière" }}</span> {# Changed formation.filiere.nom to metier.filiere.nom #}
+                                    {{ item.formation.nom }}<br>
+                                    <span class="tm-action-row__meta">{{ item.formation.filiere.nom|default:"Sans filière" }}</span>
                                 </td>
                                 <td>
                                     {% if item.formateurs.all %}
@@ -405,14 +405,14 @@
             let resultsFound = false;
 
             allRows.forEach(row => {
-                // Assuming Description is at index 0, Métier is at index 2
+                // Assuming Description is at index 0 and Formation is at index 2
                 const descriptionCell = row.cells[0];
-                const metierCell = row.cells[2];
+                const formationCell = row.cells[2];
 
                 const description = descriptionCell ? descriptionCell.textContent.toLowerCase() : '';
-                const metier = metierCell ? metierCell.textContent.toLowerCase() : '';
+                const formation = formationCell ? formationCell.textContent.toLowerCase() : '';
 
-                if (description.includes(searchTerm) || metier.includes(searchTerm)) {
+                if (description.includes(searchTerm) || formation.includes(searchTerm)) {
                     row.style.display = ''; // Show row
                     resultsFound = true;
                 } else {

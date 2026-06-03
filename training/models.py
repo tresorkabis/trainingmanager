@@ -24,7 +24,7 @@ class Filiere(models.Model):
     
 # Le modèle Formateur est défini dans progress.models, nous n'avons pas besoin de le définir ici.
 
-class Formation(models.Model): # Renamed to Formation
+class Formation(models.Model): # Renommé de Metier à Formation
     TYPE_CHOICES = (
         ("qualifiante", "Qualifiante"),
         ("continue", "Continue"),
@@ -33,9 +33,9 @@ class Formation(models.Model): # Renamed to Formation
     nom = models.CharField(max_length=200)
     duree = models.IntegerField(default=0)
     duree_heures = models.PositiveIntegerField(default=0, verbose_name="Durée en heures")
-    filiere = models.ForeignKey(Filiere, on_delete=models.SET_NULL, null=True, blank=True, related_name="metiers") # Changé related_name
+    filiere = models.ForeignKey(Filiere, on_delete=models.SET_NULL, null=True, blank=True, related_name="formations") # Changé related_name de metiers à formations
     cout = models.DecimalField(max_digits=12, decimal_places=2, default=0, verbose_name="Coût")
-    type_formation = models.CharField(max_length=20, choices=TYPE_CHOICES, default="qualifiante", verbose_name="Type de formation")
+    type_formation = models.CharField(max_length=20, choices=TYPE_CHOICES, default="qualifiante", verbose_name="Type de formation") # Nouveau champ
     
     # Champs de frais ajoutés/modifiés
     frais_participation = models.DecimalField(max_digits=12, decimal_places=2, default=0, verbose_name="Frais de participation")
@@ -51,11 +51,11 @@ class Formation(models.Model): # Renamed to Formation
 
 
 class Module(models.Model):
-    metier = models.ForeignKey(Formation, on_delete=models.CASCADE, related_name="modules") # Changé de formation à metier
+    formation = models.ForeignKey(Formation, on_delete=models.CASCADE, related_name="modules") # Changé de metier à formation
     titre = models.CharField(max_length=200)
     description = models.TextField(blank=True, null=True)
     duree_heures = models.PositiveIntegerField(default=0, verbose_name="Durée en heures")
-    formateurs = models.ManyToManyField('progress.Formateur', related_name="modules_dispenses", blank=True) # Changé en ManyToManyField
+    formateurs = models.ManyToManyField('progress.Formateur', related_name="modules_dispenses", blank=True)
     ordre = models.PositiveIntegerField(default=1)
 
     active = models.BooleanField(default=True)
@@ -66,4 +66,4 @@ class Module(models.Model):
         ordering = ["ordre", "id"]
 
     def __str__(self):
-        return f"{self.metier.nom} - {self.titre}" # Changé de formation.nom à metier.nom
+        return f"{self.formation.nom} - {self.titre}" # Changé de metier.nom à formation.nom

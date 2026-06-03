@@ -97,6 +97,9 @@ class PaiementDetailView(DetailView):
         context = super().get_context_data(**kwargs)
         context['link'] = 'paiements'
         context['titre'] = 'Détail du paiement'
+        context['total_cout'] = self.object.get_total_cout()
+        context['total_paye'] = self.object.get_total_paye()
+        context['solde_restant'] = self.object.get_solde_restant()
         return context
 
 @method_decorator(login_required, name='dispatch')

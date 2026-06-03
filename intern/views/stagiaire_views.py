@@ -1,8 +1,10 @@
+from datetime import date
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.db import models, transaction # Import transaction
-from django.db.models import OuterRef, Subquery, Count
+from django.db.models import OuterRef, Subquery, Count, Sum # Import Sum for aggregation
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse_lazy
@@ -15,8 +17,18 @@ from intern.forms import StagiaireForm # Import StagiaireForm
 from progress.models import DetailAction, Paiement, Action
 from training.models import Filiere
 
+ALLOWED_CATEGORIE_TITRES = ["dans l'emploi", "sans emploi"]
+
 
 class StagiairePermissionMixin:
+    def get_action_status(self, action):
+        today = date.today()
+        if action.date_fin < today:
+            return {"label": "Terminée", "badge": "bg-light-secondary text-dark", "key": "completed"}
+        if action.date_debut > today:
+            return {"label": "Planifiée", "badge": "bg-light-primary text-primary", "key": "planned"}
+        return {"label": "En cours", "badge": "bg-light-success text-success", "key": "ongoing"}
+
     def get_allowed_filieres(self):
         user = self.request.user
         queryset = Filiere.objects.all()
@@ -29,6 +41,9 @@ class StagiairePermissionMixin:
             return queryset.filter(service=user.service)
         return Filiere.objects.none()
 
+    def get_allowed_categories(self):
+        return Categorie.objects.filter(titre__in=ALLOWED_CATEGORIE_TITRES).order_by("titre")
+
     def get_stagiaire_queryset(self):
         user = self.request.user
         queryset = Stagiaire.objects.all()
@@ -37,16 +52,16 @@ class StagiairePermissionMixin:
             return queryset
         
         if user.profile and user.profile.name == "Chef de filière" and user.filiere:
-            # Filtrer les stagiaires inscrits à des actions dont le métier est dans la filière de l'utilisateur
+            # Filtrer les stagiaires inscrits à des actions dont la formation est dans la filière de l'utilisateur
             detail_actions_in_filiere = DetailAction.objects.filter(
-                action__metier__filiere=user.filiere
+                action__formation__filiere=user.filiere
             ).values_list('stagiaire__pk', flat=True)
             return queryset.filter(pk__in=detail_actions_in_filiere).distinct()
 
         if user.profile and user.profile.name == "Chef de service" and user.service:
-            # Filtrer les stagiaires inscrits à des actions dont le métier est dans un service de l'utilisateur
+            # Filtrer les stagiaires inscrits à des actions dont la formation est dans un service de l'utilisateur
             detail_actions_in_service = DetailAction.objects.filter(
-                action__metier__filiere__service=user.service
+                action__formation__filiere__service=user.service
             ).values_list('stagiaire__pk', flat=True)
             return queryset.filter(pk__in=detail_actions_in_service).distinct()
         
@@ -85,13 +100,13 @@ class StagiaireListView(StagiairePermissionMixin, ListView):
             action__date_fin__gte=today
         ).order_by("-action__date_debut").values("pk")[:1]
 
-        active_metier_name = DetailAction.objects.filter(
+        active_formation_name = DetailAction.objects.filter(
             pk=Subquery(active_detail_action_pk)
-        ).values("action__metier__nom")[:1]
+        ).values("action__formation__nom")[:1]
 
-        latest_metier_name = DetailAction.objects.filter(
+        latest_formation_name = DetailAction.objects.filter(
             pk=Subquery(latest_detail_action_pk)
-        ).values("action__metier__nom")[:1]
+        ).values("action__formation__nom")[:1]
 
         queryset = queryset.annotate(
             etudes_count=Count('etudes', distinct=True),
@@ -100,8 +115,8 @@ class StagiaireListView(StagiairePermissionMixin, ListView):
 
         return queryset.annotate(
             current_formation_name=Coalesce(
-                Subquery(active_metier_name, output_field=models.CharField()),
-                Subquery(latest_metier_name, output_field=models.CharField())
+                Subquery(active_formation_name, output_field=models.CharField()),
+                Subquery(latest_formation_name, output_field=models.CharField())
             )
         )
 
@@ -114,7 +129,6 @@ class StagiaireListView(StagiairePermissionMixin, ListView):
             'total': all_stagiaires.count(),
             'dans_emploi': all_stagiaires.filter(categorie__titre="dans l'emploi").count(),
             'sans_emploi': all_stagiaires.filter(categorie__titre="sans emploi").count(),
-            'non_defini': all_stagiaires.filter(categorie__titre="non défini").count(),
             'masculin': all_stagiaires.filter(sexe='M').count(),
             'feminin': all_stagiaires.filter(sexe='F').count(),
         }
@@ -133,14 +147,38 @@ class StagiaireDetailView(StagiairePermissionMixin, DetailView): # Correction de
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         current_stagiaire = self.get_object()
+        
+        # Calcul des informations de paiement
+        total_paid = current_stagiaire.paiements.aggregate(total=Sum('montant'))['total'] or 0
+        
+        # Coût total des formations uniques auxquelles le stagiaire est inscrit
+        # Utilise distinct() pour éviter de compter plusieurs fois le coût d'une même formation
+        # si le stagiaire est inscrit à plusieurs actions de cette formation.
+        formations_cost_qs = DetailAction.objects.filter(
+            stagiaire=current_stagiaire
+        ).values_list('action__formation__cout', flat=True).distinct()
+        
+        total_cost = sum(formations_cost_qs) if formations_cost_qs else 0
+        
+        solde_restant = total_cost - total_paid
+
+        ctx["total_cost"] = total_cost
+        ctx["total_paid"] = total_paid
+        ctx["solde_restant"] = solde_restant
+
+        actions_suivies = list(
+            DetailAction.objects.filter(stagiaire=current_stagiaire)
+            .select_related("action__formation")
+            .order_by("action__date_debut")
+        )
+        for detail_action in actions_suivies:
+            detail_action.status_meta = self.get_action_status(detail_action.action)
 
         ctx["stagiaires"] = self.get_stagiaire_queryset()
-        ctx["categories"] = Categorie.objects.all()
+        ctx["categories"] = self.get_allowed_categories()
         ctx["entreprises"] = Entreprise.objects.all()
-        ctx["filieres"] = self.get_allowed_filieres()
-        ctx["actions_suivies"] = DetailAction.objects.filter(
-            stagiaire=current_stagiaire
-        ).select_related("action__metier").order_by("action__date_debut")
+        ctx["filieres"] = self.get_allowed_filieres() # Conserver pour la permission mixin si nécessaire
+        ctx["actions_suivies"] = actions_suivies
         ctx["autres_formations"] = AutreFormation.objects.filter(stagiaire=current_stagiaire)
         ctx["paiements"] = Paiement.objects.filter(stagiaire=current_stagiaire).order_by('-date_paiement')
         ctx["titre"] = "Voir"
@@ -167,10 +205,10 @@ class StagiaireCreateUpdateView(StagiairePermissionMixin, View):
 
         ctx = {
             "form": form,
-            "categories": Categorie.objects.all(),
+            "categories": self.get_allowed_categories(),
             "entreprises": Entreprise.objects.all(),
-            "filieres": self.get_allowed_filieres(),
-            "actions": Action.objects.filter(active=True).select_related('metier'),
+            "filieres": self.get_allowed_filieres(), # Conserver pour la permission mixin si nécessaire
+            "actions": Action.objects.filter(active=True).select_related("formation"),
             "titre": titre,
             "mode": mode,
             "object": stagiaire,
@@ -260,10 +298,10 @@ class StagiaireCreateUpdateView(StagiairePermissionMixin, View):
     def form_invalid(self, request, form, stagiaire, mode, titre):
         ctx = {
             "form": form,
-            "categories": Categorie.objects.all(),
+            "categories": self.get_allowed_categories(),
             "entreprises": Entreprise.objects.all(),
-            "filieres": self.get_allowed_filieres(),
-            "actions": Action.objects.filter(active=True).select_related('metier'),
+            "filieres": self.get_allowed_filieres(), # Conserver pour la permission mixin si nécessaire
+            "actions": Action.objects.filter(active=True).select_related("formation"),
             "titre": titre,
             "mode": mode,
             "object": stagiaire,

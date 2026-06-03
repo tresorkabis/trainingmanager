@@ -55,14 +55,14 @@ class FormateurDetailView(FormateurPermissionMixin, DetailView): # Nouvelle vue 
 
     def get_queryset(self):
         # Précharger les modules dispensés et les actions associées
-        return super().get_queryset().prefetch_related('modules_dispenses__metier', 'actions__metier') # Changé formation à metier
+        return super().get_queryset().prefetch_related("modules_dispenses__formation", "actions__formation")
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         formateur = ctx['formateur']
         
-        ctx['modules_dispenses'] = formateur.modules_dispenses.all().select_related('metier').order_by('metier__nom', 'ordre') # Changé formation à metier
-        ctx['actions_assignees'] = formateur.actions.all().select_related('metier').order_by('-date_debut') # Changé formation à metier
+        ctx["modules_dispenses"] = formateur.modules_dispenses.all().select_related("formation").order_by("formation__nom", "ordre")
+        ctx["actions_assignees"] = formateur.actions.all().select_related("formation").order_by("-date_debut")
         ctx['titre'] = "Détail du formateur"
         return ctx
 

@@ -4,7 +4,7 @@ from .models import Stagiaire, Categorie, Filiere, Entreprise
 
 class StagiaireForm(forms.ModelForm):
     categorie = forms.ModelChoiceField(
-        queryset=Categorie.objects.all().order_by('titre'),
+        queryset=Categorie.objects.filter(titre__in=["dans l'emploi", "sans emploi"]).order_by('titre'),
         label="Catégorie",
         widget=Select2Widget(attrs={'data-width': '100%', 'class': 'form-select'}) # Utilisation de Select2Widget ici aussi
     )

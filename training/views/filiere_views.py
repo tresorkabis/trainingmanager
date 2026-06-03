@@ -50,9 +50,9 @@ class FiliereListView(FilierePermissionMixin, ListView):
         self.enforce_manage_permission() # Vérifier la permission avant de construire le queryset
         queryset = self.get_filiere_queryset().select_related("service")
         
-        # Annoter chaque filière avec le nombre de métiers
+        # Annoter chaque filière avec le nombre de formations
         queryset = queryset.annotate(
-            metiers_count=Count('metiers', distinct=True) # Changé formations_count à metiers_count, et 'formation' à 'metiers'
+            metiers_count=Count('formations', distinct=True)
         )
         return queryset
 
@@ -66,7 +66,7 @@ class FiliereListView(FilierePermissionMixin, ListView):
             'total': all_filieres.count(),
             'active': all_filieres.filter(active=True).count(),
             'inactive': all_filieres.filter(active=False).count(),
-            'total_metiers': all_filieres.aggregate(total_metiers=Count('metiers', distinct=True))['total_metiers'], # Changé total_formations à total_metiers, et 'formation' à 'metiers'
+            'total_metiers': all_filieres.aggregate(total_metiers=Count('formations', distinct=True))['total_metiers'],
         }
         return ctx
 
@@ -78,13 +78,13 @@ class FiliereDetailView(FilierePermissionMixin, DetailView):
     context_object_name = "filiere"
 
     def get_queryset(self):
-        return self.get_filiere_queryset().select_related("service").prefetch_related('metiers') # Précharger les métiers, changé formation_set à metiers
+        return self.get_filiere_queryset().select_related("service").prefetch_related("formations")
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         filiere = ctx['filiere']
         
-        ctx['metiers_associees'] = filiere.metiers.all().order_by('nom') # Changé formations_associees à metiers_associees, et formation_set à metiers
+        ctx['metiers_associees'] = filiere.formations.all().order_by('nom')
         ctx['titre'] = "Détail de la filière"
         return ctx
 

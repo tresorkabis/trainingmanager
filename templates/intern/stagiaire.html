@@ -371,14 +371,15 @@
                                     {# Suppression de l'affichage de la filiere en mode lecture seule #}
                                     {% endif %}
                                 </div>
-                                <h5 class="mb-3">Métiers internes suivis</h5>
+                                <h5 class="mb-3">Formations internes suivies</h5>
                                 {% if actions_suivies %}
                                 <div class="table-responsive">
                                     <table class="table table-striped">
                                         <thead>
                                             <tr>
                                                 <th>Action</th>
-                                                <th>Métier</th>
+                                                <th>Formation</th>
+                                                <th>Statut</th>
                                                 <th>Période</th>
                                             </tr>
                                         </thead>
@@ -386,7 +387,8 @@
                                             {% for detail_action in actions_suivies %}
                                             <tr>
                                                 <td>{{ detail_action.action.description }}</td>
-                                                <td>{{ detail_action.action.metier.nom }}</td>
+                                                <td>{{ detail_action.action.formation.nom }}</td>
+                                                <td><span class="badge {{ detail_action.status_meta.badge }}">{{ detail_action.status_meta.label }}</span></td>
                                                 <td>{{ detail_action.action.date_debut|date:"d/m/Y" }} au {{ detail_action.action.date_fin|date:"d/m/Y" }}</td>
                                             </tr>
                                             {% endfor %}
@@ -404,7 +406,7 @@
                                         <select id="assign-action-select" name="action" class="form-select">
                                             <option value="">-- Choisir une action --</option>
                                             {% for act in actions %}
-                                            <option value="{{ act.id }}">{{ act.description }} ({{ act.metier.nom }}) - {{ act.date_debut|date:"d/m/Y" }}</option>
+                                            <option value="{{ act.id }}">{{ act.description }} ({{ act.formation.nom }}) - {{ act.date_debut|date:"d/m/Y" }}</option>
                                             {% endfor %}
                                         </select>
                                         <button id="assign-action-btn" class="btn btn-primary" type="button">Inscrire à l'action</button>
@@ -580,6 +582,28 @@
                                 </a>
                             </div>
                             <div class="card-body">
+                                {# Nouvelle section pour les infos de paiement agrégées #}
+                                <div class="row g-3 mb-4">
+                                    <div class="col-12 col-md-4">
+                                        <div class="tm-stagiaire-kpi-card">
+                                            <span class="tm-stagiaire-kpi-card__label">Coût total formations</span>
+                                            <span class="tm-stagiaire-kpi-card__value">{{ total_cost|floatformat:2 }} USD</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 col-md-4">
+                                        <div class="tm-stagiaire-kpi-card">
+                                            <span class="tm-stagiaire-kpi-card__label">Total payé</span>
+                                            <span class="tm-stagiaire-kpi-card__value">{{ total_paid|floatformat:2 }} USD</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 col-md-4">
+                                        <div class="tm-stagiaire-kpi-card">
+                                            <span class="tm-stagiaire-kpi-card__label">Solde restant</span>
+                                            <span class="tm-stagiaire-kpi-card__value {% if solde_restant <= 0 %}text-success{% else %}text-danger{% endif %}">{{ solde_restant|floatformat:2 }} USD</span>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 {% if paiements %}
                                 <div class="table-responsive">
                                     <table class="table table-striped">
@@ -606,7 +630,13 @@
                                                 <td>{{ paiement.montant }}</td>
                                                 <td>{{ paiement.date_paiement|date:"d/m/Y" }}</td>
                                                 <td>{{ paiement.get_mode_paiement_display }}</td>
-                                                <td>{{ paiement.reference|default:"-" }}</td>
+                                                <td>
+                                                    {% if paiement.reference %}
+                                                        <a href="{% url 'paiement' paiement.pk %}">{{ paiement.reference }}</a>
+                                                    {% else %}
+                                                        -
+                                                    {% endif %}
+                                                </td>
                                                 <td>
                                                     <div class="d-flex gap-2">
                                                         <a href="{% url 'paiement' paiement.pk %}" class="btn btn-sm btn-outline-info" title="Voir">

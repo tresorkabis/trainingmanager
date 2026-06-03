@@ -7,85 +7,63 @@ if (dashboardChartElement && dashboardChartDataElement) {
         serie.data.some((value) => value > 0)
     );
 
+    const chartHeight = Math.max(320, (dashboardChartData.categories.length * 52) + 90);
+
     const optionsProfileVisit = {
-        series: [
-            {
-                name: "Stagiaires",
-                type: "column",
-                data: dashboardChartData.series[0].data,
-            },
-            {
-                name: "Actions planifiées",
-                type: "line",
-                data: dashboardChartData.series[1].data,
-            },
-        ],
+        series: dashboardChartData.series.map((serie) => ({
+            name: serie.name,
+            type: "bar",
+            data: serie.data,
+        })),
         chart: {
-            height: 350,
-            type: "line",
+            height: chartHeight,
+            type: "bar",
             stacked: false,
             toolbar: {
                 show: false,
             },
             fontFamily: "Nunito, sans-serif",
-            animations: { // Added animations for a premium feel
+            animations: {
                 enabled: true,
-                easing: 'easeinout',
-                speed: 800,
+                easing: "easeinout",
+                speed: 700,
                 animateGradually: {
                     enabled: true,
-                    delay: 150
+                    delay: 120,
                 },
                 dynamicAnimation: {
                     enabled: true,
-                    speed: 350
-                }
-            }
-        },
-        colors: ["#5a8dee", "#5ddab4"], // Refined colors
-        dataLabels: {
-            enabled: false,
-        },
-        stroke: {
-            width: [0, 4],
-            curve: "smooth",
-            dashArray: [0, 0], // Solid line for the line chart
-        },
-        plotOptions: {
-            bar: {
-                horizontal: false,
-                columnWidth: "55%",
-                endingShape: "rounded",
-                borderRadius: 6,
-                colors: { // Gradient for column bars
-                    ranges: [{
-                        from: 0,
-                        to: 100000, // Max value, adjust if needed
-                        color: '#5a8dee'
-                    }],
-                    backgroundBarColors: [],
-                    backgroundBarOpacity: 1,
-                    backgroundBarRadius: 0,
-                }
+                    speed: 300,
+                },
             },
         },
-        fill: { // Apply gradient to column series
-            type: 'gradient',
-            gradient: {
-                shade: 'light',
-                type: 'vertical',
-                shadeIntensity: 0.25,
-                gradientToColors: ['#8dbeff'], // Lighter shade for gradient end
-                inverseColors: true,
-                opacityFrom: 1,
-                opacityTo: 0.8,
-                stops: [0, 100]
-            }
+        colors: ["#5a8dee", "#5ddab4"],
+        plotOptions: {
+            bar: {
+                horizontal: true,
+                barHeight: "58%",
+                borderRadius: 8,
+                borderRadiusApplication: "end",
+                hideZeroBarsWhenGrouped: true,
+            },
+        },
+        dataLabels: {
+            enabled: true,
+            offsetX: 4,
+            style: {
+                fontSize: "12px",
+                fontFamily: "Nunito, sans-serif",
+                fontWeight: 700,
+                colors: ["#112033"],
+            },
+        },
+        stroke: {
+            width: 1,
+            colors: ["#ffffff"],
         },
         xaxis: {
             categories: dashboardChartData.categories,
             labels: {
-                rotate: -45,
                 style: {
                     colors: "#62748a",
                     fontSize: "12px",
@@ -98,79 +76,41 @@ if (dashboardChartElement && dashboardChartDataElement) {
             axisTicks: {
                 show: false,
             },
+            title: {
+                text: "Nombre",
+                style: {
+                    color: "#62748a",
+                    fontFamily: "Nunito, sans-serif",
+                    fontWeight: 600,
+                },
+            },
         },
-        yaxis: [
-            {
-                axisTicks: {
-                    show: true,
-                },
-                axisBorder: {
-                    show: true,
-                    color: "#5a8dee", // Color for the first Y-axis
-                },
-                labels: {
-                    style: {
-                        colors: "#5a8dee",
-                        fontSize: "12px",
-                        fontFamily: "Nunito, sans-serif",
-                    },
-                },
-                title: {
-                    text: "Nombre de Stagiaires",
-                    style: {
-                        color: "#5a8dee",
-                        fontFamily: "Nunito, sans-serif",
-                        fontWeight: 700,
-                    },
-                },
-                tooltip: {
-                    enabled: true,
+        yaxis: {
+            labels: {
+                style: {
+                    colors: "#112033",
+                    fontSize: "12px",
+                    fontFamily: "Nunito, sans-serif",
                 },
             },
-            {
-                seriesName: "Actions planifiées",
-                opposite: true,
-                axisTicks: {
-                    show: true,
-                },
-                axisBorder: {
-                    show: true,
-                    color: "#5ddab4", // Color for the second Y-axis
-                },
-                labels: {
-                    style: {
-                        colors: "#5ddab4",
-                        fontSize: "12px",
-                        fontFamily: "Nunito, sans-serif",
-                    },
-                },
-                title: {
-                    text: "Nombre d'Actions",
-                    style: {
-                        color: "#5ddab4",
-                        fontFamily: "Nunito, sans-serif",
-                        fontWeight: 700,
-                    },
-                },
-            },
-        ],
+        },
         grid: {
             borderColor: "rgba(15, 23, 42, 0.08)",
             strokeDashArray: 4,
             xaxis: {
                 lines: {
-                    show: false,
+                    show: true,
                 },
             },
             yaxis: {
                 lines: {
-                    show: true,
+                    show: false,
                 },
             },
         },
         legend: {
-            position: "bottom",
-            horizontalAlign: "center",
+            position: "top",
+            horizontalAlign: "left",
             fontSize: "13px",
             labels: {
                 colors: "#112033",
@@ -181,22 +121,11 @@ if (dashboardChartElement && dashboardChartDataElement) {
         },
         tooltip: {
             theme: "light",
-            y: [
-                {
-                    title: {
-                        formatter: function (val) {
-                            return val + " (Stagiaires)";
-                        },
-                    },
+            y: {
+                formatter: function (value) {
+                    return `${value} élément(s)`;
                 },
-                {
-                    title: {
-                        formatter: function (val) {
-                            return val + " (Actions)";
-                        },
-                    },
-                },
-            ],
+            },
         },
         noData: {
             text: "Aucune donnée exploitable pour le moment.",

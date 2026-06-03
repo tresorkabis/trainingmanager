@@ -206,6 +206,12 @@
                             <span class="tm-typeaction-stat__value">{{ stats.inactive }}</span>
                         </div>
                     </div>
+                    <div class="col-6 col-md-4">
+                        <div class="tm-typeaction-stat">
+                            <span class="tm-typeaction-stat__label">Actions de formation</span>
+                            <span class="tm-typeaction-stat__value">{{ stats.actions_total }}</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -231,6 +237,7 @@
                             <tr>
                                 <th style="width: 15%;">Code</th>
                                 <th style="width: 40%;">Libellé</th>
+                                <th style="width: 15%;">Actions</th>
                                 <th style="width: 15%;">Statut</th>
                                 <th style="width: 15%;">Actions</th>
                             </tr>
@@ -241,6 +248,7 @@
                             <tr>
                                 <td><a href="{% url 'typeaction' item.pk %}" class="tm-typeaction-row__title">{{ item.code }}</a></td>
                                 <td>{{ item.libelle }}</td>
+                                <td><span class="badge bg-primary">{{ item.actions_count }}</span></td>
                                 <td>
                                     {% if item.active %}
                                     <span class="badge bg-success">Actif</span>

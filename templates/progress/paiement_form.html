@@ -86,7 +86,7 @@
                 <h4 class="card-title">Formulaire de paiement</h4>
             </div>
             <div class="card-body">
-                <form method="post">
+                <form method="post" enctype="multipart/form-data">
                     {% csrf_token %}
                     <div class="row"> {# Début de la grille Bootstrap #}
                         <div class="col-md-6 col-12">
@@ -108,7 +108,7 @@
                                 <label for="{{ form.action.id_for_label }}" class="form-label">{{ form.action.label }}</label>
                                 {% if prefill_action and action_obj %}
                                     <input type="hidden" name="action" value="{{ action_obj.pk }}">
-                                    <div class="form-control-plaintext">{{ action_obj.description }} ({{ action_obj.metier.nom }})</div>
+                                    <div class="form-control-plaintext">{{ action_obj.description }} ({{ action_obj.formation.nom }})</div>
                                 {% else %}
                                     {{ form.action }} {# Select2Widget gère déjà ses classes #}
                                     {% for error in form.action.errors %}
@@ -153,6 +153,23 @@
                                 {% endfor %}
                             </div>
                         </div>
+                        <div class="col-12" id="bordereau-photo-wrapper">
+                            <div class="form-group mb-3">
+                                <label for="{{ form.bordereau_photo.id_for_label }}" class="form-label">{{ form.bordereau_photo.label }}</label>
+                                {{ form.bordereau_photo }}
+                                {% if object and object.bordereau_photo %}
+                                <div class="mt-2">
+                                    <small class="text-muted d-block mb-1">Bordereau actuel</small>
+                                    <a href="{{ object.bordereau_photo.url }}" target="_blank" rel="noopener">
+                                        <img src="{{ object.bordereau_photo.url }}" alt="Bordereau de virement" style="max-height: 160px; border-radius: 0.75rem; border: 1px solid #e9ecef;">
+                                    </a>
+                                </div>
+                                {% endif %}
+                                {% for error in form.bordereau_photo.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
                     </div> {# Fin de la grille Bootstrap #}
 
                     {% if form.non_field_errors %}
@@ -178,6 +195,20 @@
     <script>
         // Initialisation manuelle de Select2 après le chargement du DOM
         $(document).ready(function() {
+            const modePaiementSelect = document.getElementById('id_mode_paiement');
+            const bordereauWrapper = document.getElementById('bordereau-photo-wrapper');
+            const bordereauInput = document.getElementById('id_bordereau_photo');
+
+            function toggleBordereauField() {
+                const needsBordereau = modePaiementSelect && modePaiementSelect.value === 'VIREMENT';
+                if (bordereauWrapper) {
+                    bordereauWrapper.style.display = needsBordereau ? '' : 'none';
+                }
+                if (bordereauInput) {
+                    bordereauInput.required = needsBordereau;
+                }
+            }
+
             // Cible les champs Select2 par leur classe générée par django-select2
             // ou par leur ID si vous voulez être plus spécifique
             $('#id_stagiaire').select2({
@@ -190,6 +221,11 @@
                 allowClear: true,
                 width: '100%'
             });
+
+            if (modePaiementSelect) {
+                modePaiementSelect.addEventListener('change', toggleBordereauField);
+                toggleBordereauField();
+            }
         });
     </script>
 {% endblock script %}
