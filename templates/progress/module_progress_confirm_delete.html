@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Supprimer Progression Module{% endblock title %}
+
+{% block page_header %}Supprimer Progression Module{% endblock page_header %}
+
+{% block content %}
+<section class="section">
+    <div class="card">
+        <div class="card-header">
+            <h4 class="card-title">Confirmer la suppression</h4>
+        </div>
+        <div class="card-body">
+            <p>Êtes-vous sûr de vouloir supprimer la progression du module <strong>{{ object.module.titre }}</strong> pour le formateur <strong>{{ object.formateur.get_full_name }}</strong> dans l'action <strong>{{ object.action.description }}</strong> ?</p>
+
+            <form method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">Confirmer la suppression</button>
+                <a href="{% url 'module_progress_detail' object.pk %}" class="btn btn-secondary">Annuler</a>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock content %}

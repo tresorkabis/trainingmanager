@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Détail séance{% endblock title %}
+{% block page_header %}Détail séance formateur{% endblock page_header %}
+
+{% block content %}
+<div class="page-heading">
+    <section class="section">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title mb-1">{{ performance.formateur }}</h4>
+                <p class="text-muted mb-0">{{ performance.action.description }} - {{ performance.module.titre }}</p>
+            </div>
+            <div class="card-body">
+                <div class="row g-3 mb-4">
+                    <div class="col-12 col-md-4"><strong>Action:</strong> {{ performance.action.description }}</div>
+                    <div class="col-12 col-md-4"><strong>Matière:</strong> {{ performance.module.titre }}</div>
+                    <div class="col-12 col-md-4"><strong>Formateur:</strong> {{ performance.formateur }}</div>
+                    <div class="col-12 col-md-4"><strong>Date de début:</strong> {{ performance.date_debut_reelle|default:"-" }}</div>
+                    <div class="col-12 col-md-4"><strong>Date de fin:</strong> {{ performance.date_fin_reelle|default:"-" }}</div>
+                    <div class="col-12 col-md-4"><strong>Heures:</strong> {{ performance.heures_effectuees|default:"-" }}</div>
+                    <div class="col-12 col-md-4"><strong>Date d'enregistrement:</strong> {{ performance.date_evaluation|default:"-" }}</div>
+                    <div class="col-12 col-md-4"><strong>Évaluateur:</strong> {{ performance.evaluateur|default:"-" }}</div>
+                </div>
+
+                {% if performance.commentaires %}
+                <div class="card bg-light border-0">
+                    <div class="card-body">
+                        <strong>Commentaires</strong>
+                        <p class="mb-0 mt-2">{{ performance.commentaires }}</p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            <div class="card-footer d-flex justify-content-end gap-2">
+                <a href="{% url 'performances' %}" class="btn btn-light-secondary">Retour</a>
+                <a href="{% url 'performance_update' performance.pk %}" class="btn btn-primary">Modifier</a>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock content %}

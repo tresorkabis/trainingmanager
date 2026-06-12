@@ -1,0 +1,237 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ title|default:"Séance formateur" }}{% endblock title %}
+{% block page_header %}{{ title|default:"Séance formateur" }}{% endblock page_header %}
+
+{% block style %}
+<style>
+    .tm-performance-hero {
+        background:
+            radial-gradient(circle at top right, rgba(67, 94, 190, 0.18), transparent 35%),
+            linear-gradient(135deg, #f7f8fc 0%, #eef3ff 100%);
+        border: 1px solid rgba(67, 94, 190, 0.12);
+        border-radius: 1.25rem;
+    }
+
+    .tm-performance-card,
+    .tm-performance-sidecard {
+        border: 1px solid rgba(15, 23, 42, 0.07);
+        border-radius: 1rem;
+        box-shadow: 0 16px 32px rgba(15, 23, 42, 0.05);
+    }
+
+    .tm-performance-context {
+        display: grid;
+        gap: 0.75rem;
+    }
+
+    .tm-performance-context__item {
+        padding: 0.85rem 1rem;
+        border-radius: 0.85rem;
+        background: #fbfcfe;
+        border: 1px solid #edf1f7;
+    }
+
+    .tm-performance-context__label {
+        display: block;
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: #7b8190;
+        margin-bottom: 0.2rem;
+    }
+
+    .tm-performance-context__value {
+        font-weight: 700;
+        color: #25396f;
+    }
+
+    .tm-mini-list {
+        display: grid;
+        gap: 0.6rem;
+    }
+
+    .tm-mini-list__row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.8rem 0.9rem;
+        border-radius: 0.85rem;
+        background: #fff;
+        border: 1px solid #edf1f7;
+    }
+
+    .tm-mini-list__meta {
+        color: #7b8190;
+        font-size: 0.85rem;
+    }
+</style>
+{% endblock style %}
+
+{% block content %}
+<div class="page-heading">
+    <section class="tm-performance-hero p-4 p-lg-5 mb-4">
+        <div class="row g-4 align-items-center">
+            <div class="col-12 col-lg-8">
+                <div class="tm-section-titlebar">
+                    <span class="tm-section-titlebar__icon"><i class="bi bi-graph-up-arrow"></i></span>
+                    <div class="tm-section-titlebar__text">
+                        <h3>{{ title|default:"Nouvel enregistrement de séance" }}</h3>
+                        <p>Enregistrez une séance de formateur par action, matière et nombre d'heures.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-lg-4 d-flex justify-content-lg-end">
+                <a href="{% url 'performances' %}" class="btn btn-light-secondary">
+                    <i class="bi bi-arrow-left me-2"></i>Retour aux performances
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="row g-4">
+            <div class="col-12 col-xl-8">
+                <div class="card tm-performance-card">
+                    <div class="card-header">
+                        <h4 class="card-title mb-1">Séance</h4>
+                        <p class="text-muted mb-0">Les champs principaux permettent de tracer la matière dispensée et la charge horaire.</p>
+                    </div>
+                    <div class="card-body">
+                        {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {% for error in form.non_field_errors %}
+                            <div>{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        <form method="post" class="row g-4">
+                            {% csrf_token %}
+                            <div class="col-12 col-md-6">
+                                <label class="form-label">Action</label>
+                                {{ form.action }}
+                                {% if form.action.errors %}<div class="text-danger small">{{ form.action.errors }}</div>{% endif %}
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label class="form-label">Matière</label>
+                                {{ form.module }}
+                                {% if form.module.errors %}<div class="text-danger small">{{ form.module.errors }}</div>{% endif %}
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label class="form-label">Formateur</label>
+                                {{ form.formateur }}
+                                {% if form.formateur.errors %}<div class="text-danger small">{{ form.formateur.errors }}</div>{% endif %}
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label class="form-label">Évaluateur</label>
+                                {{ form.evaluateur }}
+                                {% if form.evaluateur.errors %}<div class="text-danger small">{{ form.evaluateur.errors }}</div>{% endif %}
+                            </div>
+                            <div class="col-12 col-md-4">
+                                <label class="form-label">Date de début</label>
+                                {{ form.date_debut_reelle }}
+                                {% if form.date_debut_reelle.errors %}<div class="text-danger small">{{ form.date_debut_reelle.errors }}</div>{% endif %}
+                            </div>
+                            <div class="col-12 col-md-4">
+                                <label class="form-label">Date de fin</label>
+                                {{ form.date_fin_reelle }}
+                                {% if form.date_fin_reelle.errors %}<div class="text-danger small">{{ form.date_fin_reelle.errors }}</div>{% endif %}
+                            </div>
+                            <div class="col-12 col-md-4">
+                                <label class="form-label">Nombre d'heures</label>
+                                {{ form.heures_effectuees }}
+                                {% if form.heures_effectuees.errors %}<div class="text-danger small">{{ form.heures_effectuees.errors }}</div>{% endif %}
+                            </div>
+                            <div class="col-12 col-md-4">
+                                <label class="form-label">Date d'enregistrement</label>
+                                {{ form.date_evaluation }}
+                                {% if form.date_evaluation.errors %}<div class="text-danger small">{{ form.date_evaluation.errors }}</div>{% endif %}
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Commentaires</label>
+                                {{ form.commentaires }}
+                                {% if form.commentaires.errors %}<div class="text-danger small">{{ form.commentaires.errors }}</div>{% endif %}
+                            </div>
+
+                            <div class="col-12 d-flex justify-content-end gap-2">
+                                <a href="{% url 'performances' %}" class="btn btn-light-secondary">Annuler</a>
+                                <button type="submit" class="btn btn-primary">{{ title|default:"Enregistrer" }}</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-xl-4">
+                <div class="card tm-performance-sidecard mb-4">
+                    <div class="card-header">
+                        <h4 class="card-title mb-1">Contexte sélectionné</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="tm-performance-context">
+                            <div class="tm-performance-context__item">
+                                <span class="tm-performance-context__label">Action</span>
+                                <div class="tm-performance-context__value">{{ selected_action.description|default:"Aucune action sélectionnée" }}</div>
+                            </div>
+                            <div class="tm-performance-context__item">
+                                <span class="tm-performance-context__label">Matière</span>
+                                <div class="tm-performance-context__value">{{ selected_module.titre|default:"Aucune matière sélectionnée" }}</div>
+                            </div>
+                            <div class="tm-performance-context__item">
+                                <span class="tm-performance-context__label">Formateur</span>
+                                <div class="tm-performance-context__value">{{ selected_formateur|default:"Aucun formateur sélectionné" }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {% if selected_action %}
+                <div class="card tm-performance-sidecard">
+                    <div class="card-header">
+                        <h4 class="card-title mb-1">Matières de l'action</h4>
+                        <p class="text-muted mb-0">Clique sur un formateur pour préremplir la saisie.</p>
+                    </div>
+                    <div class="card-body">
+                        {% if action_modules %}
+                        <div class="tm-mini-list">
+                            {% for module in action_modules %}
+                            <div class="tm-mini-list__row">
+                                <div>
+                                    <div class="fw-bold">{{ module.titre }}</div>
+                                    <div class="tm-mini-list__meta">{{ module.duree_heures }} h</div>
+                                </div>
+                                <div class="d-flex flex-column gap-2 align-items-end">
+                                    {% if module.formateurs.all %}
+                                        {% for formateur in module.formateurs.all %}
+                                        <a href="?action={{ selected_action.pk }}&module={{ module.pk }}&formateur={{ formateur.pk }}" class="btn btn-outline-primary btn-sm">
+                                            {{ formateur.nom }} {{ formateur.postnom }}
+                                        </a>
+                                        {% endfor %}
+                                    {% else %}
+                                        <span class="badge bg-light-secondary text-dark">Aucun formateur</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <p class="text-muted mb-0">Aucune matière n'est rattachée à cette action.</p>
+                        {% endif %}
+                    </div>
+                </div>
+                {% else %}
+                <div class="card tm-performance-sidecard">
+                    <div class="card-body">
+                        <p class="text-muted mb-0">Sélectionne d'abord une action pour charger ses matières et ses formateurs.</p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+</div>
+{{ form.media }}
+{% endblock content %}

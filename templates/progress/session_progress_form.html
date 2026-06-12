@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block title %}{{ title }}{% endblock title %}
+
+{% block page_header %}{{ title }}{% endblock page_header %}
+
+{% block content %}
+<section class="section">
+    <div class="card">
+        <div class="card-header">
+            <h4 class="card-title">{{ title }} pour {{ module_progress.module.titre }} ({{ module_progress.detail_action.stagiaire.get_full_name }})</h4>
+        </div>
+        <div class="card-body">
+            <form method="post" class="form">
+                {% csrf_token %}
+
+                {% if form.errors %}
+                    <div class="alert alert-danger">
+                        <strong>Erreurs de formulaire:</strong>
+                        <ul>
+                            {% for field in form %}
+                                {% for error in field.errors %}
+                                    <li>{{ field.label }}: {{ error }}</li>
+                                {% endfor %}
+                            {% endfor %}
+                            {% for error in form.non_field_errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.session_date.id_for_label }}">Date de la séance</label>
+                            {% render_field form.session_date class="form-control" type="date" %}
+                            {% if form.session_date.help_text %}
+                                <small class="form-text text-muted">{{ form.session_date.help_text }}</small>
+                            {% endif %}
+                            {% for error in form.session_date.errors %}
+                                <div class="invalid-feedback d-block">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label for="{{ form.start_time.id_for_label }}">Heure de début</label>
+                            {% render_field form.start_time class="form-control" type="time" %}
+                            {% if form.start_time.help_text %}
+                                <small class="form-text text-muted">{{ form.start_time.help_text }}</small>
+                            {% endif %}
+                            {% for error in form.start_time.errors %}
+                                <div class="invalid-feedback d-block">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label for="{{ form.end_time.id_for_label }}">Heure de fin</label>
+                            {% render_field form.end_time class="form-control" type="time" %}
+                            {% if form.end_time.help_text %}
+                                <small class="form-text text-muted">{{ form.end_time.help_text }}</small>
+                            {% endif %}
+                            {% for error in form.end_time.errors %}
+                                <div class="invalid-feedback d-block">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label for="{{ form.topics_covered.id_for_label }}">Sujets couverts</label>
+                            {% render_field form.topics_covered class="form-control" rows="3" %}
+                            {% if form.topics_covered.help_text %}
+                                <small class="form-text text-muted">{{ form.topics_covered.help_text }}</small>
+                            {% endif %}
+                            {% for error in form.topics_covered.errors %}
+                                <div class="invalid-feedback d-block">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.formateur.id_for_label }}">Formateur</label>
+                            {% render_field form.formateur class="form-select" %}
+                            {% if form.formateur.help_text %}
+                                <small class="form-text text-muted">{{ form.formateur.help_text }}</small>
+                            {% endif %}
+                            {% for error in form.formateur.errors %}
+                                <div class="invalid-feedback d-block">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.is_completed.id_for_label }}">Séance terminée</label>
+                            <div class="form-check form-switch">
+                                {% render_field form.is_completed class="form-check-input" %}
+                                <label class="form-check-label" for="{{ form.is_completed.id_for_label }}">Oui</label>
+                            </div>
+                            {% if form.is_completed.help_text %}
+                                <small class="form-text text-muted">{{ form.is_completed.help_text }}</small>
+                            {% endif %}
+                            {% for error in form.is_completed.errors %}
+                                <div class="invalid-feedback d-block">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label for="{{ form.notes.id_for_label }}">Notes additionnelles</label>
+                            {% render_field form.notes class="form-control" rows="3" %}
+                            {% if form.notes.help_text %}
+                                <small class="form-text text-muted">{{ form.notes.help_text }}</small>
+                            {% endif %}
+                            {% for error in form.notes.errors %}
+                                <div class="invalid-feedback d-block">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end mt-3">
+                    <button type="submit" class="btn btn-primary me-2">Enregistrer</button>
+                    <a href="{% url 'module_progress_detail' module_progress.pk %}" class="btn btn-secondary">Annuler</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock content %}

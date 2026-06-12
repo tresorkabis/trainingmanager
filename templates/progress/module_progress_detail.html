@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block title %}Détails Progression Module{% endblock title %}
+
+{% block style %}
+<link rel="stylesheet" href="{% static 'assets/vendors/simple-datatables/style.css' %}">
+{% endblock style %}
+
+{% block page_header %}Détails Progression Module{% endblock page_header %}
+
+{% block content %}
+<section class="section">
+    <div class="row">
+        <div class="col-12"> {# Changed from col-md-8 to col-12 as stagiaire info card is removed #}
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">Progression du Module: {{ module_progress.module.titre }}</h4>
+                    <p class="card-subtitle">Formateur: {{ module_progress.formateur.get_full_name }}</p>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Action de formation:</label>
+                                <p class="form-control-static">{{ module_progress.action.description }}</p>
+                            </div>
+                            <div class="form-group">
+                                <label>Module:</label>
+                                <p class="form-control-static">{{ module_progress.module.titre }}</p>
+                            </div>
+                            <div class="form-group">
+                                <label>Date Début Réelle:</label>
+                                <p class="form-control-static">{{ module_progress.date_debut_reelle|default:"N/A" }}</p>
+                            </div>
+                            <div class="form-group">
+                                <label>Date Fin Réelle:</label>
+                                <p class="form-control-static">{{ module_progress.date_fin_reelle|default:"N/A" }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Statut:</label>
+                                <p class="form-control-static">{{ module_progress.get_statut_module_display }}</p>
+                            </div>
+                            <div class="form-group">
+                                <label>Note:</label>
+                                <p class="form-control-static">{{ module_progress.note|default:"N/A" }}</p>
+                            </div>
+                            <div class="form-group">
+                                <label>Commentaires:</label>
+                                <p class="form-control-static">{{ module_progress.commentaires|default:"Aucun" }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <a href="{% url 'module_progress_update' module_progress.pk %}" class="btn btn-warning">Modifier</a>
+                        <a href="{% url 'module_progress_delete' module_progress.pk %}" class="btn btn-danger">Supprimer</a>
+                        <a href="{% url 'module_progressions' %}" class="btn btn-secondary">Retour à la liste</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mt-4">
+        <div class="card-header">
+            <h4 class="card-title">Séances du Module</h4>
+            <a href="{% url 'session_progress_create' module_progress_pk=module_progress.pk %}" class="btn btn-primary float-end">
+                <i class="bi bi-plus-circle"></i> Ajouter une séance
+            </a>
+        </div>
+        <div class="card-body">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            {% if sessions %}
+            <table class="table table-striped" id="table2">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Heure Début</th>
+                        <th>Heure Fin</th>
+                        <th>Formateur</th>
+                        <th>Sujets Couverts</th>
+                        <th>Terminée</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for session in sessions %}
+                    <tr>
+                        <td>{{ session.session_date }}</td>
+                        <td>{{ session.start_time|default:"N/A" }}</td>
+                        <td>{{ session.end_time|default:"N/A" }}</td>
+                        <td>{{ session.formateur|default:"N/A" }}</td>
+                        <td>{{ session.topics_covered|truncatechars:50|default:"N/A" }}</td>
+                        <td>
+                            {% if session.is_completed %}
+                                <span class="badge bg-success">Oui</span>
+                            {% else %}
+                                <span class="badge bg-warning">Non</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'session_progress_update' session.pk %}" class="btn btn-sm btn-warning" title="Modifier">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <a href="{% url 'session_progress_delete' session.pk %}" class="btn btn-sm btn-danger" title="Supprimer">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p>Aucune séance enregistrée pour ce module.</p>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock content %}
+
+{% block script %}
+<script src="{% static 'assets/vendors/simple-datatables/simple-datatables.js' %}"></script>
+<script>
+    // Simple Datatable for sessions
+    let table2 = document.querySelector('#table2');
+    let dataTable2 = new simpleDatatables.DataTable(table2);
+</script>
+{% endblock script %}

@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Séances formateurs{% endblock title %}
+{% block page_header %}Séances formateurs{% endblock page_header %}
+
+{% block content %}
+<div class="page-heading">
+    <section class="section">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <div>
+                    <h4 class="card-title mb-1">Suivi des séances</h4>
+                    <p class="text-muted mb-0">Enregistrements des séances par formateur, matière et nombre d'heures.</p>
+                </div>
+                <a href="{% url 'performance_create' %}" class="btn btn-primary">Nouvelle séance</a>
+            </div>
+            <div class="card-body">
+                <form method="get" class="row g-3 mb-4">
+                    <div class="col-12 col-md-4">
+                        <input type="text" name="q" value="{{ request.GET.q }}" class="form-control" placeholder="Recherche">
+                    </div>
+                    <div class="col-12 col-md-3">
+                        <select name="formateur" class="form-select">
+                            <option value="">Tous les formateurs</option>
+                            {% for formateur in formateurs %}
+                            <option value="{{ formateur.pk }}" {% if request.GET.formateur == formateur.pk|stringformat:"s" %}selected{% endif %}>
+                                {{ formateur.nom }} {{ formateur.postnom }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-3">
+                        <select name="action" class="form-select">
+                            <option value="">Toutes les actions</option>
+                            {% for action in actions %}
+                            <option value="{{ action.pk }}" {% if request.GET.action == action.pk|stringformat:"s" %}selected{% endif %}>
+                                {{ action.description }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-2 d-flex gap-2">
+                        <button class="btn btn-primary w-100" type="submit">Filtrer</button>
+                    </div>
+                </form>
+
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Formateur</th>
+                                <th>Action</th>
+                                <th>Matière</th>
+                                <th>Dates</th>
+                                <th>Heures</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for performance in performances %}
+                            <tr>
+                                <td>{{ performance.formateur }}</td>
+                                <td>{{ performance.action.description }}</td>
+                                <td>{{ performance.module.titre }}</td>
+                                <td>
+                                    {{ performance.date_debut_reelle|default:"-" }}<br>
+                                    <span class="text-muted">{{ performance.date_fin_reelle|default:"-" }}</span>
+                                </td>
+                                <td>
+                                    {{ performance.heures_effectuees|default:"-" }}
+                                </td>
+                                <td class="text-end">
+                                    <a href="{% url 'performance' performance.pk %}" class="btn btn-sm btn-outline-primary">Voir</a>
+                                    <a href="{% url 'performance_update' performance.pk %}" class="btn btn-sm btn-outline-info">Modifier</a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center text-muted">Aucune performance enregistrée.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                {% if is_paginated %}
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <div class="text-muted">Page {{ page_obj.number }} sur {{ page_obj.paginator.num_pages }}</div>
+                    <ul class="pagination mb-0">
+                        {% if page_obj.has_previous %}
+                        <li class="page-item"><a class="page-link" href="?{% if query_params %}{{ query_params }}&{% endif %}page=1">&laquo;</a></li>
+                        {% endif %}
+                        <li class="page-item active"><span class="page-link">{{ page_obj.number }}</span></li>
+                        {% if page_obj.has_next %}
+                        <li class="page-item"><a class="page-link" href="?{% if query_params %}{{ query_params }}&{% endif %}page={{ page_obj.next_page_number }}">&raquo;</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock content %}

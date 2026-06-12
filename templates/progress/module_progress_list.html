@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block title %}Progression des Modules{% endblock title %}
+
+{% block style %}
+<link rel="stylesheet" href="{% static 'assets/vendors/simple-datatables/style.css' %}">
+{% endblock style %}
+
+{% block page_header %}Progression des Modules{% endblock page_header %}
+
+{% block content %}
+<section class="section">
+    <div class="card">
+        <div class="card-header">
+            <h4 class="card-title">Liste des Progressions de Modules</h4>
+            <a href="{% url 'module_progress_create' %}" class="btn btn-primary float-end">
+                <i class="bi bi-plus-circle"></i> Ajouter une progression
+            </a>
+        </div>
+        <div class="card-body">
+            <form method="GET" class="row g-3 align-items-end mb-4">
+                <div class="col-md-3">
+                    <label for="id_q" class="form-label">Recherche globale</label>
+                    <input type="text" name="q" id="id_q" class="form-control" placeholder="Nom formateur, module..." value="{{ request.GET.q }}">
+                </div>
+                <div class="col-md-3">
+                    <label for="id_formateur" class="form-label">Formateur</label>
+                    <select name="formateur" id="id_formateur" class="form-select">
+                        <option value="">Tous les formateurs</option>
+                        {% for formateur in formateurs %}
+                            <option value="{{ formateur.formateur__id }}" {% if selected_formateur_id == formateur.formateur__id %}selected{% endif %}>
+                                {{ formateur.formateur__nom }} {{ formateur.formateur__postnom }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="id_module" class="form-label">Module</label>
+                    <select name="module" id="id_module" class="form-select">
+                        <option value="">Tous les modules</option>
+                        {% for module in modules %}
+                            <option value="{{ module.id }}" {% if selected_module_id == module.id %}selected{% endif %}>
+                                {{ module.titre }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="id_statut" class="form-label">Statut</label>
+                    <select name="statut" id="id_statut" class="form-select">
+                        <option value="">Tous les statuts</option>
+                        {% for code, label in statut_choices %}
+                            <option value="{{ code }}" {% if selected_statut == code %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-1">
+                    <button type="submit" class="btn btn-primary">Filtrer</button>
+                </div>
+            </form>
+
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <table class="table table-striped" id="table1">
+                <thead>
+                    <tr>
+                        <th>Formateur</th>
+                        <th>Module</th>
+                        <th>Action de formation</th>
+                        <th>Date Début Réelle</th>
+                        <th>Date Fin Réelle</th>
+                        <th>Statut</th>
+                        <th>Note</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for mp in module_progressions %}
+                    <tr>
+                        <td>{{ mp.formateur.get_full_name }}</td>
+                        <td>{{ mp.module.titre }}</td>
+                        <td>{{ mp.action.description }}</td>
+                        <td>{{ mp.date_debut_reelle|default:"N/A" }}</td>
+                        <td>{{ mp.date_fin_reelle|default:"N/A" }}</td>
+                        <td>{{ mp.get_statut_module_display }}</td>
+                        <td>{{ mp.note|default:"N/A" }}</td>
+                        <td>
+                            <a href="{% url 'module_progress_detail' mp.pk %}" class="btn btn-sm btn-info" title="Détails">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            <a href="{% url 'module_progress_update' mp.pk %}" class="btn btn-sm btn-warning" title="Modifier">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <a href="{% url 'module_progress_delete' mp.pk %}" class="btn btn-sm btn-danger" title="Supprimer">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8">Aucune progression de module trouvée.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            {% if is_paginated %}
+            <nav aria-label="Page navigation example">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}&{{ query_params }}">Précédent</a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">Précédent</span>
+                        </li>
+                    {% endif %}
+
+                    {% for i in paginator.page_range %}
+                        {% if page_obj.number == i %}
+                            <li class="page-item active"><span class="page-link">{{ i }}</span></li>
+                        {% else %}
+                            <li class="page-item"><a class="page-link" href="?page={{ i }}&{{ query_params }}">{{ i }}</a></li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}&{{ query_params }}">Suivant</a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">Suivant</span>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock content %}
+
+{% block script %}
+<script src="{% static 'assets/vendors/simple-datatables/simple-datatables.js' %}"></script>
+<script>
+    // Simple Datatable
+    let table1 = document.querySelector('#table1');
+    let dataTable = new simpleDatatables.DataTable(table1);
+</script>
+{% endblock script %}

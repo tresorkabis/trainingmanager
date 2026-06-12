@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-danger text-white">
+            <h5 class="mb-0"><i class="fas fa-exclamation-triangle"></i> Confirmation de suppression</h5>
+        </div>
+        <div class="card-body">
+            <p class="card-text">Êtes-vous sûr de vouloir supprimer la séance suivante ?</p>
+            <ul class="list-group list-group-flush mb-3">
+                <li class="list-group-item"><strong>Formateur :</strong> {{ object.formateur }}</li>
+                <li class="list-group-item"><strong>Action de formation :</strong> {{ object.action.description }}</li>
+                <li class="list-group-item"><strong>Matière :</strong> {{ object.module.titre }}</li>
+                <li class="list-group-item"><strong>Date d'enregistrement :</strong> {{ object.date_evaluation|default:"N/A" }}</li>
+            </ul>
+
+            <div class="alert alert-warning" role="alert">
+                Cette action est irréversible. Toutes les données associées à cette séance seront définitivement supprimées.
+            </div>
+
+            <form method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger me-2"><i class="fas fa-trash"></i> Confirmer la suppression</button>
+                <a href="{% url 'performances' %}" class="btn btn-secondary"><i class="fas fa-times"></i> Annuler</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
