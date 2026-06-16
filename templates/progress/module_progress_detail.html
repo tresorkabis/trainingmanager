@@ -21,35 +21,48 @@
                 </div>
                 <div class="card-body">
                     <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Action de formation:</label>
+                        <div class="col-md-3">
+                            <div class="form-group mb-2">
+                                <label class="fw-bold small text-muted text-uppercase">Action de formation:</label>
                                 <p class="form-control-static">{{ module_progress.action.description }}</p>
                             </div>
-                            <div class="form-group">
-                                <label>Module:</label>
+                            <div class="form-group mb-2">
+                                <label class="fw-bold small text-muted text-uppercase">Module:</label>
                                 <p class="form-control-static">{{ module_progress.module.titre }}</p>
                             </div>
-                            <div class="form-group">
-                                <label>Date Début Réelle:</label>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group mb-2">
+                                <label class="fw-bold small text-muted text-uppercase">Date Début Réelle:</label>
                                 <p class="form-control-static">{{ module_progress.date_debut_reelle|default:"N/A" }}</p>
                             </div>
-                            <div class="form-group">
-                                <label>Date Fin Réelle:</label>
+                            <div class="form-group mb-2">
+                                <label class="fw-bold small text-muted text-uppercase">Date Fin Réelle:</label>
                                 <p class="form-control-static">{{ module_progress.date_fin_reelle|default:"N/A" }}</p>
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Statut:</label>
-                                <p class="form-control-static">{{ module_progress.get_statut_module_display }}</p>
+                        <div class="col-md-3">
+                            <div class="form-group mb-2">
+                                <label class="fw-bold small text-muted text-uppercase">Statut:</label>
+                                <p class="form-control-static">
+                                    <span class="badge {% if module_progress.statut_module == 'VA' %}bg-success{% elif module_progress.statut_module == 'EC' %}bg-info{% elif module_progress.statut_module == 'TE' %}bg-primary{% elif module_progress.statut_module == 'EF' %}bg-danger{% else %}bg-secondary{% endif %}">
+                                        <i class="bi {% if module_progress.statut_module == 'VA' %}bi-check-circle{% elif module_progress.statut_module == 'EC' %}bi-play-circle{% else %}bi-info-circle{% endif %} me-1"></i>
+                                        {{ module_progress.get_statut_module_display }}
+                                    </span>
+                                </p>
                             </div>
                             <div class="form-group">
-                                <label>Note:</label>
-                                <p class="form-control-static">{{ module_progress.note|default:"N/A" }}</p>
+                                <label class="fw-bold small text-muted text-uppercase">Note:</label>
+                                <p class="form-control-static">
+                                    <span class="fw-bold {% if module_progress.note >= 12 %}text-success{% elif module_progress.note %}text-danger{% endif %}">
+                                        {{ module_progress.note|default:"--" }} <small class="text-muted">/ 20</small>
+                                    </span>
+                                </p>
                             </div>
-                            <div class="form-group">
-                                <label>Commentaires:</label>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group mb-2">
+                                <label class="fw-bold small text-muted text-uppercase">Commentaires:</label>
                                 <p class="form-control-static">{{ module_progress.commentaires|default:"Aucun" }}</p>
                             </div>
                         </div>

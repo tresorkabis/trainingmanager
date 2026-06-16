@@ -276,103 +276,76 @@
                     {# Tab 2: Modules et Progressions #}
                     <div class="tab-pane fade" id="modules-progressions" role="tabpanel" aria-labelledby="modules-progressions-tab">
                         <div class="mt-4"> {# Added mt-4 for spacing from tabs #}
-                            {% if object.formation.modules.all %}
-                                {% for module in object.formation.modules.all %}
-                                    <div class="card tm-detail-card mb-3"> {# Each module is now a tm-detail-card #}
-                                        <div class="card-header d-flex justify-content-between align-items-center" id="heading{{ module.pk }}" data-bs-toggle="collapse" data-bs-target="#collapse{{ module.pk }}" aria-expanded="false" aria-controls="collapse{{ module.pk }}" style="cursor: pointer;">
-                                            <h5 class="card-title mb-0">Module: {{ module.titre }} ({{ module.duree_heures }} heures)</h5>
-                                            <button class="btn btn-sm btn-outline-primary btn-icon-only" type="button">
-                                                <i class="bi bi-chevron-down collapse-icon"></i>
-                                            </button>
+                            {% if modules %}
+                                {% for module in modules %}
+                                    <div class="card tm-detail-card mb-2"> {# Marges réduites #}
+                                        <div class="card-header py-2 d-flex justify-content-between align-items-center"> {# Padding réduit #}
+                                            <h6 class="card-title mb-0" style="font-size: 0.9rem;"><i class="bi bi-journal-text me-2"></i>Module: {{ module.titre }} <span class="badge bg-light-primary text-primary ms-1" style="font-size: 0.7rem;">{{ module.duree_heures }}h</span></h6>
                                         </div>
-                                        <div id="collapse{{ module.pk }}" class="collapse" aria-labelledby="heading{{ module.pk }}">
-                                            <div class="card-body">
-                                                {# Module General Details Card #}
-                                                <div class="card tm-detail-card mb-4">
-                                                    <div class="card-header">
-                                                        <h5 class="card-title mb-1">Détails du Module</h5>
+                                        <div id="collapse{{ module.pk }}" class="" aria-labelledby="heading{{ module.pk }}">
+                                            <div class="card-body p-2"> {# Padding réduit #}
+                                                <div class="row g-2 mb-2"> {# Gouttière et marge réduites #}
+                                                    <div class="col-md-5">
+                                                        <div class="tm-detail-item p-2"> {# Padding réduit #}
+                                                            <span class="tm-detail-item__label" style="font-size: 0.7rem; margin-bottom: 0.1rem;">Description du module</span>
+                                                            <div class="tm-detail-item__value small" style="font-size: 0.8rem;">{{ module.description|default:"Pas de description." }}</div>
+                                                        </div>
                                                     </div>
-                                                    <div class="card-body">
-                                                        <div class="tm-detail-grid">
-                                                            <div class="tm-detail-item">
-                                                                <span class="tm-detail-item__label">Description</span>
-                                                                <div class="tm-detail-item__value">{{ module.description }}</div>
+                                                    <div class="col-md-4">
+                                                        <div class="tm-detail-item p-2"> {# Padding réduit #}
+                                                            <span class="tm-detail-item__label" style="font-size: 0.7rem; margin-bottom: 0.1rem;">Formateurs assignés</span>
+                                                            <div class="d-flex flex-wrap gap-1">
+                                                                {% for mp in module.module_progressions %}
+                                                                    <span class="badge bg-light-primary text-primary" style="font-size: 0.65rem;">{{ mp.formateur.get_full_name }}</span>
+                                                                {% empty %}
+                                                                    <span class="text-muted small">Aucun formateur</span>
+                                                                {% endfor %}
                                                             </div>
-                                                            <div class="tm-detail-item">
-                                                                <span class="tm-detail-item__label">Durée (heures)</span>
-                                                                <div class="tm-detail-item__value">{{ module.duree_heures }}</div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <div class="tm-detail-item p-2">
+                                                            <span class="tm-detail-item__label" style="font-size: 0.7rem; margin-bottom: 0.1rem;">Volume & Ordre</span>
+                                                            <div class="tm-detail-item__value small" style="font-size: 0.8rem;">
+                                                                <span class="fw-bold">{{ module.duree_heures }}h</span> | Seq: {{ module.ordre }}
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </div>
 
-                                                {# Formateurs Card #}
-                                                <div class="card tm-detail-card mb-4">
-                                                    <div class="card-header">
-                                                        <h5 class="card-title mb-1">Formateurs Assignés au Module</h5>
-                                                    </div>
-                                                    <div class="card-body">
-                                                        {% if module.formateurs.all %}
-                                                            <ul class="list-unstyled mb-0">
-                                                                {% for formateur in module.formateurs.all %}
-                                                                    <li class="d-flex justify-content-between align-items-center py-2 border-bottom">
-                                                                        <span>{{ formateur.get_full_name }}</span>
-                                                                        {# Removed "Ajouter une performance" button #}
-                                                                    </li>
-                                                                {% endfor %}
-                                                            </ul>
-                                                        {% else %}
-                                                            <p class="mb-0">Aucun formateur assigné à ce module.</p>
-                                                        {% endif %}
-                                                    </div>
-                                                </div>
-
-                                                {# Module Progressions Table Card #}
-                                                <div class="card tm-detail-card">
-                                                    <div class="card-header">
-                                                        <h5 class="card-title mb-1">Progression des Modules</h5>
-                                                    </div>
-                                                    <div class="card-body">
-                                                        {% with module_progressions=module.module_progressions %} {# Corrected to use pre-processed data #}
-                                                            {% if module_progressions %}
-                                                                <div class="table-responsive">
-                                                                    <table class="table table-striped">
-                                                                        <thead>
-                                                                            <tr>
-                                                                                <th>Formateur</th>
-                                                                                <th>Statut</th>
-                                                                                <th>Note</th>
-                                                                                <th>Actions</th>
-                                                                            </tr>
-                                                                        </thead>
-                                                                        <tbody>
-                                                                            {% for mp in module_progressions %}
-                                                                                <tr>
-                                                                                    <td>{{ mp.formateur.get_full_name }}</td>
-                                                                                    <td>{{ mp.get_statut_module_display }}</td>
-                                                                                    <td>{{ mp.note|default:"N/A" }}</td>
-                                                                                    <td>
-                                                                                        <a href="{% url 'module_progress_detail' mp.pk %}" class="btn btn-sm btn-info btn-xs" title="Détails">
-                                                                                            <i class="bi bi-eye"></i>
-                                                                                        </a>
-                                                                                        <a href="{% url 'module_progress_update' mp.pk %}" class="btn btn-sm btn-warning btn-xs" title="Modifier">
-                                                                                            <i class="bi bi-pencil"></i>
-                                                                                        </a>
-                                                                                        <a href="{% url 'module_progress_delete' mp.pk %}" class="btn btn-sm btn-danger btn-xs" title="Supprimer">
-                                                                                            <i class="bi bi-trash"></i>
-                                                                                        </a>
-                                                                                    </td>
-                                                                                </tr>
-                                                                            {% endfor %}
-                                                                        </tbody>
-                                                                    </table>
-                                                                </div>
-                                                            {% else %}
-                                                                <p class="mb-0">Aucune progression de module enregistrée pour ce module.</p>
-                                                            {% endif %}
-                                                        {% endwith %}
-                                                    </div>
-                                                </div>
+                                                <h6 class="fw-bold mb-1 small text-uppercase text-muted px-1" style="font-size: 0.65rem;">Suivi des progressions</h6>
+                                                {% with module_progressions=module.module_progressions %}
+                                                    {% if module_progressions %}
+                                                        <div class="table-responsive border rounded">
+                                                            <table class="table table-striped table-sm mb-0">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th>Formateur</th>
+                                                                        <th>Statut</th>
+                                                                        <th>Note</th>
+                                                                        <th class="text-end">Actions</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    {% for mp in module_progressions %}
+                                                                        <tr>
+                                                                            <td class="align-middle">{{ mp.formateur.get_full_name }}</td>
+                                                                            <td class="align-middle"><span class="small">{{ mp.get_statut_module_display }}</span></td>
+                                                                            <td class="align-middle">{{ mp.note|default:"-" }}</td>
+                                                                            <td class="text-end align-middle">
+                                                                                <a href="{% url 'module_progress_detail' mp.pk %}" class="btn btn-link btn-sm p-1" title="Détails"><i class="bi bi-eye"></i></a>
+                                                                                <a href="{% url 'module_progress_update' mp.pk %}" class="btn btn-link btn-sm p-1 text-warning" title="Modifier"><i class="bi bi-pencil"></i></a>
+                                                                                <a href="{% url 'module_progress_delete' mp.pk %}" class="btn btn-link btn-sm p-1 text-danger" title="Supprimer"><i class="bi bi-trash"></i></a>
+                                                                            </td>
+                                                                        </tr>
+                                                                    {% endfor %}
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    {% else %}
+                                                        <div class="alert alert-light small mb-0 py-2 border">Aucune progression enregistrée.</div>
+                                                    {% endif %}
+                                                {% endwith %}
                                             </div>
                                         </div>
                                     </div>
@@ -441,26 +414,6 @@
             new simpleDatatables.DataTable(table1);
         }
 
-        // JavaScript for rotating chevron icons in the custom expandable cards
-        document.querySelectorAll('.card-header[data-bs-toggle="collapse"]').forEach(header => {
-            header.addEventListener('click', () => {
-                const icon = header.querySelector('.collapse-icon');
-                if (icon) {
-                    icon.classList.toggle('bi-chevron-down');
-                    icon.classList.toggle('bi-chevron-up');
-                }
-            });
-            // Set initial icon based on collapse state
-            const targetId = header.getAttribute('data-bs-target');
-            const targetCollapse = document.querySelector(targetId);
-            if (targetCollapse && targetCollapse.classList.contains('show')) {
-                const icon = header.querySelector('.collapse-icon');
-                if (icon) {
-                    icon.classList.remove('bi-chevron-down');
-                    icon.classList.add('bi-chevron-up');
-                }
-            }
-        });
     });
 </script>
 {% endblock script %}

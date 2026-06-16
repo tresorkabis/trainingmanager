@@ -87,19 +87,7 @@
                 </div>
 
                 <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="{{ form.formateur.id_for_label }}">Formateur</label>
-                            {% render_field form.formateur class="form-select" %}
-                            {% if form.formateur.help_text %}
-                                <small class="form-text text-muted">{{ form.formateur.help_text }}</small>
-                            {% endif %}
-                            {% for error in form.formateur.errors %}
-                                <div class="invalid-feedback d-block">{{ error }}</div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                    <div class="col-md-6">
+                    <div class="col-md-12">
                         <div class="form-group">
                             <label for="{{ form.is_completed.id_for_label }}">Séance terminée</label>
                             <div class="form-check form-switch">

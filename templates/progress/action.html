@@ -19,6 +19,24 @@
         border-radius: 1rem;
         box-shadow: 0 16px 32px rgba(15, 23, 42, 0.05);
     }
+
+    .tm-module-card {
+        background: #ffffff;
+        border: 1px solid rgba(15, 23, 42, 0.08);
+        border-radius: 0.75rem;
+        transition: all 0.2s ease;
+    }
+    .tm-module-card:hover {
+        border-color: rgba(67, 94, 190, 0.3);
+    }
+    .tm-module-badge {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.75rem;
+        border-radius: 2rem;
+        background: rgba(67, 94, 190, 0.08);
+        color: #435ebe;
+        font-weight: 600;
+    }
 </style>
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 {% endblock style %}
@@ -81,6 +99,9 @@
                                     placeholder="Ex: Vague de septembre - Electricité"
                                     required
                                 >
+                                {% for error in form.description.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                {% endfor %}
                             </div>
                             <div class="form-group">
                                 <label for="formation">Formation associée</label>
@@ -110,6 +131,9 @@
                                     min="{{ today|date:'Y-m-d' }}"
                                     required
                                 >
+                                {% for error in form.date_debut.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                {% endfor %}
                             </div>
                             <div class="form-group">
                                 <label for="date_fin">Date de fin</label>
@@ -122,6 +146,9 @@
                                     required
                                 >
                             </div>
+                            {% for error in form.date_fin.errors %}
+                                <div class="invalid-feedback d-block">{{ error }}</div>
+                            {% endfor %}
                         </div>
                     </div>
 
@@ -174,28 +201,44 @@
 
             selectedFormation.modules.forEach(module => {
                 const moduleDiv = document.createElement('div');
-                moduleDiv.classList.add('mb-3', 'p-3', 'border', 'rounded');
+                moduleDiv.classList.add('tm-module-card', 'mb-3', 'p-4');
+
+                const headerDiv = document.createElement('div');
+                headerDiv.classList.add('d-flex', 'justify-content-between', 'align-items-center', 'mb-3');
 
                 const moduleTitle = document.createElement('h6');
-                moduleTitle.textContent = `Module: ${module.titre} (${module.duree_heures} heures)`;
-                moduleDiv.appendChild(moduleTitle);
+                moduleTitle.classList.add('fw-bold', 'mb-0');
+                moduleTitle.innerHTML = `<i class="bi bi-journal-bookmark-fill me-2 text-primary"></i>${module.titre}`;
+                
+                const durationBadge = document.createElement('span');
+                durationBadge.classList.add('tm-module-badge');
+                durationBadge.textContent = `${module.duree_heures}h`;
+
+                headerDiv.appendChild(moduleTitle);
+                headerDiv.appendChild(durationBadge);
+                moduleDiv.appendChild(headerDiv);
+
+                const label = document.createElement('label');
+                label.classList.add('form-label', 'small', 'text-muted', 'mb-2');
+                label.textContent = "Formateurs assignés à ce module";
+                moduleDiv.appendChild(label);
 
                 const formateursSelect = document.createElement('select');
                 formateursSelect.classList.add('form-select', 'select2-enabled'); // Add a class for Select2 initialization
                 formateursSelect.name = `module_formateurs_${module.id}`;
                 formateursSelect.multiple = true;
-                formateursSelect.size = 3; // Adjust size as needed
+                formateursSelect.style.width = '100%';
 
                 // Populate with all available formateurs
                 allFormateursData.forEach(formateur => {
                     const option = document.createElement('option');
                     option.value = formateur.id;
-                    option.textContent = `${formateur.nom} ${formateur.postnom}`;
+                    option.textContent = `${formateur.nom} ${formateur.postnom} ${formateur.prenom || ''}`;
                     formateursSelect.appendChild(option);
                 });
 
                 // Pre-select formateurs for this module based on initial data (for edit mode)
-                const assignedFormateursForModule = initialModulesFormateursAssignment[module.id] || [];
+                const assignedFormateursForModule = initialModulesFormateursAssignment[String(module.id)] || [];
                 assignedFormateursForModule.forEach(formateurId => {
                     const optionToSelect = formateursSelect.querySelector(`option[value="${formateurId}"]`);
                     if (optionToSelect) {
@@ -208,7 +251,11 @@
             });
 
             // Initialize Select2 for newly created selects
-            $('.select2-enabled').select2();
+            if (typeof $ !== 'undefined') {
+                $('.select2-enabled').select2({
+                    placeholder: "Choisir les formateurs pour ce module"
+                });
+            }
         }
 
         function updateFormFieldsBasedOnFormation() {

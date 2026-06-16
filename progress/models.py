@@ -39,6 +39,9 @@ class Formateur(models.Model):
     def __str__(self):
         return f"{self.nom} {self.postnom} {self.prenom or ''}".strip()
 
+    def get_full_name(self):
+        return f"{self.nom} {self.postnom} {self.prenom or ''}".strip()
+
 class Action(models.Model):
     STATUT_CHOICES = [
         ('PLANIFIEE', 'Planifiée'),
@@ -106,6 +109,11 @@ class ModuleProgress(models.Model):
     def __str__(self):
         return f"Progression de {self.formateur.get_full_name()} pour {self.module.titre} dans {self.action.description} ({self.get_statut_module_display()})"
 
+    def delete(self, *args, **kwargs):
+        if self.sessions_progress.exists():
+            raise ValidationError("Impossible de supprimer cette progression car des séances y sont rattachées.")
+        super().delete(*args, **kwargs)
+
 class SessionProgress(models.Model):
     module_progress = models.ForeignKey(ModuleProgress, on_delete=models.CASCADE, related_name='sessions_progress')
     session_date = models.DateField(verbose_name="Date de la séance")
@@ -127,6 +135,19 @@ class SessionProgress(models.Model):
 
     def __str__(self):
         return f"Séance du {self.session_date} pour {self.module_progress.module.titre} par {self.formateur or 'N/A'}"
+
+    def save(self, *args, **kwargs):
+        # Assigne automatiquement le formateur du module si non défini
+        if not self.formateur and self.module_progress:
+            self.formateur = self.module_progress.formateur
+            
+        is_new = self.pk is None
+        super().save(*args, **kwargs)
+        if is_new:
+            mp = self.module_progress
+            if mp.statut_module == 'NC':
+                mp.statut_module = 'EC'
+                mp.save(update_fields=['statut_module'])
 
 
 class FormateurPerformance(models.Model):

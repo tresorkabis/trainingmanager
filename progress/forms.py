@@ -50,11 +50,15 @@ class PaiementForm(forms.ModelForm):
 # Removed FormateurPerformanceForm class
 
 class ModuleProgressForm(forms.ModelForm):
-    detail_action = forms.ModelChoiceField(
-        queryset=DetailAction.objects.select_related('stagiaire', 'action').order_by('stagiaire__nom', 'action__description'),
-        label="Stagiaire et Action de formation",
-        widget=Select2Widget(attrs={'data-width': '100%', 'class': 'form-select'}),
-        help_text="Sélectionnez le stagiaire et l'action de formation associée."
+    formateur = forms.ModelChoiceField(
+        queryset=Formateur.objects.all().order_by('nom', 'postnom'),
+        label="Formateur",
+        widget=Select2Widget(attrs={'data-width': '100%', 'class': 'form-select'})
+    )
+    action = forms.ModelChoiceField(
+        queryset=Action.objects.all().order_by('description'),
+        label="Action de formation",
+        widget=Select2Widget(attrs={'data-width': '100%', 'class': 'form-select'})
     )
     module = forms.ModelChoiceField(
         queryset=Module.objects.all().order_by('formation__nom', 'ordre'),
@@ -93,21 +97,21 @@ class ModuleProgressForm(forms.ModelForm):
     class Meta:
         model = ModuleProgress
         fields = [
-            'detail_action', 'module', 'date_debut_reelle', 'date_fin_reelle',
+            'formateur', 'action', 'module', 'date_debut_reelle', 'date_fin_reelle',
             'statut_module', 'note', 'commentaires'
         ]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Dynamically filter modules based on the selected action's formation
-        if 'detail_action' in self.data:
+        # Filtrer dynamiquement les modules basés sur la formation de l'action sélectionnée
+        if 'action' in self.data:
             try:
-                detail_action_id = int(self.data.get('detail_action'))
-                detail_action = DetailAction.objects.get(pk=detail_action_id)
+                action_id = int(self.data.get('action'))
+                action_obj = Action.objects.get(pk=action_id)
                 self.fields['module'].queryset = Module.objects.filter(
-                    formation=detail_action.action.formation
+                    formation=action_obj.formation
                 ).order_by('ordre')
-            except (ValueError, TypeError, DetailAction.DoesNotExist):
+            except (ValueError, TypeError, Action.DoesNotExist):
                 pass # Fallback to default queryset if selection is invalid
 
 class SessionProgressForm(forms.ModelForm):
@@ -130,12 +134,6 @@ class SessionProgressForm(forms.ModelForm):
         label="Sujets couverts",
         required=False
     )
-    formateur = forms.ModelChoiceField(
-        queryset=Formateur.objects.all().order_by('nom', 'postnom'),
-        label="Formateur",
-        required=False,
-        widget=Select2Widget(attrs={'data-width': '100%', 'class': 'form-select'})
-    )
     is_completed = forms.BooleanField(
         label="Séance terminée",
         required=False,
@@ -151,7 +149,7 @@ class SessionProgressForm(forms.ModelForm):
         model = SessionProgress
         fields = [
             'session_date', 'start_time', 'end_time', 'topics_covered',
-            'formateur', 'is_completed', 'notes'
+            'is_completed', 'notes'
         ]
 
     def __init__(self, *args, **kwargs):
