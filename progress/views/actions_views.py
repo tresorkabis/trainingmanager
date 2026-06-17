@@ -220,6 +220,20 @@ class ActionListViews(ActionPermissionMixin, ListView):
             "completed": all_actions.filter(date_fin__lt=date.today()).count(),
             "enrolled": all_actions.aggregate(total=Count("detailaction", distinct=True))["total"] or 0,
         }
+
+        # Préparation des données pour le composant tm_hero
+        ctx["hero_actions"] = [
+            {'label': 'Nouvelle action', 'url': reverse_lazy('action_create'), 'icon': 'bi bi-clipboard-plus'},
+            {'label': 'Voir les formations', 'url': reverse_lazy('formations'), 'class': 'btn-light-secondary', 'icon': 'bi bi-journal-text'},
+        ]
+
+        ctx["hero_stats"] = [
+            {'label': 'Total', 'value': ctx['stats']['total']},
+            {'label': 'Planifiées', 'value': ctx['stats']['planned']},
+            {'label': 'En cours', 'value': ctx['stats']['ongoing']},
+            {'label': 'Terminées', 'value': ctx['stats']['completed']},
+            {'label': 'Inscrits', 'value': ctx['stats']['enrolled']},
+        ]
         return ctx
 
 
