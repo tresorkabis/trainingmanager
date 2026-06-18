@@ -2,6 +2,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.views import View
 from django.views.generic import ListView, DetailView
+from django.contrib import messages
 
 from progress.models import DetailAction
 
@@ -33,6 +34,7 @@ class DetailActionCreateView(View):
     def post(self, request):
         stagiaire_id = request.POST.get('stagiaire') or request.GET.get('stagiaire')
         action_id = request.POST.get('action') or request.GET.get('action')
+        next_url = request.POST.get('next') or request.GET.get('next')
 
         if not stagiaire_id or not action_id:
             # Bad request; redirect back
@@ -45,6 +47,21 @@ class DetailActionCreateView(View):
         action = get_object_or_404(Action, pk=action_id)
 
         # Avoid duplicate inscriptions
-        DetailAction.objects.get_or_create(stagiaire=stagiaire, action=action, defaults={'statut': 'Inscrit'})
+        obj, created = DetailAction.objects.get_or_create(
+            stagiaire=stagiaire,
+            action=action,
+            defaults={'statut': 'Inscrit'}
+        )
 
-        return HttpResponseRedirect(reverse_lazy('stagiaire', kwargs={'pk': stagiaire.pk}))
+        if created:
+            messages.success(
+                request,
+                f"{stagiaire.get_full_name()} a été inscrit à l'action '{action.description}'."
+            )
+        else:
+            messages.info(
+                request,
+                f"{stagiaire.get_full_name()} est déjà inscrit à l'action '{action.description}'."
+            )
+
+        return HttpResponseRedirect(next_url or reverse_lazy('stagiaire', kwargs={'pk': stagiaire.pk}))

@@ -1,19 +1,13 @@
 {% extends "base.html" %}
 {% load static %}
+{% load tm_tags %}
 
 {% block title %}Détail Service{% endblock title %}
 {% block page_header %}Détail du Service{% endblock page_header %}
 
 {% block style %}
+<link rel="stylesheet" href="{% static 'assets/css/training-manager.css' %}">
 <style>
-    .tm-service-detail-hero {
-        background:
-            radial-gradient(circle at top right, rgba(67, 94, 190, 0.18), transparent 35%),
-            linear-gradient(135deg, #f7f8fc 0%, #eef3ff 100%);
-        border: 1px solid rgba(67, 94, 190, 0.12);
-        border-radius: 1.25rem;
-    }
-
     .tm-service-detail-card {
         border: 1px solid rgba(15, 23, 42, 0.07);
         border-radius: 1rem;
@@ -53,27 +47,7 @@
 
 {% block content %}
 <div class="page-heading">
-    <section class="tm-service-detail-hero p-4 p-lg-5 mb-4">
-        <div class="row g-4 align-items-center">
-            <div class="col-12 col-lg-8">
-                <div class="tm-section-titlebar">
-                    <span class="tm-section-titlebar__icon"><i class="bi bi-gear"></i></span>
-                    <div class="tm-section-titlebar__text">
-                        <h3>{{ service.nom }}</h3>
-                        <p>Détails du service</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-12 col-lg-4 d-flex justify-content-lg-end">
-                <a href="{% url 'services' %}" class="btn btn-light-secondary me-2">
-                    <i class="bi bi-arrow-left me-2"></i>Retour à la liste
-                </a>
-                <a href="{% url 'service_update' service.pk %}" class="btn btn-primary">
-                    <i class="bi bi-pencil me-2"></i>Modifier
-                </a>
-            </div>
-        </div>
-    </section>
+    {% tm_hero title=service.nom subtitle="Consultez les détails du service et ses filières rattachées." icon="bi bi-building" actions=hero_actions stats=hero_stats theme="primary" %}
 
     <section class="section px-3 px-md-4">
         <div class="row g-3">

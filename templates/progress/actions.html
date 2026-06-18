@@ -2,7 +2,7 @@
 {% load static %}
 {% load tm_tags %}
 
-{% block title %}Actions de formation{% endblock title %} {# Changed "Actions de Formation" to "Actions de formation" #}
+{% block title %}Suivi des actions de formation{% endblock title %}
 {% block page_header %}Suivi des actions de formation{% endblock page_header %}
 
 {% block style %}
@@ -14,24 +14,35 @@
     {% tm_hero title="Actions de formation" subtitle="Pilotez les sessions planifiées, en cours et terminées depuis un tableau de bord plus lisible." icon="bi bi-clipboard-check" actions=hero_actions stats=hero_stats theme="primary" %}
 
     <section class="section">
-        <div class="card tm-card-premium">
-            <div class="card-header">
+        <div class="card tm-listing-card">
+            <div class="card-header d-flex justify-content-between align-items-center">
                 <h4 class="card-title mb-0">Catalogue des actions</h4>
+                <a href="{% url 'action_create' %}" class="btn btn-primary btn-sm">
+                    <i class="bi bi-clipboard-plus me-2"></i>Nouvelle action
+                </a>
             </div>
             <div class="card-body">
+                {# Quick Filters #}
+                <div class="d-flex flex-wrap gap-2 mb-3">
+                    <button class="btn btn-outline-secondary btn-sm filter-btn active" data-status="all">Toutes</button>
+                    <button class="btn btn-outline-primary btn-sm filter-btn" data-status="Planifiée">Planifiées</button>
+                    <button class="btn btn-outline-success btn-sm filter-btn" data-status="En cours">En cours</button>
+                    <button class="btn btn-outline-dark btn-sm filter-btn" data-status="Terminée">Terminées</button>
+                </div>
+
                 {# Custom Search Input #}
-                <div class="custom-search-container">
-                <input type="text" id="searchInput" class="tm-search-input form-control" placeholder="Recherche par description, formation...">
+                <div class="custom-search-container mb-3">
+                    <input type="text" id="searchInput" class="custom-search-input form-control" placeholder="Recherche par description, formation...">
                 </div>
 
                 <div class="table-responsive">
-                    <table class="tm-table table-striped" id="actionTable">
+                    <table class="table table-hover" id="actionTable">
                         <thead>
                             <tr>
                                 <th style="width: 20%;">Description</th>
                                 <th style="width: 12%;">Période</th>
                                 <th style="width: 18%;">Formation</th>
-                                <th style="width: 15%;">Formateurs</th>
+                                <th style="width: 15%;">Progression</th>
                                 <th style="width: 10%;">Inscrits</th>
                                 <th style="width: 12%;">Statut</th>
                                 <th style="width: 13%;">Actions</th>
@@ -40,30 +51,35 @@
                         <tbody id="actionTableBody">
                             {% if action_list %}
                             {% for item in object_list %}
-                            <tr>
+                            <tr class="action-row" data-status-label="{{ item.status_meta.label }}">
                                 <td>
-                                    <a href="{% url 'action' item.pk %}" class="tm-action-row__title">{{ item.description }}</a>
+                                    <a href="{% url 'action' item.pk %}" class="tm-action-row__title text-decoration-none fw-bold text-primary">{{ item.description }}</a>
                                     <div class="tm-action-row__meta">Réf. #{{ item.pk }}</div>
                                 </td>
                                 <td>
-                                    {{ item.date_debut|date:"d/m/Y" }}<br>
+                                    <span class="small fw-bold">{{ item.date_debut|date:"d/m/Y" }}</span><br>
                                     <span class="tm-action-row__meta">au {{ item.date_fin|date:"d/m/Y" }}</span>
                                 </td>
                                 <td>
                                     {{ item.formation.nom }}<br>
-                                    <span class="tm-action-row__meta">{{ item.formation.filiere.nom|default:"Sans filière" }}</span>
+                                    <span class="tm-action-row__meta text-muted small">{{ item.formation.filiere.nom|default:"Sans filière" }}</span>
                                 </td>
                                 <td>
-                                    {% if item.formateurs.all %}
-                                        {% for formateur in item.formateurs.all %}
-                                            <span class="badge bg-secondary">{{ formateur.nom }} {{ formateur.postnom }}</span>{% if not forloop.last %}<br>{% endif %}
-                                        {% endfor %}
-                                    {% else %}
-                                        <span class="badge bg-warning">Aucun affecté</span>
-                                    {% endif %}
+                                    <div class="progress" style="height: 10px;" title="{{ item.progression_percent }}%">
+                                        <div class="progress-bar {% if item.progression_percent == 100 %}bg-success{% else %}bg-primary{% endif %}"
+                                             role="progressbar"
+                                             style="width: {{ item.progression_percent }}%"
+                                             aria-valuenow="{{ item.progression_percent }}"
+                                             aria-valuemin="0"
+                                             aria-valuemax="100">
+                                        </div>
+                                    </div>
+                                    <span class="small text-muted">{{ item.progression_percent }}% complété</span>
                                 </td>
-                                <td><span class="badge bg-info">{{ item.stagiaire_total }}</span></td>
-                                <td><span class="badge {{ item.status_meta.badge }}">{{ item.status_meta.label }}</span></td>
+                                <td class="text-center">
+                                    <span class="badge rounded-pill bg-light-info text-info">{{ item.stagiaire_total }}</span>
+                                </td>
+                                <td><span class="badge {{ item.status_meta.badge }} w-100">{{ item.status_meta.label }}</span></td>
                                 <td>
                                     <div class="d-flex gap-2">
                                         <a href="{% url 'action' item.pk %}" class="btn btn-sm btn-outline-primary" title="Voir">
@@ -94,7 +110,7 @@
                     <div class="dataTable-info">
                         Page {{ page_obj.number }} sur {{ page_obj.paginator.num_pages }}
                     </div>
-                <ul class="pagination tm-pagination float-end">
+                    <ul class="pagination pagination-primary float-end">
                         {% if page_obj.has_previous %}
                         <li class="page-item pager"><a href="?page=1" class="page-link">&laquo;</a></li>
                         <li class="page-item">
@@ -129,59 +145,59 @@
     document.addEventListener('DOMContentLoaded', function() {
         const searchInput = document.getElementById('searchInput');
         const tableBody = document.getElementById('actionTableBody');
-        const allRows = Array.from(tableBody.querySelectorAll('tr')); // Get all original rows
-        let noResultsRow = document.getElementById('noResultsRow');
+        const allRows = Array.from(tableBody.querySelectorAll('.action-row'));
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        let currentStatusFilter = 'all';
 
-        // If noResultsRow doesn't exist initially, create a placeholder
-        if (!noResultsRow) {
-            noResultsRow = document.createElement('tr');
-            noResultsRow.id = 'noResultsRow';
-            const td = document.createElement('td');
-            td.colSpan = 7; // Adjusted colspan for new columns
-            td.className = 'no-results-message';
-            td.textContent = 'Aucun résultat trouvé.';
-            noResultsRow.appendChild(td);
-            noResultsRow.style.display = 'none'; // Hide by default
-            tableBody.appendChild(noResultsRow);
-        }
-
-        function performSearch() {
+        function performSearchAndFilter() {
             const searchTerm = searchInput.value.toLowerCase().trim();
             let resultsFound = false;
 
             allRows.forEach(row => {
-                // Assuming Description is at index 0 and Formation is at index 2
                 const descriptionCell = row.cells[0];
                 const formationCell = row.cells[2];
+                const rowStatus = row.getAttribute('data-status-label');
 
                 const description = descriptionCell ? descriptionCell.textContent.toLowerCase() : '';
                 const formation = formationCell ? formationCell.textContent.toLowerCase() : '';
 
-                if (description.includes(searchTerm) || formation.includes(searchTerm)) {
-                    row.style.display = ''; // Show row
+                const matchesSearch = description.includes(searchTerm) || formation.includes(searchTerm);
+                const matchesFilter = currentStatusFilter === 'all' || rowStatus === currentStatusFilter;
+
+                if (matchesSearch && matchesFilter) {
+                    row.style.display = '';
                     resultsFound = true;
                 } else {
-                    row.style.display = 'none'; // Hide row
+                    row.style.display = 'none';
                 }
             });
 
-            if (resultsFound) {
-                noResultsRow.style.display = 'none';
-            } else {
-                noResultsRow.style.display = '';
+            const noResultsRow = document.getElementById('noResultsRow');
+            if (noResultsRow) {
+                noResultsRow.style.display = resultsFound ? 'none' : '';
             }
         }
 
-        // Attach event listener for keyup on the search input
-        searchInput.addEventListener('keyup', performSearch);
+        searchInput.addEventListener('keyup', performSearchAndFilter);
 
-        // Initial display check for no results if the list is empty
-        if (allRows.length === 0 && !noResultsRow.textContent.includes('Aucune action de formation disponible.')) {
-             noResultsRow.style.display = '';
-             noResultsRow.textContent = 'Aucune action de formation disponible.';
-        } else if (allRows.length > 0) {
-            noResultsRow.style.display = 'none';
-        }
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                filterBtns.forEach(b => b.classList.remove('active', 'btn-primary', 'btn-success', 'btn-dark'));
+                filterBtns.forEach(b => b.classList.add('btn-outline-secondary'));
+
+                this.classList.remove('btn-outline-secondary');
+                this.classList.add('active');
+
+                const status = this.getAttribute('data-status');
+                if (status === 'all') this.classList.add('btn-secondary');
+                else if (status === 'Planifiée') this.classList.add('btn-primary');
+                else if (status === 'En cours') this.classList.add('btn-success');
+                else if (status === 'Terminée') this.classList.add('btn-dark');
+
+                currentStatusFilter = status;
+                performSearchAndFilter();
+            });
+        });
     });
 </script>
 {% endblock script %}

@@ -1,6 +1,6 @@
 from django import forms
 from django_select2.forms import Select2Widget, ModelSelect2TagWidget
-from .models import Stagiaire, Categorie, Filiere, Entreprise
+from .models import Stagiaire, Categorie, Entreprise
 
 class StagiaireForm(forms.ModelForm):
     categorie = forms.ModelChoiceField(
@@ -8,13 +8,6 @@ class StagiaireForm(forms.ModelForm):
         label="Catégorie",
         widget=Select2Widget(attrs={'data-width': '100%', 'class': 'form-select'}) # Utilisation de Select2Widget ici aussi
     )
-    # Le champ filiere est supprimé du formulaire car il n'est plus directement lié au stagiaire
-    # filiere = forms.ModelChoiceField(
-    #     queryset=Filiere.objects.all().order_by('nom'),
-    #     label="Filière",
-    #     required=False,
-    #     widget=Select2Widget(attrs={'data-width': '100%', 'class': 'form-select'})
-    # )
     # Use a CharField with Select2 tagging enabled so users can type a new company name.
     # clean_entreprise will return an Entreprise instance so ModelForm assigns the FK correctly.
     # Use a CharField with a ModelSelect2TagWidget so both existing PKs and free-text names are accepted.
@@ -34,7 +27,7 @@ class StagiaireForm(forms.ModelForm):
         fields = [
             'nom', 'postnom', 'prenom', 'adresse', 'sexe', 'telephone', 'email',
             'date_naissance', 'lieu_naissance', 'nationalite', 'type_piece', 'numero_piece',
-            'nom_pere', 'nom_mere', 'niveau_etude', 'photo', 'categorie', # 'filiere' supprimé
+            'nom_pere', 'nom_mere', 'niveau_etude', 'photo', 'categorie',
             'entreprise', 'fonction', 'anciennete_emploi', 'anciennete_entreprise'
         ]
         widgets = {

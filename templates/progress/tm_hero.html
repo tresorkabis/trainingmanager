@@ -1,0 +1,40 @@
+<section class="tm-hero tm-hero--{{ theme }} mb-4">
+    <div class="tm-hero__layout">
+        <div class="tm-hero__left">
+            <div class="tm-section-titlebar mb-3">
+                {% if photo_url %}
+                <img src="{{ photo_url }}" alt="{{ title }}" style="width: 80px; height: 80px; border-radius: 1rem; object-fit: cover; border: 3px solid #fff; box-shadow: 0 5px 15px rgba(0,0,0,0.08);" class="me-3">
+                {% else %}
+                <span class="tm-section-titlebar__icon"><i class="{{ icon }}"></i></span>
+                {% endif %}
+                <div class="tm-section-titlebar__text">
+                    <h3>{{ title }}</h3>
+                    <p>{{ subtitle }}</p>
+                </div>
+            </div>
+            {% if actions %}
+            <div class="d-flex flex-wrap gap-2">
+                {% for action in actions %}
+                <a href="{{ action.url }}" class="btn {{ action.class|default:'btn-primary' }}">
+                    {% if action.icon %}<i class="{{ action.icon }} me-2"></i>{% endif %}
+                    {{ action.label }}
+                </a>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+
+        {% if stats %}
+        <div class="tm-hero__right">
+            <div class="tm-hero__stats-grid">
+                {% for stat in stats %}
+                <div class="tm-stat-card">
+                    <span class="tm-stat-card__label">{{ stat.label }}</span>
+                    <span class="tm-stat-card__value">{{ stat.value }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</section>

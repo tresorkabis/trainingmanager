@@ -125,13 +125,32 @@ class StagiaireListView(StagiairePermissionMixin, ListView):
         ctx["link"] = "stagiaires"
         
         all_stagiaires = self.get_queryset()
+        total = all_stagiaires.count()
+        dans_emploi = all_stagiaires.filter(categorie__titre="dans l'emploi").count()
+        sans_emploi = all_stagiaires.filter(categorie__titre="sans emploi").count()
+        masculin = all_stagiaires.filter(sexe='M').count()
+        feminin = all_stagiaires.filter(sexe='F').count()
+
         ctx['stats'] = {
-            'total': all_stagiaires.count(),
-            'dans_emploi': all_stagiaires.filter(categorie__titre="dans l'emploi").count(),
-            'sans_emploi': all_stagiaires.filter(categorie__titre="sans emploi").count(),
-            'masculin': all_stagiaires.filter(sexe='M').count(),
-            'feminin': all_stagiaires.filter(sexe='F').count(),
+            'total': total,
+            'dans_emploi': dans_emploi,
+            'sans_emploi': sans_emploi,
+            'masculin': masculin,
+            'feminin': feminin,
         }
+
+        ctx["hero_stats"] = [
+            {'label': 'Total Stagiaires', 'value': total},
+            {'label': "Dans l'emploi", 'value': dans_emploi},
+            {'label': 'Sans emploi', 'value': sans_emploi},
+            {'label': 'Féminin', 'value': feminin},
+        ]
+
+        ctx["hero_actions"] = [
+            {'label': 'Nouveau stagiaire', 'url': reverse_lazy('stagiaire_create'), 'icon': 'bi bi-person-plus'},
+            {'label': 'Imprimer', 'url': reverse_lazy('stagiaires_print'), 'icon': 'bi bi-printer', 'class': 'btn-light-secondary'},
+        ]
+
         return ctx
 
 
@@ -141,8 +160,11 @@ class StagiaireDetailView(StagiairePermissionMixin, DetailView): # Correction de
     template_name = "intern/stagiaire.html"
 
     def get_queryset(self):
-        # Suppression de 'filiere' de select_related
-        return self.get_stagiaire_queryset().select_related("categorie", "entreprise")
+        return (
+            self.get_stagiaire_queryset()
+            .select_related("categorie", "entreprise")
+            .prefetch_related("etudes", "autres_formations", "paiements")
+        )
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
@@ -151,34 +173,45 @@ class StagiaireDetailView(StagiairePermissionMixin, DetailView): # Correction de
         # Calcul des informations de paiement
         total_paid = current_stagiaire.paiements.aggregate(total=Sum('montant'))['total'] or 0
         
-        # Coût total des formations uniques auxquelles le stagiaire est inscrit
-        # Utilise distinct() pour éviter de compter plusieurs fois le coût d'une même formation
-        # si le stagiaire est inscrit à plusieurs actions de cette formation.
         formations_cost_qs = DetailAction.objects.filter(
             stagiaire=current_stagiaire
         ).values_list('action__formation__cout', flat=True).distinct()
         
         total_cost = sum(formations_cost_qs) if formations_cost_qs else 0
-        
         solde_restant = total_cost - total_paid
-
-        ctx["total_cost"] = total_cost
-        ctx["total_paid"] = total_paid
-        ctx["solde_restant"] = solde_restant
 
         actions_suivies = list(
             DetailAction.objects.filter(stagiaire=current_stagiaire)
             .select_related("action__formation")
             .order_by("action__date_debut")
         )
+        action_ids_inscrits = [da.action_id for da in actions_suivies]
         for detail_action in actions_suivies:
             detail_action.status_meta = self.get_action_status(detail_action.action)
+
+        ctx["total_cost"] = total_cost
+        ctx["total_paid"] = total_paid
+        ctx["solde_restant"] = solde_restant
+
+        ctx["hero_stats"] = [
+            {'label': 'Montant Facturé', 'value': f"{total_cost:,.0f} USD"},
+            {'label': 'Versements', 'value': f"{total_paid:,.0f} USD"},
+            {'label': 'Solde restant', 'value': f"{solde_restant:,.0f} USD"},
+            {'label': 'Inscriptions', 'value': len(actions_suivies)},
+        ]
+        ctx["photo_url"] = current_stagiaire.photo.url if current_stagiaire.photo else None
+
+        ctx["hero_actions"] = [
+            {'label': 'Retour', 'url': reverse_lazy('stagiaires'), 'icon': 'bi bi-arrow-left', 'class': 'btn-light-secondary'},
+            {'label': 'Modifier', 'url': reverse_lazy('stagiaire_update', kwargs={'pk': current_stagiaire.pk}), 'icon': 'bi bi-pencil'},
+        ]
 
         ctx["stagiaires"] = self.get_stagiaire_queryset()
         ctx["categories"] = self.get_allowed_categories()
         ctx["entreprises"] = Entreprise.objects.all()
         ctx["filieres"] = self.get_allowed_filieres() # Conserver pour la permission mixin si nécessaire
         ctx["actions_suivies"] = actions_suivies
+        ctx["actions_disponibles"] = Action.objects.filter(active=True).select_related("formation", "formation__filiere").exclude(pk__in=action_ids_inscrits).order_by("-date_debut", "description")
         ctx["autres_formations"] = AutreFormation.objects.filter(stagiaire=current_stagiaire)
         ctx["paiements"] = Paiement.objects.filter(stagiaire=current_stagiaire).order_by('-date_paiement')
         ctx["titre"] = "Voir"
@@ -212,6 +245,9 @@ class StagiaireCreateUpdateView(StagiairePermissionMixin, View):
             "titre": titre,
             "mode": mode,
             "object": stagiaire,
+            "hero_actions": [
+                {'label': 'Retour', 'url': reverse_lazy('stagiaires'), 'icon': 'bi bi-arrow-left', 'class': 'btn-light-secondary'},
+            ],
         }
         return render(request, self.template_name, ctx)
 
@@ -231,11 +267,6 @@ class StagiaireCreateUpdateView(StagiairePermissionMixin, View):
         if form.is_valid():
             with transaction.atomic():
                 stagiaire = form.save(commit=False)
-                
-                # Le champ filiere a été supprimé du modèle Stagiaire, donc cette validation n'est plus nécessaire
-                # if stagiaire.filiere and not self.get_allowed_filieres().filter(pk=stagiaire.filiere.pk).exists():
-                #     form.add_error('filiere', "Vous ne pouvez pas rattacher ce stagiaire à cette filière.")
-                #     return self.form_invalid(request, form, stagiaire, mode, titre)
 
                 if stagiaire.categorie and stagiaire.categorie.titre != "dans l'emploi":
                     stagiaire.entreprise = None
@@ -306,6 +337,9 @@ class StagiaireCreateUpdateView(StagiairePermissionMixin, View):
             "mode": mode,
             "object": stagiaire,
             "form_errors": form.errors,
+            "hero_actions": [
+                {'label': 'Retour', 'url': reverse_lazy('stagiaires'), 'icon': 'bi bi-arrow-left', 'class': 'btn-light-secondary'},
+            ],
         }
         reconstructed_studies = []
         etude_intitules = request.POST.getlist("etude_intitule[]")

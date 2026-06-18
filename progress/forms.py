@@ -115,18 +115,38 @@ class ModuleProgressForm(forms.ModelForm):
                 pass # Fallback to default queryset if selection is invalid
 
 class SessionProgressForm(forms.ModelForm):
-    session_date = forms.DateField(
+    planned_date = forms.DateField(
         widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
-        label="Date de la séance"
+        label="Date prévue"
     )
-    start_time = forms.TimeField(
+    planned_start_time = forms.TimeField(
         widget=forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
-        label="Heure de début",
+        label="Heure prévue de début",
         required=False
     )
-    end_time = forms.TimeField(
+    planned_end_time = forms.TimeField(
         widget=forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
-        label="Heure de fin",
+        label="Heure prévue de fin",
+        required=False
+    )
+    planned_topics = forms.CharField(
+        widget=forms.Textarea(attrs={'rows': 3, 'class': 'form-control'}),
+        label="Sujets prévus",
+        required=False
+    )
+    actual_date = forms.DateField(
+        widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+        label="Date réelle",
+        required=False
+    )
+    actual_start_time = forms.TimeField(
+        widget=forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
+        label="Heure réelle de début",
+        required=False
+    )
+    actual_end_time = forms.TimeField(
+        widget=forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
+        label="Heure réelle de fin",
         required=False
     )
     topics_covered = forms.CharField(
@@ -134,10 +154,10 @@ class SessionProgressForm(forms.ModelForm):
         label="Sujets couverts",
         required=False
     )
-    is_completed = forms.BooleanField(
-        label="Séance terminée",
-        required=False,
-        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
+    statut = forms.ChoiceField(
+        choices=SessionProgress.STATUT_CHOICES,
+        label="Statut",
+        widget=forms.Select(attrs={'class': 'form-select'})
     )
     notes = forms.CharField(
         widget=forms.Textarea(attrs={'rows': 3, 'class': 'form-control'}),
@@ -148,8 +168,9 @@ class SessionProgressForm(forms.ModelForm):
     class Meta:
         model = SessionProgress
         fields = [
-            'session_date', 'start_time', 'end_time', 'topics_covered',
-            'is_completed', 'notes'
+            'planned_date', 'planned_start_time', 'planned_end_time', 'planned_topics',
+            'actual_date', 'actual_start_time', 'actual_end_time', 'topics_covered',
+            'statut', 'notes'
         ]
 
     def __init__(self, *args, **kwargs):

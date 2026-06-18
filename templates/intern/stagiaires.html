@@ -1,275 +1,99 @@
 {% extends "base.html" %}
 {% load static %}
+{% load tm_tags %}
 
-{% block title %}Répertoire des stagiaires{% endblock title %} {# This title is for the browser tab #}
-{% block page_header %}Répertoire des stagiaires{% endblock page_header %} {# This content will go into tm-topbar__title #}
+{% block title %}Répertoire des stagiaires{% endblock title %}
+{% block page_header %}Répertoire des stagiaires{% endblock page_header %}
 
 {% block style %}
+<link rel="stylesheet" href="{% static 'assets/css/training-manager.css' %}">
 <style>
-    .stagiaire-photo-thumbnail {
-        width: 80px; /* Increased size for cards */
-        height: 80px; /* Increased size for cards */
-        object-fit: cover;
-        border-radius: 50%;
-    }
-    /* Custom styles for search input */
-    .custom-search-container {
-        display: flex; /* Keep flex for potential future additions or alignment */
-        gap: 0.5rem;
-        margin-bottom: 1rem;
-    }
-    .custom-search-input {
-        flex-grow: 1;
-        border: 1px solid #ced4da;
-        border-radius: 0.5rem;
-        padding: 0.5rem 1rem;
-        max-width: 300px; /* Keep max-width for aesthetics */
-    }
-    .custom-search-input:focus {
-        border-color: #435ebe;
-        box-shadow: 0 0 0 0.2rem rgba(67, 94, 190, 0.25);
-        outline: none;
-    }
-    .no-results-message {
-        text-align: center;
-        padding: 1rem;
-        color: #6c757d;
-    }
-
-    /* Table styling */
-    .table {
-        width: 100%;
-        border-collapse: separate;
-        border-spacing: 0;
-        border-radius: 1rem;
-        overflow: hidden;
-    }
-
-    .table thead th {
-        background-color: #f8f9fa;
-        color: #25396f;
-        font-weight: 700;
-        padding: 1rem 1.5rem;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-        text-align: left;
-    }
-
-    .table tbody tr {
-        transition: background-color 0.2s ease;
-    }
-
-    .table tbody tr:nth-of-type(odd) {
-        background-color: #ffffff;
-    }
-
-    .table tbody tr:nth-of-type(even) {
-        background-color: #fcfdff;
-    }
-
-    .table tbody tr:hover {
-        background-color: #eef2f7;
-    }
-
-    .table tbody td {
-        padding: 0.8rem 1.5rem;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.03);
-        color: #495057;
-    }
-
-    .table tbody td a {
-        color: #435ebe;
-        text-decoration: none;
-    }
-
-    .table tbody td a:hover {
-        text-decoration: underline;
-    }
-
-    /* Pagination styling */
-    .pagination {
-        margin-bottom: 0;
-    }
-
-    .pagination .page-item {
-        margin: 0 0.2rem;
-    }
-
-    .pagination .page-link {
-        border-radius: 0.5rem;
-        padding: 0.5rem 0.9rem;
-        font-size: 0.9rem;
-        color: #435ebe;
-        border: 1px solid #e9ecef;
-        transition: all 0.2s ease;
-    }
-
-    .pagination .page-item.active .page-link {
-        background-color: #435ebe;
-        border-color: #435ebe;
-        color: #fff;
-        box-shadow: 0 2px 8px rgba(67, 94, 190, 0.2);
-    }
-
-    .pagination .page-link:hover:not(.active) {
-        background-color: #f0f1f5;
-        border-color: #d8dce3;
-    }
-
-    .pagination .page-item.pager .page-link {
-        font-weight: bold;
-    }
-
-    .pagination .page-item.disabled .page-link {
-        color: #adb5bd;
-        pointer-events: none;
-        background-color: #ffffff;
-        border-color: #e9ecef;
-    }
-
-    /* Specific styles for stagiaire list */
-    .tm-stagiaire-hero {
-        background:
-            radial-gradient(circle at top right, rgba(67, 94, 190, 0.18), transparent 35%),
-            linear-gradient(135deg, #f7f8fc 0%, #eef3ff 100%);
-        border: 1px solid rgba(67, 94, 190, 0.12);
-        border-radius: 1.25rem;
-        overflow: hidden;
-    }
-
-    .tm-stagiaire-stat {
-        background: rgba(255, 255, 255, 0.76);
-        border: 1px solid rgba(67, 94, 190, 0.1);
-        border-radius: 1rem;
-        padding: 1rem;
-        box-shadow: 0 10px 24px rgba(17, 24, 39, 0.04);
-        height: 100%;
-    }
-
-    .tm-stagiaire-stat__label {
-        display: block;
-        font-size: 0.78rem;
-        letter-spacing: 0.04em;
-        text-transform: uppercase;
-        color: #6c757d;
-        margin-bottom: 0.35rem;
-    }
-
-    .tm-stagiaire-stat__value {
-        font-size: 1.35rem;
-        font-weight: 700;
-        color: #25396f;
-    }
-
     .tm-stagiaire-row__title {
         color: #25396f;
         font-weight: 700;
         text-decoration: none;
     }
-
     .tm-stagiaire-row__meta {
         color: #7b8190;
         font-size: 0.85rem;
+    }
+    .tm-stagiaire-card {
+        border: 1px solid rgba(15, 23, 42, 0.07);
+        border-radius: 1rem;
+        box-shadow: 0 10px 24px rgba(17, 24, 39, 0.05);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .tm-stagiaire-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 16px 30px rgba(17, 24, 39, 0.08);
+    }
+    .tm-stagiaire-card-photo,
+    .stagiaire-photo-thumbnail {
+        object-fit: cover;
+    }
+    .tm-stagiaire-card-photo {
+        width: 80px;
+        height: 80px;
+        border-radius: 1rem;
+    }
+    .stagiaire-photo-thumbnail {
+        width: 52px;
+        height: 52px;
+        border-radius: 0.85rem;
     }
 </style>
 {% endblock style %}
 
 {% block content %}
-{# Removed the redundant div.page-heading here #}
-    <section class="tm-stagiaire-hero p-4 p-lg-5 mb-4">
-        <div class="row g-4 align-items-center">
-            <div class="col-12 col-xl-6">
-                <div class="tm-section-titlebar mb-3">
-                    <span class="tm-section-titlebar__icon"><i class="bi bi-people"></i></span>
-                    <div class="tm-section-titlebar__text">
-                        <h3>Stagiaires</h3>
-                        <p>Gérez le répertoire des stagiaires et leurs parcours.</p>
-                    </div>
-                </div>
-                <div class="d-flex flex-wrap gap-2 align-items-center">
-                    <a href="{% url 'stagiaire_create' %}" class="btn btn-primary">
-                        <i class="bi bi-person-plus me-2"></i>Nouveau stagiaire
-                    </a>
-                    <div class="btn-group ms-2" role="group" aria-label="Affichage">
-                        <button type="button" id="toggleCardsBtn" class="btn btn-outline-secondary active" title="Cartes"><i class="bi bi-grid-fill"></i></button>
-                        <button type="button" id="toggleTableBtn" class="btn btn-outline-secondary" title="Tableau"><i class="bi bi-list-ul"></i></button>
-                    </div>
-                </div>
-            </div>
-            <div class="col-12 col-xl-6">
-                <div class="row g-3">
-                    <div class="col-6 col-md-4">
-                        <div class="tm-stagiaire-stat">
-                            <span class="tm-stagiaire-stat__label">Total Stagiaires</span>
-                            <span class="tm-stagiaire-stat__value">{{ stats.total }}</span>
-                        </div>
-                    </div>
-                    <div class="col-6 col-md-4">
-                        <div class="tm-stagiaire-stat">
-                            <span class="tm-stagiaire-stat__label">Dans l'emploi</span>
-                            <span class="tm-stagiaire-stat__value">{{ stats.dans_emploi }}</span>
-                        </div>
-                    </div>
-                    <div class="col-6 col-md-4">
-                        <div class="tm-stagiaire-stat">
-                            <span class="tm-stagiaire-stat__label">Sans emploi</span>
-                            <span class="tm-stagiaire-stat__value">{{ stats.sans_emploi }}</span>
-                        </div>
-                    </div>
-                    <div class="col-6 col-md-4"> {# New stat for Masculin #}
-                        <div class="tm-stagiaire-stat">
-                            <span class="tm-stagiaire-stat__label">Masculin</span>
-                            <span class="tm-stagiaire-stat__value">{{ stats.masculin }}</span>
-                        </div>
-                    </div>
-                    <div class="col-6 col-md-4"> {# New stat for Féminin #}
-                        <div class="tm-stagiaire-stat">
-                            <span class="tm-stagiaire-stat__label">Féminin</span>
-                            <span class="tm-stagiaire-stat__value">{{ stats.feminin }}</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+<div class="page-heading">
+    {% tm_hero title="Stagiaires" subtitle="Gérez le répertoire des stagiaires, leurs affectations et leurs parcours de formation." icon="bi bi-people" actions=hero_actions stats=hero_stats theme="primary" %}
 
     <section class="section">
         <div class="card tm-listing-card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h4 class="card-title mb-0">Catalogue des stagiaires</h4>
-                <div>
-                    <a href="{% url 'stagiaires_print' %}?page={{ page_obj.number }}" class="btn btn-outline-secondary btn-sm ms-2 no-print" target="_blank">
-                        <i class="bi bi-printer"></i> Imprimer les cartes
-                    </a>
+                <div class="d-flex gap-2">
+                    <div class="btn-group" role="group">
+                        <button type="button" id="toggleCardsBtn" class="btn btn-outline-secondary btn-sm active" title="Cartes"><i class="bi bi-grid-fill"></i></button>
+                        <button type="button" id="toggleTableBtn" class="btn btn-outline-secondary btn-sm" title="Tableau"><i class="bi bi-list-ul"></i></button>
+                    </div>
                 </div>
             </div>
             <div class="card-body">
-                {# Custom Search Input #}
-                <div class="custom-search-container">
+                <div class="custom-search-container mb-3">
                     <input type="text" id="searchInput" class="custom-search-input form-control" placeholder="Recherche par nom, postnom, prénom...">
                 </div>
 
-                <!-- Cards grid: affichage en tuiles des stagiaires -->
+                <!-- Cards grid -->
                 <div class="row g-3 mb-3" id="stagiaireCards">
                     {% if object_list %}
                         {% for item in object_list %}
                         <div class="col-12 col-md-6 col-lg-4">
-                            <div class="card h-100 shadow-sm">
-                                <div class="card-body d-flex gap-2 align-items-center">
+                            <div class="card tm-stagiaire-card h-100">
+                                <div class="card-body d-flex gap-3 align-items-center">
                                     {% if item.photo %}
-                                        <img src="{{ item.photo.url }}" alt="Photo" class="stagiaire-photo-thumbnail me-2">
+                                        <img src="{{ item.photo.url }}" alt="Photo" class="tm-stagiaire-card-photo">
                                     {% else %}
-                                        <img src="{% static 'assets/images/faces/1.jpg' %}" alt="No Photo" class="stagiaire-photo-thumbnail me-2">
+                                        <div class="bg-light-primary text-primary d-flex align-items-center justify-content-center fw-bold rounded-3" style="width: 80px; height: 80px; font-size: 1.5rem;">
+                                            {{ item.nom|slice:":1" }}{{ item.prenom|slice:":1" }}
+                                        </div>
                                     {% endif %}
-                                    <div class="flex-grow-1">
-                                        <a href="{% url 'stagiaire' item.id %}" class="tm-stagiaire-row__title d-block mb-1">{{ item.nom }} {{ item.postnom }} {{ item.prenom }}</a>
-                                        <div class="tm-stagiaire-row__meta">{{ item.current_formation_name|default:"-" }}</div>
-                                        <div class="tm-stagiaire-row__meta">{{ item.categorie }}{% if item.categorie and item.categorie.titre != "sans emploi" %}{% if item.entreprise %} &nbsp;•&nbsp; {{ item.entreprise.nom }}{% endif %}{% endif %}</div>
-                                        <div class="mt-2"><small class="text-muted">{{ item.telephone|default:"-" }} · {{ item.email|default:"-" }}</small></div>
+                                    <div class="flex-grow-1 min-w-0">
+                                        <a href="{% url 'stagiaire' item.id %}" class="tm-stagiaire-row__title d-block text-truncate">{{ item.nom }} {{ item.postnom }} {{ item.prenom }}</a>
+                                        <div class="tm-stagiaire-row__meta text-truncate">{{ item.current_formation_name|default:"Pas de formation active" }}</div>
+                                        <div class="tm-stagiaire-row__meta small">
+                                            {% if item.categorie and item.categorie.titre == "dans l'emploi" %}
+                                            <span class="badge bg-light-success text-success">{{ item.categorie }}</span>
+                                            {% elif item.categorie and item.categorie.titre == "sans emploi" %}
+                                            <span class="badge bg-light-warning text-warning">{{ item.categorie }}</span>
+                                            {% else %}
+                                            <span class="badge bg-light-secondary text-dark">{{ item.categorie }}</span>
+                                            {% endif %}
+                                        </div>
                                     </div>
-                                    <div class="d-flex flex-column align-items-end">
-                                        <a href="{% url 'stagiaire' item.id %}" class="btn btn-sm btn-outline-primary mb-1">Voir</a>
-                                        <a href="{% url 'stagiaire_update' item.pk %}" class="btn btn-sm btn-primary mb-1">Modifier</a>
-                                        <a href="{% url 'stagiaire_delete' item.pk %}" class="btn btn-sm btn-danger" onclick="return confirm('Confirmer la suppression de ce stagiaire ?');">Supprimer</a>
+                                    <div class="d-flex flex-column gap-1">
+                                        <a href="{% url 'stagiaire' item.id %}" class="btn btn-sm btn-light-primary" title="Voir"><i class="bi bi-eye"></i></a>
+                                        <a href="{% url 'stagiaire_update' item.pk %}" class="btn btn-sm btn-light-info" title="Modifier"><i class="bi bi-pencil"></i></a>
                                     </div>
                                 </div>
                             </div>
@@ -277,94 +101,81 @@
                         {% endfor %}
                     {% else %}
                         <div class="col-12">
-                            <p class="text-muted">Aucun stagiaire à afficher.</p>
+                            <p class="text-muted text-center p-5">Aucun stagiaire à afficher.</p>
                         </div>
                     {% endif %}
                 </div>
 
-                <div id="stagiaireTableContainer" class="table-responsive"> {# Added table-responsive for better mobile display #}
-                    <table class="table table-striped" id="table1"> {# Removed dataTable-table class #}
+                <div id="stagiaireTableContainer" class="table-responsive" style="display: none;">
+                    <table class="table table-hover tm-table" id="table1">
                         <thead>
                             <tr>
-                                <th style="width: 3%;">N°</th>
-                                <th style="width: 5%;">Photo</th>
-                                <th style="width: 20%;">Nom complet</th> {# Combined Nom, Postnom, Prénom #}
-                                <th style="width: 5%;">Sexe</th>
-                                <th style="width: 10%;">Téléphone</th>
-                                <th style="width: 15%;">Formation actuelle</th> {# Changed from Filière #}
-                                <th style="width: 10%;">Catégorie</th>
-                                <th style="width: 12%;">Entreprise</th>
-                                <th style="width: 10%;">Actions</th> {# New column for actions #}
+                                <th>Photo</th>
+                                <th>Nom complet</th>
+                                <th>Sexe</th>
+                                <th>Téléphone</th>
+                                <th>Formation actuelle</th>
+                                <th>Catégorie</th>
+                                <th class="text-end">Actions</th>
                             </tr>
                         </thead>
                         <tbody id="stagiaireTableBody">
-                            {% if object_list %}
                             {% for item in object_list %}
                             <tr>
-                                <td>{{ forloop.counter }}</td>
                                 <td>
                                     {% if item.photo %}
                                         <img src="{{ item.photo.url }}" alt="Photo" class="stagiaire-photo-thumbnail">
                                     {% else %}
-                                        <img src="{% static 'assets/images/faces/1.jpg' %}" alt="No Photo" class="stagiaire-photo-thumbnail">
+                                        <div class="bg-light-primary text-primary d-flex align-items-center justify-content-center fw-bold rounded-circle" style="width: 40px; height: 40px;">
+                                            {{ item.nom|slice:":1" }}
+                                        </div>
                                     {% endif %}
                                 </td>
-                                <td><a href="{% url 'stagiaire' item.id %}" class="tm-stagiaire-row__title">{{ item.nom }} {{ item.postnom }} {{ item.prenom }}</a></td> {# Combined full name #}
+                                <td><a href="{% url 'stagiaire' item.id %}" class="tm-stagiaire-row__title">{{ item.nom }} {{ item.postnom }} {{ item.prenom }}</a></td>
                                 <td>{{ item.sexe }}</td>
-                                <td>{{ item.telephone }}</td>
-
-                                <td>{{ item.current_formation_name|default:"N/A" }}</td> {# Display current formation name #}
-                                <td>{{ item.categorie }}</td>
-                                <td>{% if item.categorie and item.categorie.titre == "sans emploi" %}{% else %}{{ item.entreprise.nom|default:"" }}{% endif %}</td>
+                                <td>{{ item.telephone|default:"-" }}</td>
+                                <td>{{ item.current_formation_name|default:"-" }}</td>
                                 <td>
-                                    <div class="d-flex gap-2">
-                                        <a href="{% url 'stagiaire_update' item.pk %}" class="btn btn-sm btn-outline-primary" title="Modifier">
-                                            <i class="bi bi-pencil"></i>
-                                        </a>
-                                        <a href="{% url 'stagiaire_delete' item.pk %}" class="btn btn-sm btn-outline-danger" title="Supprimer">
-                                            <i class="bi bi-trash"></i>
-                                        </a>
+                                    {% if item.categorie and item.categorie.titre == "dans l'emploi" %}
+                                    <span class="badge bg-light-success text-success">{{ item.categorie }}</span>
+                                    {% elif item.categorie and item.categorie.titre == "sans emploi" %}
+                                    <span class="badge bg-light-warning text-warning">{{ item.categorie }}</span>
+                                    {% else %}
+                                    <span class="badge bg-light-secondary text-dark">{{ item.categorie }}</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">
+                                    <div class="d-flex gap-2 justify-content-end">
+                                        <a href="{% url 'stagiaire' item.id %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></a>
+                                        <a href="{% url 'stagiaire_update' item.pk %}" class="btn btn-sm btn-outline-info"><i class="bi bi-pencil"></i></a>
                                     </div>
                                 </td>
                             </tr>
                             {% endfor %}
-                            {% else %}
-                            <tr id="noResultsRow">
-                                <td colspan="9" class="no-results-message">Aucun stagiaire enregistré.</td> {# Adjusted colspan #}
-                            </tr>
-                            {% endif %}
                         </tbody>
                     </table>
                 </div>
 
-                {# Custom Pagination (if needed, for now keep Django's) #}
+                {% if is_paginated %}
                 <div class="d-flex justify-content-between align-items-center mt-3">
-                    <div class="dataTable-info">
+                    <div class="text-muted small">
                         Page {{ page_obj.number }} sur {{ page_obj.paginator.num_pages }}
                     </div>
-                    <ul class="pagination pagination-primary float-end">
-                        {% if page_obj.has_previous %}
-                        <li class="page-item pager"><a href="?page=1" class="page-link">&laquo;</a></li>
-                        <li class="page-item">
-                            <a href="?page={{ page_obj.previous_page_number }}" class="page-link">
-                                {{ page_obj.previous_page_number }}
-                            </a>
-                        </li>
-                        {% endif %}
-
-                        <li class="page-item active"><a href="#" class="page-link">{{ page_obj.number }}</a></li>
-
-                        {% if page_obj.has_next %}
-                        <li class=" page-item">
-                            <a href="?page={{ page_obj.next_page_number }}" class="page-link">
-                                {{ page_obj.next_page_number }}
-                            </a>
-                        </li>
-                        <li class="page-item pager"><a href="?page={{ page_obj.paginator.num_pages }}" class="page-link">&raquo;</a></li>
-                        {% endif %}
-                    </ul>
+                    <nav>
+                        <ul class="pagination pagination-primary pagination-sm mb-0">
+                            {% if page_obj.has_previous %}
+                            <li class="page-item"><a href="?page=1" class="page-link">&laquo;</a></li>
+                            <li class="page-item"><a href="?page={{ page_obj.previous_page_number }}" class="page-link">{{ page_obj.previous_page_number }}</a></li>
+                            {% endif %}
+                            <li class="page-item active"><a href="#" class="page-link">{{ page_obj.number }}</a></li>
+                            {% if page_obj.has_next %}
+                            <li class="page-item"><a href="?page={{ page_obj.next_page_number }}" class="page-link">{{ page_obj.next_page_number }}</a></li>
+                            <li class="page-item"><a href="?page={{ page_obj.paginator.num_pages }}" class="page-link">&raquo;</a></li>
+                            {% endif %}
+                        </ul>
+                    </nav>
                 </div>
-
+                {% endif %}
             </div>
         </div>
     </section>
@@ -375,118 +186,52 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const searchInput = document.getElementById('searchInput');
-
-        // Table elements
         const tableBody = document.getElementById('stagiaireTableBody');
-        const allRows = tableBody ? Array.from(tableBody.querySelectorAll('tr')).filter(r => r.id !== 'noResultsRow') : [];
-        let noResultsRow = document.getElementById('noResultsRow');
-
-        if (tableBody && !noResultsRow) {
-            noResultsRow = document.createElement('tr');
-            noResultsRow.id = 'noResultsRow';
-            const td = document.createElement('td');
-            td.colSpan = 10;
-            td.className = 'no-results-message';
-            td.textContent = 'Aucun stagiaire trouvé.';
-            noResultsRow.appendChild(td);
-            noResultsRow.style.display = 'none';
-            tableBody.appendChild(noResultsRow);
-        }
-
-        // Cards elements
+        const rows = Array.from(tableBody.querySelectorAll('tr'));
         const cardsContainer = document.getElementById('stagiaireCards');
-        const cardElements = cardsContainer ? Array.from(cardsContainer.querySelectorAll('.card')).map(c => c.closest('div[class*="col-"]') || c) : [];
-        // Remove potential card placeholder if present
-        const allCards = cardElements.filter(el => el && el.id !== 'cardNoResults');
-
-        let cardNoResults = document.getElementById('cardNoResults');
-        if (cardsContainer && !cardNoResults) {
-            cardNoResults = document.createElement('div');
-            cardNoResults.id = 'cardNoResults';
-            cardNoResults.className = 'col-12 no-results-message';
-            cardNoResults.style.display = 'none';
-            cardNoResults.innerHTML = '<p class="text-muted">Aucun stagiaire trouvé.</p>';
-            cardsContainer.appendChild(cardNoResults);
-        }
+        const cards = Array.from(cardsContainer.querySelectorAll('.col-12'));
 
         function performSearch() {
-            const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
-            let tableFound = false;
-            let cardsFound = false;
+            const term = searchInput.value.toLowerCase().trim();
 
-            // Filter table rows
-            allRows.forEach(row => {
-                const fullNameCell = row.cells && row.cells[2];
-                const fullName = fullNameCell ? fullNameCell.textContent.toLowerCase() : row.textContent.toLowerCase();
-                const matches = searchTerm === '' || fullName.includes(searchTerm);
-                row.style.display = matches ? '' : 'none';
-                if (matches) tableFound = true;
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(term) ? '' : 'none';
             });
 
-            // Filter cards
-            allCards.forEach(cardCol => {
-                const titleEl = cardCol.querySelector('.tm-stagiaire-row__title');
-                const metaEl = cardCol.querySelector('.tm-stagiaire-row__meta');
-                const title = titleEl ? titleEl.textContent.toLowerCase() : '';
-                const meta = metaEl ? metaEl.textContent.toLowerCase() : '';
-                const combined = (title + ' ' + meta).trim();
-                const matches = searchTerm === '' || combined.includes(searchTerm);
-                cardCol.style.display = matches ? '' : 'none';
-                if (matches) cardsFound = true;
+            cards.forEach(card => {
+                const text = card.textContent.toLowerCase();
+                card.style.display = text.includes(term) ? '' : 'none';
             });
-
-            if (noResultsRow) noResultsRow.style.display = tableFound ? 'none' : '';
-            if (cardNoResults) cardNoResults.style.display = cardsFound ? 'none' : '';
         }
 
-        if (searchInput) {
-            searchInput.addEventListener('keyup', performSearch);
-        }
+        searchInput.addEventListener('keyup', performSearch);
 
-        // Initial check
-        if (allRows.length === 0 && noResultsRow) {
-            noResultsRow.style.display = '';
-        }
-        if (allCards.length === 0 && cardNoResults) {
-            cardNoResults.style.display = '';
-        }
-    });
-</script>
-
-<script>
-// Toggle view: cartes / tableau
-(function(){
-    document.addEventListener('DOMContentLoaded', function(){
-        const cardsContainer = document.getElementById('stagiaireCards');
-        const tableContainer = document.getElementById('stagiaireTableContainer');
+        // View Toggle
         const toggleCardsBtn = document.getElementById('toggleCardsBtn');
         const toggleTableBtn = document.getElementById('toggleTableBtn');
-        const VIEW_KEY = 'stagiaire_view';
+        const tableContainer = document.getElementById('stagiaireTableContainer');
 
-        function setView(view){
-            if(view === 'table'){
-                if(cardsContainer) cardsContainer.style.display = 'none';
-                if(tableContainer) tableContainer.style.display = '';
-                if(toggleCardsBtn) toggleCardsBtn.classList.remove('active');
-                if(toggleTableBtn) toggleTableBtn.classList.add('active');
+        function setView(view) {
+            if (view === 'table') {
+                cardsContainer.style.display = 'none';
+                tableContainer.style.display = 'block';
+                toggleTableBtn.classList.add('active');
+                toggleCardsBtn.classList.remove('active');
             } else {
-                if(cardsContainer) cardsContainer.style.display = '';
-                if(tableContainer) tableContainer.style.display = 'none';
-                if(toggleCardsBtn) toggleCardsBtn.classList.add('active');
-                if(toggleTableBtn) toggleTableBtn.classList.remove('active');
+                cardsContainer.style.display = 'flex';
+                tableContainer.style.display = 'none';
+                toggleCardsBtn.classList.add('active');
+                toggleTableBtn.classList.remove('active');
             }
-            try{ localStorage.setItem(VIEW_KEY, view); } catch(e){}
+            localStorage.setItem('stagiaire_view', view);
         }
 
-        // initialize from storage or default to cards
-        var saved = null;
-        try{ saved = localStorage.getItem(VIEW_KEY); } catch(e){}
-        setView(saved === 'table' ? 'table' : 'cards');
+        toggleCardsBtn.addEventListener('click', () => setView('cards'));
+        toggleTableBtn.addEventListener('click', () => setView('table'));
 
-        if(toggleCardsBtn) toggleCardsBtn.addEventListener('click', function(){ setView('cards'); });
-        if(toggleTableBtn) toggleTableBtn.addEventListener('click', function(){ setView('table'); });
+        const savedView = localStorage.getItem('stagiaire_view');
+        if (savedView) setView(savedView);
     });
-})();
 </script>
-
 {% endblock script %}

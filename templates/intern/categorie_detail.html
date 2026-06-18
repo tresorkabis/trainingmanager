@@ -1,19 +1,13 @@
 {% extends "base.html" %}
 {% load static %}
+{% load tm_tags %}
 
 {% block title %}Détail Catégorie{% endblock title %}
 {% block page_header %}Détail de la Catégorie{% endblock page_header %}
 
 {% block style %}
+<link rel="stylesheet" href="{% static 'assets/css/training-manager.css' %}">
 <style>
-    .tm-categorie-detail-hero {
-        background:
-            radial-gradient(circle at top right, rgba(67, 94, 190, 0.18), transparent 35%),
-            linear-gradient(135deg, #f7f8fc 0%, #eef3ff 100%);
-        border: 1px solid rgba(67, 94, 190, 0.12);
-        border-radius: 1.25rem;
-    }
-
     .tm-categorie-detail-card {
         border: 1px solid rgba(15, 23, 42, 0.07);
         border-radius: 1rem;
@@ -53,27 +47,7 @@
 
 {% block content %}
 <div class="page-heading">
-    <section class="tm-categorie-detail-hero p-4 p-lg-5 mb-4">
-        <div class="row g-4 align-items-center">
-            <div class="col-12 col-lg-8">
-                <div class="tm-section-titlebar">
-                    <span class="tm-section-titlebar__icon"><i class="bi bi-tags"></i></span>
-                    <div class="tm-section-titlebar__text">
-                        <h3>{{ categorie.titre }}</h3>
-                        <p>Détails de la catégorie</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-12 col-lg-4 d-flex justify-content-lg-end">
-                <a href="{% url 'categories' %}" class="btn btn-light-secondary me-2">
-                    <i class="bi bi-arrow-left me-2"></i>Retour à la liste
-                </a>
-                <a href="{% url 'categorie_update' categorie.pk %}" class="btn btn-primary">
-                    <i class="bi bi-pencil me-2"></i>Modifier
-                </a>
-            </div>
-        </div>
-    </section>
+    {% tm_hero title=categorie.titre subtitle="Consultez les détails de la catégorie et les stagiaires associés." icon="bi bi-tags" actions=hero_actions stats=hero_stats theme="primary" %}
 
     <section class="section px-3 px-md-4">
         <div class="row g-3">

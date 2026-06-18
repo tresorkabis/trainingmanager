@@ -11,8 +11,8 @@ from django.views import View
 from django.views.generic import DetailView, ListView, DeleteView
 
 from training.models import Filiere, Formation, Module
-from progress.models import Formateur, Action # Import Action
-from training.forms import MetierForm, ModuleFormSet # Import des formulaires et formset
+from progress.models import Formateur, Action, ModuleSubject # Import ModuleSubject
+from training.forms import MetierForm, ModuleFormSet, ModuleSubjectFormSet # Import ModuleSubjectFormSet
 
 
 class FormationPermissionMixin:
@@ -68,13 +68,30 @@ class FormationListView(FormationPermissionMixin, ListView):
         ctx["link"] = "formations"
 
         all_formations = self.get_queryset()
+        total = all_formations.count()
+        active = all_formations.filter(active=True).count()
+        total_modules = all_formations.aggregate(total_modules=Count('modules', distinct=True))['total_modules'] or 0
+        total_actions = all_formations.aggregate(total_actions=Count('actions', distinct=True))['total_actions'] or 0
+
         ctx['stats'] = {
-            'total': all_formations.count(),
-            'active': all_formations.filter(active=True).count(),
+            'total': total,
+            'active': active,
             'inactive': all_formations.filter(active=False).count(),
-            'total_modules': all_formations.aggregate(total_modules=Count('modules', distinct=True))['total_modules'],
-            'total_actions': all_formations.aggregate(total_actions=Count('actions', distinct=True))['total_actions'],
+            'total_modules': total_modules,
+            'total_actions': total_actions,
         }
+
+        ctx["hero_stats"] = [
+            {'label': 'Total Formations', 'value': total},
+            {'label': 'Actives', 'value': active},
+            {'label': 'Modules', 'value': total_modules},
+            {'label': 'Actions', 'value': total_actions},
+        ]
+
+        ctx["hero_actions"] = [
+            {'label': 'Nouvelle formation', 'url': reverse_lazy('formation_create'), 'icon': 'bi bi-folder-plus'},
+            {'label': 'Voir les formateurs', 'url': reverse_lazy('formateurs'), 'icon': 'bi bi-person-badge', 'class': 'btn-light-secondary'},
+        ]
         return ctx
 
 
@@ -89,15 +106,27 @@ class FormationDetailView(FormationPermissionMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
+        formation = self.get_object()
+        
         ctx["filieres"] = self.get_allowed_filieres()
         ctx["formateurs"] = Formateur.objects.all()
         ctx["titre"] = "Voir"
         ctx["mode"] = "view"
         ctx["link"] = "formations"
+        ctx["actions"] = formation.actions.all()
 
-        # Ajouter les actions de formation liées à cette formation
-        formation = self.get_object()
-        ctx["actions"] = formation.actions.all() # Accéder aux actions via le related_name
+        # Hero Context
+        ctx["hero_stats"] = [
+            {'label': 'Modules', 'value': formation.modules.count()},
+            {'label': 'Durée', 'value': f"{formation.duree_heures}h"},
+            {'label': 'Coût', 'value': f"{formation.cout:,.0f} USD"},
+            {'label': 'Sessions', 'value': formation.actions.count()},
+        ]
+        
+        ctx["hero_actions"] = [
+            {'label': 'Retour à la liste', 'url': reverse_lazy('formations'), 'icon': 'bi bi-arrow-left', 'class': 'btn-light-secondary'},
+            {'label': 'Modifier', 'url': reverse_lazy('formation_update', kwargs={'pk': formation.pk}), 'icon': 'bi bi-pencil'},
+        ]
 
         return ctx
 
@@ -183,6 +212,59 @@ class FormationCreateUpdateView(FormationPermissionMixin, View): # Vue unifiée 
             "object": formation,
             "form_errors": form.errors,
             "formset_errors": formset.errors, # Passer les erreurs du formset
+        }
+        return render(request, self.template_name, ctx, status=400)
+
+
+@method_decorator(login_required, name="dispatch")
+class ModuleSubjectManageView(FormationPermissionMixin, View):
+    template_name = "training/module_subjects_form.html"
+
+    def get(self, request, pk):
+        self.enforce_manage_permission()
+        module = get_object_or_404(Module, pk=pk)
+        formset = ModuleSubjectFormSet(instance=module)
+        
+        ctx = {
+            "module": module,
+            "formset": formset,
+            "titre": f"Sujets du module : {module.titre}",
+            "hero_actions": [
+                {'label': 'Retour à la formation', 'url': reverse_lazy('formation', kwargs={'pk': module.formation.pk}), 'icon': 'bi bi-arrow-left', 'class': 'btn-light-secondary'},
+            ]
+        }
+        return render(request, self.template_name, ctx)
+
+    def post(self, request, pk):
+        self.enforce_manage_permission()
+        module = get_object_or_404(Module, pk=pk)
+        formset = ModuleSubjectFormSet(request.POST, instance=module)
+        
+        if formset.is_valid():
+            with transaction.atomic():
+                formset.save()
+                
+                # Calcul et mise à jour de la durée du module
+                hours_per_session = float(request.POST.get('hours-per-session', 2))
+                total_sessions = sum(s.nombre_seances for s in module.subjects.all())
+                module.duree_heures = int(total_sessions * hours_per_session)
+                module.save()
+                
+                # Mise à jour de la durée totale de la formation
+                formation = module.formation
+                total_formation_hours = sum(m.duree_heures for m in formation.modules.all())
+                if formation.duree_heures != total_formation_hours:
+                    formation.duree_heures = total_formation_hours
+                    formation.save(update_fields=['duree_heures'])
+                
+            messages.success(request, f"Les sujets du module '{module.titre}' ont été mis à jour (Durée : {module.duree_heures}h).")
+            return HttpResponseRedirect(reverse_lazy("formation", kwargs={'pk': module.formation.pk}))
+        
+        ctx = {
+            "module": module,
+            "formset": formset,
+            "titre": f"Sujets du module : {module.titre}",
+            "formset_errors": formset.errors,
         }
         return render(request, self.template_name, ctx, status=400)
 

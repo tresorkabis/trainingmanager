@@ -2,6 +2,9 @@ from django.contrib.auth.decorators import login_required
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.generic import ListView, CreateView, DetailView, UpdateView, DeleteView
+from django.db.models import Sum
+from django.utils import timezone
+from datetime import date
 
 from progress.models import Paiement
 from progress.forms import PaiementForm
@@ -14,17 +17,39 @@ class PaiementListView(ListView):
     paginate_by = 10
 
     def get_queryset(self):
-        # Optionnel: Filtrer les paiements par stagiaire si l'utilisateur est un stagiaire
-        # ou par filière/service si l'utilisateur a un rôle spécifique
-        queryset = super().get_queryset()
-        # Exemple de filtre si l'utilisateur est un stagiaire et ne doit voir que ses paiements
-        # if self.request.user.is_authenticated and hasattr(self.request.user, 'stagiaire'):
-        #     queryset = queryset.filter(stagiaire=self.request.user.stagiaire)
+        queryset = super().get_queryset().select_related('stagiaire', 'action', 'action__formation').order_by('-date_paiement', '-id')
         return queryset
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['link'] = 'paiements' # Pour activer le lien dans le menu latéral
+        all_paiements = self.get_queryset()
+        today = date.today()
+        
+        # Stats
+        total_recu = all_paiements.aggregate(total=Sum('montant'))['total'] or 0
+        total_especes = all_paiements.filter(mode_paiement='ESPECES').aggregate(total=Sum('montant'))['total'] or 0
+        total_virement = all_paiements.filter(mode_paiement='VIREMENT').aggregate(total=Sum('montant'))['total'] or 0
+        total_mois = all_paiements.filter(date_paiement__month=today.month, date_paiement__year=today.year).aggregate(total=Sum('montant'))['total'] or 0
+
+        context['stats'] = {
+            'total_recu': total_recu,
+            'total_especes': total_especes,
+            'total_virement': total_virement,
+            'total_mois': total_mois,
+        }
+
+        context['hero_stats'] = [
+            {'label': 'Total Encaissé', 'value': f"{total_recu:,.0f} USD"},
+            {'label': 'Ce mois', 'value': f"{total_mois:,.0f} USD"},
+            {'label': 'Espèces', 'value': f"{total_especes:,.0f} USD"},
+            {'label': 'Virements', 'value': f"{total_virement:,.0f} USD"},
+        ]
+
+        context['hero_actions'] = [
+            {'label': 'Nouveau paiement', 'url': reverse_lazy('paiement_create'), 'icon': 'bi bi-plus-circle', 'class': 'btn-primary'},
+        ]
+
+        context['link'] = 'paiements'
         context['titre'] = 'Liste des paiements'
         return context
 
@@ -100,6 +125,20 @@ class PaiementDetailView(DetailView):
         context['total_cout'] = self.object.get_total_cout()
         context['total_paye'] = self.object.get_total_paye()
         context['solde_restant'] = self.object.get_solde_restant()
+        
+        mode_icon = 'bi bi-cash' if self.object.mode_paiement == 'ESPECES' else 'bi bi-bank' # Determine icon based on mode
+        
+        context['hero_stats'] = [
+            {'label': 'Montant reçu', 'value': f"{self.object.montant:,.0f} USD"},
+            {'label': 'Déjà payé', 'value': f"{context['total_paye']:,.0f} USD"},
+            {'label': 'Solde restant', 'value': f"{context['solde_restant']:,.0f} USD"},
+            {'label': 'Mode', 'value': self.object.get_mode_paiement_display()},
+        ]
+        
+        context['hero_actions'] = [
+            {'label': 'Retour à la liste', 'url': reverse_lazy('paiements'), 'icon': 'bi bi-arrow-left', 'class': 'btn-light-secondary'},
+            {'label': 'Imprimer', 'url': '#', 'icon': 'bi bi-printer', 'class': 'btn-light-primary'}, # Placeholder for print
+        ]
         return context
 
 @method_decorator(login_required, name='dispatch')

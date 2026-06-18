@@ -34,9 +34,12 @@ class FilierePermissionMixin:
             return queryset.filter(pk=user.service.pk)
         return Service.objects.none()
 
-    def enforce_manage_permission(self): # Renommé pour être plus générique
+    def can_manage_filieres(self):
         user = self.request.user
-        if not (user.is_superuser or (user.profile and user.profile.name == "Manager")):
+        return user.is_superuser or (user.profile and user.profile.name == "Manager")
+
+    def enforce_manage_permission(self): # Renommé pour être plus générique
+        if not self.can_manage_filieres():
             raise PermissionDenied("Vous n'avez pas la permission de gérer les filières.")
 
 
@@ -47,7 +50,6 @@ class FiliereListView(FilierePermissionMixin, ListView):
     template_name = "training/filieres.html"
 
     def get_queryset(self):
-        self.enforce_manage_permission() # Vérifier la permission avant de construire le queryset
         queryset = self.get_filiere_queryset().select_related("service")
         
         # Annoter chaque filière avec le nombre de formations
@@ -59,15 +61,34 @@ class FiliereListView(FilierePermissionMixin, ListView):
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx["link"] = "filieres"
+        ctx["can_manage"] = self.can_manage_filieres()
         
         # Calcul des statistiques globales
-        all_filieres = self.get_queryset() # Utiliser le queryset annoté
+        all_filieres = self.get_queryset()
+        total = all_filieres.count()
+        active = all_filieres.filter(active=True).count()
+        total_metiers = all_filieres.aggregate(total_metiers=Count('formations', distinct=True))['total_metiers'] or 0
+        
         ctx['stats'] = {
-            'total': all_filieres.count(),
-            'active': all_filieres.filter(active=True).count(),
-            'inactive': all_filieres.filter(active=False).count(),
-            'total_metiers': all_filieres.aggregate(total_metiers=Count('formations', distinct=True))['total_metiers'],
+            'total': total,
+            'active': active,
+            'inactive': total - active,
+            'total_metiers': total_metiers,
         }
+
+        ctx["hero_stats"] = [
+            {'label': 'Total Filières', 'value': total},
+            {'label': 'Actives', 'value': active},
+            {'label': 'Inactives', 'value': total - active},
+            {'label': 'Formations', 'value': total_metiers},
+        ]
+
+        if self.can_manage_filieres():
+            ctx["hero_actions"] = [
+                {'label': 'Nouvelle filière', 'url': reverse_lazy('filiere_create'), 'icon': 'bi bi-plus-circle'},
+            ]
+        else:
+            ctx["hero_actions"] = []
         return ctx
 
 
@@ -86,6 +107,24 @@ class FiliereDetailView(FilierePermissionMixin, DetailView):
         
         ctx['metiers_associees'] = filiere.formations.all().order_by('nom')
         ctx['titre'] = "Détail de la filière"
+        ctx["can_manage"] = self.can_manage_filieres()
+
+        # Stats pour le Hero
+        metiers_count = ctx['metiers_associees'].count()
+        ctx["hero_stats"] = [
+            {'label': 'Formations', 'value': metiers_count},
+            {'label': 'Statut', 'value': "Active" if filiere.active else "Inactive"},
+            {'label': 'Service', 'value': filiere.service.nom if filiere.service else "N/A"},
+            {'label': 'ID', 'value': f"#FIL-{filiere.pk}"},
+        ]
+        
+        ctx["hero_actions"] = [
+            {'label': 'Retour à la liste', 'url': reverse_lazy('filieres'), 'icon': 'bi bi-arrow-left', 'class': 'btn-light-secondary'},
+        ]
+        if ctx["can_manage"]:
+            ctx["hero_actions"].append(
+                {'label': 'Modifier', 'url': reverse_lazy('filiere_update', kwargs={'pk': filiere.pk}), 'icon': 'bi bi-pencil'}
+            )
         return ctx
 
 

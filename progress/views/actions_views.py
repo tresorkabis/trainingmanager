@@ -5,14 +5,17 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.contrib import messages
 from django.db.models import Count
+from django.db import transaction
 from django.http import HttpResponseRedirect
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.generic import DeleteView, DetailView, ListView, UpdateView
 
 from progress.models import Action, Formateur, ModuleProgress
+from progress.services import ActionWorkflowService
+from intern.models import Stagiaire
 from training.models import Formation, Module
 
 
@@ -65,31 +68,8 @@ class ActionPermissionMixin:
     def build_form_context(self, **kwargs):
         allowed_formations = self.get_allowed_formations()
         all_formateurs = Formateur.objects.filter(active=True).order_by("nom", "postnom")
-
-        formations_data = []
-        modules_formateurs_assignment = {} # New dictionary to store module-formateur assignments for the current action
-
-        for formation in allowed_formations:
-            modules_data = []
-            formateurs_for_formation = set() # Formateurs eligible for any module in this formation
-            for module in formation.modules.all():
-                module_formateurs = module.formateurs.all()
-                for f in module_formateurs:
-                    formateurs_for_formation.add(f)
-                modules_data.append({
-                    "id": module.id,
-                    "titre": module.titre,
-                    "duree_heures": module.duree_heures,
-                    # We need to pass the formateurs assigned to this module (from the Module model itself)
-                    "assigned_formateurs_ids": [f.id for f in module_formateurs],
-                })
-
-            formations_data.append({
-                "id": formation.id,
-                "nom": formation.nom,
-                "modules": modules_data, # Now includes module-specific formateurs
-                "formateurs_ids": [f.id for f in formateurs_for_formation], # These are formateurs eligible for any module in this formation
-            })
+        formations_data = ActionWorkflowService.build_formations_payload(allowed_formations)
+        modules_formateurs_assignment = {}
 
         context = {
             "formations": allowed_formations,
@@ -98,11 +78,22 @@ class ActionPermissionMixin:
             "formateurs_json": list(all_formateurs.values("id", "nom", "postnom", "prenom")),
             "today": date.today(),
             "selected_formateur_ids": [], # This is for Action.formateurs, which we might remove or keep separate
+            "hero_actions": [
+                {'label': 'Retour aux actions', 'url': reverse_lazy('actions'), 'class': 'btn-light-secondary', 'icon': 'bi bi-arrow-left'},
+            ],
         }
 
         # If in update mode, populate initial module-formateur assignments for the specific action being edited
         action_object = kwargs.get('object') # Get the action object if available
         if action_object and action_object.pk:
+            # Stats pour le mode édition (KPI cards)
+            status_meta = self.get_action_status(action_object)
+            context["hero_stats"] = [
+                {'label': 'Inscrits', 'value': action_object.detailaction_set.count()},
+                {'label': 'Formateurs', 'value': action_object.formateurs.count()},
+                {'label': 'Statut', 'value': status_meta['label']},
+            ]
+            
             # On récupère les assignations réelles depuis ModuleProgress pour CETTE action
             progressions = ModuleProgress.objects.filter(action=action_object)
             for prog in progressions:
@@ -110,57 +101,18 @@ class ActionPermissionMixin:
                     modules_formateurs_assignment[prog.module_id] = []
                 modules_formateurs_assignment[prog.module_id].append(prog.formateur_id)
             context["modules_formateurs_assignment_json"] = modules_formateurs_assignment
+            context["action_schedules"] = list(action_object.course_schedules.all().order_by("jour_semaine", "heure_debut", "ordre", "id"))
         else:
             context["modules_formateurs_assignment_json"] = {} # Empty for create view
+            context["action_schedules"] = []
+            context["stats"] = None
 
         context.update(kwargs)
         return context
 
     def _save_module_assignments(self, action, request):
-        """Helper to create ModuleProgress records based on selected formateurs per module."""
-        all_assigned_formateur_ids = set()
-
-        # 1. On récupère les progressions existantes pour éviter les doublons et la perte de données
-        existing_progress = {
-            (p.module_id, p.formateur_id): p 
-            for p in ModuleProgress.objects.filter(action=action)
-        }
-        
-        new_assignments = set()
-
-        for module in action.formation.modules.all():
-            formateur_ids = request.POST.getlist(f"module_formateurs_{module.id}")
-            valid_ids = [int(fid) for fid in formateur_ids if str(fid).isdigit()]
-
-            for f_id in valid_ids:
-                new_assignments.add((module.id, f_id))
-                all_assigned_formateur_ids.add(f_id)
-                
-                # 2. On ne crée que si ça n'existe pas déjà
-                if (module.id, f_id) not in existing_progress:
-                    ModuleProgress.objects.create(
-                        action=action,
-                        module=module,
-                        formateur_id=f_id,
-                        statut_module='NC'
-                    )
-
-        # 3. On supprime les assignations qui ont été décochées dans le formulaire
-        for (m_id, f_id), progress_obj in existing_progress.items():
-            if (m_id, f_id) not in new_assignments:
-                if progress_obj.sessions_progress.exists():
-                    messages.error(
-                        request, 
-                        f"Le formateur {progress_obj.formateur} ne peut pas être retiré du module '{progress_obj.module.titre}' "
-                        f"car des séances de formation ont déjà été enregistrées."
-                    )
-                    all_assigned_formateur_ids.add(f_id) # On garde le formateur dans la liste globale de l'action
-                    continue
-                progress_obj.delete()
-
-        # Optionnel: Mettre à jour Action.formateurs (M2M) pour le récapitulatif global
-        if all_assigned_formateur_ids:
-            action.formateurs.set(list(all_assigned_formateur_ids))
+        assignments = ActionWorkflowService.extract_module_assignments(action.formation, request.POST)
+        return ActionWorkflowService.sync_action_components(action, assignments, request=request)
 
     def validate_action_payload(self, date_debut, date_fin, formation_id, formateur_ids):
         errors = []
@@ -195,6 +147,10 @@ class ActionPermissionMixin:
 
         return errors
 
+    def validate_action_components(self, formation, request):
+        assignments = ActionWorkflowService.extract_module_assignments(formation, request.POST)
+        return ActionWorkflowService.validate_module_assignments(formation, assignments)
+
 
 @method_decorator(login_required, name="dispatch")
 class ActionListViews(ActionPermissionMixin, ListView):
@@ -210,6 +166,16 @@ class ActionListViews(ActionPermissionMixin, ListView):
 
         for action in page_actions:
             action.status_meta = self.get_action_status(action)
+            # Calcul de la progression
+            progressions = action.module_progressions.all()
+            total_modules = action.formation.modules.count()
+            if total_modules > 0:
+                # On considère un module "avancé" s'il est au moins en cours (EC)
+                # Et "terminé" s'il est TE ou VA.
+                completed_count = progressions.filter(statut_module__in=['TE', 'VA']).values('module').distinct().count()
+                action.progression_percent = int((completed_count / total_modules) * 100)
+            else:
+                action.progression_percent = 0
 
         ctx["object_list"] = page_actions
         ctx["link"] = "actions"
@@ -228,8 +194,7 @@ class ActionListViews(ActionPermissionMixin, ListView):
         ]
 
         ctx["hero_stats"] = [
-            {'label': 'Total', 'value': ctx['stats']['total']},
-            {'label': 'Planifiées', 'value': ctx['stats']['planned']},
+            {'label': 'Total Actions', 'value': ctx['stats']['total']},
             {'label': 'En cours', 'value': ctx['stats']['ongoing']},
             {'label': 'Terminées', 'value': ctx['stats']['completed']},
             {'label': 'Inscrits', 'value': ctx['stats']['enrolled']},
@@ -250,7 +215,9 @@ class ActionDetailViews(ActionPermissionMixin, DetailView):
             .prefetch_related(
                 "detailaction_set__stagiaire",
                 "formateurs",
+                "course_schedules",
                 "formation__modules__formateurs",
+                "formation__modules__subjects",
                 "formation__modules__seances__formateur",
                 "formation__modules__seances__evaluateur",
                 "module_progressions",
@@ -261,6 +228,7 @@ class ActionDetailViews(ActionPermissionMixin, DetailView):
         ctx = super().get_context_data(**kwargs)
         action = ctx["object"]
         inscriptions = action.detailaction_set.select_related("stagiaire").order_by("stagiaire__nom", "stagiaire__postnom")
+        inscrit_ids = list(inscriptions.values_list("stagiaire_id", flat=True))
 
         # On récupère la liste des modules une seule fois
         modules_list = list(action.formation.modules.all().order_by("ordre"))
@@ -275,12 +243,39 @@ class ActionDetailViews(ActionPermissionMixin, DetailView):
             module.module_progressions = [p for p in all_progressions if p.module_id == module.id]
             module.module_progressions.sort(key=lambda x: x.formateur.nom)
 
+        # Statistiques financières
+        total_attendu = (action.formation.cout or 0) * inscriptions.count()
+        total_paye = sum(p.montant for ins in inscriptions for p in ins.stagiaire.paiements.filter(action=action))
+        
+        ctx["finance"] = {
+            "total_attendu": total_attendu,
+            "total_paye": total_paye,
+            "solde": total_attendu - total_paye,
+            "percent": int((total_paye / total_attendu * 100)) if total_attendu > 0 else 0
+        }
+
         ctx["modules"] = modules_list
         ctx["status_meta"] = self.get_action_status(action)
         ctx["inscriptions"] = inscriptions
+        ctx["stagiaires_disponibles"] = Stagiaire.objects.filter(active=True).exclude(pk__in=inscrit_ids).order_by("nom", "postnom", "prenom")
         ctx["link"] = "actions"
         ctx["inscription_count"] = inscriptions.count()
         ctx["formateurs_assignes"] = action.formateurs.all().order_by("nom", "postnom")
+        ctx["course_schedules"] = action.course_schedules.all().order_by("jour_semaine", "heure_debut", "ordre", "id")
+
+        # Stats pour le Hero
+        ctx["hero_stats"] = [
+            {'label': 'Inscrits', 'value': ctx["inscription_count"]},
+            {'label': 'Modules', 'value': len(modules_list)},
+            {'label': 'Statut', 'value': ctx["status_meta"]['label']},
+            {'label': 'Reste à payer', 'value': f"{ctx['finance']['solde']:,.0f} USD"},
+        ]
+
+        ctx["hero_actions"] = [
+            {'label': 'Retour', 'url': reverse_lazy('actions'), 'icon': 'bi bi-arrow-left', 'class': 'btn-light-secondary'},
+            {'label': 'Modifier', 'url': reverse_lazy('action_update', kwargs={'pk': action.pk}), 'icon': 'bi bi-pencil'},
+        ]
+
         return ctx
 
 
@@ -305,7 +300,11 @@ class ActionCreateView(ActionPermissionMixin, View):
         formation_id = request.POST["formation"]
         # formateur_ids = request.POST.getlist("formateurs") # Removed direct Action.formateurs assignment
 
+        formation = get_object_or_404(Formation, pk=formation_id)
+        schedules = ActionWorkflowService.extract_action_schedules(request.POST)
         errors = self.validate_action_payload(date_debut, date_fin, formation_id, []) # Pass empty list for formateur_ids
+        errors.extend(self.validate_action_components(formation, request))
+        errors.extend(ActionWorkflowService.validate_action_schedules(schedules))
         if errors:
             ctx = self.build_form_context(
                 titre="Créer",
@@ -313,24 +312,26 @@ class ActionCreateView(ActionPermissionMixin, View):
                 submitted=request.POST,
                 selected_formateur_ids=[], # No longer tracking action-level formateurs
                 form_errors=errors,
+                submitted_schedules=schedules,
             )
             return render(request, "progress/action.html", ctx, status=400)
 
-        action = Action(
-            description=description,
-            date_debut=date_debut,
-            date_fin=date_fin,
-            formation_id=formation_id,
+        with transaction.atomic():
+            action = Action(
+                description=description,
+                date_debut=date_debut,
+                date_fin=date_fin,
+                formation_id=formation_id,
+            )
+            action.save()
+            ActionWorkflowService.sync_action_schedules(action, schedules)
+            result = self._save_module_assignments(action, request)
+
+        messages.success(
+            request,
+            f"L'action a été créée avec {result.created_progressions} progression(s) de module."
         )
-        action.save()
-        # Removed direct Action.formateurs assignment
-        # if formateur_ids:
-        #     action.formateurs.set(Formateur.objects.filter(pk__in=self.normalize_formateur_ids(formateur_ids)))
-
-        # New: Process module-specific formateur assignments for creation
-        self._save_module_assignments(action, request)
-
-        return HttpResponseRedirect(reverse_lazy("actions"))
+        return HttpResponseRedirect(reverse_lazy("action", kwargs={"pk": action.pk}))
 
 @method_decorator(login_required, name="dispatch")
 class ActionUpdateView(ActionPermissionMixin, UpdateView):
@@ -345,22 +346,30 @@ class ActionUpdateView(ActionPermissionMixin, UpdateView):
         return form
 
     def form_valid(self, form):
-        # formateur_ids = self.request.POST.getlist("formateurs") # Removed direct Action.formateurs assignment
+        schedules = ActionWorkflowService.extract_action_schedules(self.request.POST)
         errors = self.validate_action_payload(
             form.cleaned_data["date_debut"],
             form.cleaned_data["date_fin"],
             str(form.cleaned_data["formation"].pk),
-            [], # Pass empty list for formateur_ids
+            [],
         )
+        errors.extend(self.validate_action_components(form.cleaned_data["formation"], self.request))
+        errors.extend(ActionWorkflowService.validate_action_schedules(schedules))
         if errors:
             for error in errors:
                 form.add_error(None, error)
             return self.form_invalid(form)
-        
-        response = super().form_valid(form) # Saves the Action object
-        self._save_module_assignments(self.object, self.request)
 
-        return response
+        with transaction.atomic():
+            response = super().form_valid(form)
+            ActionWorkflowService.sync_action_schedules(self.object, schedules)
+            result = self._save_module_assignments(self.object, self.request)
+
+        messages.success(
+            self.request,
+            f"L'action a été mise à jour avec {result.created_progressions} nouvelle(s) progression(s) de module."
+        )
+        return HttpResponseRedirect(reverse_lazy("action", kwargs={"pk": self.object.pk}))
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
@@ -370,6 +379,7 @@ class ActionUpdateView(ActionPermissionMixin, UpdateView):
                 mode="edit",
                 object=self.object, # Pass the object to build_form_context
                 selected_formateur_ids=[], # No longer tracking action-level formateurs
+                submitted_schedules=ActionWorkflowService.extract_action_schedules(self.request.POST) if self.request.method == "POST" else [],
             )
         )
         return ctx

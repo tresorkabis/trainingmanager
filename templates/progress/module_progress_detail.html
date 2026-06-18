@@ -67,6 +67,21 @@
                             </div>
                         </div>
                     </div>
+                    {% if subject_planning %}
+                    <div class="mt-4">
+                        <div class="alert alert-light border mb-0">
+                            <div class="fw-semibold mb-1">Sujet prévu pour la prochaine séance</div>
+                            <div class="small text-muted">
+                                {{ subject_planning.subject.titre }}
+                                {% if subject_planning.subject.description %}
+                                    - {{ subject_planning.subject.description }}
+                                {% endif %}
+                                <br>
+                                Séance {{ subject_planning.session_index }} sur {{ subject_planning.sessions_for_subject }} pour ce sujet.
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
                     <div class="mt-4">
                         <a href="{% url 'module_progress_update' module_progress.pk %}" class="btn btn-warning">Modifier</a>
                         <a href="{% url 'module_progress_delete' module_progress.pk %}" class="btn btn-danger">Supprimer</a>
@@ -79,12 +94,37 @@
 
     <div class="card mt-4">
         <div class="card-header">
-            <h4 class="card-title">Séances du Module</h4>
-            <a href="{% url 'session_progress_create' module_progress_pk=module_progress.pk %}" class="btn btn-primary float-end">
-                <i class="bi bi-plus-circle"></i> Ajouter une séance
-            </a>
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+                <div>
+                    <h4 class="card-title mb-1">Séances du Module</h4>
+                    <p class="text-muted mb-0">
+                        La planification rapide ouvre un formulaire déjà prérempli avec la prochaine séance suggérée.
+                    </p>
+                </div>
+                <a href="{% url 'session_progress_create' module_progress_pk=module_progress.pk %}" class="btn btn-primary">
+                    <i class="bi bi-calendar-plus"></i> Planifier une séance
+                </a>
+            </div>
         </div>
         <div class="card-body">
+            <div class="alert alert-light border d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+                <div>
+                    <div class="fw-semibold">Proposition de planification</div>
+                    <div class="small text-muted">
+                        {{ next_session_defaults.planned_date }}
+                        {% if next_session_defaults.planned_start_time and next_session_defaults.planned_end_time %}
+                            - {{ next_session_defaults.planned_start_time|time:"H:i" }} à {{ next_session_defaults.planned_end_time|time:"H:i" }}
+                        {% endif %}
+                        {% if next_session_defaults.planned_topics %}
+                            - {{ next_session_defaults.planned_topics|truncatechars:80 }}
+                        {% endif %}
+                    </div>
+                </div>
+                <a href="{% url 'session_progress_create' module_progress_pk=module_progress.pk %}" class="btn btn-outline-primary">
+                    Ouvrir le formulaire prérempli
+                </a>
+            </div>
+
             {% if messages %}
                 {% for message in messages %}
                     <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
@@ -98,29 +138,45 @@
             <table class="table table-striped" id="table2">
                 <thead>
                     <tr>
-                        <th>Date</th>
-                        <th>Heure Début</th>
-                        <th>Heure Fin</th>
+                        <th>Date prévue</th>
+                        <th>Date réelle</th>
+                        <th>Heure prévue</th>
+                        <th>Heure réelle</th>
                         <th>Formateur</th>
-                        <th>Sujets Couverts</th>
-                        <th>Terminée</th>
+                        <th>Sujets prévus</th>
+                        <th>Sujets couverts</th>
+                        <th>Statut</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for session in sessions %}
                     <tr>
-                        <td>{{ session.session_date }}</td>
-                        <td>{{ session.start_time|default:"N/A" }}</td>
-                        <td>{{ session.end_time|default:"N/A" }}</td>
+                        <td>{{ session.planned_date }}</td>
+                        <td>{{ session.actual_date|default:"N/A" }}</td>
+                        <td>
+                            {% if session.planned_start_time or session.planned_end_time %}
+                                {{ session.planned_start_time|default:"N/A" }} - {{ session.planned_end_time|default:"N/A" }}
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if session.actual_start_time or session.actual_end_time %}
+                                {{ session.actual_start_time|default:"N/A" }} - {{ session.actual_end_time|default:"N/A" }}
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </td>
                         <td>{{ session.formateur|default:"N/A" }}</td>
+                        <td>
+                            {{ session.planned_topics|truncatechars:50|default:"N/A" }}
+                        </td>
                         <td>{{ session.topics_covered|truncatechars:50|default:"N/A" }}</td>
                         <td>
-                            {% if session.is_completed %}
-                                <span class="badge bg-success">Oui</span>
-                            {% else %}
-                                <span class="badge bg-warning">Non</span>
-                            {% endif %}
+                            <span class="badge {% if session.statut == 'REALISEE' %}bg-success{% elif session.statut == 'PLANIFIEE' %}bg-info{% elif session.statut == 'REPORTEE' %}bg-warning{% else %}bg-secondary{% endif %}">
+                                {{ session.get_statut_display }}
+                            </span>
                         </td>
                         <td>
                             <a href="{% url 'session_progress_update' session.pk %}" class="btn btn-sm btn-warning" title="Modifier">

@@ -40,12 +40,27 @@ class CategorieListView(CategoriePermissionMixin, ListView):
         
         # Calcul des statistiques globales
         all_categories = self.get_queryset() # Utiliser le queryset annoté
+        total = all_categories.count()
+        active = all_categories.filter(active=True).count()
+        total_stagiaires = all_categories.aggregate(total_stagiaires=Count('stagiaire', distinct=True))['total_stagiaires'] or 0
+
         ctx['stats'] = {
-            'total': all_categories.count(),
-            'active': all_categories.filter(active=True).count(),
-            'inactive': all_categories.filter(active=False).count(),
-            'total_stagiaires': all_categories.aggregate(total_stagiaires=Count('stagiaire', distinct=True))['total_stagiaires'],
+            'total': total,
+            'active': active,
+            'inactive': total - active,
+            'total_stagiaires': total_stagiaires,
         }
+
+        ctx['hero_stats'] = [
+            {'label': 'Total Catégories', 'value': total},
+            {'label': 'Actives', 'value': active},
+            {'label': 'Inactives', 'value': total - active},
+            {'label': 'Total Stagiaires', 'value': total_stagiaires},
+        ]
+        
+        ctx['hero_actions'] = [
+            {'label': 'Nouvelle catégorie', 'url': reverse_lazy('categorie_create'), 'icon': 'bi bi-bookmark-plus'},
+        ]
         return ctx
 
 @method_decorator(login_required, name="dispatch")
@@ -63,6 +78,19 @@ class CategorieDetailView(CategoriePermissionMixin, DetailView):
         
         ctx['stagiaires_associes'] = categorie.stagiaire_set.all().order_by('nom', 'postnom')
         ctx['titre'] = "Détail de la catégorie"
+        
+        # Stats pour le Hero
+        ctx["hero_stats"] = [
+            {'label': 'Stagiaires', 'value': ctx['stagiaires_associes'].count()},
+            {'label': 'Statut', 'value': "Active" if categorie.active else "Inactive"},
+            {'label': 'Date création', 'value': categorie.created_at.strftime("%d/%m/%Y")},
+            {'label': 'ID', 'value': f"#CAT-{categorie.pk}"},
+        ]
+        
+        ctx["hero_actions"] = [
+            {'label': 'Retour à la liste', 'url': reverse_lazy('categories'), 'icon': 'bi bi-arrow-left', 'class': 'btn-light-secondary'},
+            {'label': 'Modifier', 'url': reverse_lazy('categorie_update', kwargs={'pk': categorie.pk}), 'icon': 'bi bi-pencil'},
+        ]
         return ctx
 
 @method_decorator(login_required, name="dispatch")

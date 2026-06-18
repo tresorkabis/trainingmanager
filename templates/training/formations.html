@@ -1,165 +1,18 @@
 {% extends "base.html" %}
 {% load static %}
+{% load tm_tags %}
 
 {% block title %}Catalogue des formations{% endblock title %}
 {% block page_header %}Catalogue des formations{% endblock page_header %}
 
 {% block style %}
+<link rel="stylesheet" href="{% static 'assets/css/training-manager.css' %}">
 <style>
-    /* Custom styles for search input */
-    .custom-search-container {
-        display: flex;
-        gap: 0.5rem;
-        margin-bottom: 1rem;
-    }
-    .custom-search-input {
-        flex-grow: 1;
-        border: 1px solid #ced4da;
-        border-radius: 0.5rem;
-        padding: 0.5rem 1rem;
-        max-width: 300px;
-    }
-    .custom-search-input:focus {
-        border-color: #435ebe;
-        box-shadow: 0 0 0 0.2rem rgba(67, 94, 190, 0.25);
-        outline: none;
-    }
-    .no-results-message {
-        text-align: center;
-        padding: 1rem;
-        color: #6c757d;
-    }
-
-    /* Table styling */
-    .table {
-        width: 100%;
-        border-collapse: separate;
-        border-spacing: 0;
-        border-radius: 1rem;
-        overflow: hidden;
-    }
-
-    .table thead th {
-        background-color: #f8f9fa;
-        color: #25396f;
-        font-weight: 700;
-        padding: 1rem 1.5rem;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-        text-align: left;
-    }
-
-    .table tbody tr {
-        transition: background-color 0.2s ease;
-    }
-
-    .table tbody tr:nth-of-type(odd) {
-        background-color: #ffffff;
-    }
-
-    .table tbody tr:nth-of-type(even) {
-        background-color: #fcfdff;
-    }
-
-    .table tbody tr:hover {
-        background-color: #eef2f7;
-    }
-
-    .table tbody td {
-        padding: 0.8rem 1.5rem;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.03);
-        color: #495057;
-    }
-
-    .table tbody td a {
-        color: #435ebe;
-        text-decoration: none;
-    }
-
-    .table tbody td a:hover {
-        text-decoration: underline;
-    }
-
-    /* Pagination styling */
-    .pagination {
-        margin-bottom: 0;
-    }
-
-    .pagination .page-item {
-        margin: 0 0.2rem;
-    }
-
-    .pagination .page-link {
-        border-radius: 0.5rem;
-        padding: 0.5rem 0.9rem;
-        font-size: 0.9rem;
-        color: #435ebe;
-        border: 1px solid #e9ecef;
-        transition: all 0.2s ease;
-    }
-
-    .pagination .page-item.active .page-link {
-        background-color: #435ebe;
-        border-color: #435ebe;
-        color: #fff;
-        box-shadow: 0 2px 8px rgba(67, 94, 190, 0.2);
-    }
-
-    .pagination .page-link:hover:not(.active) {
-        background-color: #f0f1f5;
-        border-color: #d8dce3;
-    }
-
-    .pagination .page-item.pager .page-link {
-        font-weight: bold;
-    }
-
-    .pagination .page-item.disabled .page-link {
-        color: #adb5bd;
-        pointer-events: none;
-        background-color: #ffffff;
-        border-color: #e9ecef;
-    }
-
-    /* Specific styles for formation list */
-    .tm-formation-hero {
-        background:
-            radial-gradient(circle at top right, rgba(67, 94, 190, 0.18), transparent 35%),
-            linear-gradient(135deg, #f7f8fc 0%, #eef3ff 100%);
-        border: 1px solid rgba(67, 94, 190, 0.12);
-        border-radius: 1.25rem;
-        overflow: hidden;
-    }
-
-    .tm-formation-stat {
-        background: rgba(255, 255, 255, 0.76);
-        border: 1px solid rgba(67, 94, 190, 0.1);
-        border-radius: 1rem;
-        padding: 1rem;
-        box-shadow: 0 10px 24px rgba(17, 24, 39, 0.04);
-        height: 100%;
-    }
-
-    .tm-formation-stat__label {
-        display: block;
-        font-size: 0.78rem;
-        letter-spacing: 0.04em;
-        text-transform: uppercase;
-        color: #6c757d;
-        margin-bottom: 0.35rem;
-    }
-
-    .tm-formation-stat__value {
-        font-size: 1.35rem;
-        font-weight: 700;
-        color: #25396f;
-    }
-
     .tm-formation-row__title {
         color: #25396f;
         font-weight: 700;
         text-decoration: none;
     }
-
     .tm-formation-row__meta {
         color: #7b8190;
         font-size: 0.85rem;
@@ -169,98 +22,64 @@
 
 {% block content %}
 <div class="page-heading">
-    <section class="tm-formation-hero p-4 p-lg-5 mb-4">
-        <div class="row g-4 align-items-center">
-            <div class="col-12 col-xl-6">
-                <div class="tm-section-titlebar mb-3">
-                    <span class="tm-section-titlebar__icon"><i class="bi bi-journal-text"></i></span>
-                    <div class="tm-section-titlebar__text">
-                        <h3>Formations</h3>
-                        <p>Gérez le catalogue de formations et leurs modules.</p>
-                    </div>
-                </div>
-                <div class="d-flex flex-wrap gap-2">
-                    <a href="{% url 'formation_create' %}" class="btn btn-primary">
-                        <i class="bi bi-folder-plus me-2"></i>Nouvelle formation
-                    </a>
-                    <a href="{% url 'formateurs' %}" class="btn btn-light-secondary">
-                        <i class="bi bi-person-badge me-2"></i>Voir les formateurs
-                    </a>
-                </div>
-            </div>
-            <div class="col-12 col-xl-6">
-                <div class="row g-3">
-                    <div class="col-6 col-md-4">
-                        <div class="tm-formation-stat">
-                            <span class="tm-formation-stat__label">Total Formations</span>
-                            <span class="tm-formation-stat__value">{{ stats.total }}</span>
-                        </div>
-                    </div>
-                    <div class="col-6 col-md-4">
-                        <div class="tm-formation-stat">
-                            <span class="tm-formation-stat__label">Actives</span>
-                            <span class="tm-formation-stat__value">{{ stats.active }}</span>
-                        </div>
-                    </div>
-                    <div class="6 col-md-4">
-                        <div class="tm-formation-stat">
-                            <span class="tm-formation-stat__label">Inactives</span>
-                            <span class="tm-formation-stat__value">{{ stats.inactive }}</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+    {% tm_hero title="Formations" subtitle="Gérez le catalogue des programmes pédagogiques et leurs modules d'enseignement." icon="bi bi-journal-text" actions=hero_actions stats=hero_stats theme="primary" %}
 
     <section class="section">
-        <div class="card tm-listing-card"> {# Applied premium card styling #}
-            <div class="card-header d-flex justify-content-between align-items-center"> {# Added d-flex for alignment #}
-                <h4 class="card-title mb-0">Catalogue des formations</h4>
+        <div class="card tm-listing-card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="card-title mb-0">Programmes disponibles</h4>
                 <a href="{% url 'formation_create' %}" class="btn btn-primary btn-sm">
-                    <i class="bi bi-folder-plus me-2"></i>Nouvelle formation
+                    <i class="bi bi-plus-circle me-2"></i>Nouveau programme
                 </a>
             </div>
             <div class="card-body">
                 {# Custom Search Input #}
-                <div class="custom-search-container">
-                    <input type="text" id="searchInput" class="custom-search-input form-control" placeholder="Recherche par nom, filière...">
+                <div class="custom-search-container mb-3">
+                    <input type="text" id="searchInput" class="custom-search-input form-control" placeholder="Recherche par nom, filière ou type...">
                 </div>
 
                 <div class="table-responsive">
-                    <table class="table table-striped" id="formationTable"> {# Changed ID to formationTable #}
+                    <table class="table table-hover" id="formationTable">
                         <thead>
                             <tr>
-                                <th style="width: 5%;">N°</th>
-                                <th style="width: 20%;">Nom</th>
-                                <th style="width: 10%;">Type</th>
-                                <th style="width: 10%;">Durée (mois)</th>
-                                <th style="width: 10%;">Durée (heures)</th>
-                                <th style="width: 15%;">Filière</th>
-                                <th style="width: 10%;">Coût</th>
-                                <th style="width: 15%;">Actions</th> {# New column for actions #}
+                                <th>Formation</th>
+                                <th>Type</th>
+                                <th>Durée</th>
+                                <th>Filière</th>
+                                <th>Coût</th>
+                                <th class="text-end">Actions</th>
                             </tr>
                         </thead>
                         <tbody id="formationTableBody">
                             {% if formation_list %}
                             {% for item in object_list %}
                             <tr>
-                                <td>{{ forloop.counter }}</td>
-                                <td><a href="{% url 'formation' item.pk %}" class="tm-formation-row__title">{{ item.nom }}</a></td> {# Link to detail page #}
+                                <td>
+                                    <a href="{% url 'formation' item.pk %}" class="tm-formation-row__title d-block">{{ item.nom }}</a>
+                                    <span class="tm-formation-row__meta">Réf. #FOR-{{ item.pk }}</span>
+                                </td>
                                 <td>
                                     {% if item.type_formation == 'qualifiante' %}
-                                        <span class="badge bg-primary">Qualifiante</span>
+                                        <span class="badge bg-light-primary text-primary">Qualifiante</span>
                                     {% else %}
-                                        <span class="badge bg-success">Continue</span>
+                                        <span class="badge bg-light-success text-success">Continue</span>
                                     {% endif %}
                                 </td>
-                                <td>{{ item.duree }} mois</td>
-                                <td>{{ item.duree_heures }} h</td>
-                                <td>{{ item.filiere.nom|default:"-" }}</td>
-                                <td>{{ item.cout }}</td>
                                 <td>
-                                    <div class="d-flex gap-2">
-                                        <a href="{% url 'formation_update' item.pk %}" class="btn btn-sm btn-outline-primary" title="Modifier">
+                                    <div class="fw-bold">{{ item.duree_heures }} h</div>
+                                    <div class="small text-muted">({{ item.duree }} mois)</div>
+                                </td>
+                                <td>
+                                    <div class="text-dark">{{ item.filiere.nom|default:"-" }}</div>
+                                    <div class="small text-muted">{{ item.filiere.service.nom|default:"" }}</div>
+                                </td>
+                                <td class="fw-bold text-primary">{{ item.cout|floatformat:0 }} USD</td>
+                                <td class="text-end">
+                                    <div class="d-flex gap-2 justify-content-end">
+                                        <a href="{% url 'formation' item.pk %}" class="btn btn-sm btn-outline-primary" title="Voir">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a href="{% url 'formation_update' item.pk %}" class="btn btn-sm btn-outline-info" title="Modifier">
                                             <i class="bi bi-pencil"></i>
                                         </a>
                                         <a href="{% url 'formation_delete' item.pk %}" class="btn btn-sm btn-outline-danger" title="Supprimer">
@@ -272,46 +91,36 @@
                             {% endfor %}
                             {% else %}
                             <tr id="noResultsRow">
-                                <td colspan="7" class="no-results-message">Aucune formation enregistrée.</td> {# Adjusted colspan #}
+                                <td colspan="6" class="text-center p-5 text-muted">Aucun programme enregistré.</td>
                             </tr>
                             {% endif %}
                         </tbody>
                     </table>
                 </div>
 
-                {# Custom Pagination (Django's pagination) #}
+                {% if is_paginated %}
                 <div class="d-flex justify-content-between align-items-center mt-3">
-                    <div class="dataTable-info">
+                    <div class="text-muted small">
                         Page {{ page_obj.number }} sur {{ page_obj.paginator.num_pages }}
                     </div>
-                    <ul class="pagination pagination-primary float-end">
-                        {% if page_obj.has_previous %}
-                        <li class="page-item pager"><a href="?page=1" class="page-link">&laquo;</a></li>
-                        <li class="page-item">
-                            <a href="?page={{ page_obj.previous_page_number }}" class="page-link">
-                                {{ page_obj.previous_page_number }}
-                            </a>
-                        </li>
-                        {% endif %}
-
-                        <li class="page-item active"><a href="#" class="page-link">{{ page_obj.number }}</a></li>
-
-                        {% if page_obj.has_next %}
-                        <li class=" page-item">
-                            <a href="?page={{ page_obj.next_page_number }}" class="page-link">
-                                {{ page_obj.next_page_number }}
-                            </a>
-                        </li>
-                        <li class="page-item pager"><a href="?page={{ page_obj.paginator.num_pages }}" class="page-link">&raquo;</a></li>
-                        {% endif %}
-                    </ul>
+                    <nav>
+                        <ul class="pagination pagination-primary pagination-sm mb-0">
+                            {% if page_obj.has_previous %}
+                            <li class="page-item"><a href="?page=1" class="page-link">&laquo;</a></li>
+                            {% endif %}
+                            <li class="page-item active"><a href="#" class="page-link">{{ page_obj.number }}</a></li>
+                            {% if page_obj.has_next %}
+                            <li class="page-item"><a href="?page={{ page_obj.next_page_number }}" class="page-link">{{ page_obj.next_page_number }}</a></li>
+                            <li class="page-item"><a href="?page={{ page_obj.paginator.num_pages }}" class="page-link">&raquo;</a></li>
+                            {% endif %}
+                        </ul>
+                    </nav>
                 </div>
-
+                {% endif %}
             </div>
         </div>
     </section>
 </div>
-
 {% endblock content %}
 
 {% block script %}
@@ -319,58 +128,17 @@
     document.addEventListener('DOMContentLoaded', function() {
         const searchInput = document.getElementById('searchInput');
         const tableBody = document.getElementById('formationTableBody');
-        const allRows = Array.from(tableBody.querySelectorAll('tr')); // Get all original rows
-        let noResultsRow = document.getElementById('noResultsRow');
-
-        // If noResultsRow doesn't exist initially, create a placeholder
-        if (!noResultsRow) {
-            noResultsRow = document.createElement('tr');
-            noResultsRow.id = 'noResultsRow';
-            const td = document.createElement('td');
-        td.colSpan = 7; // Adjusted colspan after removing 'Frais matériels'
-            td.className = 'no-results-message';
-            td.textContent = 'Aucune formation trouvée.';
-            noResultsRow.appendChild(td);
-            noResultsRow.style.display = 'none'; // Hide by default
-            tableBody.appendChild(noResultsRow);
-        }
+        const rows = Array.from(tableBody.querySelectorAll('tr'));
 
         function performSearch() {
-            const searchTerm = searchInput.value.toLowerCase().trim();
-            let resultsFound = false;
-
-            allRows.forEach(row => {
-                // Assuming Nom is at index 1, Filière is at index 4
-                const nomCell = row.cells[1];
-                const filiereCell = row.cells[4];
-
-                const nom = nomCell ? nomCell.textContent.toLowerCase() : '';
-                const filiere = filiereCell ? filiereCell.textContent.toLowerCase() : '';
-
-                if (nom.includes(searchTerm) || filiere.includes(searchTerm)) {
-                    row.style.display = ''; // Show row
-                    resultsFound = true;
-                } else {
-                    row.style.display = 'none'; // Hide row
-                }
+            const term = searchInput.value.toLowerCase().trim();
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(term) ? '' : 'none';
             });
-
-            if (resultsFound) {
-                noResultsRow.style.display = 'none';
-            } else {
-                noResultsRow.style.display = '';
-            }
         }
-
-        // Attach event listener for keyup on the search input
-        searchInput.addEventListener('keyup', performSearch);
-
-        // Initial display check for no results if the list is empty
-        if (allRows.length === 0 && !noResultsRow.textContent.includes('Aucune formation enregistrée.')) {
-             noResultsRow.style.display = '';
-             noResultsRow.textContent = 'Aucune formation enregistrée.';
-        } else if (allRows.length > 0) {
-            noResultsRow.style.display = 'none';
+        if (searchInput) {
+            searchInput.addEventListener('keyup', performSearch);
         }
     });
 </script>

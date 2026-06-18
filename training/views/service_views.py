@@ -40,14 +40,28 @@ class ServiceListView(ServicePermissionMixin, ListView):
         ctx['link'] = "services"
         
         # Calcul des statistiques globales
-        all_services = self.get_queryset() # Utiliser le queryset annoté
+        all_services = self.get_queryset()
+        total = all_services.count()
+        active = all_services.filter(active=True).count()
+        total_filieres = all_services.aggregate(total_filieres=Count('filieres', distinct=True))['total_filieres'] or 0
+        
         ctx['stats'] = {
-            'total': all_services.count(),
-            'active': all_services.filter(active=True).count(),
-            'inactive': all_services.filter(active=False).count(),
-            'total_filieres': all_services.aggregate(total_filieres=Count('filieres', distinct=True))['total_filieres'], # CHANGÉ 'filiere' à 'filieres'
-            'total_metiers': all_services.aggregate(total_metiers=Count('filieres__formations', distinct=True))['total_metiers'],
+            'total': total,
+            'active': active,
+            'inactive': total - active,
+            'total_filieres': total_filieres,
         }
+
+        ctx["hero_stats"] = [
+            {'label': 'Total Services', 'value': total},
+            {'label': 'Actifs', 'value': active},
+            {'label': 'Inactifs', 'value': total - active},
+            {'label': 'Filières', 'value': total_filieres},
+        ]
+
+        ctx["hero_actions"] = [
+            {'label': 'Nouveau service', 'url': reverse_lazy('service_create'), 'icon': 'bi bi-plus-circle'},
+        ]
         return ctx
 
 @method_decorator(login_required, name="dispatch")
@@ -65,6 +79,19 @@ class ServiceDetailView(ServicePermissionMixin, DetailView):
         
         ctx['filieres_associees'] = service.filieres.all().prefetch_related('formations').order_by('nom')
         ctx['titre'] = "Détail du service"
+        
+        # Stats pour le Hero
+        ctx["hero_stats"] = [
+            {'label': 'Filières', 'value': ctx['filieres_associees'].count()},
+            {'label': 'Statut', 'value': "Actif" if service.active else "Inactif"},
+            {'label': 'Date création', 'value': service.created_at.strftime("%d/%m/%Y")},
+            {'label': 'ID', 'value': f"#SRV-{service.pk}"},
+        ]
+        
+        ctx["hero_actions"] = [
+            {'label': 'Retour à la liste', 'url': reverse_lazy('services'), 'icon': 'bi bi-arrow-left', 'class': 'btn-light-secondary'},
+            {'label': 'Modifier', 'url': reverse_lazy('service_update', kwargs={'pk': service.pk}), 'icon': 'bi bi-pencil'},
+        ]
         return ctx
 
 @method_decorator(login_required, name="dispatch")

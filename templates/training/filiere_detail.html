@@ -1,19 +1,13 @@
 {% extends "base.html" %}
 {% load static %}
+{% load tm_tags %}
 
 {% block title %}Détail Filière{% endblock title %}
 {% block page_header %}Détail de la Filière{% endblock page_header %}
 
 {% block style %}
+<link rel="stylesheet" href="{% static 'assets/css/training-manager.css' %}">
 <style>
-    .tm-filiere-detail-hero {
-        background:
-            radial-gradient(circle at top right, rgba(67, 94, 190, 0.18), transparent 35%),
-            linear-gradient(135deg, #f7f8fc 0%, #eef3ff 100%);
-        border: 1px solid rgba(67, 94, 190, 0.12);
-        border-radius: 1.25rem;
-    }
-
     .tm-filiere-detail-card {
         border: 1px solid rgba(15, 23, 42, 0.07);
         border-radius: 1rem;
@@ -53,27 +47,7 @@
 
 {% block content %}
 <div class="page-heading">
-    <section class="tm-filiere-detail-hero p-4 p-lg-5 mb-4">
-        <div class="row g-4 align-items-center">
-            <div class="col-12 col-lg-8">
-                <div class="tm-section-titlebar">
-                    <span class="tm-section-titlebar__icon"><i class="bi bi-signpost-2"></i></span>
-                    <div class="tm-section-titlebar__text">
-                        <h3>{{ filiere.nom }}</h3>
-                        <p>Détails de la filière (Service: {{ filiere.service.nom }})</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-12 col-lg-4 d-flex justify-content-lg-end">
-                <a href="{% url 'filieres' %}" class="btn btn-light-secondary me-2">
-                    <i class="bi bi-arrow-left me-2"></i>Retour à la liste
-                </a>
-                <a href="{% url 'filiere_update' filiere.pk %}" class="btn btn-primary">
-                    <i class="bi bi-pencil me-2"></i>Modifier
-                </a>
-            </div>
-        </div>
-    </section>
+    {% tm_hero title=filiere.nom subtitle="Détails de la filière et métiers associés." icon="bi bi-signpost-2" actions=hero_actions theme="primary" %}
 
     <section class="section px-3 px-md-4">
         <div class="row g-3">

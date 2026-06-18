@@ -12,7 +12,7 @@
             <h4 class="card-title">Confirmer la suppression de la séance</h4>
         </div>
         <div class="card-body">
-            <p>Êtes-vous sûr de vouloir supprimer la séance du <strong>{{ object.session_date }}</strong> pour le module <strong>{{ object.module_progress.module.titre }}</strong>, animée par <strong>{{ object.module_progress.formateur.get_full_name }}</strong> dans l'action <strong>{{ object.module_progress.action.description }}</strong> ?</p>
+            <p>Êtes-vous sûr de vouloir supprimer la séance prévue le <strong>{{ object.planned_date }}</strong> pour le module <strong>{{ object.module_progress.module.titre }}</strong>, animée par <strong>{{ object.module_progress.formateur.get_full_name }}</strong> dans l'action <strong>{{ object.module_progress.action.description }}</strong> ?</p>
 
             <form method="post">
                 {% csrf_token %}

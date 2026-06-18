@@ -1,29 +1,17 @@
 {% extends "base.html" %}
 {% load static %}
+{% load tm_tags %}
 
 {% block title %}Confirmer la suppression du paiement{% endblock title %}
-{% block page_header %}Confirmer la suppression du paiement{% endblock page_header %} {# Le titre seul reste ici #}
+{% block page_header %}Confirmer la suppression du paiement{% endblock page_header %}
+
+{% block style %}
+<link rel="stylesheet" href="{% static 'assets/css/training-manager.css' %}">
+{% endblock style %}
 
 {% block content %}
 <div class="page-heading">
-    <section class="tm-stagiaire-hero p-4 p-lg-5 mb-4"> {# Section hero pour la confirmation de suppression #}
-        <div class="d-flex justify-content-end mb-3">
-            <a href="{% url 'paiements' %}" class="btn btn-secondary btn-xs">
-                <i class="bi bi-arrow-left"></i> Retour à la liste
-            </a>
-        </div>
-        <div class="row g-4 align-items-center">
-            <div class="col-12">
-                <div class="tm-section-titlebar mb-3">
-                    <span class="tm-section-titlebar__icon"><i class="bi bi-trash"></i></span> {# Icône pour la suppression #}
-                    <div class="tm-section-titlebar__text">
-                        <h3>Confirmer la suppression du paiement</h3>
-                        <p>Cette action est irréversible.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+    {% tm_hero title="Supprimer le paiement" subtitle="Cette action est irréversible." icon="bi bi-trash" theme="danger" %}
 
     <section class="section">
         <div class="card tm-detail-card"> {# Utilisation de tm-detail-card pour la cohérence #}

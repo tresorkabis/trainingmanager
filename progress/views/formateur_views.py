@@ -39,12 +39,26 @@ class FormateurListView(FormateurPermissionMixin, ListView):
         ctx['link'] = "formateurs"
         
         # Calcul des statistiques globales
-        all_formateurs = self.get_queryset() # Utiliser le queryset annoté
+        all_formateurs = self.get_queryset()
+        total = all_formateurs.count()
+        active = all_formateurs.filter(active=True).count()
+        inactive = total - active
+
         ctx['stats'] = {
-            'total': all_formateurs.count(),
-            'active': all_formateurs.filter(active=True).count(),
-            'inactive': all_formateurs.filter(active=False).count(),
+            'total': total,
+            'active': active,
+            'inactive': inactive,
         }
+
+        ctx["hero_stats"] = [
+            {'label': 'Total Formateurs', 'value': total},
+            {'label': 'Actifs', 'value': active},
+            {'label': 'Inactifs', 'value': inactive},
+        ]
+
+        ctx["hero_actions"] = [
+            {'label': 'Nouveau formateur', 'url': reverse_lazy('formateur_create'), 'icon': 'bi bi-person-plus'},
+        ]
         return ctx
 
 @method_decorator(login_required, name="dispatch")
@@ -65,6 +79,17 @@ class FormateurDetailView(FormateurPermissionMixin, DetailView): # Nouvelle vue 
         ctx["actions_assignees"] = formateur.actions.all().select_related("formation").order_by("-date_debut")
         ctx["performances"] = formateur.performances.all().select_related("action", "module").order_by("-action__date_debut")
         ctx['titre'] = "Détail du formateur"
+
+        ctx["hero_stats"] = [
+            {'label': 'Modules', 'value': ctx["modules_dispenses"].count()},
+            {'label': 'Actions', 'value': ctx["actions_assignees"].count()},
+            {'label': 'Spécialité', 'value': formateur.specialite or "N/A"},
+        ]
+
+        ctx["hero_actions"] = [
+            {'label': 'Retour', 'url': reverse_lazy('formateurs'), 'icon': 'bi bi-arrow-left', 'class': 'btn-light-secondary'},
+            {'label': 'Modifier', 'url': reverse_lazy('formateur_update', kwargs={'pk': formateur.pk}), 'icon': 'bi bi-pencil'},
+        ]
         return ctx
 
 @method_decorator(login_required, name="dispatch")

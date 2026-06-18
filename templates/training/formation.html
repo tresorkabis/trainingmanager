@@ -1,302 +1,176 @@
 {% extends "base.html" %}
 {% load static %}
-{% block title %} Formations {% endblock title %}
-{% block page_header %}{% if object and object.id %}{{ object.nom }}{% else %}{{ titre|default:"Formations" }}{% endif %}{% endblock page_header %}
+{% load tm_tags %}
+
+{% block title %}Détail Formation - {{ object.nom }}{% endblock title %}
+{% block page_header %}Détail de la Formation{% endblock page_header %}
+
+{% block style %}
+<link rel="stylesheet" href="{% static 'assets/css/training-manager.css' %}">
+<style>
+    .tm-detail-item {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 0.75rem;
+        padding: 1rem;
+        height: 100%;
+    }
+    .tm-detail-item__label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.025em;
+        color: #64748b;
+        display: block;
+        margin-bottom: 0.25rem;
+    }
+    .tm-detail-item__value {
+        font-weight: 700;
+        color: #1e293b;
+        display: block;
+    }
+</style>
+{% endblock style %}
 
 {% block content %}
 <div class="page-heading">
-    <div class="page-title">
-        <div class="row">
-            <div class="col-12 col-md-6 order-md-1 order-last">
-                <h3><a href="{% url 'formations' %}">Formations</a></h3>
-                <p class="text-subtitle text-muted">{{ titre }}</p>
-            </div>
-            <div class="col-12 col-md-6 order-md-2 order-first">
-                <nav aria-label="breadcrumb" class="breadcrumb-header float-start float-lg-end">
-                    <ol class="breadcrumb">
-                        <li class="breadcrumb-item">Formations</li>
-                        <li class="breadcrumb-item active" aria-current="page">{{ titre }}</li>
-                    </ol>
-                </nav>
-            </div>
-        </div>
-    </div>
-    <section class="section">
-        <div class="col-md-12 col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h4 class="card-title">Details</h4>
-                </div>
-                <div class="card-content">
-                    <div class="card-body">
-                        <form id="formation-form" class="form form-horizontal" method="post" action="#">
-                            {% csrf_token %}
-                            <div class="form-body">
-                                <div class="row">
-                                    <div class="col-6">
-                                        <div class="row">
-                                            <div class="col-4">
-                                                <label for="nom">Nom</label>
-                                            </div>
-                                            <div class="col-8 form-group">
-                                                <input type="text" id="nom" class="form-control" name="nom"
-                                                    placeholder="Nom de la formation" {% if object.id %}
-                                                    value="{{object.nom}}" disabled {% endif %}>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-6">
-                                        <div class="row">
-                                            <div class="col-4">
-                                                <label for="filiere">Filière</label>
-                                            </div>
-                                            <div class="col-8 form-group">
-                                                <select {% if object.id %} disabled {% endif %} name="filiere"
-                                                    id="filiere" class="form-control">
-                                                    <option value="">Selectionner une filère</option>
-                                                    {% for item in filieres %}
-                                                    {% if object and item.id == object.filiere.id %}
-                                                    <option value="{{ item.id }}" selected>
-                                                        {{ item.nom }}
-                                                    </option>
-                                                    {% else %}
-                                                    <option value="{{ item.id }}">
-                                                        {{ item.nom }}
-                                                    </option>
-                                                    {% endif %}
-                                                    {% endfor %}
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
+    {% tm_hero title=object.nom subtitle="Détails du programme pédagogique, modules et sessions planifiées." icon="bi bi-journal-text" actions=hero_actions stats=hero_stats theme="primary" %}
 
-                                    <div class="col-6">
-                                        <div class="row">
-                                            <div class="col-4">
-                                                <label for="type_formation">Type de formation</label>
-                                            </div>
-                                            <div class="col-8 form-group">
-                                                <select {% if object.id %} disabled {% endif %} name="type_formation" id="type_formation" class="form-control">
-                                                    <option value="qualifiante" {% if object and object.type_formation == 'qualifiante' %} selected {% endif %}>Qualifiante</option>
-                                                    <option value="continue" {% if object and object.type_formation == 'continue' %} selected {% endif %}>Continue</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-6">
-                                        <div class="row">
-                                            <div class="col-4">
-                                                <label for="duree">Durée en mois</label>
-                                            </div>
-                                            <div class="col-8 form-group">
-                                                <input type="number" id="duree" class="form-control" name="duree"
-                                                    placeholder="Durée en mois" {% if object.id %}
-                                                    value="{{ object.duree }}" disabled {% endif %}>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-6">
-                                        <div class="row">
-                                            <div class="col-4">
-                                                <label for="duree_heures">Durée en heures</label>
-                                            </div>
-                                            <div class="col-8 form-group">
-                                                <input type="number" id="duree_heures" class="form-control" name="duree_heures"
-                                                    placeholder="Calculée automatiquement" {% if object.id %}
-                                                    value="{{ object.duree_heures }}" disabled {% else %}
-                                                    value="0" disabled {# Set to 0 and disabled for new forms #}
-                                                    {% endif %}>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-6">
-                                        <div class="row">
-                                            <div class="col-4">
-                                                <label for="cout">Coût</label>
-                                            </div>
-                                            <div class="col-8 form-group">
-                                                <input {% if object.id %} value="{{ object.cout }}" disabled
-                                                    {% endif %} type="number" step="0.01" id="cout" class="form-control"
-                                                    name="cout" placeholder="Coût de la formation">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    {# Nouveau champ: Frais de participation #}
-                                    <div class="col-6">
-                                        <div class="row">
-                                            <div class="col-4">
-                                                <label for="frais_participation">Frais de participation</label>
-                                            </div>
-                                            <div class="col-8 form-group">
-                                                <input {% if object.id %} value="{{ object.frais_participation }}" disabled
-                                                    {% endif %} type="number" step="0.01" id="frais_participation" class="form-control"
-                                                    name="frais_participation" placeholder="Frais de participation">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    {# Nouveau champ: Frais du jury #}
-                                    <div class="col-6">
-                                        <div class="row">
-                                            <div class="col-4">
-                                                <label for="frais_jury">Frais du jury</label>
-                                            </div>
-                                            <div class="col-8 form-group">
-                                                <input {% if object.id %} value="{{ object.frais_jury }}" disabled
-                                                    {% endif %} type="number" step="0.01" id="frais_jury" class="form-control"
-                                                    name="frais_jury" placeholder="Frais du jury">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    {# Champ existant renommé: Frais matériels #}
-                                    <div class="col-6">
-                                        <div class="row">
-                                            <div class="col-4">
-                                                <label for="frais_materiels">Frais matériels</label>
-                                            </div>
-                                            <div class="col-8 form-group">
-                                                <input {% if object.id %} value="{{ object.frais_materiels }}" disabled
-                                                    {% endif %} type="number" step="0.01" id="frais_materiels" class="form-control"
-                                                    name="frais_materiels" placeholder="Frais matériels">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-sm-12 d-flex justify-content-end">
-                                        {% if not object.id %}
-                                        <button type="submit" class="btn btn-primary me-1 mb-1">Envoyer</button>
-                                        <button type="reset" class="btn btn-light-secondary me-1 mb-1">Annuler</button>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                </div>
+    <section class="section">
+        <div class="card tm-detail-card">
+            <div class="card-header">
+                <ul class="nav nav-tabs card-header-tabs" id="formationTab" role="tablist">
+                    <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#details">Configuration</a></li>
+                    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#modules">Modules ({{ object.modules.count }})</a></li>
+                    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#actions">Sessions ({{ object.actions.count }})</a></li>
+                </ul>
             </div>
-            <div class="col-md-12 col-12 mt-3">
-                <div class="card">
-                    <div class="card-header">
-                        <h4 class="card-title">Modules de la formation</h4>
-                    </div>
-                    <div class="card-content">
-                        <div class="card-body">
-                            {% if object.id %}
-                                {% if object.modules.all %}
-                                <div class="table-responsive">
-                                    <table class="table table-striped">
-                                        <thead>
-                                            <tr>
-                                                <th>Ordre</th>
-                                                <th>Module</th>
-                                                <th>Description</th>
-                                                <th>Durée (heures)</th>
-                                                <th>Formateur</th> {# New column for Formateur #}
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {% for module in object.modules.all %}
-                                            <tr>
-                                                <td>{{ module.ordre }}</td>
-                                                <td>{{ module.titre }}</td>
-                                                <td>{{ module.description|default:"-" }}</td>
-                                                <td>{{ module.duree_heures }}</td>
-                                                <td>{{ module.formateur|default:"Non assigné" }}</td> {# Display Formateur #}
-                                            </tr>
-                                            {% endfor %}
-                                        </tbody>
-                                    </table>
-                                </div>
-                                {% else %}
-                                <p class="text-muted mb-0">Aucun module n'is yet rattaché à cette formation.</p>
-                                {% endif %}
-                            {% else %}
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <p class="text-muted mb-0">Ajoutez les modules qui composent cette formation.</p>
-                                <button type="button" id="add-module-row" class="btn btn-primary btn-sm">Ajouter un module</button>
-                            </div>
-                            <div id="modules-container">
-                                <div class="module-row border rounded p-3 mb-3">
-                                    <div class="row g-3">
-                                        <div class="col-md-3"> {# Adjusted width #}
-                                            <label class="form-label">Titre du module</label>
-                                            <input type="text" class="form-control" name="module_titre[]" form="formation-form" placeholder="Ex: Introduction">
-                                        </div>
-                                        <div class="col-md-4"> {# Adjusted width #}
-                                            <label class="form-label">Description</label>
-                                            <input type="text" class="form-control" name="module_description[]" form="formation-form" placeholder="Résumé du module">
-                                        </div>
-                                        <div class="col-md-2"> {# Adjusted width #}
-                                            <label class="form-label">Heures</label>
-                                            <input type="number" class="form-control" name="module_duree_heures[]" form="formation-form" min="0" placeholder="0">
-                                        </div>
-                                        <div class="col-md-2"> {# New column for Formateur #}
-                                            <label class="form-label">Formateur</label>
-                                            <select name="module_formateur[]" form="formation-form" class="form-control">
-                                                <option value="">Sélectionner un formateur</option>
-                                                {% for formateur in formateurs %}
-                                                <option value="{{ formateur.id }}">{{ formateur.nom }} {{ formateur.postnom }}</option>
-                                                {% endfor %}
-                                            </select>
-                                        </div>
-                                        <div class="col-md-1 d-flex align-items-end">
-                                            <button type="button" class="btn btn-light-secondary remove-module-row">X</button>
-                                        </div>
-                                    </div>
+            <div class="card-body">
+                <div class="tab-content">
+                    <!-- Details Tab -->
+                    <div class="tab-pane fade show active" id="details">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="tm-detail-item">
+                                    <span class="tm-detail-item__label">Filière</span>
+                                    <span class="tm-detail-item__value">{{ object.filiere.nom|default:"-" }}</span>
                                 </div>
                             </div>
-                            {% endif %}
+                            <div class="col-md-3">
+                                <div class="tm-detail-item">
+                                    <span class="tm-detail-item__label">Type</span>
+                                    <span class="tm-detail-item__value text-capitalize">{{ object.get_type_formation_display }}</span>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="tm-detail-item">
+                                    <span class="tm-detail-item__label">Durée (Mois)</span>
+                                    <span class="tm-detail-item__value">{{ object.duree }}</span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="tm-detail-item">
+                                    <span class="tm-detail-item__label">Coût Principal</span>
+                                    <span class="tm-detail-item__value text-primary">{{ object.cout|floatformat:0 }} USD</span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="tm-detail-item">
+                                    <span class="tm-detail-item__label">Participation</span>
+                                    <span class="tm-detail-item__value">{{ object.frais_participation|floatformat:0 }} USD</span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="tm-detail-item">
+                                    <span class="tm-detail-item__label">Jury / Matériels</span>
+                                    <span class="tm-detail-item__value">{{ object.frais_jury|add:object.frais_materiels|floatformat:0 }} USD</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </div>
 
-            {# Section pour afficher les actions de formation #}
-            <div class="col-md-12 col-12 mt-3">
-                <div class="card">
-                    <div class="card-header">
-                        <h4 class="card-title">Actions de formation</h4>
-                    </div>
-                    <div class="card-content">
-                        <div class="card-body">
-                            {% if object.id %}
-                                {% if actions %}
-                                <div class="table-responsive">
-                                    <table class="table table-striped">
-                                        <thead>
-                                            <tr>
-                                                <th>Description</th>
-                                                <th>Date de début prévue</th>
-                                                <th>Date de fin prévue</th>
-                                                <th>Statut</th>
-                                                <th>Lieu</th>
-                                                <th>Formateur</th>
-                                                <th>Évaluateur</th>
-                                                <th>Actions</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {% for action in actions %}
-                                            <tr>
-                                                <td>{{ action.description }}</td>
-                                                <td>{{ action.date_debut_prevue|date:"d/m/Y" }}</td>
-                                                <td>{{ action.date_fin_prevue|date:"d/m/Y" }}</td>
-                                                <td>{{ action.get_statut_display }}</td>
-                                                <td>{{ action.lieu }}</td>
-                                                <td>{{ action.formateur.nom }} {{ action.formateur.postnom }}</td>
-                                                <td>{{ action.evaluateur.get_full_name }}</td>
-                                                <td>
-                                                    <a href="{% url 'action' action.pk %}" class="btn btn-sm btn-info">Voir</a>
-                                                </td>
-                                            </tr>
+                    <!-- Modules Tab -->
+                    <div class="tab-pane fade" id="modules">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 50px;">#</th>
+                                        <th>Module</th>
+                                        <th>Durée</th>
+                                        <th>Formateurs autorisés</th>
+                                        <th class="text-end">Sujets</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for m in object.modules.all %}
+                                    <tr>
+                                        <td><span class="badge bg-light-secondary text-dark">{{ m.ordre }}</span></td>
+                                        <td>
+                                            <div class="fw-bold">{{ m.titre }}</div>
+                                            <div class="small text-muted text-truncate" style="max-width: 300px;">{{ m.description|default:"" }}</div>
+                                        </td>
+                                        <td>{{ m.duree_heures }} h</td>
+                                        <td>
+                                            {% for f in m.formateurs.all %}
+                                                <span class="badge bg-light-primary text-primary">{{ f.get_full_name }}</span>
+                                            {% empty %}
+                                                <span class="text-muted small italic">Aucun formateur spécifié</span>
                                             {% endfor %}
-                                        </tbody>
-                                    </table>
-                                </div>
-                                {% else %}
-                                <p class="text-muted mb-0">Aucune action de formation n'est rattachée à cette formation.</p>
-                                {% endif %}
-                            {% else %}
-                                <p class="text-muted mb-0">Les actions de formation seront affichées une fois la formation créée.</p>
-                            {% endif %}
+                                        </td>
+                                        <td class="text-end">
+                                            <a href="{% url 'module_subjects_manage' m.pk %}" class="btn btn-sm btn-outline-info" title="Gérer les sujets">
+                                                <i class="bi bi-list-check"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% if m.subjects.all %}
+                                    <tr class="table-light">
+                                        <td></td>
+                                        <td colspan="4">
+                                            <div class="small">
+                                                <strong class="text-muted me-2">Sujets :</strong>
+                                                {% for s in m.subjects.all %}
+                                                    <span class="badge bg-white text-dark border me-1">{{ s.titre }} ({{ s.nombre_seances }}s)</span>
+                                                {% endfor %}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endif %}
+                                    {% empty %}
+                                    <tr><td colspan="4" class="text-center text-muted p-4">Aucun module configuré.</td></tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Actions Tab -->
+                    <div class="tab-pane fade" id="actions">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Session</th>
+                                        <th>Période</th>
+                                        <th>Statut</th>
+                                        <th>Inscrits</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for a in actions %}
+                                    <tr>
+                                        <td class="fw-bold">{{ a.description }}</td>
+                                        <td>{{ a.date_debut|date:"d/m/Y" }} au {{ a.date_fin|date:"d/m/Y" }}</td>
+                                        <td><span class="badge bg-light-primary text-primary">{{ a.statut }}</span></td>
+                                        <td><span class="badge rounded-pill bg-info">{{ a.detailaction_set.count }}</span></td>
+                                        <td><a href="{% url 'action' a.pk %}" class="btn btn-sm btn-light-primary">Voir</a></td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr><td colspan="5" class="text-center text-muted p-4">Aucune session planifiée pour cette formation.</td></tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -305,47 +179,3 @@
     </section>
 </div>
 {% endblock content %}
-{% block script %}
-<script>
-    const modulesContainer = document.getElementById('modules-container');
-    const addModuleRowButton = document.getElementById('add-module-row');
-
-    if (modulesContainer && addModuleRowButton) {
-        addModuleRowButton.addEventListener('click', function () {
-            const firstRow = modulesContainer.querySelector('.module-row');
-            const clonedRow = firstRow.cloneNode(true);
-
-            clonedRow.querySelectorAll('input').forEach((field) => {
-                field.value = '';
-            });
-            // Reset selected option for formateur dropdown in cloned row
-            const formateurSelect = clonedRow.querySelector('select[name="module_formateur[]"]');
-            if (formateurSelect) {
-                formateurSelect.value = '';
-            }
-
-            modulesContainer.appendChild(clonedRow);
-        });
-
-        modulesContainer.addEventListener('click', function (event) {
-            if (!event.target.classList.contains('remove-module-row')) {
-                return;
-            }
-
-            const rows = modulesContainer.querySelectorAll('.module-row');
-            if (rows.length === 1) {
-                rows[0].querySelectorAll('input').forEach((field) => {
-                    field.value = '';
-                });
-                const formateurSelect = rows[0].querySelector('select[name="module_formateur[]']");
-                if (formateurSelect) {
-                    formateurSelect.value = '';
-                }
-                return;
-            }
-
-            event.target.closest('.module-row').remove();
-        });
-    }
-</script>
-{% endblock script %}

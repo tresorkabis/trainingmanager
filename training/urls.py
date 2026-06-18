@@ -2,7 +2,7 @@ from django.urls import path
 from training.views.home_views import HomeView
 from training.views.filiere_views import FiliereListView, FiliereDetailView, FiliereCreateUpdateView, FiliereDeleteView
 from training.views.service_views import ServiceListView, ServiceDetailView, ServiceCreateUpdateView, ServiceDeleteView
-from training.views.formation_views import FormationListView, FormationDetailView, FormationCreateUpdateView, FormationDeleteView # Import Formation views
+from training.views.formation_views import FormationListView, FormationDetailView, FormationCreateUpdateView, FormationDeleteView, ModuleSubjectManageView # Import ModuleSubjectManageView
 
 
 urlpatterns = [
@@ -36,5 +36,7 @@ urlpatterns = [
 
     path("formations/<int:pk>/delete", FormationDeleteView.as_view(), name="formation_delete"),
     path("formations/<int:pk>/delete", FormationDeleteView.as_view(), name="metier_delete"),
+
+    path("modules/<int:pk>/subjects", ModuleSubjectManageView.as_view(), name="module_subjects_manage"),
 
 ]

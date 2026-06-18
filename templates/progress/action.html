@@ -1,181 +1,217 @@
 {% extends "base.html" %}
 {% load static %}
-{% load widget_tweaks %} {# Ensure widget_tweaks is loaded for form field styling #}
+{% load widget_tweaks %}
+{% load tm_tags %}
 
-{% block title %}{{ titre }} une Formation{% endblock title %}
-{% block page_header %}{{ titre }} une Action de Formation{% endblock page_header %}
+{% block title %}{{ titre }} une action de formation{% endblock title %}
+{% block page_header %}{{ titre }} une action de formation{% endblock page_header %}
+
 {% block style %}
-<style>
-    .tm-action-form-hero {
-        background:
-            radial-gradient(circle at top right, rgba(67, 94, 190, 0.18), transparent 35%),
-            linear-gradient(135deg, #f7f8fc 0%, #eef3ff 100%);
-        border: 1px solid rgba(67, 94, 190, 0.12);
-        border-radius: 1.25rem;
-    }
-
-    .tm-action-form-card {
-        border: 1px solid rgba(15, 23, 42, 0.07);
-        border-radius: 1rem;
-        box-shadow: 0 16px 32px rgba(15, 23, 42, 0.05);
-    }
-
-    .tm-module-card {
-        background: #ffffff;
-        border: 1px solid rgba(15, 23, 42, 0.08);
-        border-radius: 0.75rem;
-        transition: all 0.2s ease;
-    }
-    .tm-module-card:hover {
-        border-color: rgba(67, 94, 190, 0.3);
-    }
-    .tm-module-badge {
-        font-size: 0.75rem;
-        padding: 0.25rem 0.75rem;
-        border-radius: 2rem;
-        background: rgba(67, 94, 190, 0.08);
-        color: #435ebe;
-        font-weight: 600;
-    }
-</style>
+<link rel="stylesheet" href="{% static 'assets/css/training-manager.css' %}">
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 {% endblock style %}
 
 {% block content %}
 <div class="page-heading">
-    <section class="tm-action-form-hero p-4 p-lg-5 mb-4">
-        <div class="row g-4 align-items-center">
-            <div class="col-12 col-lg-8">
-                <div class="tm-section-titlebar">
-                    <span class="tm-section-titlebar__icon"><i class="bi bi-clipboard-check"></i></span>
-                    <div class="tm-section-titlebar__text">
-                        <h3>{{ titre }} une action</h3>
-                        <p>Renseignez une session de formation avec ses dates, sa formation de rattachement et son libellé opérationnel.</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-12 col-lg-4 d-flex justify-content-lg-end">
-                <a href="{% url 'actions' %}" class="btn btn-light-secondary">
-                    <i class="bi bi-arrow-left me-2"></i>Retour aux actions
-                </a>
-            </div>
-        </div>
-    </section>
+    {% tm_hero title=titre|add:" une action" subtitle="Renseignez une session de formation avec ses dates, sa formation de rattachement et son libellé opérationnel." icon="bi bi-clipboard-check" actions=hero_actions stats=hero_stats theme="primary" %}
 
     <section class="section">
-        <div class="card tm-action-form-card">
-            <div class="card-header">
-                <h4 class="card-title mb-1">Paramètres de l'action</h4>
-                <p class="text-muted mb-0">Les champs ci-dessous permettent de planifier précisément l'action de formation.</p>
-            </div>
-            <div class="card-body">
-                {% if form_errors %}
-                <div class="alert alert-danger">
-                    {% for error in form_errors %}
-                    <p>{{ error }}</p>
-                    {% endfor %}
-                </div>
-                {% endif %}
-                {% if form.non_field_errors %}
-                <div class="alert alert-danger">
-                    {% for error in form.non_field_errors %}
-                    <p>{{ error }}</p>
-                    {% endfor %}
-                </div>
-                {% endif %}
-
-                <form action="" method="post" class="form">
-                    {% csrf_token %}
-                    <div class="row g-4">
-                        <div class="col-12 col-lg-6">
-                            <div class="form-group">
-                                <label for="description">Description</label>
-                                <input
-                                    type="text"
-                                    id="description"
-                                    class="form-control"
-                                    name="description"
-                                    value="{% if submitted.description %}{{ submitted.description }}{% else %}{{ object.description|default:'' }}{% endif %}"
-                                    placeholder="Ex: Vague de septembre - Electricité"
-                                    required
-                                >
-                                {% for error in form.description.errors %}
-                                    <div class="invalid-feedback d-block">{{ error }}</div>
+        <form action="" method="post" class="form">
+            {% csrf_token %}
+            <div class="row g-4">
+                <div class="col-12 col-lg-7">
+                    <div class="card tm-detail-card h-100">
+                        <div class="card-header border-bottom mb-3">
+                            <h4 class="card-title mb-0">Paramètres de l'action</h4>
+                        </div>
+                        <div class="card-body">
+                            {% if form_errors %}
+                            <div class="alert alert-danger">
+                                {% for error in form_errors %}
+                                <p class="mb-0">{{ error }}</p>
                                 {% endfor %}
                             </div>
-                            <div class="form-group">
-                                <label for="formation">Formation associée</label>
-                                <select id="formation" class="form-select" name="formation" required>
-                                    <option value="">Sélectionnez une formation</option>
-                                    {% for formation in formations %}
-                                    <option
-                                        value="{{ formation.pk }}"
-                                        {% if submitted.formation == formation.pk|stringformat:"s" or object.formation.pk == formation.pk %}selected{% endif %}
-                                    >
-                                        {{ formation.nom }}{% if formation.filiere %} - {{ formation.filiere.nom }}{% endif %}
-                                    </option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            {# Removed the old form-group for Action.formateurs #}
-                        </div>
-                        <div class="col-12 col-lg-6">
-                            <div class="form-group">
-                                <label for="date_debut">Date de début</label>
-                                <input
-                                    type="date"
-                                    id="date_debut"
-                                    class="form-control"
-                                    name="date_debut"
-                                    value="{% if submitted.date_debut %}{{ submitted.date_debut }}{% else %}{{ object.date_debut|date:'Y-m-d'|default:'' }}{% endif %}"
-                                    min="{{ today|date:'Y-m-d' }}"
-                                    required
-                                >
-                                {% for error in form.date_debut.errors %}
-                                    <div class="invalid-feedback d-block">{{ error }}</div>
-                                {% endfor %}
-                            </div>
-                            <div class="form-group">
-                                <label for="date_fin">Date de fin</label>
-                                <input
-                                    type="date"
-                                    id="date_fin"
-                                    class="form-control"
-                                    name="date_fin"
-                                    value="{% if submitted.date_fin %}{{ submitted.date_fin }}{% else %}{{ object.date_fin|date:'Y-m-d'|default:'' }}{% endif %}"
-                                    required
-                                >
-                            </div>
-                            {% for error in form.date_fin.errors %}
-                                <div class="invalid-feedback d-block">{{ error }}</div>
-                            {% endfor %}
-                        </div>
-                    </div>
+                            {% endif %}
 
-                    {# New section for module-specific formateur assignment #}
-                    <div class="col-12 mt-4" id="module-formateur-assignment-section">
-                        <h4>Assignation des formateurs aux modules</h4>
-                        <p class="text-muted mb-3">Sélectionnez les formateurs pour chaque module de la formation choisie.</p>
-                        <div id="modules-assignment-container">
-                            {# Modules and their formateur selects will be rendered here by JavaScript #}
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <div class="form-group mb-3">
+                                        <label for="description" class="form-label fw-bold">Description de l'action</label>
+                                        <input
+                                            type="text"
+                                            id="description"
+                                            class="form-control form-control-lg"
+                                            name="description"
+                                            value="{% if submitted.description %}{{ submitted.description }}{% else %}{{ object.description|default:'' }}{% endif %}"
+                                            placeholder="Ex: Vague de septembre - Electricité"
+                                            required
+                                        >
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-group mb-3">
+                                        <label for="formation" class="form-label fw-bold">Formation rattachée</label>
+                                        <select id="formation" class="form-select" name="formation" required>
+                                            <option value="">Sélectionnez une formation</option>
+                                            {% for formation in formations %}
+                                            <option
+                                                value="{{ formation.pk }}"
+                                                {% if submitted.formation == formation.pk|stringformat:"s" or object.formation.pk == formation.pk %}selected{% endif %}
+                                            >
+                                                {{ formation.nom }}{% if formation.filiere %} - {{ formation.filiere.nom }}{% endif %}
+                                            </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label for="date_debut" class="form-label fw-bold">Date de début</label>
+                                        <input
+                                            type="date"
+                                            id="date_debut"
+                                            class="form-control"
+                                            name="date_debut"
+                                            value="{% if submitted.date_debut %}{{ submitted.date_debut }}{% else %}{{ object.date_debut|date:'Y-m-d'|default:'' }}{% endif %}"
+                                            required
+                                        >
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label for="date_fin" class="form-label fw-bold">Date de fin</label>
+                                        <input
+                                            type="date"
+                                            id="date_fin"
+                                            class="form-control"
+                                            name="date_fin"
+                                            value="{% if submitted.date_fin %}{{ submitted.date_fin }}{% else %}{{ object.date_fin|date:'Y-m-d'|default:'' }}{% endif %}"
+                                            required
+                                        >
+                                    </div>
+                                </div>
+                                <div class="col-12" id="duration-info-container" style="display: none;">
+                                    <div class="alert alert-info py-2 d-flex align-items-center mb-0">
+                                        <i class="bi bi-calendar-range me-2"></i>
+                                        <span>Durée estimée : <strong id="duration-days">0</strong> jours</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mt-4 pt-3 border-top">
+                                <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-3">
+                                    <div>
+                                        <h5 class="mb-1">Jours et heures de cours</h5>
+                                        <p class="text-muted small mb-0">Ajoutez un ou plusieurs créneaux. Ces créneaux serviront à préremplir la planification des séances.</p>
+                                    </div>
+                                    <button type="button" class="btn btn-outline-primary btn-sm" id="add-course-schedule">
+                                        <i class="bi bi-plus-circle me-1"></i> Ajouter un créneau
+                                    </button>
+                                </div>
+                                <div id="course-schedules-container">
+                                    {% with schedules=submitted_schedules|default:action_schedules %}
+                                        {% if schedules %}
+                                            {% for schedule in schedules %}
+                                                <div class="row g-2 align-items-end mb-3 course-schedule-row">
+                                                    <div class="col-md-4">
+                                                        <label class="form-label fw-bold">Jour</label>
+                                                        <select class="form-select" name="course_schedule_day" required>
+                                                            <option value="">Sélectionnez</option>
+                                                            <option value="0" {% if schedule.jour_semaine|stringformat:"s" == "0" %}selected{% endif %}>Lundi</option>
+                                                            <option value="1" {% if schedule.jour_semaine|stringformat:"s" == "1" %}selected{% endif %}>Mardi</option>
+                                                            <option value="2" {% if schedule.jour_semaine|stringformat:"s" == "2" %}selected{% endif %}>Mercredi</option>
+                                                            <option value="3" {% if schedule.jour_semaine|stringformat:"s" == "3" %}selected{% endif %}>Jeudi</option>
+                                                            <option value="4" {% if schedule.jour_semaine|stringformat:"s" == "4" %}selected{% endif %}>Vendredi</option>
+                                                            <option value="5" {% if schedule.jour_semaine|stringformat:"s" == "5" %}selected{% endif %}>Samedi</option>
+                                                            <option value="6" {% if schedule.jour_semaine|stringformat:"s" == "6" %}selected{% endif %}>Dimanche</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <label class="form-label fw-bold">Heure de début</label>
+                                                        <input type="time" class="form-control" name="course_schedule_start" value="{{ schedule.heure_debut|default:'' }}" required>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <label class="form-label fw-bold">Heure de fin</label>
+                                                        <input type="time" class="form-control" name="course_schedule_end" value="{{ schedule.heure_fin|default:'' }}" required>
+                                                    </div>
+                                                    <div class="col-md-2 d-grid">
+                                                        <button type="button" class="btn btn-outline-danger remove-course-schedule">
+                                                            <i class="bi bi-trash"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            {% endfor %}
+                                        {% else %}
+                                            <div class="row g-2 align-items-end mb-3 course-schedule-row">
+                                                <div class="col-md-4">
+                                                    <label class="form-label fw-bold">Jour</label>
+                                                    <select class="form-select" name="course_schedule_day" required>
+                                                        <option value="">Sélectionnez</option>
+                                                        <option value="0">Lundi</option>
+                                                        <option value="1">Mardi</option>
+                                                        <option value="2">Mercredi</option>
+                                                        <option value="3">Jeudi</option>
+                                                        <option value="4">Vendredi</option>
+                                                        <option value="5">Samedi</option>
+                                                        <option value="6">Dimanche</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label class="form-label fw-bold">Heure de début</label>
+                                                    <input type="time" class="form-control" name="course_schedule_start" required>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label class="form-label fw-bold">Heure de fin</label>
+                                                    <input type="time" class="form-control" name="course_schedule_end" required>
+                                                </div>
+                                                <div class="col-md-2 d-grid">
+                                                    <button type="button" class="btn btn-outline-danger remove-course-schedule">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        {% endif %}
+                                    {% endwith %}
+                                </div>
+                            </div>
+
+                            <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+                                <a href="{% url 'actions' %}" class="btn btn-light-secondary">Annuler</a>
+                                <button type="submit" class="btn btn-primary px-4">
+                                    <i class="bi bi-check-circle me-2"></i>{{ titre }} l'action
+                                </button>
+                            </div>
                         </div>
                     </div>
+                </div>
 
-                    <div class="d-flex justify-content-end gap-2 mt-4">
-                        <a href="{% url 'actions' %}" class="btn btn-light-secondary">Annuler</a>
-                        <button type="submit" class="btn btn-primary">{{ titre }}</button>
+                <div class="col-12 col-lg-5">
+                    <div class="card tm-detail-card h-100">
+                        <div class="card-header border-bottom mb-3">
+                            <h4 class="card-title mb-0">Assignation par module</h4>
+                            <p class="text-muted small mb-0">Définissez les formateurs pour chaque module.</p>
+                        </div>
+                        <div class="card-body">
+                            <div id="modules-assignment-container">
+                                {# Rendu dynamique par JS #}
+                                <div class="text-center p-5">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Chargement...</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </form>
+                </div>
             </div>
-        </div>
+        </form>
     </section>
 </div>
 
 {# JSON data for JavaScript #}
 {{ formations_json|json_script:"formations-data" }}
 {{ formateurs_json|json_script:"formateurs-data" }}
-{# Removed selected_formateur_ids_json as it's no longer for action-level formateurs #}
-{{ modules_formateurs_assignment_json|json_script:"modules-formateurs-assignment-data" }} {# New JSON data #}
+{{ modules_formateurs_assignment_json|json_script:"modules-formateurs-assignment-data" }}
 
 {% endblock content %}
 
@@ -185,30 +221,142 @@
     document.addEventListener('DOMContentLoaded', function() {
         const formationSelect = document.getElementById('formation');
         const modulesAssignmentContainer = document.getElementById('modules-assignment-container');
+        const dateDebutInput = document.getElementById('date_debut');
+        const dateFinInput = document.getElementById('date_fin');
+        const durationContainer = document.getElementById('duration-info-container');
+        const durationDaysSpan = document.getElementById('duration-days');
+        const form = document.querySelector('form.form');
+        const courseSchedulesContainer = document.getElementById('course-schedules-container');
+        const addCourseScheduleButton = document.getElementById('add-course-schedule');
+        const courseScheduleTemplate = `
+            <div class="row g-2 align-items-end mb-3 course-schedule-row">
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">Jour</label>
+                    <select class="form-select" name="course_schedule_day" required>
+                        <option value="">Sélectionnez</option>
+                        <option value="0">Lundi</option>
+                        <option value="1">Mardi</option>
+                        <option value="2">Mercredi</option>
+                        <option value="3">Jeudi</option>
+                        <option value="4">Vendredi</option>
+                        <option value="5">Samedi</option>
+                        <option value="6">Dimanche</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Heure de début</label>
+                    <input type="time" class="form-control" name="course_schedule_start" required>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Heure de fin</label>
+                    <input type="time" class="form-control" name="course_schedule_end" required>
+                </div>
+                <div class="col-md-2 d-grid">
+                    <button type="button" class="btn btn-outline-danger remove-course-schedule">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
+            </div>
+        `;
 
-        // Get JSON data from the template
+        // Validation des dates et calcul de durée
+        function calculateDuration() {
+            const start = new Date(dateDebutInput.value);
+            const end = new Date(dateFinInput.value);
+
+            if (dateDebutInput.value && dateFinInput.value) {
+                if (end < start) {
+                    dateFinInput.classList.add('is-invalid');
+                    durationContainer.style.display = 'none';
+                } else {
+                    dateFinInput.classList.remove('is-invalid');
+                    const diffTime = Math.abs(end - start);
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+                    durationDaysSpan.textContent = diffDays;
+                    durationContainer.style.display = 'block';
+                }
+            } else {
+                durationContainer.style.display = 'none';
+            }
+        }
+
+        dateDebutInput.addEventListener('change', calculateDuration);
+        dateFinInput.addEventListener('change', calculateDuration);
+        calculateDuration();
+
+        // Empêcher la soumission si dates invalides
+        form.addEventListener('submit', function(e) {
+            const start = new Date(dateDebutInput.value);
+            const end = new Date(dateFinInput.value);
+            if (end < start) {
+                e.preventDefault();
+                alert("La date de fin doit être postérieure ou égale à la date de début.");
+            }
+        });
+
+        // Initialisation Select2 pour le champ formation
+        if (typeof $ !== 'undefined') {
+            $('#formation').select2({
+                placeholder: "Sélectionnez une formation",
+                width: '100%'
+            }).on('change', function() {
+                updateFormFieldsBasedOnFormation();
+            });
+        }
+
+        function bindCourseScheduleRemoval(row) {
+            const removeButton = row.querySelector('.remove-course-schedule');
+            if (removeButton) {
+                removeButton.addEventListener('click', function() {
+                    const rows = courseSchedulesContainer.querySelectorAll('.course-schedule-row');
+                    if (rows.length > 1) {
+                        row.remove();
+                    } else {
+                        row.querySelectorAll('input, select').forEach((field) => {
+                            if (field.tagName === 'SELECT') {
+                                field.selectedIndex = 0;
+                            } else {
+                                field.value = '';
+                            }
+                        });
+                    }
+                });
+            }
+        }
+
+        courseSchedulesContainer.querySelectorAll('.course-schedule-row').forEach(bindCourseScheduleRemoval);
+
+        if (addCourseScheduleButton) {
+            addCourseScheduleButton.addEventListener('click', function() {
+                courseSchedulesContainer.insertAdjacentHTML('beforeend', courseScheduleTemplate);
+                const newRow = courseSchedulesContainer.querySelector('.course-schedule-row:last-child');
+                bindCourseScheduleRemoval(newRow);
+            });
+        }
+
         const allFormationsData = JSON.parse(document.getElementById('formations-data').textContent);
         const allFormateursData = JSON.parse(document.getElementById('formateurs-data').textContent);
         const initialModulesFormateursAssignment = JSON.parse(document.getElementById('modules-formateurs-assignment-data').textContent);
+        const formateursById = new Map(allFormateursData.map(formateur => [String(formateur.id), formateur]));
 
         function renderModuleFormateurAssignments(selectedFormation) {
-            modulesAssignmentContainer.innerHTML = ''; // Clear previous modules
+            modulesAssignmentContainer.innerHTML = '';
 
             if (!selectedFormation || !selectedFormation.modules || selectedFormation.modules.length === 0) {
-                modulesAssignmentContainer.innerHTML = '<p class="text-muted">Aucun module disponible pour cette formation ou formation non sélectionnée.</p>';
+                modulesAssignmentContainer.innerHTML = '<p class="text-muted text-center p-4">Sélectionnez d\'abord une formation pour assigner des formateurs aux modules.</p>';
                 return;
             }
 
             selectedFormation.modules.forEach(module => {
                 const moduleDiv = document.createElement('div');
-                moduleDiv.classList.add('tm-module-card', 'mb-3', 'p-4');
+                moduleDiv.classList.add('tm-module-card');
 
                 const headerDiv = document.createElement('div');
-                headerDiv.classList.add('d-flex', 'justify-content-between', 'align-items-center', 'mb-3');
+                headerDiv.classList.add('d-flex', 'justify-content-between', 'align-items-center', 'mb-2');
 
                 const moduleTitle = document.createElement('h6');
-                moduleTitle.classList.add('fw-bold', 'mb-0');
-                moduleTitle.innerHTML = `<i class="bi bi-journal-bookmark-fill me-2 text-primary"></i>${module.titre}`;
+                moduleTitle.classList.add('fw-bold', 'mb-0', 'small');
+                moduleTitle.innerHTML = `<i class="bi bi-journal-bookmark text-primary me-2"></i>${module.titre}`;
                 
                 const durationBadge = document.createElement('span');
                 durationBadge.classList.add('tm-module-badge');
@@ -218,26 +366,22 @@
                 headerDiv.appendChild(durationBadge);
                 moduleDiv.appendChild(headerDiv);
 
-                const label = document.createElement('label');
-                label.classList.add('form-label', 'small', 'text-muted', 'mb-2');
-                label.textContent = "Formateurs assignés à ce module";
-                moduleDiv.appendChild(label);
-
                 const formateursSelect = document.createElement('select');
-                formateursSelect.classList.add('form-select', 'select2-enabled'); // Add a class for Select2 initialization
+                formateursSelect.classList.add('form-select', 'select2-enabled');
                 formateursSelect.name = `module_formateurs_${module.id}`;
                 formateursSelect.multiple = true;
                 formateursSelect.style.width = '100%';
 
-                // Populate with all available formateurs
-                allFormateursData.forEach(formateur => {
+                const eligibleIds = module.eligible_formateurs_ids || [];
+                eligibleIds.forEach(formateurId => {
+                    const formateur = formateursById.get(String(formateurId));
+                    if (!formateur) return;
                     const option = document.createElement('option');
                     option.value = formateur.id;
-                    option.textContent = `${formateur.nom} ${formateur.postnom} ${formateur.prenom || ''}`;
+                    option.textContent = `${formateur.nom} ${formateur.postnom}`;
                     formateursSelect.appendChild(option);
                 });
 
-                // Pre-select formateurs for this module based on initial data (for edit mode)
                 const assignedFormateursForModule = initialModulesFormateursAssignment[String(module.id)] || [];
                 assignedFormateursForModule.forEach(formateurId => {
                     const optionToSelect = formateursSelect.querySelector(`option[value="${formateurId}"]`);
@@ -248,28 +392,23 @@
 
                 moduleDiv.appendChild(formateursSelect);
                 modulesAssignmentContainer.appendChild(moduleDiv);
-            });
 
-            // Initialize Select2 for newly created selects
-            if (typeof $ !== 'undefined') {
-                $('.select2-enabled').select2({
-                    placeholder: "Choisir les formateurs pour ce module"
-                });
-            }
+                // Re-initialize Select2
+                if (typeof $ !== 'undefined') {
+                    $(formateursSelect).select2({
+                        placeholder: "Choisir formateur(s)"
+                    });
+                }
+            });
         }
 
         function updateFormFieldsBasedOnFormation() {
             const selectedFormationId = formationSelect.value;
             const selectedFormation = allFormationsData.find(f => String(f.id) === selectedFormationId);
-
-            // Render module-formateur assignment section
             renderModuleFormateurAssignments(selectedFormation);
         }
 
-        // Attach event listener
         formationSelect.addEventListener('change', updateFormFieldsBasedOnFormation);
-
-        // Initial call to populate fields based on pre-selected formation (if any)
         updateFormFieldsBasedOnFormation();
     });
 </script>

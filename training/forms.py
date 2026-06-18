@@ -3,7 +3,7 @@ from django.forms import inlineformset_factory
 from django_select2.forms import Select2Widget
 
 from .models import Formation, Module, Filiere
-from progress.models import Formateur
+from progress.models import Formateur, ModuleSubject
 
 class MetierForm(forms.ModelForm):
     filiere = forms.ModelChoiceField(
@@ -68,4 +68,23 @@ ModuleFormSet = inlineformset_factory(
     extra=1,
     can_delete=True,
     fields=["titre", "description", "duree_heures", "formateurs", "ordre"]
+)
+
+class ModuleSubjectForm(forms.ModelForm):
+    class Meta:
+        model = ModuleSubject
+        fields = ["titre", "nombre_seances", "ordre", "description"]
+        widgets = {
+            'titre': forms.TextInput(attrs={'class': 'form-control'}),
+            'nombre_seances': forms.NumberInput(attrs={'class': 'form-control', 'min': 1}),
+            'ordre': forms.NumberInput(attrs={'class': 'form-control'}),
+            'description': forms.Textarea(attrs={'rows': 2, 'class': 'form-control'}),
+        }
+
+ModuleSubjectFormSet = inlineformset_factory(
+    Module,
+    ModuleSubject,
+    form=ModuleSubjectForm,
+    extra=2,
+    can_delete=True
 )

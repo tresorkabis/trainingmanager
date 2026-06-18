@@ -11,17 +11,10 @@
 
 {% block content %}
 <div class="page-heading">
-    {% tm_hero 
-        title="Paiements" 
-        subtitle="Gérez tous les enregistrements de paiements des stagiaires." 
-        icon="bi bi-wallet-fill"
-        actions=hero_actions
-        stats=hero_stats 
-        theme="success"
-    %}
+    {% tm_hero title="Paiements" subtitle="Suivi des encaissements par stagiaire et par action de formation." icon="bi bi-wallet-fill" actions=hero_actions stats=hero_stats theme="success" %}
 
     <section class="section">
-        <div class="card tm-card-premium">
+        <div class="card tm-listing-card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h4 class="card-title mb-0">Historique des paiements</h4>
                 <a href="{% url 'paiement_create' %}" class="btn btn-primary btn-sm">
@@ -29,86 +22,82 @@
                 </a>
             </div>
             <div class="card-body">
-                {% if paiement_list %}
+                <div class="d-flex flex-wrap gap-2 mb-3">
+                    <button class="btn btn-outline-secondary btn-sm filter-btn active" data-mode="all">Tous</button>
+                    <button class="btn btn-outline-success btn-sm filter-btn" data-mode="Espèces">Espèces</button>
+                    <button class="btn btn-outline-primary btn-sm filter-btn" data-mode="Virement Bancaire">Virement</button>
+                </div>
+
+                <div class="custom-search-container mb-3">
+                    <input type="text" id="searchInput" class="custom-search-input form-control" placeholder="Rechercher par stagiaire, référence ou motif...">
+                </div>
+
                 <div class="table-responsive">
-                    <table class="tm-table table-striped" id="table1">
+                    <table class="table table-hover" id="paiementTable">
                         <thead>
                             <tr>
                                 <th>Stagiaire</th>
-                                <th>Action de formation</th>
+                                <th>Action / Formation</th>
                                 <th>Montant</th>
-                                <th>Date de paiement</th>
-                                <th>Mode de paiement</th>
+                                <th>Date</th>
+                                <th>Mode</th>
                                 <th>Référence</th>
-                                <th>Actions</th>
+                                <th class="text-end">Actions</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody id="paiementTableBody">
+                            {% if paiement_list %}
                             {% for paiement in paiement_list %}
-                            <tr>
-                                <td><a href="{% url 'stagiaire' paiement.stagiaire.pk %}">{{ paiement.stagiaire.get_full_name }}</a></td>
+                            <tr class="paiement-row" data-mode-label="{{ paiement.get_mode_paiement_display }}">
+                                <td>
+                                    <a href="{% url 'stagiaire' paiement.stagiaire.pk %}" class="tm-action-row__title text-decoration-none fw-bold text-primary">{{ paiement.stagiaire.get_full_name }}</a>
+                                    <div class="tm-action-row__meta">{{ paiement.stagiaire.telephone|default:"-" }}</div>
+                                </td>
                                 <td>
                                     {% if paiement.action %}
-                                        <a href="{% url 'action' paiement.action.pk %}">{{ paiement.action.description }}</a>
+                                        <div class="fw-bold text-dark">{{ paiement.action.description }}</div>
+                                        <div class="tm-action-row__meta text-muted small">{{ paiement.action.formation.nom }}</div>
                                     {% else %}
-                                        N/A
+                                        <span class="text-muted small">Hors action</span>
                                     {% endif %}
                                 </td>
-                                <td>{{ paiement.montant }}</td>
+                                <td><span class="fw-bold text-success">{{ paiement.montant|floatformat:0 }} USD</span></td>
                                 <td>{{ paiement.date_paiement|date:"d/m/Y" }}</td>
-                                <td>{{ paiement.get_mode_paiement_display }}</td>
                                 <td>
-                                    {% if paiement.reference %}
-                                        <a href="{% url 'paiement' paiement.pk %}" class="tm-action-row__title">{{ paiement.reference }}</a>
+                                    {% if paiement.mode_paiement == 'ESPECES' %}
+                                        <span class="badge bg-light-success text-success w-100"><i class="bi bi-cash me-1"></i>Espèces</span>
                                     {% else %}
-                                        -
+                                        <span class="badge bg-light-primary text-primary w-100"><i class="bi bi-bank me-1"></i>Virement</span>
                                     {% endif %}
                                 </td>
                                 <td>
-                                    <div class="d-flex gap-2">
-                                        <a href="{% url 'paiement' paiement.pk %}" class="btn btn-sm btn-outline-info" title="Voir"> {# Style cohérent #}
-                                            <i class="bi bi-eye"></i>
-                                        </a>
-                                        <a href="{% url 'paiement_update' paiement.pk %}" class="btn btn-sm btn-outline-primary" title="Modifier"> {# Style cohérent #}
-                                            <i class="bi bi-pencil"></i>
-                                        </a>
-                                        <a href="{% url 'paiement_delete' paiement.pk %}" class="btn btn-sm btn-outline-danger" title="Supprimer"> {# Style cohérent #}
-                                            <i class="bi bi-trash"></i>
-                                        </a>
+                                    <code class="text-primary fw-bold">{{ paiement.reference|default:"-" }}</code>
+                                </td>
+                                <td class="text-end">
+                                    <div class="d-flex gap-2 justify-content-end">
+                                        <a href="{% url 'paiement' paiement.pk %}" class="btn btn-sm btn-outline-primary" title="Voir"><i class="bi bi-eye"></i></a>
+                                        <a href="{% url 'paiement_update' paiement.pk %}" class="btn btn-sm btn-outline-info" title="Modifier"><i class="bi bi-pencil"></i></a>
+                                        <a href="{% url 'paiement_delete' paiement.pk %}" class="btn btn-sm btn-outline-danger" title="Supprimer"><i class="bi bi-trash"></i></a>
                                     </div>
                                 </td>
                             </tr>
                             {% endfor %}
+                            {% else %}
+                            <tr><td colspan="7" class="text-center p-5 text-muted">Aucun paiement enregistré.</td></tr>
+                            {% endif %}
                         </tbody>
                     </table>
                 </div>
-                {% else %}
-                <p class="text-muted text-center">Aucun paiement enregistré pour le moment.</p>
-                {% endif %}
 
                 {% if is_paginated %}
                 <div class="d-flex justify-content-between align-items-center mt-3">
-                    <div class="dataTable-info">
-                        Page {{ page_obj.number }} sur {{ page_obj.paginator.num_pages }}
-                    </div>
-                    <ul class="pagination tm-pagination float-end">
+                    <div class="dataTable-info">Page {{ page_obj.number }} sur {{ page_obj.paginator.num_pages }}</div>
+                    <ul class="pagination pagination-primary float-end">
                         {% if page_obj.has_previous %}
                         <li class="page-item pager"><a href="?page=1" class="page-link">&laquo;</a></li>
-                        <li class="page-item">
-                            <a href="?page={{ page_obj.previous_page_number }}" class="page-link">
-                                {{ page_obj.previous_page_number }}
-                            </a>
-                        </li>
                         {% endif %}
-
                         <li class="page-item active"><a href="#" class="page-link">{{ page_obj.number }}</a></li>
-
                         {% if page_obj.has_next %}
-                        <li class=" page-item">
-                            <a href="?page={{ page_obj.next_page_number }}" class="page-link">
-                                {{ page_obj.next_page_number }}
-                            </a>
-                        </li>
                         <li class="page-item pager"><a href="?page={{ page_obj.paginator.num_pages }}" class="page-link">&raquo;</a></li>
                         {% endif %}
                     </ul>
@@ -119,3 +108,38 @@
     </section>
 </div>
 {% endblock content %}
+
+{% block script %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('searchInput');
+        const tableBody = document.getElementById('paiementTableBody');
+        const rows = Array.from(tableBody.querySelectorAll('.paiement-row'));
+        const filterBtns = document.querySelectorAll('.filter-btn');
+
+        function filterTable() {
+            const term = searchInput.value.toLowerCase().trim();
+            const mode = document.querySelector('.filter-btn.active').getAttribute('data-mode');
+
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                const rowMode = row.getAttribute('data-mode-label');
+                const matchesSearch = text.includes(term);
+                const matchesFilter = mode === 'all' || rowMode === mode;
+                row.style.display = (matchesSearch && matchesFilter) ? '' : 'none';
+            });
+        }
+
+        searchInput.addEventListener('keyup', filterTable);
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                filterBtns.forEach(b => b.classList.remove('active', 'btn-success', 'btn-primary'));
+                this.classList.add('active');
+                if (this.getAttribute('data-mode') === 'Espèces') this.classList.add('btn-success');
+                else if (this.getAttribute('data-mode') === 'Virement Bancaire') this.classList.add('btn-primary');
+                filterTable();
+            });
+        });
+    });
+</script>
+{% endblock script %}

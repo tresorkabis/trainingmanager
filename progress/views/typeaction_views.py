@@ -35,6 +35,7 @@ class TypeActionListView(TypeActionPermissionMixin, ListView):
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx['link'] = "typeactions"
+        ctx["can_manage"] = True
         
         # Calcul des statistiques globales
         all_typeactions = self.get_queryset() # Utiliser le queryset
@@ -44,6 +45,19 @@ class TypeActionListView(TypeActionPermissionMixin, ListView):
             'inactive': all_typeactions.filter(active=False).count(),
             'actions_total': all_typeactions.aggregate(total=Count("actions_liees", distinct=True))["total"],
         }
+        ctx["hero_actions"] = [
+            {
+                "label": "Nouveau type d'action",
+                "url": reverse_lazy("typeaction_create"),
+                "icon": "bi bi-tag-fill",
+            }
+        ]
+        ctx["hero_stats"] = [
+            {"label": "Total", "value": ctx["stats"]["total"]},
+            {"label": "Actifs", "value": ctx["stats"]["active"]},
+            {"label": "Inactifs", "value": ctx["stats"]["inactive"]},
+            {"label": "Actions liées", "value": ctx["stats"]["actions_total"]},
+        ]
         return ctx
 
 @method_decorator(login_required, name="dispatch")

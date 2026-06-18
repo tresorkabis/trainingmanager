@@ -1,899 +1,501 @@
 {% extends "base.html" %}
 {% load static %}
+{% load tm_tags %}
 
-{% block title %}Fiche Stagiaire - {{ object.get_full_name }}{% endblock title %}
-{% block page_header %}Fiche Stagiaire - {{ object.get_full_name }}{% endblock page_header %}
+{% block title %}{% if form %}{% if mode == "edit" %}Modifier un Stagiaire{% else %}Créer un Stagiaire{% endif %}{% else %}Fiche Stagiaire - {{ object.get_full_name }}{% endif %}{% endblock title %}
+{% block page_header %}{% if form %}{% if mode == "edit" %}Modifier un Stagiaire{% else %}Créer un Stagiaire{% endif %}{% else %}Fiche Stagiaire - {{ object.get_full_name }}{% endif %}{% endblock page_header %}
 
 {% block style %}
+<link rel="stylesheet" href="{% static 'assets/css/training-manager.css' %}">
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 <style>
-    /* Removed all custom tab styles to rely on Bootstrap defaults */
-
-    .tm-stagiaire-hero {
-        background:
-            radial-gradient(circle at top right, rgba(67, 94, 190, 0.18), transparent 35%),
-            linear-gradient(135deg, #f7f8fc 0%, #eef3ff 100%);
-        border: 1px solid rgba(67, 94, 190, 0.12);
-        border-radius: 1.25rem;
-        overflow: hidden;
-    }
-
-    .tm-stagiaire-hero__photo {
-        width: 150px; /* Increased width */
-        height: 150px; /* Increased height */
-        border-radius: 1.5rem;
-        object-fit: cover;
-        border: 4px solid rgba(255, 255, 255, 0.9);
-        box-shadow: 0 18px 45px rgba(20, 33, 61, 0.12);
-    }
-
-    /* New style for KPI cards, similar to tm-metier-kpi-card */
-    .tm-stagiaire-kpi-card {
-        border: 1px solid rgba(67, 94, 190, 0.1);
-        border-radius: 1rem;
-        background: rgba(255, 255, 255, 0.76);
-        padding: 0.75rem; /* Reduced padding */
-        height: 100%;
-        box-shadow: 0 10px 24px rgba(17, 24, 39, 0.04);
-    }
-
-    .tm-stagiaire-kpi-card__label {
-        display: block;
-        font-size: 0.7rem; /* Reduced font size */
-        letter-spacing: 0.04em;
-        text-transform: uppercase;
-        color: #6c757d;
-        margin-bottom: 0.25rem; /* Reduced margin */
-    }
-
-    .tm-stagiaire-kpi-card__value {
-        font-size: 1.1rem; /* Reduced font size */
-        font-weight: 700;
-        color: #25396f;
-    }
-
-
-    .tm-detail-card {
-        border: 1px solid rgba(15, 23, 42, 0.07);
-        border-radius: 1rem;
-        box-shadow: 0 16px 32px rgba(15, 23, 42, 0.05);
-    }
-
-    .tm-detail-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 1rem;
-    }
-
     .tm-detail-item {
-        border-radius: 0.9rem;
-        border: 1px solid #edf1f7;
         background: #fbfcfe;
+        border: 1px solid #e8eef7;
+        border-radius: 0.9rem;
         padding: 1rem;
-        min-height: 100%;
+        height: 100%;
     }
-
     .tm-detail-item__label {
         display: block;
-        font-size: 0.8rem;
-        color: #7b8190;
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: #6c757d;
         margin-bottom: 0.35rem;
     }
-
     .tm-detail-item__value {
-        color: #25396f;
+        display: block;
         font-weight: 700;
+        color: #1e293b;
         word-break: break-word;
     }
-
-    .tm-pill-list {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.5rem;
-    }
-
-    .tm-pill {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.35rem;
-        padding: 0.55rem 0.85rem;
-        border-radius: 999px;
-        background: #fff;
-        border: 1px solid rgba(67, 94, 190, 0.12);
+    .tm-subsection-title {
+        font-size: 0.95rem;
+        font-weight: 800;
         color: #25396f;
-        font-weight: 600;
+        margin-bottom: 0.75rem;
     }
-
-    /* Custom extra-small button style */
-    .btn-xs {
-        padding: 0.2rem 0.5rem; /* Réduit le padding */
-        font-size: 0.75rem; /* Réduit la taille de la police */
-        line-height: 1.5;
-        border-radius: 0.2rem;
+    .select2-container--default .select2-selection--single {
+        height: calc(1.5em + 1rem + 2px);
+        padding: 0.5rem 0.75rem;
+        border: 1px solid #dce7f1;
+        border-radius: 0.5rem;
     }
-
-    /* Table styling (copié de paiements.html pour cohérence) */
-    .table {
-        width: 100%;
-        border-collapse: separate;
-        border-spacing: 0;
-        border-radius: 1rem;
-        overflow: hidden;
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        line-height: 1.2;
+        padding-left: 0;
+        color: #1e293b;
     }
-
-    .table thead th {
-        background-color: #f8f9fa;
-        color: #25396f;
-        font-weight: 700;
-        padding: 1rem 1.5rem;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-        text-align: left;
-    }
-
-    .table tbody tr {
-        transition: background-color 0.2s ease;
-    }
-
-    .table tbody tr:nth-of-type(odd) {
-        background-color: #ffffff;
-    }
-
-    .table tbody tr:nth-of-type(even) {
-        background-color: #fcfdff;
-    }
-
-    .table tbody tr:hover {
-        background-color: #eef2f7;
-    }
-
-    .table tbody td {
-        padding: 0.8rem 1.5rem;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.03);
-        color: #495057;
-    }
-
-    .table tbody td a {
-        color: #435ebe;
-        text-decoration: none;
-    }
-
-    .table tbody td a:hover {
-        text-decoration: underline;
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: calc(1.5em + 1rem);
+        right: 8px;
     }
 </style>
 {% endblock style %}
 
 {% block content %}
 <div class="page-heading">
-    <section class="tm-stagiaire-hero p-4 p-lg-5 mb-4">
-        <div class="d-flex justify-content-end mb-3 gap-2"> {# Nouvelle div pour les boutons d'action #}
-            <a href="{% url 'stagiaires' %}" class="btn btn-secondary btn-xs">
-                <i class="bi bi-arrow-left"></i> Retour à la liste
-            </a>
-            <a href="{% url 'stagiaires_print' %}?ids={{ object.pk }}" target="_blank" class="btn btn-outline-secondary btn-xs">
-                <i class="bi bi-printer"></i> Imprimer la carte
-            </a>
-            {% if not mode %} {# Afficher les boutons Modifier/Supprimer seulement en mode vue #}
-            <a href="{% url 'stagiaire_update' object.pk %}" class="btn btn-primary btn-xs">
-                <i class="bi bi-pencil"></i> Modifier
-            </a>
-            <a href="{% url 'stagiaire_delete' object.pk %}" class="btn btn-danger btn-xs">
-                <i class="bi bi-trash"></i> Supprimer
-            </a>
-            {% endif %}
-        </div>
-        <div class="row g-4 align-items-center">
-            <div class="col-12 col-xl-7"> {# Left column for photo, name, pills, description #}
-                <div class="d-flex flex-column flex-sm-row align-items-start align-items-sm-center gap-4">
-                    {% if object %}
-                        {% if object.photo %}
-                        <img id="photo-preview" src="{{ object.photo.url }}" alt="Photo du stagiaire" class="tm-stagiaire-hero__photo">
-                        {% else %}
-                        <img id="photo-preview" src="{% static 'assets/images/faces/1.jpg' %}" alt="Photo du stagiaire" class="tm-stagiaire-hero__photo">
-                        {% endif %}
-                        <div>
-                            <div class="tm-pill-list mb-3">
-                                <span class="tm-pill"><i class="bi bi-person-badge"></i>{{ object.categorie }}</span>
-                                {# Suppression du pill filiere #}
-                                {% if object.entreprise %}
-                                <span class="tm-pill"><i class="bi bi-building"></i>{{ object.entreprise.nom }}</span>
-                                {% endif %}
-                            </div>
-                            <h2 class="mb-2">{{ object.get_full_name }}</h2>
-                            <p class="text-muted mb-0"> 
-                                Fiche de consultation avec identité complète, affectation, parcours académique et suivi des formations.
-                            </p>
-                        </div>
-                    {% else %}
-                        <img id="photo-preview" src="{% static 'assets/images/faces/1.jpg' %}" alt="Photo du stagiaire" class="tm-stagiaire-hero__photo">
-                        <div>
-                            <div class="tm-pill-list mb-3">
-                                <span class="tm-pill"><i class="bi bi-person-badge"></i>Nouvel·le stagiaire</span>
-                            </div>
-                            <h2 class="mb-2">Création d'un stagiaire</h2>
-                            <p class="text-muted mb-0">Remplir le formulaire pour ajouter un nouveau stagiaire.</p>
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
-            <div class="col-12 col-xl-5"> {# Right column for KPI cards #}
-                {% if object %}
-                <div class="row g-3">
-                    <div class="col-6">
-                        <div class="tm-stagiaire-kpi-card">
-                            <span class="tm-stagiaire-kpi-card__label">Téléphone</span>
-                            <span class="tm-stagiaire-kpi-card__value">{{ object.telephone|default:"Non renseigné" }}</span>
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <div class="tm-stagiaire-kpi-card">
-                            <span class="tm-stagiaire-kpi-card__label">Sexe</span>
-                            <span class="tm-stagiaire-kpi-card__value">{{ object.get_sexe_display }}</span>
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <div class="tm-stagiaire-kpi-card">
-                            <span class="tm-stagiaire-kpi-card__label">Type de pièce</span>
-                            <span class="tm-stagiaire-kpi-card__value">{{ object.get_type_piece_display|default:"Non renseigné" }}</span>
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <div class="tm-stagiaire-kpi-card">
-                            <span class="tm-stagiaire-kpi-card__label">Niveau d'étude</span>
-                            <span class="tm-stagiaire-kpi-card__value">{{ object.niveau_etude|default:"Non renseigné" }}</span>
-                        </div>
-                    </div>
-                </div>
-                {% else %}
-                <div class="row g-3">
-                    <div class="col-6">
-                        <div class="tm-stagiaire-kpi-card">
-                            <span class="tm-stagiaire-kpi-card__label">Téléphone</span>
-                            <span class="tm-stagiaire-kpi-card__value">Non renseigné</span>
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <div class="tm-stagiaire-kpi-card">
-                            <span class="tm-stagiaire-kpi-card__label">Sexe</span>
-                            <span class="tm-stagiaire-kpi-card__value">-</span>
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <div class="tm-stagiaire-kpi-card">
-                            <span class="tm-stagiaire-kpi-card__label">Type de pièce</span>
-                            <span class="tm-stagiaire-kpi-card__value">Non renseigné</span>
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <div class="tm-stagiaire-kpi-card">
-                            <span class="tm-stagiaire-kpi-card__label">Niveau d'étude</span>
-                            <span class="tm-stagiaire-kpi-card__value">Non renseigné</span>
-                        </div>
-                    </div>
-                </div>
-                {% endif %}
-            </div>
-        </div>
-    </section>
+    {% if form %}
+        {% if mode == "edit" %}
+            {% tm_hero title="Modifier le stagiaire" subtitle="Mettez à jour les informations du dossier." icon="bi bi-pencil" actions=hero_actions theme="primary" photo_url=photo_url %}
+        {% else %}
+            {% tm_hero title="Créer un stagiaire" subtitle="Renseignez un nouveau dossier stagiaire." icon="bi bi-person-plus" actions=hero_actions theme="primary" photo_url=photo_url %}
+        {% endif %}
+    {% else %}
+        {% tm_hero title=object.get_full_name subtitle="Consultation du dossier complet du stagiaire." icon="bi bi-person-badge" actions=hero_actions stats=hero_stats theme="primary" photo_url=photo_url %}
+    {% endif %}
 
+    {% if messages %}
+        <div class="mt-3">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {% if form %}
     <section class="section">
-        <div class="card tm-detail-card">
-            <div class="card-header">
-                <h4 class="card-title mb-1">Détails du stagiaire</h4>
-                <p class="text-muted mb-0">Informations complètes et parcours de formation.</p>
+        <div class="card tm-listing-card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <div>
+                    <h4 class="card-title mb-0">{% if mode == "edit" %}Modifier le stagiaire{% else %}Créer un stagiaire{% endif %}</h4>
+                    <p class="text-muted mb-0">Renseignez les informations du dossier.</p>
+                </div>
+                <a href="{% url 'stagiaires' %}" class="btn btn-light-secondary btn-sm">
+                    <i class="bi bi-arrow-left me-2"></i>Retour
+                </a>
             </div>
             <div class="card-body">
-                {% if mode %}
+                {% if form.non_field_errors %}
+                <div class="alert alert-danger">
+                    {% for error in form.non_field_errors %}
+                    <div>{{ error }}</div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
                 <form method="post" enctype="multipart/form-data">
                     {% csrf_token %}
-                {% endif %}
-                <ul class="nav nav-tabs nav-fill" id="myTab" role="tablist">
-                    <li class="nav-item" role="presentation">
-                        <a class="nav-link active" id="identity-tab" data-bs-toggle="tab" href="#identity" role="tab" aria-controls="identity" aria-selected="true">Identité</a>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <a class="nav-link" id="assignment-tab" data-bs-toggle="tab" href="#assignment" role="tab" aria-controls="assignment" aria-selected="false">Affectation</a>
-                    </li>
-                    {% if object.categorie and object.categorie.titre == "dans l'emploi" %}
-                    <li class="nav-item" role="presentation" id="professional-tab-li">
-                        <a class="nav-link" id="professional-tab" data-bs-toggle="tab" href="#professional" role="tab" aria-controls="professional" aria-selected="false">Professionnel</a>
-                    </li>
-                    {% endif %}
-                    <li class="nav-item" role="presentation">
-                        <a class="nav-link" id="studies-tab" data-bs-toggle="tab" href="#studies" role="tab" aria-controls="studies" aria-selected="false">Études</a>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <a class="nav-link" id="other-trainings-tab" data-bs-toggle="tab" href="#other-trainings" role="tab" aria-controls="other-trainings" aria-selected="false">Autres formations</a>
-                    </li>
-                    <li class="nav-item" role="presentation"> {# Nouveau Tab pour les Paiements #}
-                        <a class="nav-link" id="payments-tab" data-bs-toggle="tab" href="#payments" role="tab" aria-controls="payments" aria-selected="false">Paiements</a>
-                    </li>
-                </ul>
-
-                <div class="tab-content" id="myTabContent">
-                    <div class="tab-pane fade show active" id="identity" role="tabpanel" aria-labelledby="identity-tab">
-                        <div class="card tm-detail-card mt-4"> {# Re-added mt-4 for spacing #}
-                            <div class="card-header">
-                                <h4 class="card-title mb-1">Identité et administration</h4>
-                                <p class="text-muted mb-0">Toutes les informations d'état civil et les références administratives du stagiaire.</p>
-                            </div>
-                            <div class="card-body">
-                                <div class="tm-detail-grid">
-                                    {% if form %}
-                                    <div class="tm-detail-item"><label class="tm-detail-item__label" for="id_nom">Nom</label>{{ form.nom }}</div>
-                                    <div class="tm-detail-item"><label class="tm-detail-item__label" for="id_postnom">Postnom</label>{{ form.postnom }}</div>
-                                    <div class="tm-detail-item"><label class="tm-detail-item__label" for="id_prenom">Prénom</label>{{ form.prenom }}</div>
-                                    <div class="tm-detail-item"><label class="tm-detail-item__label" for="id_date_naissance">Date de naissance</label>{{ form.date_naissance }}</div>
-                                    <div class="tm-detail-item"><label class="tm-detail-item__label" for="id_lieu_naissance">Lieu de naissance</label>{{ form.lieu_naissance }}</div>
-                                    <div class="tm-detail-item"><label class="tm-detail-item__label" for="id_nationalite">Nationalité</label>{{ form.nationalite }}</div>
-                                    <div class="tm-detail-item"><label class="tm-detail-item__label" for="id_niveau_etude">Niveau d'étude</label>{{ form.niveau_etude }}</div>
-                                    <div class="tm-detail-item"><label class="tm-detail-item__label" for="id_type_piece">Type de pièce</label>{{ form.type_piece }}</div>
-                                    <div class="tm-detail-item"><label class="tm-detail-item__label" for="id_numero_piece">Numéro de pièce</label>{{ form.numero_piece }}</div>
-                                    <div class="tm-detail-item"><label class="tm-detail-item__label" for="id_nom_pere">Nom du père</label>{{ form.nom_pere }}</div>
-                                    <div class="tm-detail-item"><label class="tm-detail-item__label" for="id_nom_mere">Nom de la mère</label>{{ form.nom_mere }}</div>
-                                    <div class="tm-detail-item"><label class="tm-detail-item__label" for="id_adresse">Adresse</label>{{ form.adresse }}</div>
-                                    <div class="tm-detail-item"><label class="tm-detail-item__label" for="id_sexe">Sexe</label>{{ form.sexe }}</div>
-                                    <div class="tm-detail-item"><label class="tm-detail-item__label" for="id_telephone">Téléphone</label>{{ form.telephone }}</div>
-                                    <div class="tm-detail-item"><label class="tm-detail-item__label" for="id_email">Email</label>{{ form.email }}</div>
-                                    <div class="tm-detail-item"><label class="tm-detail-item__label" for="id_photo">Photo</label>{{ form.photo }}</div>
-                                    {% else %}
-                                    <div class="tm-detail-item"><span class="tm-detail-item__label">Nom</span><div class="tm-detail-item__value">{{ object.nom }}</div></div>
-                                    <div class="tm-detail-item"><span class="tm-detail-item__label">Postnom</span><div class="tm-detail-item__value">{{ object.postnom }}</div></div>
-                                    <div class="tm-detail-item"><span class="tm-detail-item__label">Prénom</span><div class="tm-detail-item__value">{{ object.prenom }}</div></div>
-                                    <div class="tm-detail-item"><span class="tm-detail-item__label">Date de naissance</span><div class="tm-detail-item__value">{{ object.date_naissance|date:"d/m/Y"|default:"Non renseignée" }}</div></div>
-                                    <div class="tm-detail-item"><span class="tm-detail-item__label">Lieu de naissance</span><div class="tm-detail-item__value">{{ object.lieu_naissance|default:"Non renseigné" }}</div></div>
-                                    <div class="tm-detail-item"><span class="tm-detail-item__label">Nationalité</span><div class="tm-detail-item__value">{{ object.nationalite|default:"Non renseignée" }}</div></div>
-                                    <div class="tm-detail-item"><span class="tm-detail-item__label">Numéro de pièce</span><div class="tm-detail-item__value">{{ object.numero_piece|default:"Non renseigné" }}</div></div>
-                                    <div class="tm-detail-item"><span class="tm-detail-item__label">Nom du père</span><div class="tm-detail-item__value">{{ object.nom_pere|default:"Non renseignée" }}</div></div>
-                                    <div class="tm-detail-item"><span class="tm-detail-item__label">Nom de la mère</span><div class="tm-detail-item__value">{{ object.nom_mere|default:"Non renseignée" }}</div></div>
-                                    <div class="tm-detail-item"><span class="tm-detail-item__label">Adresse</span><div class="tm-detail-item__value">{{ object.adresse|default:"Non renseignée" }}</div></div>
-                                    {% endif %}
-                                </div>
-                            </div>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label" for="{{ form.nom.id_for_label }}">{{ form.nom.label }}</label>
+                            {{ form.nom }}
+                            {{ form.nom.errors }}
                         </div>
-                    </div> {# FIN DU TAB-PANE IDENTITY #}
-
-                    <div class="tab-pane fade" id="assignment" role="tabpanel" aria-labelledby="assignment-tab">
-                        <div class="card tm-detail-card mt-4">
-                            <div class="card-header">
-                                <h4 class="card-title mb-1">Affectation et suivi interne</h4>
-                                <p class="text-muted mb-0">Positionnement du stagiaire dans le référentiel de formation et historique des actions suivies.</p>
-                            </div>
-                            <div class="card-body">
-                                <div class="tm-detail-grid mb-4">
-                                    {% if form %}
-                                    <div class="tm-detail-item">
-                                        <label class="tm-detail-item__label" for="categorie">Catégorie</label>
-                                        {{ form.categorie }}
-                                    </div>
-                                    {# Suppression du champ filiere du formulaire #}
-                                    {% else %}
-                                    <div class="tm-detail-item"><span class="tm-detail-item__label">Catégorie</span><div class="tm-detail-item__value">{{ object.categorie }}</div></div>
-                                    {# Suppression de l'affichage de la filiere en mode lecture seule #}
-                                    {% endif %}
-                                </div>
-                                <h5 class="mb-3">Formations internes suivies</h5>
-                                {% if actions_suivies %}
-                                <div class="table-responsive">
-                                    <table class="table table-striped">
-                                        <thead>
-                                            <tr>
-                                                <th>Action</th>
-                                                <th>Formation</th>
-                                                <th>Statut</th>
-                                                <th>Période</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {% for detail_action in actions_suivies %}
-                                            <tr>
-                                                <td>{{ detail_action.action.description }}</td>
-                                                <td>{{ detail_action.action.formation.nom }}</td>
-                                                <td><span class="badge {{ detail_action.status_meta.badge }}">{{ detail_action.status_meta.label }}</span></td>
-                                                <td>{{ detail_action.action.date_debut|date:"d/m/Y" }} au {{ detail_action.action.date_fin|date:"d/m/Y" }}</td>
-                                            </tr>
-                                            {% endfor %}
-                                        </tbody>
-                                    </table>
-                                </div>
-                                {% else %}
-                                <p class="text-muted mb-0">Ce stagiaire n'est inscrit à aucune action de formation interne.</p>
-                                {% endif %}
-
-                                {# Formulaire d'inscription à une action - disponible en mode création/édition ou en visualisation #}
-                                <div class="mt-3">
-                                    <div class="input-group">
-                                        <input type="hidden" id="stagiaire-id" value="{{ object.pk }}">
-                                        <select id="assign-action-select" name="action" class="form-select">
-                                            <option value="">-- Choisir une action --</option>
-                                            {% for act in actions %}
-                                            <option value="{{ act.id }}">{{ act.description }} ({{ act.formation.nom }}) - {{ act.date_debut|date:"d/m/Y" }}</option>
-                                            {% endfor %}
-                                        </select>
-                                        <button id="assign-action-btn" class="btn btn-primary" type="button">Inscrire à l'action</button>
-                                    </div>
-                                </div>
-                            </div>
+                        <div class="col-md-4">
+                            <label class="form-label" for="{{ form.postnom.id_for_label }}">{{ form.postnom.label }}</label>
+                            {{ form.postnom }}
+                            {{ form.postnom.errors }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label" for="{{ form.prenom.id_for_label }}">{{ form.prenom.label }}</label>
+                            {{ form.prenom }}
+                            {{ form.prenom.errors }}
+                        </div>
+                        <div class="col-md-8">
+                            <label class="form-label" for="{{ form.adresse.id_for_label }}">{{ form.adresse.label }}</label>
+                            {{ form.adresse }}
+                            {{ form.adresse.errors }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label" for="{{ form.sexe.id_for_label }}">{{ form.sexe.label }}</label>
+                            {{ form.sexe }}
+                            {{ form.sexe.errors }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label" for="{{ form.telephone.id_for_label }}">{{ form.telephone.label }}</label>
+                            {{ form.telephone }}
+                            {{ form.telephone.errors }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label" for="{{ form.email.id_for_label }}">{{ form.email.label }}</label>
+                            {{ form.email }}
+                            {{ form.email.errors }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label" for="{{ form.date_naissance.id_for_label }}">{{ form.date_naissance.label }}</label>
+                            {{ form.date_naissance }}
+                            {{ form.date_naissance.errors }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label" for="{{ form.lieu_naissance.id_for_label }}">{{ form.lieu_naissance.label }}</label>
+                            {{ form.lieu_naissance }}
+                            {{ form.lieu_naissance.errors }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label" for="{{ form.nationalite.id_for_label }}">{{ form.nationalite.label }}</label>
+                            {{ form.nationalite }}
+                            {{ form.nationalite.errors }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label" for="{{ form.type_piece.id_for_label }}">{{ form.type_piece.label }}</label>
+                            {{ form.type_piece }}
+                            {{ form.type_piece.errors }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label" for="{{ form.numero_piece.id_for_label }}">{{ form.numero_piece.label }}</label>
+                            {{ form.numero_piece }}
+                            {{ form.numero_piece.errors }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label" for="{{ form.nom_pere.id_for_label }}">{{ form.nom_pere.label }}</label>
+                            {{ form.nom_pere }}
+                            {{ form.nom_pere.errors }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label" for="{{ form.nom_mere.id_for_label }}">{{ form.nom_mere.label }}</label>
+                            {{ form.nom_mere }}
+                            {{ form.nom_mere.errors }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label" for="{{ form.niveau_etude.id_for_label }}">{{ form.niveau_etude.label }}</label>
+                            {{ form.niveau_etude }}
+                            {{ form.niveau_etude.errors }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label" for="{{ form.categorie.id_for_label }}">{{ form.categorie.label }}</label>
+                            {{ form.categorie }}
+                            {{ form.categorie.errors }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label" for="{{ form.entreprise.id_for_label }}">{{ form.entreprise.label }}</label>
+                            {{ form.entreprise }}
+                            {{ form.entreprise.errors }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label" for="{{ form.fonction.id_for_label }}">{{ form.fonction.label }}</label>
+                            {{ form.fonction }}
+                            {{ form.fonction.errors }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label" for="{{ form.anciennete_emploi.id_for_label }}">{{ form.anciennete_emploi.label }}</label>
+                            {{ form.anciennete_emploi }}
+                            {{ form.anciennete_emploi.errors }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label" for="{{ form.anciennete_entreprise.id_for_label }}">{{ form.anciennete_entreprise.label }}</label>
+                            {{ form.anciennete_entreprise }}
+                            {{ form.anciennete_entreprise.errors }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label" for="{{ form.photo.id_for_label }}">{{ form.photo.label }}</label>
+                            {{ form.photo }}
+                            {{ form.photo.errors }}
                         </div>
                     </div>
-
-                    {% if object.categorie and object.categorie.titre == "dans l'emploi" %}
-                    <div class="tab-pane fade" id="professional" role="tabpanel" aria-labelledby="professional-tab">
-                        <div class="card tm-detail-card mt-4" id="professional-info-section">
-                            <div class="card-header">
-                                <h4 class="card-title mb-1">Situation professionnelle</h4>
-                                <p class="text-muted mb-0">Données liées à l'emploi actuel et au contexte d'entreprise.</p>
-                            </div>
-                            <div class="card-body">
-                                <div class="tm-detail-grid">
-                                    {% if form %}
-                                    <div class="tm-detail-item">
-                                        <label for="id_entreprise" class="tm-detail-item__label">Entreprise</label>
-                                        {{ form.entreprise }}
-                                    </div>
-                                    <div class="tm-detail-item">
-                                        <label for="id_fonction" class="tm-detail-item__label">Fonction</label>
-                                        {{ form.fonction }}
-                                    </div>
-                                    <div class="tm-detail-item">
-                                        <label for="id_anciennete_emploi" class="tm-detail-item__label">Ancienneté dans l'emploi</label>
-                                        {{ form.anciennete_emploi }}
-                                    </div>
-                                    <div class="tm-detail-item">
-                                        <label for="id_anciennete_entreprise" class="tm-detail-item__label">Ancienneté dans l'entreprise</label>
-                                        {{ form.anciennete_entreprise }}
-                                    </div>
-                                    {% else %}
-                                    <div class="tm-detail-item"><span class="tm-detail-item__label">Entreprise</span><div class="tm-detail-item__value">{{ object.entreprise.nom|default:"Non renseignée" }}</div></div>
-                                    <div class="tm-detail-item"><span class="tm-detail-item__label">Fonction</span><div class="tm-detail-item__value">{{ object.fonction|default:"Non renseignée" }}</div></div>
-                                    <div class="tm-detail-item"><span class="tm-detail-item__label">Ancienneté dans l'emploi</span><div class="tm-detail-item__value">{{ object.anciennete_emploi|default:"Non renseignée" }}</div></div>
-                                    <div class="tm-detail-item"><span class="tm-detail-item__label">Ancienneté dans l'entreprise</span><div class="tm-detail-item__value">{{ object.anciennete_entreprise|default:"Non renseignée" }}</div></div>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+                        <a href="{% url 'stagiaires' %}" class="btn btn-light-secondary">Annuler</a>
+                        <button type="submit" class="btn btn-primary">{% if mode == "edit" %}Enregistrer les modifications{% else %}Créer le stagiaire{% endif %}</button>
                     </div>
-                    {% endif %}
-
-                    <div class="tab-pane fade" id="studies" role="tabpanel" aria-labelledby="studies-tab">
-                        <div class="card tm-detail-card mt-4">
-                            <div class="card-header">
-                                <h4 class="card-title mb-1">Parcours académique</h4>
-                                <p class="text-muted mb-0">Niveau d'étude général et historique des études effectuées.</p>
-                            </div>
-                            <div class="card-body">
-                                <div class="tm-detail-item mb-4">
-                                    <span class="tm-detail-item__label">Niveau d'étude général</span>
-                                    <div class="tm-detail-item__value">{{ object.niveau_etude|default:"Non renseigné" }}</div>
-                                </div>
-                                {% if mode %}
-                                <div id="studies-container">
-                                    <div class="study-row mb-3 p-3 border rounded">
-                                        <div class="row g-2">
-                                            <div class="col-md-4"><input class="form-control" name="etude_intitule[]" placeholder="Intitulé" value=""></div>
-                                            <div class="col-md-3"><input class="form-control" name="etude_etablissement[]" placeholder="Établissement" value=""></div>
-                                            <div class="col-md-2"><input class="form-control" name="etude_niveau[]" placeholder="Niveau" value=""></div>
-                                            <div class="col-md-1"><input type="number" min="1900" class="form-control" name="etude_annee_debut[]" placeholder="Début"></div>
-                                            <div class="col-md-1"><input type="number" min="1900" class="form-control" name="etude_annee_fin[]" placeholder="Fin"></div>
-                                            <div class="col-md-1 d-flex align-items-center">
-                                                <button type="button" class="btn btn-danger remove-study-row">&times;</button>
-                                            </div>
-                                            <div class="col-12 mt-2"><input class="form-control" name="etude_diplome[]" placeholder="Diplôme obtenu" value=""></div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="mt-2">
-                                    <button id="add-study-row" type="button" class="btn btn-sm btn-outline-primary">Ajouter une étude</button>
-                                </div>
-                                {% else %}
-                                {% if object.pk and object.etudes.all %}
-                                <div class="table-responsive">
-                                    <table class="table table-striped">
-                                        <thead>
-                                            <tr>
-                                                <th>Intitulé</th>
-                                                <th>Établissement</th>
-                                                <th>Niveau</th>
-                                                <th>Année début</th>
-                                                <th>Année fin</th>
-                                                <th>Diplôme obtenu</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {% for etude in object.etudes.all %}
-                                            <tr>
-                                                <td>{{ etude.intitule }}</td>
-                                                <td>{{ etude.etablissement|default:"-" }}</td>
-                                                <td>{{ etude.niveau|default:"-" }}</td>
-                                                <td>{{ etude.annee_debut|default:"-" }}</td>
-                                                <td>{{ etude.annee_fin|default:"-" }}</td>
-                                                <td>{{ etude.diplome_obtenu|default:"-" }}</td>
-                                            </tr>
-                                            {% endfor %}
-                                        </tbody>
-                                    </table>
-                                </div>
-                                {% else %}
-                                <p class="text-muted mb-0">Aucune étude enregistrée.</p>
-                                {% endif %}
-                                {% endif %}
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="tab-pane fade" id="other-trainings" role="tabpanel" aria-labelledby="other-trainings-tab">
-                        <div class="card tm-detail-card mt-4">
-                            <div class="card-header">
-                                <h4 class="card-title mb-1">Formations complémentaires</h4>
-                                <p class="text-muted mb-0">Formations externes, certifications et perfectionnements suivis en dehors des actions internes.</p>
-                            </div>
-                            <div class="card-body">
-                                {% if mode %}
-                                <div id="other-trainings-container">
-                                    <div class="other-training-row mb-3 p-3 border rounded">
-                                        <div class="row g-2">
-                                            <div class="col-md-6"><input class="form-control" name="autre_formation_intitule[]" placeholder="Intitulé" value=""></div>
-                                            <div class="col-md-4"><input class="form-control" name="autre_formation_etablissement[]" placeholder="Établissement" value=""></div>
-                                            <div class="col-md-1"><input type="number" min="1900" class="form-control" name="autre_formation_annee_fin[]" placeholder="Année"></div>
-                                            <div class="col-md-1 d-flex align-items-center">
-                                                <button type="button" class="btn btn-danger remove-other-training-row">&times;</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="mt-2">
-                                    <button id="add-other-training-row" type="button" class="btn btn-sm btn-outline-primary">Ajouter une formation</button>
-                                </div>
-                                {% else %}
-                                {% if object.pk and object.autres_formations.all %}
-                                <div class="table-responsive">
-                                    <table class="table table-striped">
-                                        <thead>
-                                            <tr>
-                                                <th>Intitulé</th>
-                                                <th>Établissement</th>
-                                                <th>Année de fin</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {% for training in object.autres_formations.all %}
-                                            <tr>
-                                                <td>{{ training.intitule }}</td>
-                                                <td>{{ training.etablissement|default:"-" }}</td>
-                                                <td>{{ training.annee_fin|default:"-" }}</td>
-                                            </tr>
-                                            {% endfor %}
-                                        </tbody>
-                                    </table>
-                                </div>
-                                {% else %}
-                                <p class="text-muted mb-0">Aucune formation complémentaire enregistrée.</p>
-                                {% endif %}
-                                {% endif %}
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="tab-pane fade" id="payments" role="tabpanel" aria-labelledby="payments-tab"> {# Nouveau contenu pour les Paiements #}
-                        <div class="card tm-detail-card mt-4">
-                            <div class="card-header d-flex justify-content-between align-items-center">
-                                <h4 class="card-title mb-1">Historique des paiements</h4>
-                                <a href="{% url 'paiement_create' %}?stagiaire={{ object.pk }}" class="btn btn-primary btn-sm">
-                                    <i class="bi bi-plus-circle me-2"></i>Enregistrer un paiement
-                                </a>
-                            </div>
-                            <div class="card-body">
-                                {# Nouvelle section pour les infos de paiement agrégées #}
-                                <div class="row g-3 mb-4">
-                                    <div class="col-12 col-md-4">
-                                        <div class="tm-stagiaire-kpi-card">
-                                            <span class="tm-stagiaire-kpi-card__label">Coût total formations</span>
-                                            <span class="tm-stagiaire-kpi-card__value">{{ total_cost|floatformat:2 }} USD</span>
-                                        </div>
-                                    </div>
-                                    <div class="col-12 col-md-4">
-                                        <div class="tm-stagiaire-kpi-card">
-                                            <span class="tm-stagiaire-kpi-card__label">Total payé</span>
-                                            <span class="tm-stagiaire-kpi-card__value">{{ total_paid|floatformat:2 }} USD</span>
-                                        </div>
-                                    </div>
-                                    <div class="col-12 col-md-4">
-                                        <div class="tm-stagiaire-kpi-card">
-                                            <span class="tm-stagiaire-kpi-card__label">Solde restant</span>
-                                            <span class="tm-stagiaire-kpi-card__value {% if solde_restant <= 0 %}text-success{% else %}text-danger{% endif %}">{{ solde_restant|floatformat:2 }} USD</span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {% if paiements %}
-                                <div class="table-responsive">
-                                    <table class="table table-striped">
-                                        <thead>
-                                            <tr>
-                                                <th>Action de formation</th>
-                                                <th>Montant</th>
-                                                <th>Date de paiement</th>
-                                                <th>Mode de paiement</th>
-                                                <th>Référence</th>
-                                                <th>Actions</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {% for paiement in paiements %}
-                                            <tr>
-                                                <td>
-                                                    {% if paiement.action %}
-                                                        <a href="{% url 'action' paiement.action.pk %}">{{ paiement.action.description }}</a>
-                                                    {% else %}
-                                                        N/A
-                                                    {% endif %}
-                                                </td>
-                                                <td>{{ paiement.montant }}</td>
-                                                <td>{{ paiement.date_paiement|date:"d/m/Y" }}</td>
-                                                <td>{{ paiement.get_mode_paiement_display }}</td>
-                                                <td>
-                                                    {% if paiement.reference %}
-                                                        <a href="{% url 'paiement' paiement.pk %}">{{ paiement.reference }}</a>
-                                                    {% else %}
-                                                        -
-                                                    {% endif %}
-                                                </td>
-                                                <td>
-                                                    <div class="d-flex gap-2">
-                                                        <a href="{% url 'paiement' paiement.pk %}" class="btn btn-sm btn-outline-info" title="Voir">
-                                                            <i class="bi bi-eye"></i>
-                                                        </a>
-                                                        <a href="{% url 'paiement_update' paiement.pk %}" class="btn btn-sm btn-outline-primary" title="Modifier">
-                                                            <i class="bi bi-pencil"></i>
-                                                        </a>
-                                                        <a href="{% url 'paiement_delete' paiement.pk %}" class="btn btn-sm btn-outline-danger" title="Supprimer">
-                                                            <i class="bi bi-trash"></i>
-                                                        </a>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                            {% endfor %}
-                                        </tbody>
-                                    </table>
-                                </div>
-                                {% else %}
-                                <p class="text-muted mb-0">Aucun paiement enregistré pour ce stagiaire.</p>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                    {% if mode %}
-                    <div class="d-flex justify-content-end mt-3">
-                        <button type="submit" class="btn btn-primary">Enregistrer</button>
-                    </div>
-                    </form>
-                    {% endif %}
+                </form>
             </div>
         </div>
     </section>
+    {% endif %}
+
+    {% if not form %}
+    <section class="section">
+        <div class="card tm-listing-card">
+            <div class="card-header">
+                <ul class="nav nav-tabs card-header-tabs" id="stagiaireTab" role="tablist">
+                    <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#identity">Identité</a></li>
+                    {% if object.categorie and object.categorie.titre == "dans l'emploi" %}
+                    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#employment">Emploi</a></li>
+                    {% endif %}
+                    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#formations">Formations</a></li>
+                    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#studies">Cursus</a></li>
+                    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#payments">Paiements</a></li>
+                </ul>
+            </div>
+            <div class="card-body">
+                <div class="tab-content pt-3">
+                    <div class="tab-pane fade show active" id="identity">
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <div class="tm-subsection-title">Identité civile</div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="tm-detail-item"><span class="tm-detail-item__label">Nom complet</span><span class="tm-detail-item__value">{{ object.get_full_name }}</span></div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="tm-detail-item"><span class="tm-detail-item__label">Catégorie</span><span class="tm-detail-item__value">{{ object.categorie }}</span></div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="tm-detail-item"><span class="tm-detail-item__label">Statut</span><span class="tm-detail-item__value">{% if object.active %}Actif{% else %}Inactif{% endif %}</span></div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="tm-detail-item"><span class="tm-detail-item__label">Sexe</span><span class="tm-detail-item__value">{{ object.get_sexe_display }}</span></div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="tm-detail-item"><span class="tm-detail-item__label">Date de naissance</span><span class="tm-detail-item__value">{{ object.date_naissance|date:"d/m/Y"|default:"-" }}</span></div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="tm-detail-item"><span class="tm-detail-item__label">Lieu de naissance</span><span class="tm-detail-item__value">{{ object.lieu_naissance|default:"-" }}</span></div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="tm-detail-item"><span class="tm-detail-item__label">Nationalité</span><span class="tm-detail-item__value">{{ object.nationalite|default:"-" }}</span></div>
+                            </div>
+                            <div class="col-md-8">
+                                <div class="tm-detail-item"><span class="tm-detail-item__label">Adresse</span><span class="tm-detail-item__value">{{ object.adresse|default:"-" }}</span></div>
+                            </div>
+
+                            <div class="col-12 mt-2">
+                                <div class="tm-subsection-title">Contacts et pièces</div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="tm-detail-item"><span class="tm-detail-item__label">Téléphone</span><span class="tm-detail-item__value">{{ object.telephone|default:"-" }}</span></div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="tm-detail-item"><span class="tm-detail-item__label">Email</span><span class="tm-detail-item__value">{{ object.email|default:"-" }}</span></div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="tm-detail-item"><span class="tm-detail-item__label">Référence dossier</span><span class="tm-detail-item__value">#STG-{{ object.pk }}</span></div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="tm-detail-item"><span class="tm-detail-item__label">Type de pièce</span><span class="tm-detail-item__value">{{ object.get_type_piece_display|default:"-" }}</span></div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="tm-detail-item"><span class="tm-detail-item__label">Numéro de pièce</span><span class="tm-detail-item__value">{{ object.numero_piece|default:"-" }}</span></div>
+                            </div>
+
+                            <div class="col-12 mt-2">
+                                <div class="tm-subsection-title">Historique du dossier</div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="tm-detail-item"><span class="tm-detail-item__label">Créé le</span><span class="tm-detail-item__value">{{ object.created_at|date:"d/m/Y H:i" }}</span></div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="tm-detail-item"><span class="tm-detail-item__label">Mis à jour</span><span class="tm-detail-item__value">{{ object.updated_at|date:"d/m/Y H:i" }}</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if object.categorie and object.categorie.titre == "dans l'emploi" %}
+                    <div class="tab-pane fade" id="employment">
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <div class="tm-subsection-title">Situation professionnelle</div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="tm-detail-item"><span class="tm-detail-item__label">Entreprise</span><span class="tm-detail-item__value">{{ object.entreprise|default:"-" }}</span></div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="tm-detail-item"><span class="tm-detail-item__label">Fonction</span><span class="tm-detail-item__value">{{ object.fonction|default:"-" }}</span></div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="tm-detail-item"><span class="tm-detail-item__label">Ancienneté dans l'emploi</span><span class="tm-detail-item__value">{{ object.anciennete_emploi|default:"-" }} ans</span></div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="tm-detail-item"><span class="tm-detail-item__label">Ancienneté dans l'entreprise</span><span class="tm-detail-item__value">{{ object.anciennete_entreprise|default:"-" }} ans</span></div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div class="tab-pane fade" id="family"> {# This tab seems to be a duplicate of some identity fields #}
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <div class="tm-subsection-title">Informations familiales</div> {# Renamed title #}
+                            </div>
+                            <div class="col-md-4">
+                                <div class="tm-detail-item"><span class="tm-detail-item__label">Nom du père</span><span class="tm-detail-item__value">{{ object.nom_pere|default:"-" }}</span></div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="tm-detail-item"><span class="tm-detail-item__label">Nom de la mère</span><span class="tm-detail-item__value">{{ object.nom_mere|default:"-" }}</span></div>
+                            </div>
+                            {# Removed duplicated created_at and updated_at fields from here #}
+                            {# Removed duplicated niveau_etude from here as it's in identity #}
+                        </div>
+                    </div>
+
+                    <div class="tab-pane fade" id="formations">
+                        <div class="card mb-4 border-0 bg-light">
+                            <div class="card-body">
+                                <form method="post" action="{% url 'detailaction_create' %}" class="row g-3 align-items-end">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="stagiaire" value="{{ object.pk }}">
+                                    <input type="hidden" name="next" value="{{ request.path }}#formations">
+                                    <div class="col-12 col-md-8">
+                                        <label for="action-select" class="form-label fw-bold">Inscrire à une action</label>
+                                        <select id="action-select" name="action" class="form-select" required>
+                                            <option value="">Sélectionner une action</option>
+                                            {% for action in actions_disponibles %}
+                                                <option value="{{ action.pk }}">
+                                                    {{ action.description }} - {{ action.formation.nom }} ({{ action.date_debut|date:"d/m/Y" }})
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="col-12 col-md-4">
+                                        <button type="submit" class="btn btn-primary w-100">
+                                            <i class="bi bi-person-plus me-2"></i>Ajouter l'inscription
+                                        </button>
+                                    </div>
+                                </form>
+                                {% if not actions_disponibles %}
+                                    <div class="alert alert-warning mt-3 mb-0">Aucune action disponible à laquelle inscrire ce stagiaire.</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-hover tm-table">
+                                <thead>
+                                    <tr>
+                                        <th>Action</th>
+                                        <th>Formation</th>
+                                        <th>Période</th>
+                                        <th class="text-center">Statut</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for da in actions_suivies %}
+                                    <tr>
+                                        <td>
+                                            <div class="fw-bold text-primary">{{ da.action.description }}</div>
+                                            <div class="small text-muted">Réf. #{{ da.action.pk }}</div>
+                                        </td>
+                                        <td>
+                                            {{ da.action.formation.nom }}
+                                        </td>
+                                        <td>{{ da.action.date_debut|date:"d/m/Y" }} - {{ da.action.date_fin|date:"d/m/Y" }}</td>
+                                        <td class="text-center">
+                                            <span class="badge {{ da.status_meta.badge }} w-100">{{ da.status_meta.label }}</span>
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr><td colspan="4" class="text-center p-4 text-muted">Aucune inscription.</td></tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="tab-pane fade" id="studies">
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <h6 class="fw-bold mb-3">Études & Diplômes</h6>
+                                <div class="list-group list-group-flush border-top">
+                                    {% for etude in object.etudes.all %}
+                                    <div class="list-group-item px-0">
+                                        <div class="fw-bold text-dark">{{ etude.intitule }}</div>
+                                        <div class="small text-muted">
+                                            {{ etude.etablissement|default:"-" }}
+                                            {% if etude.niveau %} - {{ etude.niveau }}{% endif %}
+                                            {% if etude.annee_fin %} ({{ etude.annee_fin }}){% endif %}
+                                        </div>
+                                    </div>
+                                    {% empty %}
+                                    <div class="p-3 text-muted small">Aucun diplôme renseigné.</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="fw-bold mb-3">Autres Formations</h6>
+                                <div class="list-group list-group-flush border-top">
+                                    {% for af in object.autres_formations.all %}
+                                    <div class="list-group-item px-0">
+                                        <div class="fw-bold text-dark">{{ af.intitule }}</div>
+                                        <div class="small text-muted">
+                                            {{ af.etablissement|default:"-" }}
+                                            {% if af.annee_fin %} ({{ af.annee_fin }}){% endif %}
+                                        </div>
+                                    </div>
+                                    {% empty %}
+                                    <div class="p-3 text-muted small">Aucune formation supplémentaire.</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-pane fade" id="payments">
+                        <div class="table-responsive">
+                            <table class="table table-hover tm-table">
+                                <thead>
+                                    <tr>
+                                        <th>Référence</th>
+                                        <th>Date</th>
+                                        <th>Mode</th>
+                                        <th class="text-end">Montant</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for p in paiements %}
+                                    <tr>
+                                        <td><code class="fw-bold text-primary">{{ p.reference }}</code></td>
+                                        <td>{{ p.date_paiement|date:"d/m/Y" }}</td>
+                                        <td>{{ p.get_mode_paiement_display }}</td>
+                                        <td class="text-end"><span class="fw-bold text-success">{{ p.montant|floatformat:0 }} USD</span></td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr><td colspan="4" class="text-center p-4 text-muted">Aucun paiement.</td></tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    {% endif %}
 </div>
 {% endblock content %}
+
 {% block script %}
-{% if form %}{{ form.media }}{% endif %}
-{% if mode %}
-<script>
-    const studiesContainer = document.getElementById('studies-container');
-    const addStudyRowButton = document.getElementById('add-study-row');
-
-    if (addStudyRowButton && studiesContainer) {
-        addStudyRowButton.addEventListener('click', function () {
-            const firstRow = studiesContainer.querySelector('.study-row');
-            const clonedRow = firstRow.cloneNode(true);
-
-            clonedRow.querySelectorAll('input, textarea').forEach((field) => {
-                field.value = '';
-            });
-
-            studiesContainer.appendChild(clonedRow);
-        });
-
-        studiesContainer.addEventListener('click', function (event) {
-            if (!event.target.classList.contains('remove-study-row')) {
-                return;
-            }
-
-            const rows = studiesContainer.querySelectorAll('.study-row');
-            if (rows.length === 1) {
-                rows[0].querySelectorAll('input, textarea').forEach((field) => {
-                    field.value = '';
-                });
-                return;
-            }
-
-            event.target.closest('.study-row').remove();
-        });
-    }
-
-    {# New JavaScript for AutreFormation #}
-    const otherTrainingsContainer = document.getElementById('other-trainings-container');
-    const addOtherTrainingRowButton = document.getElementById('add-other-training-row');
-
-    if (addOtherTrainingRowButton && otherTrainingsContainer) {
-        addOtherTrainingRowButton.addEventListener('click', function () {
-            const firstRow = otherTrainingsContainer.querySelector('.other-training-row');
-            const clonedRow = firstRow.cloneNode(true);
-
-            clonedRow.querySelectorAll('input, textarea').forEach((field) => {
-                field.value = '';
-            });
-
-            otherTrainingsContainer.appendChild(clonedRow);
-        });
-
-        otherTrainingsContainer.addEventListener('click', function (event) {
-            if (!event.target.classList.contains('remove-other-training-row')) {
-                return;
-            }
-
-            const rows = otherTrainingsContainer.querySelectorAll('.other-training-row');
-            if (rows.length === 1) {
-                rows[0].querySelectorAll('input, textarea').forEach((field) => {
-                    field.value = '';
-                });
-                return;
-            }
-
-            event.target.closest('.other-training-row').remove();
-        });
-    }
-
-
-    const photoInput = document.getElementById('photo');
-    const photoPreview = document.getElementById('photo-preview');
-
-    if (photoInput && photoPreview) {
-        photoInput.addEventListener('change', function () {
-            const [file] = this.files;
-            if (!file) {
-                return;
-            }
-
-            const previewUrl = URL.createObjectURL(file);
-            photoPreview.src = previewUrl;
-        });
-    }
-
-    // Conditional display for professional info
-    const categorieSelect = document.getElementById('categorie') || document.getElementById('id_categorie');
-    const professionalTabLi = document.getElementById('professional-tab-li'); // The li element for the tab
-    const professionalTabLink = document.getElementById('professional-tab'); // The a element for the tab
-    const professionalInfoSection = document.getElementById('professional-info-section'); // The content div
-
-    const categoryDansEmploiName = "dans l'emploi"; // Ensure this matches the actual category name
-
-    function toggleProfessionalInfo() {
-        // Vérifier si categorieSelect existe avant d'essayer d'y accéder
-        if (!categorieSelect) {
-            console.warn("Element with ID 'categorie' not found. Skipping professional info toggle.");
-            return;
-        }
-        const selectedOption = categorieSelect.options[categorieSelect.selectedIndex];
-        const categoryName = selectedOption ? (selectedOption.getAttribute('data-category-name') || selectedOption.textContent.trim()) : null;
-        const isDansEmploi = (categoryName === categoryDansEmploiName);
-
-        if (isDansEmploi) {
-            if (professionalTabLi) professionalTabLi.style.display = 'block'; // Show the tab li
-            // Enable fields if not in view mode
-            if (!{{ object.id|yesno:"true,false" }}) {
-                if (professionalInfoSection) {
-                    professionalInfoSection.querySelectorAll('input, select').forEach(field => {
-                        field.disabled = false;
-                    });
-                }
-            }
-        } else {
-            if (professionalTabLi) professionalTabLi.style.display = 'none'; // Hide the tab li
-            // If the professional tab is currently active, switch to another tab (e.g., identity)
-            if (professionalTabLink && professionalTabLink.classList.contains('active')) {
-                // Use Bootstrap's programmatic API to show the identity tab
-                const identityTabInstance = bootstrap.Tab.getInstance(document.getElementById('identity-tab'));
-                if (identityTabInstance) {
-                    identityTabInstance.show();
-                }
-            }
-            // Disable and clear fields if not "dans l'emploi"
-            if (professionalInfoSection) {
-                professionalInfoSection.querySelectorAll('input, select').forEach(field => {
-                    field.disabled = true;
-                    if (field.tagName === 'SELECT') {
-                        field.value = '';
-                    } else {
-                        field.value = '';
-                    }
-                });
-            }
-        }
-    }
-
-    // Initialize Bootstrap tabs and then call toggleProfessionalInfo
-    document.addEventListener('DOMContentLoaded', function () {
-        // Bootstrap handles basic tab switching with data-bs-toggle="tab"
-        // No need for manual new bootstrap.Tab(triggerEl) and click listeners if data-bs-toggle is used.
-
-        // Initial call to set visibility based on current value
-        if (categorieSelect && professionalTabLi && professionalTabLink && professionalInfoSection) {
-            categorieSelect.addEventListener('change', toggleProfessionalInfo);
-            toggleProfessionalInfo();
-        }
-    });
-
-</script>
+{% if form %}
+{{ form.media }}
 {% endif %}
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
-// Debug: log main form submissions
-document.addEventListener('DOMContentLoaded', function () {
-    const mainForm = document.querySelector('form[method="post"]');
-    if (mainForm) {
-        mainForm.addEventListener('submit', function (e) {
-            try { console.log('Stagiaire main form submit event fired'); } catch (err) {}
-            // do not prevent default; just log
-        });
-    }
-});
-
-// Assign action via AJAX to avoid nested forms and ensure button works in view mode
-document.addEventListener('DOMContentLoaded', function () {
-    const assignBtn = document.getElementById('assign-action-btn');
-    const assignSelect = document.getElementById('assign-action-select');
-    const stagiaireIdInput = document.getElementById('stagiaire-id');
-    const url = "{% url 'detailaction_create' %}";
-
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
-    }
-
-    if (!assignBtn) return;
-    assignBtn.addEventListener('click', function () {
-        const actionId = assignSelect ? assignSelect.value : null;
-        const stagiaireId = stagiaireIdInput ? stagiaireIdInput.value : null;
-        if (!actionId || !stagiaireId) {
-            alert('Sélectionner une action valide et un stagiaire existant.');
+document.addEventListener('DOMContentLoaded', function() {
+    function initActionSelect() {
+        if (typeof $ === 'undefined' || !$.fn.select2) {
             return;
         }
 
-        const csrftoken = getCookie('csrftoken');
-        fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
-                'X-CSRFToken': csrftoken,
-            },
-            body: `stagiaire=${encodeURIComponent(stagiaireId)}&action=${encodeURIComponent(actionId)}`
-        }).then(resp => {
-            if (resp.ok) {
-                // Redirect back to stagiaire page (only if object.pk is available)
-                var stagiaireUrl = null;
-                {% if object.pk %}
-                stagiaireUrl = "{% url 'stagiaire' pk=object.pk %}";
-                {% endif %}
-                if (stagiaireUrl) {
-                    window.location.href = stagiaireUrl;
-                } else {
-                    window.location.reload();
-                }
-            } else {
-                resp.text().then(t => alert('Erreur lors de l\'inscription : ' + t));
-            }
-        }).catch(err => {
-            alert('Erreur réseau: ' + err.message);
+        const $select = $('#action-select');
+        if (!$select.length || $select.data('select2')) {
+            return;
+        }
+
+        $select.select2({
+            placeholder: "Rechercher une action",
+            width: '100%'
         });
-    });
+    }
+
+    initActionSelect();
+
+    const formationsTab = document.querySelector('a[href="#formations"]');
+    if (formationsTab) {
+        formationsTab.addEventListener('shown.bs.tab', initActionSelect);
+    }
 });
 </script>
 {% endblock script %}

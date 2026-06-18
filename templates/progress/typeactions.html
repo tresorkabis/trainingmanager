@@ -1,259 +1,62 @@
 {% extends "base.html" %}
 {% load static %}
+{% load tm_tags %}
 
 {% block title %}Référentiel des types d'actions{% endblock title %}
 {% block page_header %}Référentiel des types d'actions{% endblock page_header %}
 
 {% block style %}
-<style>
-    /* Custom styles for search input */
-    .custom-search-container {
-        display: flex;
-        gap: 0.5rem;
-        margin-bottom: 1rem;
-    }
-    .custom-search-input {
-        flex-grow: 1;
-        border: 1px solid #ced4da;
-        border-radius: 0.5rem;
-        padding: 0.5rem 1rem;
-        max-width: 300px;
-    }
-    .custom-search-input:focus {
-        border-color: #435ebe;
-        box-shadow: 0 0 0 0.2rem rgba(67, 94, 190, 0.25);
-        outline: none;
-    }
-    .no-results-message {
-        text-align: center;
-        padding: 1rem;
-        color: #6c757d;
-    }
-
-    /* Table styling */
-    .table {
-        width: 100%;
-        border-collapse: separate;
-        border-spacing: 0;
-        border-radius: 1rem;
-        overflow: hidden;
-    }
-
-    .table thead th {
-        background-color: #f8f9fa;
-        color: #25396f;
-        font-weight: 700;
-        padding: 1rem 1.5rem;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-        text-align: left;
-    }
-
-    .table tbody tr {
-        transition: background-color 0.2s ease;
-    }
-
-    .table tbody tr:nth-of-type(odd) {
-        background-color: #ffffff;
-    }
-
-    .table tbody tr:nth-of-type(even) {
-        background-color: #fcfdff;
-    }
-
-    .table tbody tr:hover {
-        background-color: #eef2f7;
-    }
-
-    .table tbody td {
-        padding: 0.8rem 1.5rem;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.03);
-        color: #495057;
-    }
-
-    .table tbody td a {
-        color: #435ebe;
-        text-decoration: none;
-    }
-
-    .table tbody td a:hover {
-        text-decoration: underline;
-    }
-
-    /* Pagination styling */
-    .pagination {
-        margin-bottom: 0;
-    }
-
-    .pagination .page-item {
-        margin: 0 0.2rem;
-    }
-
-    .pagination .page-link {
-        border-radius: 0.5rem;
-        padding: 0.5rem 0.9rem;
-        font-size: 0.9rem;
-        color: #435ebe;
-        border: 1px solid #e9ecef;
-        transition: all 0.2s ease;
-    }
-
-    .pagination .page-item.active .page-link {
-        background-color: #435ebe;
-        border-color: #435ebe;
-        color: #fff;
-        box-shadow: 0 2px 8px rgba(67, 94, 190, 0.2);
-    }
-
-    .pagination .page-link:hover:not(.active) {
-        background-color: #f0f1f5;
-        border-color: #d8dce3;
-    }
-
-    .pagination .page-item.pager .page-link {
-        font-weight: bold;
-    }
-
-    .pagination .page-item.disabled .page-link {
-        color: #adb5bd;
-        pointer-events: none;
-        background-color: #ffffff;
-        border-color: #e9ecef;
-    }
-
-    /* Specific styles for typeaction list */
-    .tm-typeaction-hero {
-        background:
-            radial-gradient(circle at top right, rgba(67, 94, 190, 0.18), transparent 35%),
-            linear-gradient(135deg, #f7f8fc 0%, #eef3ff 100%);
-        border: 1px solid rgba(67, 94, 190, 0.12);
-        border-radius: 1.25rem;
-        overflow: hidden;
-    }
-
-    .tm-typeaction-stat {
-        background: rgba(255, 255, 255, 0.76);
-        border: 1px solid rgba(67, 94, 190, 0.1);
-        border-radius: 1rem;
-        padding: 1rem;
-        box-shadow: 0 10px 24px rgba(17, 24, 39, 0.04);
-        height: 100%;
-    }
-
-    .tm-typeaction-stat__label {
-        display: block;
-        font-size: 0.78rem;
-        letter-spacing: 0.04em;
-        text-transform: uppercase;
-        color: #6c757d;
-        margin-bottom: 0.35rem;
-    }
-
-    .tm-typeaction-stat__value {
-        font-size: 1.35rem;
-        font-weight: 700;
-        color: #25396f;
-    }
-
-    .tm-typeaction-row__title {
-        color: #25396f;
-        font-weight: 700;
-        text-decoration: none;
-    }
-
-    .tm-typeaction-row__meta {
-        color: #7b8190;
-        font-size: 0.85rem;
-    }
-</style>
+<link rel="stylesheet" href="{% static 'assets/css/training-manager.css' %}">
 {% endblock style %}
 
 {% block content %}
 <div class="page-heading">
-    <section class="tm-typeaction-hero p-4 p-lg-5 mb-4">
-        <div class="row g-4 align-items-center">
-            <div class="col-12 col-xl-6">
-                <div class="tm-section-titlebar mb-3">
-                    <span class="tm-section-titlebar__icon"><i class="bi bi-tag"></i></span>
-                    <div class="tm-section-titlebar__text">
-                        <h3>Types d'actions</h3>
-                        <p>Gérez les différents types d'actions de formation (interné, externé, etc.).</p>
-                    </div>
-                </div>
-                <div class="d-flex flex-wrap gap-2">
-                    <a href="{% url 'typeaction_create' %}" class="btn btn-primary">
-                        <i class="bi bi-tag-fill me-2"></i>Nouveau type d'action
-                    </a>
-                    {# Add other relevant buttons here if needed #}
-                </div>
-            </div>
-            <div class="col-12 col-xl-6">
-                <div class="row g-3">
-                    <div class="col-6 col-md-4">
-                        <div class="tm-typeaction-stat">
-                            <span class="tm-typeaction-stat__label">Total Types</span>
-                            <span class="tm-typeaction-stat__value">{{ stats.total }}</span>
-                        </div>
-                    </div>
-                    <div class="col-6 col-md-4">
-                        <div class="tm-typeaction-stat">
-                            <span class="tm-typeaction-stat__label">Actifs</span>
-                            <span class="tm-typeaction-stat__value">{{ stats.active }}</span>
-                        </div>
-                    </div>
-                    <div class="col-6 col-md-4">
-                        <div class="tm-typeaction-stat">
-                            <span class="tm-typeaction-stat__label">Inactifs</span>
-                            <span class="tm-typeaction-stat__value">{{ stats.inactive }}</span>
-                        </div>
-                    </div>
-                    <div class="col-6 col-md-4">
-                        <div class="tm-typeaction-stat">
-                            <span class="tm-typeaction-stat__label">Actions de formation</span>
-                            <span class="tm-typeaction-stat__value">{{ stats.actions_total }}</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+    {% tm_hero title="Types d'actions" subtitle="Centralisez les catégories utilisées pour qualifier les actions de formation." icon="bi bi-tag" actions=hero_actions stats=hero_stats theme="primary" %}
 
     <section class="section">
         <div class="card tm-listing-card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h4 class="card-title mb-0">Catalogue des types d'actions</h4>
+                {% if can_manage %}
                 <a href="{% url 'typeaction_create' %}" class="btn btn-primary btn-sm">
                     <i class="bi bi-tag-fill me-2"></i>Nouveau type d'action
                 </a>
+                {% endif %}
             </div>
             <div class="card-body">
-                {# Custom Search Input #}
-                <div class="custom-search-container">
+                <div class="custom-search-container mb-3">
                     <input type="text" id="searchInput" class="custom-search-input form-control" placeholder="Recherche par code, libellé...">
                 </div>
 
                 <div class="table-responsive">
-                    <table class="table table-striped" id="typeActionTable">
+                    <table class="table table-hover tm-table" id="typeActionTable">
                         <thead>
                             <tr>
                                 <th style="width: 15%;">Code</th>
-                                <th style="width: 40%;">Libellé</th>
-                                <th style="width: 15%;">Actions</th>
-                                <th style="width: 15%;">Statut</th>
-                                <th style="width: 15%;">Actions</th>
+                                <th style="width: 45%;">Libellé</th>
+                                <th style="width: 15%;">Actions liées</th>
+                                <th style="width: 10%;">Statut</th>
+                                <th style="width: 15%;">Gestion</th>
                             </tr>
                         </thead>
                         <tbody id="typeActionTableBody">
                             {% if typeAction_list %}
                             {% for item in object_list %}
                             <tr>
-                                <td><a href="{% url 'typeaction' item.pk %}" class="tm-typeaction-row__title">{{ item.code }}</a></td>
-                                <td>{{ item.libelle }}</td>
-                                <td><span class="badge bg-primary">{{ item.actions_count }}</span></td>
+                                <td>
+                                    <a href="{% url 'typeaction' item.pk %}" class="tm-action-row__title">{{ item.code }}</a>
+                                </td>
+                                <td>
+                                    {{ item.libelle }}
+                                </td>
+                                <td>
+                                    <span class="badge bg-light-primary text-primary">{{ item.actions_count }}</span>
+                                </td>
                                 <td>
                                     {% if item.active %}
-                                    <span class="badge bg-success">Actif</span>
+                                    <span class="badge bg-light-success text-success">Actif</span>
                                     {% else %}
-                                    <span class="badge bg-danger">Inactif</span>
+                                    <span class="badge bg-light-danger text-danger">Inactif</span>
                                     {% endif %}
                                 </td>
                                 <td>
@@ -270,14 +73,14 @@
                             {% endfor %}
                             {% else %}
                             <tr id="noResultsRow">
-                                <td colspan="4" class="no-results-message">Aucun type d'action enregistré.</td> {# Adjusted colspan #}
+                                <td colspan="5" class="text-center p-5 text-muted">Aucun type d'action enregistré.</td>
                             </tr>
                             {% endif %}
                         </tbody>
                     </table>
                 </div>
 
-                {# Custom Pagination (Django's pagination) #}
+                {% if is_paginated %}
                 <div class="d-flex justify-content-between align-items-center mt-3">
                     <div class="dataTable-info">
                         Page {{ page_obj.number }} sur {{ page_obj.paginator.num_pages }}
@@ -295,16 +98,16 @@
                         <li class="page-item active"><a href="#" class="page-link">{{ page_obj.number }}</a></li>
 
                         {% if page_obj.has_next %}
-                        <li class=" page-item">
+                        <li class="page-item">
                             <a href="?page={{ page_obj.next_page_number }}" class="page-link">
                                 {{ page_obj.next_page_number }}
                             </a>
-                            </li>
+                        </li>
                         <li class="page-item pager"><a href="?page={{ page_obj.paginator.num_pages }}" class="page-link">&raquo;</a></li>
                         {% endif %}
                     </ul>
                 </div>
-
+                {% endif %}
             </div>
         </div>
     </section>
@@ -316,20 +119,16 @@
     document.addEventListener('DOMContentLoaded', function() {
         const searchInput = document.getElementById('searchInput');
         const tableBody = document.getElementById('typeActionTableBody');
-        const allRows = Array.from(tableBody.querySelectorAll('tr')); // Get all original rows
+        const allRows = Array.from(tableBody.querySelectorAll('tr')).filter(row => row.id !== 'noResultsRow');
         let noResultsRow = document.getElementById('noResultsRow');
 
-        // If noResultsRow doesn't exist initially, create a placeholder
-        if (!noResultsRow) {
-            noResultsRow = document.createElement('tr');
-            noResultsRow.id = 'noResultsRow';
-            const td = document.createElement('td');
-            td.colSpan = 4; // Adjusted colspan for new columns
-            td.className = 'no-results-message';
-            td.textContent = 'Aucun type d\'action trouvé.';
-            noResultsRow.appendChild(td);
-            noResultsRow.style.display = 'none'; // Hide by default
-            tableBody.appendChild(noResultsRow);
+        function ensureNoResultsRow() {
+            if (!noResultsRow) {
+                noResultsRow = document.createElement('tr');
+                noResultsRow.id = 'noResultsRow';
+                noResultsRow.innerHTML = '<td colspan="5" class="text-center p-5 text-muted">Aucun type d\'action trouvé.</td>';
+                tableBody.appendChild(noResultsRow);
+            }
         }
 
         function performSearch() {
@@ -337,7 +136,6 @@
             let resultsFound = false;
 
             allRows.forEach(row => {
-                // Assuming Code is at index 0, Libellé is at index 1
                 const codeCell = row.cells[0];
                 const libelleCell = row.cells[1];
 
@@ -345,28 +143,22 @@
                 const libelle = libelleCell ? libelleCell.textContent.toLowerCase() : '';
 
                 if (code.includes(searchTerm) || libelle.includes(searchTerm)) {
-                    row.style.display = ''; // Show row
+                    row.style.display = '';
                     resultsFound = true;
                 } else {
-                    row.style.display = 'none'; // Hide row
+                    row.style.display = 'none';
                 }
             });
 
-            if (resultsFound) {
-                noResultsRow.style.display = 'none';
-            } else {
-                noResultsRow.style.display = '';
-            }
+            ensureNoResultsRow();
+            noResultsRow.style.display = resultsFound ? 'none' : '';
         }
 
-        // Attach event listener for keyup on the search input
         searchInput.addEventListener('keyup', performSearch);
-
-        // Initial display check for no results if the list is empty
-        if (allRows.length === 0 && !noResultsRow.textContent.includes('Aucun type d\'action enregistré.')) {
-             noResultsRow.style.display = '';
-             noResultsRow.textContent = 'Aucun type d\'action enregistré.';
-        } else if (allRows.length > 0) {
+        ensureNoResultsRow();
+        if (allRows.length === 0) {
+            noResultsRow.style.display = '';
+        } else {
             noResultsRow.style.display = 'none';
         }
     });

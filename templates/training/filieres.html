@@ -1,312 +1,122 @@
 {% extends "base.html" %}
 {% load static %}
+{% load tm_tags %}
 
-{% block title %}Référentiel des filières{% endblock title %}
+{% block title %}Répertoire des filières{% endblock title %}
 {% block page_header %}Référentiel des filières{% endblock page_header %}
 
 {% block style %}
+<link rel="stylesheet" href="{% static 'assets/css/training-manager.css' %}">
 <style>
-    /* Custom styles for search input */
-    .custom-search-container {
-        display: flex;
-        gap: 0.5rem;
-        margin-bottom: 1rem;
-    }
-    .custom-search-input {
-        flex-grow: 1;
-        border: 1px solid #ced4da;
-        border-radius: 0.5rem;
-        padding: 0.5rem 1rem;
-        max-width: 300px;
-    }
-    .custom-search-input:focus {
-        border-color: #435ebe;
-        box-shadow: 0 0 0 0.2rem rgba(67, 94, 190, 0.25);
-        outline: none;
-    }
-    .no-results-message {
-        text-align: center;
-        padding: 1rem;
-        color: #6c757d;
-    }
-
-    /* Table styling */
-    .table {
-        width: 100%;
-        border-collapse: separate;
-        border-spacing: 0;
-        border-radius: 1rem;
-        overflow: hidden;
-    }
-
-    .table thead th {
-        background-color: #f8f9fa;
-        color: #25396f;
-        font-weight: 700;
-        padding: 1rem 1.5rem;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-        text-align: left;
-    }
-
-    .table tbody tr {
-        transition: background-color 0.2s ease;
-    }
-
-    .table tbody tr:nth-of-type(odd) {
-        background-color: #ffffff;
-    }
-
-    .table tbody tr:nth-of-type(even) {
-        background-color: #fcfdff;
-    }
-
-    .table tbody tr:hover {
-        background-color: #eef2f7;
-    }
-
-    .table tbody td {
-        padding: 0.8rem 1.5rem;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.03);
-        color: #495057;
-    }
-
-    .table tbody td a {
-        color: #435ebe;
-        text-decoration: none;
-    }
-
-    .table tbody td a:hover {
-        text-decoration: underline;
-    }
-
-    /* Pagination styling */
-    .pagination {
-        margin-bottom: 0;
-    }
-
-    .pagination .page-item {
-        margin: 0 0.2rem;
-    }
-
-    .pagination .page-link {
-        border-radius: 0.5rem;
-        padding: 0.5rem 0.9rem;
-        font-size: 0.9rem;
-        color: #435ebe;
-        border: 1px solid #e9ecef;
-        transition: all 0.2s ease;
-    }
-
-    .pagination .page-item.active .page-link {
-        background-color: #435ebe;
-        border-color: #435ebe;
-        color: #fff;
-        box-shadow: 0 2px 8px rgba(67, 94, 190, 0.2);
-    }
-
-    .pagination .page-link:hover:not(.active) {
-        background-color: #f0f1f5;
-        border-color: #d8dce3;
-    }
-
-    .pagination .page-item.pager .page-link {
-        font-weight: bold;
-    }
-
-    .pagination .page-item.disabled .page-link {
-        color: #adb5bd;
-        pointer-events: none;
-        background-color: #ffffff;
-        border-color: #e9ecef;
-    }
-
-    /* Specific styles for filiere list */
-    .tm-filiere-hero {
-        background:
-            radial-gradient(circle at top right, rgba(67, 94, 190, 0.18), transparent 35%),
-            linear-gradient(135deg, #f7f8fc 0%, #eef3ff 100%);
-        border: 1px solid rgba(67, 94, 190, 0.12);
-        border-radius: 1.25rem;
-        overflow: hidden;
-    }
-
-    .tm-filiere-stat {
-        background: rgba(255, 255, 255, 0.76);
-        border: 1px solid rgba(67, 94, 190, 0.1);
-        border-radius: 1rem;
-        padding: 1rem;
-        box-shadow: 0 10px 24px rgba(17, 24, 39, 0.04);
-        height: 100%;
-    }
-
-    .tm-filiere-stat__label {
-        display: block;
-        font-size: 0.78rem;
-        letter-spacing: 0.04em;
-        text-transform: uppercase;
-        color: #6c757d;
-        margin-bottom: 0.35rem;
-    }
-
-    .tm-filiere-stat__value {
-        font-size: 1.35rem;
-        font-weight: 700;
-        color: #25396f;
-    }
-
     .tm-filiere-row__title {
         color: #25396f;
         font-weight: 700;
         text-decoration: none;
-    }
-
-    .tm-filiere-row__meta {
-        color: #7b8190;
-        font-size: 0.85rem;
     }
 </style>
 {% endblock style %}
 
 {% block content %}
 <div class="page-heading">
-    <section class="tm-filiere-hero p-4 p-lg-5 mb-4">
-        <div class="row g-4 align-items-center">
-            <div class="col-12 col-xl-6">
-                <div class="tm-section-titlebar mb-3">
-                    <span class="tm-section-titlebar__icon"><i class="bi bi-signpost-2"></i></span>
-                    <div class="tm-section-titlebar__text">
-                        <h3>Filières</h3>
-                        <p>Gérez les filières et leurs métiers associés.</p> {# Changed "formations" to "métiers" #}
-                    </div>
-                </div>
-                <div class="d-flex flex-wrap gap-2">
-                    <a href="{% url 'filiere_create' %}" class="btn btn-primary">
-                        <i class="bi bi-signpost-2 me-2"></i>Nouvelle filière
-                    </a>
-                    {# Add other relevant buttons here if needed #}
-                </div>
-            </div>
-            <div class="col-12 col-xl-6">
-                <div class="row g-3">
-                    <div class="col-6 col-md-4">
-                        <div class="tm-filiere-stat">
-                            <span class="tm-filiere-stat__label">Total Filières</span>
-                            <span class="tm-filiere-stat__value">{{ stats.total }}</span>
-                        </div>
-                    </div>
-                    <div class="col-6 col-md-4">
-                        <div class="tm-filiere-stat">
-                            <span class="tm-filiere-stat__label">Actives</span>
-                            <span class="tm-filiere-stat__value">{{ stats.active }}</span>
-                        </div>
-                    </div>
-                    <div class="col-6 col-md-4">
-                        <div class="tm-filiere-stat">
-                            <span class="tm-filiere-stat__label">Inactives</span>
-                            <span class="tm-filiere-stat__value">{{ stats.inactive }}</span>
-                        </div>
-                    </div>
-                    <div class="col-6 col-md-4">
-                        <div class="tm-filiere-stat">
-                            <span class="tm-filiere-stat__label">Total Métiers</span> {# Changed "Formations" to "Métiers" #}
-                            <span class="tm-filiere-stat__value">{{ stats.total_metiers }}</span> {# Changed total_formations to total_metiers #}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+    {% tm_hero title="Filières" subtitle="Gérez les domaines de spécialité et les formations associées par service." icon="bi bi-signpost-2" actions=hero_actions stats=hero_stats theme="primary" %}
 
     <section class="section">
         <div class="card tm-listing-card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h4 class="card-title mb-0">Catalogue des filières</h4>
+                {% if can_manage %}
                 <a href="{% url 'filiere_create' %}" class="btn btn-primary btn-sm">
-                    <i class="bi bi-signpost-2 me-2"></i>Nouvelle filière
+                    <i class="bi bi-plus-circle me-2"></i>Nouvelle filière
                 </a>
+                {% endif %}
             </div>
             <div class="card-body">
-                {# Custom Search Input #}
-                <div class="custom-search-container">
-                    <input type="text" id="searchInput" class="custom-search-input form-control" placeholder="Recherche par nom, service...">
+                {# Quick Filters #}
+                <div class="d-flex flex-wrap gap-2 mb-3">
+                    <button class="btn btn-outline-secondary btn-sm filter-btn active" data-status="all">Toutes</button>
+                    <button class="btn btn-outline-success btn-sm filter-btn" data-status="Actif">Actives</button>
+                    <button class="btn btn-outline-danger btn-sm filter-btn" data-status="Inactif">Inactives</button>
+                </div>
+
+                <div class="custom-search-container mb-3">
+                    <input type="text" id="searchInput" class="custom-search-input form-control" placeholder="Recherche par nom ou service...">
                 </div>
 
                 <div class="table-responsive">
-                    <table class="table table-striped" id="filiereTable">
+                    <table class="table table-hover" id="filiereTable">
                         <thead>
                             <tr>
-                                <th style="width: 5%;">N°</th>
-                                <th style="width: 30%;">Nom</th>
-                                <th style="width: 25%;">Service</th>
-                                <th style="width: 10%;">Métiers</th> {# Changed Formations to Métiers #}
-                                <th style="width: 10%;">Statut</th>
-                                <th style="width: 15%;">Actions</th>
+                                <th>Filière</th>
+                                <th>Service de rattachement</th>
+                                <th>Formations</th>
+                                <th>Statut</th>
+                                <th class="text-end">Actions</th>
                             </tr>
                         </thead>
                         <tbody id="filiereTableBody">
                             {% if filiere_list %}
                             {% for item in object_list %}
-                            <tr>
-                                <td>{{ forloop.counter }}</td>
-                                <td><a href="{% url 'filiere' item.pk %}" class="tm-filiere-row__title">{{ item.nom }}</a></td>
-                                <td>{{ item.service.nom|default:"-" }}</td>
-                                <td><span class="badge bg-primary">{{ item.metiers_count }}</span></td> {# Changed formations_count to metiers_count #}
+                            <tr class="filiere-row" data-status-label="{% if item.active %}Actif{% else %}Inactif{% endif %}">
                                 <td>
-                                    {% if item.active %}
-                                    <span class="badge bg-success">Actif</span>
-                                    {% else %}
-                                    <span class="badge bg-danger">Inactif</span>
-                                    {% endif %}
+                                    <a href="{% url 'filiere' item.pk %}" class="tm-filiere-row__title">{{ item.nom }}</a>
+                                    <div class="small text-muted">ID #FIL-{{ item.pk }}</div>
                                 </td>
                                 <td>
-                                    <div class="d-flex gap-2">
-                                        <a href="{% url 'filiere_update' item.pk %}" class="btn btn-sm btn-outline-primary" title="Modifier">
+                                    <div class="fw-bold text-dark">{{ item.service.nom|default:"-" }}</div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-light-primary text-primary">{{ item.metiers_count }} Formations</span>
+                                </td>
+                                <td>
+                                    {% if item.active %}
+                                    <span class="badge bg-light-success text-success w-100">Actif</span>
+                                    {% else %}
+                                    <span class="badge bg-light-danger text-danger w-100">Inactif</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">
+                                    <div class="d-flex gap-2 justify-content-end">
+                                        <a href="{% url 'filiere' item.pk %}" class="btn btn-sm btn-outline-primary" title="Voir">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        {% if can_manage %}
+                                        <a href="{% url 'filiere_update' item.pk %}" class="btn btn-sm btn-outline-info" title="Modifier">
                                             <i class="bi bi-pencil"></i>
                                         </a>
                                         <a href="{% url 'filiere_delete' item.pk %}" class="btn btn-sm btn-outline-danger" title="Supprimer">
                                             <i class="bi bi-trash"></i>
                                         </a>
+                                        {% endif %}
                                     </div>
                                 </td>
                             </tr>
                             {% endfor %}
                             {% else %}
                             <tr id="noResultsRow">
-                                <td colspan="6" class="no-results-message">Aucune filière enregistrée.</td>
+                                <td colspan="5" class="text-center p-5 text-muted">Aucune filière enregistrée.</td>
                             </tr>
                             {% endif %}
                         </tbody>
                     </table>
                 </div>
 
-                {# Custom Pagination (Django's pagination) #}
+                {% if is_paginated %}
                 <div class="d-flex justify-content-between align-items-center mt-3">
-                    <div class="dataTable-info">
-                        Page {{ page_obj.number }} sur {{ page_obj.paginator.num_pages }}
-                    </div>
-                    <ul class="pagination pagination-primary float-end">
-                        {% if page_obj.has_previous %}
-                        <li class="page-item pager"><a href="?page=1" class="page-link">&laquo;</a></li>
-                        <li class="page-item">
-                            <a href="?page={{ page_obj.previous_page_number }}" class="page-link">
-                                {{ page_obj.previous_page_number }}
-                            </a>
-                        </li>
-                        {% endif %}
-
-                        <li class="page-item active"><a href="#" class="page-link">{{ page_obj.number }}</a></li>
-
-                        {% if page_obj.has_next %}
-                        <li class=" page-item">
-                            <a href="?page={{ page_obj.next_page_number }}" class="page-link">
-                                {{ page_obj.next_page_number }}
-                            </a>
-                            </li>
-                        <li class="page-item pager"><a href="?page={{ page_obj.paginator.num_pages }}" class="page-link">&raquo;</a></li>
-                        {% endif %}
-                    </ul>
+                    <div class="text-muted small">Page {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</div>
+                    <nav>
+                        <ul class="pagination pagination-primary pagination-sm mb-0">
+                            {% if page_obj.has_previous %}
+                            <li class="page-item"><a href="?page=1" class="page-link">&laquo;</a></li>
+                            {% endif %}
+                            <li class="page-item active"><a href="#" class="page-link">{{ page_obj.number }}</a></li>
+                            {% if page_obj.has_next %}
+                            <li class="page-item"><a href="?page={{ page_obj.next_page_number }}" class="page-link">{{ page_obj.next_page_number }}</a></li>
+                            <li class="page-item"><a href="?page={{ page_obj.paginator.num_pages }}" class="page-link">&raquo;</a></li>
+                            {% endif %}
+                        </ul>
+                    </nav>
                 </div>
-
+                {% endif %}
             </div>
         </div>
     </section>
@@ -318,59 +128,74 @@
     document.addEventListener('DOMContentLoaded', function() {
         const searchInput = document.getElementById('searchInput');
         const tableBody = document.getElementById('filiereTableBody');
-        const allRows = Array.from(tableBody.querySelectorAll('tr')); // Get all original rows
-        let noResultsRow = document.getElementById('noResultsRow');
+        const allRows = Array.from(tableBody.querySelectorAll('.filiere-row'));
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        let currentStatusFilter = 'all';
 
-        // If noResultsRow doesn't exist initially, create a placeholder
-        if (!noResultsRow) {
-            noResultsRow = document.createElement('tr');
-            noResultsRow.id = 'noResultsRow';
-            const td = document.createElement('td');
-            td.colSpan = 6; // Adjusted colspan for new columns
-            td.className = 'no-results-message';
-            td.textContent = 'Aucune filière trouvée.';
-            noResultsRow.appendChild(td);
-            noResultsRow.style.display = 'none'; // Hide by default
-            tableBody.appendChild(noResultsRow);
-        }
-
-        function performSearch() {
+        function performSearchAndFilter() {
             const searchTerm = searchInput.value.toLowerCase().trim();
             let resultsFound = false;
 
             allRows.forEach(row => {
-                // Assuming Nom is at index 1, Service is at index 2
-                const nomCell = row.cells[1];
-                const serviceCell = row.cells[2];
+                const nameCell = row.cells[0];
+                const serviceCell = row.cells[1];
+                const rowStatus = row.getAttribute('data-status-label');
 
-                const nom = nomCell ? nomCell.textContent.toLowerCase() : '';
+                const name = nameCell ? nameCell.textContent.toLowerCase() : '';
                 const service = serviceCell ? serviceCell.textContent.toLowerCase() : '';
 
-                if (nom.includes(searchTerm) || service.includes(searchTerm)) {
-                    row.style.display = ''; // Show row
+                const matchesSearch = name.includes(searchTerm) || service.includes(searchTerm);
+                const matchesFilter = currentStatusFilter === 'all' || rowStatus === currentStatusFilter;
+
+                if (matchesSearch && matchesFilter) {
+                    row.style.display = '';
                     resultsFound = true;
                 } else {
-                    row.style.display = 'none'; // Hide row
+                    row.style.display = 'none';
                 }
             });
 
-            if (resultsFound) {
-                noResultsRow.style.display = 'none';
-            } else {
-                noResultsRow.style.display = '';
+            const noResultsRow = document.getElementById('noResultsRow');
+            if (noResultsRow) {
+                if (!resultsFound && allRows.length > 0) {
+                    if (!document.getElementById('tempNoResults')) {
+                        const tr = document.createElement('tr');
+                        tr.id = 'tempNoResults';
+                        tr.innerHTML = `<td colspan="5" class="text-center p-4 text-muted">Aucun résultat pour cette recherche.</td>`;
+                        tableBody.appendChild(tr);
+                    }
+                } else {
+                    const temp = document.getElementById('tempNoResults');
+                    if (temp) temp.remove();
+                }
             }
         }
 
-        // Attach event listener for keyup on the search input
-        searchInput.addEventListener('keyup', performSearch);
-
-        // Initial display check for no results if the list is empty
-        if (allRows.length === 0 && !noResultsRow.textContent.includes('Aucune filière enregistrée.')) {
-             noResultsRow.style.display = '';
-             noResultsRow.textContent = 'Aucune filière enregistrée.';
-        } else if (allRows.length > 0) {
-            noResultsRow.style.display = 'none';
+        if (searchInput) {
+            searchInput.addEventListener('keyup', performSearchAndFilter);
         }
+
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                filterBtns.forEach(b => b.classList.remove('active', 'btn-success', 'btn-danger'));
+                filterBtns.forEach(b => b.classList.add('btn-outline-secondary'));
+
+                this.classList.remove('btn-outline-secondary');
+                this.classList.add('active');
+
+                const status = this.getAttribute('data-status');
+                if (status === 'all') {
+                    // keep current state
+                } else if (status === 'Actif') {
+                    this.classList.add('btn-success');
+                } else if (status === 'Inactif') {
+                    this.classList.add('btn-danger');
+                }
+
+                currentStatusFilter = status;
+                performSearchAndFilter();
+            });
+        });
     });
 </script>
 {% endblock script %}

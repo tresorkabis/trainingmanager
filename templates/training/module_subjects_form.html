@@ -1,0 +1,226 @@
+{% extends "base.html" %}
+{% load static %}
+{% load tm_tags %}
+
+{% block title %}{{ titre }}{% endblock title %}
+{% block page_header %}{{ titre }}{% endblock page_header %}
+
+{% block style %}
+<link rel="stylesheet" href="{% static 'assets/css/training-manager.css' %}">
+<style>
+    .bg-light-alt { background-color: #f8f9fa; }
+    .subject-row { transition: all 0.3s ease; }
+    .subject-row:hover { border-color: #435ebe !important; }
+</style>
+{% endblock style %}
+
+{% block content %}
+<div class="page-heading">
+    {% tm_hero title=titre subtitle="Définissez les sujets abordés dans ce module pour un suivi précis de la progression." icon="bi bi-journal-check" actions=hero_actions theme="primary" %}
+
+    <section class="section">
+        <form action="" method="post" id="subjects-form">
+            {% csrf_token %}
+            {{ formset.management_form }}
+
+            <div class="card tm-detail-card">
+                <div class="card-header border-bottom d-flex justify-content-between align-items-center">
+                    <h4 class="card-title mb-0">Liste des sujets</h4>
+                    <span class="badge bg-light-primary text-primary">{{ module.titre }}</span>
+                </div>
+                <div class="card-body pt-4">
+                    <div class="alert alert-info py-2 mb-4 d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="bi bi-clock-history me-2"></i>
+                            Durée totale calculée : <strong id="total-duration-display">0</strong> heures
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <label class="small fw-bold mb-0">Durée/séance (h) :</label>
+                            <input type="number" id="hours-per-session" name="hours-per-session" value="2" class="form-control form-control-sm" style="width: 60px;">
+                        </div>
+                    </div>
+
+                    {% if formset.non_form_errors %}
+                        <div class="alert alert-danger">{{ formset.non_form_errors }}</div>
+                    {% endif %}
+
+                    <div id="subjects-container">
+                        {% for form in formset %}
+                            <div class="subject-row mb-4 p-3 border rounded-3 bg-light-alt">
+                                {{ form.id }}
+                                <div class="row g-3">
+                                    <div class="col-md-7">
+                                        <div class="form-group mb-2">
+                                            <label class="form-label fw-bold small">Titre du sujet</label>
+                                            {{ form.titre }}
+                                            {% if form.titre.errors %}<div class="text-danger small">{{ form.titre.errors.0 }}</div>{% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group mb-2">
+                                            <label class="form-label fw-bold small">Séances prévues</label>
+                                            {{ form.nombre_seances }}
+                                            {% if form.nombre_seances.errors %}<div class="text-danger small">{{ form.nombre_seances.errors.0 }}</div>{% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="form-group mb-2">
+                                            <label class="form-label fw-bold small">Ordre</label>
+                                            {{ form.ordre }}
+                                            {% if form.ordre.errors %}<div class="text-danger small">{{ form.ordre.errors.0 }}</div>{% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="form-group mb-0">
+                                            <label class="form-label fw-bold small">Description / Objectifs (Optionnel)</label>
+                                            {{ form.description }}
+                                            {% if form.description.errors %}<div class="text-danger small">{{ form.description.errors.0 }}</div>{% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {% if formset.can_delete %}
+                                    <div class="mt-2 text-end">
+                                        <div class="form-check form-check-inline">
+                                            {{ form.DELETE }}
+                                            <label class="form-check-label text-danger small" for="{{ form.DELETE.id_for_label }}">Supprimer ce sujet</label>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="text-center mb-4">
+                        <button type="button" id="add-subject-btn" class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-plus-circle me-1"></i> Ajouter un sujet
+                        </button>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+                        <p class="text-muted small mb-0"><i class="bi bi-info-circle me-1"></i>L'ordre définit la séquence d'enseignement suggérée.</p>
+                        <div class="d-flex gap-2">
+                            <a href="{% url 'formation' module.formation.pk %}" class="btn btn-light-secondary">Annuler</a>
+                            <button type="submit" class="btn btn-primary px-4">
+                                <i class="bi bi-save me-2"></i>Enregistrer les sujets
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </section>
+</div>
+
+{# Template pour le nouveau formulaire (JS) #}
+<div id="empty-form-template" style="display: none;">
+    <div class="subject-row mb-4 p-3 border rounded-3 bg-light-alt">
+        <div class="row g-3">
+            <div class="col-md-7">
+                <div class="form-group mb-2">
+                    <label class="form-label fw-bold small">Titre du sujet</label>
+                    {{ formset.empty_form.titre }}
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group mb-2">
+                    <label class="form-label fw-bold small">Séances prévues</label>
+                    {{ formset.empty_form.nombre_seances }}
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group mb-2">
+                    <label class="form-label fw-bold small">Ordre</label>
+                    {{ formset.empty_form.ordre }}
+                </div>
+            </div>
+            <div class="col-12">
+                <div class="form-group mb-0">
+                    <label class="form-label fw-bold small">Description / Objectifs (Optionnel)</label>
+                    {{ formset.empty_form.description }}
+                </div>
+            </div>
+        </div>
+        <div class="mt-2 text-end">
+            <button type="button" class="btn btn-link btn-sm text-danger remove-new-row">
+                <i class="bi bi-x-circle me-1"></i>Retirer
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block script %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const container = document.getElementById('subjects-container');
+        const addButton = document.getElementById('add-subject-btn');
+        const totalForms = document.getElementById('id_subjects-TOTAL_FORMS');
+        const emptyTemplate = document.getElementById('empty-form-template').innerHTML;
+        const totalDisplay = document.getElementById('total-duration-display');
+        const hoursPerSessionInput = document.getElementById('hours-per-session');
+
+        function updateTotals() {
+            let totalSessions = 0;
+            const sessionInputs = container.querySelectorAll('input[name$="-nombre_seances"]');
+            const hps = parseFloat(hoursPerSessionInput.value) || 0;
+
+            sessionInputs.forEach(input => {
+                const row = input.closest('.subject-row');
+                const deleteInput = row.querySelector('input[name$="-DELETE"]');
+                if (!deleteInput || !deleteInput.checked) {
+                    totalSessions += parseInt(input.value) || 0;
+                }
+            });
+
+            totalDisplay.textContent = totalSessions * hps;
+        }
+
+        container.addEventListener('input', function(e) {
+            if (e.target.name && e.target.name.endsWith('-nombre_seances')) {
+                updateTotals();
+            }
+        });
+
+        container.addEventListener('change', function(e) {
+            if (e.target.name && e.target.name.endsWith('-DELETE')) {
+                updateTotals();
+            }
+        });
+
+        hoursPerSessionInput.addEventListener('input', updateTotals);
+
+        addButton.addEventListener('click', function() {
+            const currentCount = parseInt(totalForms.value);
+            const newFormHtml = emptyTemplate.replace(/__prefix__/g, currentCount);
+
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = newFormHtml;
+            const newNode = tempDiv.firstElementChild;
+
+            container.appendChild(newNode);
+            totalForms.value = currentCount + 1;
+
+            newNode.querySelector('.remove-new-row').addEventListener('click', function() {
+                newNode.remove();
+                updateTotals();
+            });
+
+            // Valeur par défaut
+            const nInput = newNode.querySelector('input[name$="-nombre_seances"]');
+            if (nInput) nInput.value = 1;
+
+            // Auto-incrémenter l'ordre
+            const allOrderInputs = container.querySelectorAll('input[name$="-ordre"]');
+            if (allOrderInputs.length > 1) {
+                const prevValue = parseInt(allOrderInputs[allOrderInputs.length - 2].value) || 0;
+                newNode.querySelector('input[name$="-ordre"]').value = prevValue + 1;
+            }
+
+            updateTotals();
+        });
+
+        updateTotals();
+    });
+</script>
+{% endblock script %}

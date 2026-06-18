@@ -1,84 +1,18 @@
 {% extends "base.html" %}
 {% load static %}
-{% load widget_tweaks %} {# Chargement du filtre widget_tweaks #}
+{% load widget_tweaks %}
+{% load tm_tags %}
 
 {% block title %}{{ titre }}{% endblock title %}
-{% block page_header %}{{ titre }}{% endblock page_header %} {# Le titre seul reste ici #}
+{% block page_header %}{{ titre }}{% endblock page_header %}
 
 {% block style %}
-<style>
-    /* Styles pour la section hero (copié de stagiaires.html pour cohérence) */
-    .tm-stagiaire-hero {
-        background:
-            radial-gradient(circle at top right, rgba(67, 94, 190, 0.18), transparent 35%),
-            linear-gradient(135deg, #f7f8fc 0%, #eef3ff 100%);
-        border: 1px solid rgba(67, 94, 190, 0.12);
-        border-radius: 1.25rem;
-        overflow: hidden;
-    }
-
-    /* Styles pour les titres de section (copié de stagiaires.html) */
-    .tm-section-titlebar {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-    }
-
-    .tm-section-titlebar__icon {
-        font-size: 2.5rem;
-        color: #435ebe;
-    }
-
-    .tm-section-titlebar__text h3 {
-        font-size: 1.8rem;
-        font-weight: 700;
-        color: #25396f;
-        margin-bottom: 0.2rem;
-    }
-
-    .tm-section-titlebar__text p {
-        font-size: 0.9rem;
-        color: #6c757d;
-        margin-bottom: 0;
-    }
-
-    /* Styles pour les cartes de détail (copié de stagiaire.html) */
-    .tm-detail-card {
-        border: 1px solid rgba(15, 23, 42, 0.07);
-        border-radius: 1rem;
-        box-shadow: 0 16px 32px rgba(15, 23, 42, 0.05);
-    }
-
-    /* Custom extra-small button style (copié de stagiaire.html) */
-    .btn-xs {
-        padding: 0.2rem 0.5rem; /* Réduit le padding */
-        font-size: 0.75rem; /* Réduit la taille de la police */
-        line-height: 1.5;
-        border-radius: 0.2rem;
-    }
-</style>
+<link rel="stylesheet" href="{% static 'assets/css/training-manager.css' %}">
 {% endblock style %}
 
 {% block content %}
 <div class="page-heading">
-    <section class="tm-stagiaire-hero p-4 p-lg-5 mb-4"> {# Section hero pour le formulaire #}
-        <div class="d-flex justify-content-end mb-3">
-            <a href="{% url 'paiements' %}" class="btn btn-secondary btn-xs">
-                <i class="bi bi-arrow-left"></i> Retour à la liste
-            </a>
-        </div>
-        <div class="row g-4 align-items-center">
-            <div class="col-12">
-                <div class="tm-section-titlebar mb-3">
-                    <span class="tm-section-titlebar__icon"><i class="bi bi-wallet-fill"></i></span> {# Icône pour le formulaire paiement #}
-                    <div class="tm-section-titlebar__text">
-                        <h3>{{ titre }}</h3>
-                        <p>{% if object %}Modifier un paiement existant.{% else %}Enregistrer un nouveau paiement.{% endif %}</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+    {% tm_hero title=titre subtitle=object|yesno:"Modifier un paiement existant.,Enregistrer un nouveau paiement." icon="bi bi-wallet-fill" theme="success" %}
 
     <section class="section">
         <div class="card tm-detail-card"> {# Utilisation de tm-detail-card pour la cohérence #}

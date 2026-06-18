@@ -56,8 +56,6 @@ class Stagiaire(models.Model):
     categorie = models.ForeignKey(Categorie, on_delete=models.CASCADE)
     
     # Filière (stagiaire peut être rattaché à une filière/formation)
-    filiere = models.ForeignKey(Filiere, on_delete=models.SET_NULL, null=True, blank=True)
-
     # New fields for "dans l'emploi" category
     entreprise = models.ForeignKey(Entreprise, on_delete=models.SET_NULL, null=True, blank=True)
     fonction = models.CharField(max_length=100, blank=True, null=True)

@@ -1,163 +1,163 @@
 {% extends "base.html" %}
 {% load static %}
+{% load tm_tags %}
 
 {% block title %}Détail du Paiement{% endblock title %}
 {% block page_header %}Détail du Paiement{% endblock page_header %} {# Le titre seul reste ici #}
 
 {% block style %}
+<link rel="stylesheet" href="{% static 'assets/css/training-manager.css' %}">
 <style>
-    /* Styles pour la section hero (copié de stagiaires.html pour cohérence) */
-    .tm-stagiaire-hero {
-        background:
-            radial-gradient(circle at top right, rgba(67, 94, 190, 0.18), transparent 35%),
-            linear-gradient(135deg, #f7f8fc 0%, #eef3ff 100%);
-        border: 1px solid rgba(67, 94, 190, 0.12);
-        border-radius: 1.25rem;
-        overflow: hidden;
-    }
-
-    /* Styles pour les titres de section (copié de stagiaires.html) */
-    .tm-section-titlebar {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-    }
-
-    .tm-section-titlebar__icon {
-        font-size: 2.5rem;
-        color: #435ebe;
-    }
-
-    .tm-section-titlebar__text h3 {
-        font-size: 1.8rem;
-        font-weight: 700;
-        color: #25396f;
-        margin-bottom: 0.2rem;
-    }
-
-    .tm-section-titlebar__text p {
-        font-size: 0.9rem;
-        color: #6c757d;
-        margin-bottom: 0;
-    }
-
-    /* Styles pour les cartes de détail (copié de stagiaire.html) */
-    .tm-detail-card {
-        border: 1px solid rgba(15, 23, 42, 0.07);
+    .bordereau-preview {
+        max-width: 100%;
         border-radius: 1rem;
-        box-shadow: 0 16px 32px rgba(15, 23, 42, 0.05);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease;
     }
-
-    /* Custom extra-small button style (copié de stagiaire.html) */
-    .btn-xs {
-        padding: 0.2rem 0.5rem; /* Réduit le padding */
-        font-size: 0.75rem; /* Réduit la taille de la police */
-        line-height: 1.5;
-        border-radius: 0.2rem;
+    .bordereau-preview:hover {
+        transform: scale(1.02);
     }
-
-    /* Style pour l'image du bordereau dans la colonne */
-    .bordereau-img {
-        width: 200px; /* Largeur fixe */
-        height: 200px; /* Hauteur fixe */
-        object-fit: cover; /* Recadre l'image pour remplir la zone sans la déformer */
-        border-radius: 1rem;
-        border: 1px solid #e9ecef;
-        margin-top: 1rem; /* Pour espacer de la description si elle est longue */
+    .receipt-header {
+        border-bottom: 2px dashed #e9ecef;
+        padding-bottom: 1.5rem;
+        margin-bottom: 1.5rem;
     }
 </style>
 {% endblock style %}
 
 {% block content %}
 <div class="page-heading">
-    <section class="tm-stagiaire-hero p-4 p-lg-5 mb-4"> {# Utilisation de tm-stagiaire-hero pour la cohérence #}
-        <div class="d-flex justify-content-end mb-3">
-            <a href="{% url 'paiements' %}" class="btn btn-secondary btn-xs">
-                <i class="bi bi-arrow-left"></i> Retour à la liste
-            </a>
-        </div>
-        <div class="row g-4 align-items-center">
-            <div class="col-12">
-                <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
-                    <div class="tm-section-titlebar mb-3 mb-md-0">
-                        <span class="tm-section-titlebar__icon"><i class="bi bi-wallet-fill"></i></span> {# Icône pour le détail paiement #}
-                        <div class="tm-section-titlebar__text">
-                            <h3>Paiement #{{ paiement.pk }}</h3> {# Titre plus spécifique #}
-                            <p>Détails du paiement effectué par <a href="{% url 'stagiaire' paiement.stagiaire.pk %}">{{ paiement.stagiaire.get_full_name }}</a>.</p> {# Description plus informative #}
+    {% tm_hero title="Détail du Paiement" subtitle="Consultation des informations de transaction et justificatifs." icon="bi bi-receipt" actions=hero_actions stats=hero_stats theme="success" %}
+
+    <section class="section">
+        <div class="row g-4">
+            <div class="col-12 col-lg-8">
+                <div class="card tm-detail-card h-100">
+                    <div class="card-body p-4">
+                        <div class="receipt-header d-flex justify-content-between align-items-start">
+                            <div>
+                                <h4 class="fw-bold mb-1">REÇU DE PAIEMENT</h4>
+                                <span class="badge bg-light-primary text-primary">Référence: {{ paiement.reference }}</span>
+                            </div>
+                            <div class="text-end">
+                                <h3 class="text-success fw-bold mb-0">{{ paiement.montant|floatformat:0 }} USD</h3>
+                                <small class="text-muted">{{ paiement.date_paiement|date:"d F Y" }}</small>
+                            </div>
+                        </div>
+
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <h6 class="text-muted small text-uppercase fw-bold mb-3">Émetteur (Stagiaire)</h6>
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="avatar avatar-xl me-3">
+                                        {% if paiement.stagiaire.photo %}
+                                            <img src="{{ paiement.stagiaire.photo.url }}" alt="Photo">
+                                        {% else %}
+                                            <div class="bg-light-primary text-primary d-flex align-items-center justify-content-center fw-bold" style="width: 48px; height: 48px; border-radius: 50%;">
+                                                {{ paiement.stagiaire.nom|slice:":1" }}{{ paiement.stagiaire.prenom|slice:":1" }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div>
+                                        <h5 class="mb-0">{{ paiement.stagiaire.get_full_name }}</h5>
+                                        <p class="text-muted small mb-0">{{ paiement.stagiaire.email|default:"Pas d'email" }}</p>
+                                        <a href="{% url 'stagiaire' paiement.stagiaire.pk %}" class="btn btn-link btn-sm p-0">Voir le profil</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="text-muted small text-uppercase fw-bold mb-3">Détails de l'Action</h6>
+                                {% if paiement.action %}
+                                    <h5 class="mb-1">{{ paiement.action.description }}</h5>
+                                    <p class="text-muted small mb-0">{{ paiement.action.formation.nom }}</p>
+                                    <a href="{% url 'action' paiement.action.pk %}" class="btn btn-link btn-sm p-0">Voir l'action</a>
+                                {% else %}
+                                    <p class="text-muted">Paiement libre (non rattaché)</p>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-12">
+                                <hr class="my-2">
+                            </div>
+
+                            <div class="col-md-6">
+                                <p class="mb-1 text-muted small">Mode de règlement</p>
+                                <p class="fw-bold">
+                                    {% if paiement.mode_paiement == 'ESPECES' %}
+                                        <i class="bi bi-cash me-2 text-success"></i>Espèces
+                                    {% else %}
+                                        <i class="bi bi-bank me-2 text-primary"></i>Virement Bancaire
+                                    {% endif %}
+                                </p>
+                            </div>
+                            <div class="col-md-6">
+                                <p class="mb-1 text-muted small">Motif du paiement</p>
+                                <p class="fw-bold">{{ paiement.motif|default:"Frais de formation" }}</p>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 p-3 bg-light rounded-3">
+                            <div class="row text-center g-3">
+                                <div class="col-4 border-end">
+                                    <small class="text-muted d-block">Coût Total</small>
+                                    <span class="fw-bold">{{ total_cout|default:"0"|floatformat:0 }} USD</span>
+                                </div>
+                                <div class="col-4 border-end">
+                                    <small class="text-muted d-block">Déjà payé</small>
+                                    <span class="fw-bold text-success">{{ total_paye|default:"0"|floatformat:0 }} USD</span>
+                                </div>
+                                <div class="col-4">
+                                    <small class="text-muted d-block">Solde restant</small>
+                                    <span class="fw-bold {% if solde_restant <= 0 %}text-success{% else %}text-danger{% endif %}">{{ solde_restant|default:"0"|floatformat:0 }} USD</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="d-flex gap-2">
-                        <a href="{% url 'paiement_update' paiement.pk %}" class="btn btn-primary btn-xs">
-                            <i class="bi bi-pencil"></i> Modifier
+                    <div class="card-footer bg-transparent border-top p-3 d-flex justify-content-end gap-2">
+                        <a href="{% url 'paiement_update' paiement.pk %}" class="btn btn-outline-primary">
+                            <i class="bi bi-pencil me-2"></i>Modifier
                         </a>
-                        <a href="{% url 'paiement_delete' paiement.pk %}" class="btn btn-danger btn-xs">
-                            <i class="bi bi-trash"></i> Supprimer
+                        <a href="{% url 'paiement_delete' paiement.pk %}" class="btn btn-outline-danger">
+                            <i class="bi bi-trash me-2"></i>Supprimer
                         </a>
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
 
-    <section class="section">
-        <div class="card tm-detail-card">
-            <div class="card-header">
-                <h4 class="card-title mb-1">Informations sur le paiement</h4>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-4"> {# Changé col-md-6 à col-md-4 #}
-                        <p><strong>Stagiaire:</strong> <a href="{% url 'stagiaire' paiement.stagiaire.pk %}">{{ paiement.stagiaire.get_full_name }}</a></p>
-                        <p><strong>Action de formation:</strong>
-                            {% if paiement.action %}
-                                <a href="{% url 'action' paiement.action.pk %}">{{ paiement.action.description }}</a>
-                            {% else %}
-                                N/A
-                            {% endif %}
-                        </p>
-                        <p><strong>Montant:</strong> {{ paiement.montant }}</p>
-                        <p><strong>Date de paiement:</strong> {{ paiement.date_paiement|date:"d/m/Y" }}</p>
-                        <p><strong>Coût total de la formation:</strong>
-                            {% if total_cout is not None %}
-                                {{ total_cout|floatformat:2 }}
-                            {% else %}
-                                N/A
-                            {% endif %}
-                        </p>
+            <div class="col-12 col-lg-4">
+                <div class="card tm-detail-card">
+                    <div class="card-header">
+                        <h5 class="card-title">Justificatif</h5>
                     </div>
-                    <div class="col-md-4"> {# Changé col-md-6 à col-md-4 #}
-                        <p><strong>Mode de paiement:</strong> {{ paiement.get_mode_paiement_display }}</p>
-                        <p><strong>Référence:</strong> {{ paiement.reference|default:"-" }}</p>
-                        <p><strong>Motif:</strong> {{ paiement.motif|default:"-" }}</p>
-                        <p><strong>Total déjà payé:</strong>
-                            {% if total_paye is not None %}
-                                {{ total_paye|floatformat:2 }}
-                            {% else %}
-                                N/A
-                            {% endif %}
-                        </p>
-                        <p><strong>Solde restant:</strong>
-                            {% if solde_restant is not None %}
-                                <span class="{% if solde_restant <= 0 %}text-success{% else %}text-danger{% endif %}">
-                                    {{ solde_restant|floatformat:2 }}
-                                </span>
-                            {% else %}
-                                N/A
-                            {% endif %}
-                        </p>
-                        <p><strong>Créé le:</strong> {{ paiement.created_at|date:"d/m/Y H:i" }}</p>
-                        <p><strong>Mis à jour le:</strong> {{ paiement.updated_at|date:"d/m/Y H:i" }}</p>
-                    </div>
-                    <div class="col-md-4"> {# Nouvelle colonne pour la photo du bordereau #}
+                    <div class="card-body text-center">
                         {% if paiement.bordereau_photo %}
-                        <h5 class="mb-3">Bordereau</h5>
-                        <a href="{{ paiement.bordereau_photo.url }}" target="_blank" rel="noopener">
-                            <img src="{{ paiement.bordereau_photo.url }}" alt="Photo du bordereau" class="bordereau-img">
-                        </a>
+                            <a href="{{ paiement.bordereau_photo.url }}" target="_blank">
+                                <img src="{{ paiement.bordereau_photo.url }}" alt="Bordereau" class="bordereau-preview mb-3">
+                            </a>
+                            <p class="small text-muted">Cliquez sur l'image pour l'agrandir</p>
+                            <a href="{{ paiement.bordereau_photo.url }}" download class="btn btn-sm btn-outline-secondary w-100">
+                                <i class="bi bi-download me-2"></i>Télécharger
+                            </a>
                         {% else %}
-                        <h5 class="mb-3">Bordereau</h5>
-                        <p class="text-muted">Aucune photo de bordereau.</p>
+                            <div class="p-5 bg-light rounded-3">
+                                <i class="bi bi-image text-muted display-4"></i>
+                                <p class="mt-3 text-muted">Aucun justificatif joint à ce paiement.</p>
+                            </div>
                         {% endif %}
+                    </div>
+                </div>
+
+                <div class="card tm-detail-card mt-4">
+                    <div class="card-body">
+                        <h6 class="text-muted small text-uppercase fw-bold mb-3">Informations Système</h6>
+                        <div class="d-flex justify-content-between mb-2">
+                            <small class="text-muted">Date création</small>
+                            <small class="fw-bold">{{ paiement.created_at|date:"d/m/Y H:i" }}</small>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <small class="text-muted">Dernière modif.</small>
+                            <small class="fw-bold">{{ paiement.updated_at|date:"d/m/Y H:i" }}</small>
+                        </div>
                     </div>
                 </div>
             </div>

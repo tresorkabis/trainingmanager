@@ -1,234 +1,51 @@
 {% extends 'base.html' %}
 {% load static %}
 {% load widget_tweaks %}
+{% load tm_tags %}
 
-{% block title %}Détail de l'Action de Formation - {{ object.description }}{% endblock title %}
+{% block title %}Détail de l'Action - {{ object.description }}{% endblock title %}
 {% block page_header %}Détail de l'Action de Formation{% endblock page_header %}
 
 {% block style %}
-<link rel="stylesheet" href="{% static 'assets/vendors/simple-datatables/style.css' %}">
+<link rel="stylesheet" href="{% static 'assets/css/training-manager.css' %}">
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 <style>
-    /* Removed all custom tab styles to rely on Bootstrap defaults */
-
-    .tm-stagiaire-hero {
-        background:
-            radial-gradient(circle at top right, rgba(67, 94, 190, 0.18), transparent 35%),
-            linear-gradient(135deg, #f7f8fc 0%, #eef3ff 100%);
-        border: 1px solid rgba(67, 94, 190, 0.12);
-        border-radius: 1.25rem;
-        overflow: hidden;
-    }
-
-    .tm-stagiaire-hero__photo {
-        width: 150px; /* Increased width */
-        height: 150px; /* Increased height */
-        border-radius: 1.5rem;
-        object-fit: cover;
-        border: 4px solid rgba(255, 255, 255, 0.9);
-        box-shadow: 0 18px 45px rgba(20, 33, 61, 0.12);
-    }
-
-    /* New style for KPI cards, similar to tm-metier-kpi-card */
-    .tm-stagiaire-kpi-card {
-        border: 1px solid rgba(67, 94, 190, 0.1);
-        border-radius: 1rem;
-        background: rgba(255, 255, 255, 0.76);
-        padding: 0.75rem; /* Reduced padding */
-        height: 100%;
-        box-shadow: 0 10px 24px rgba(17, 24, 39, 0.04);
-    }
-
-    .tm-stagiaire-kpi-card__label {
-        display: block;
-        font-size: 0.7rem; /* Reduced font size */
-        letter-spacing: 0.04em;
-        text-transform: uppercase;
-        color: #6c757d;
-        margin-bottom: 0.25rem; /* Reduced margin */
-    }
-
-    .tm-stagiaire-kpi-card__value {
-        font-size: 1.1rem; /* Reduced font size */
-        font-weight: 700;
-        color: #25396f;
-    }
-
-
-    .tm-detail-card {
-        border: 1px solid rgba(15, 23, 42, 0.07);
-        border-radius: 1rem;
-        box-shadow: 0 16px 32px rgba(15, 23, 42, 0.05);
-    }
-
-    .tm-detail-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 1rem;
-    }
-
-    .tm-detail-item {
-        border-radius: 0.9rem;
-        border: 1px solid #edf1f7;
-        background: #fbfcfe;
-        padding: 1rem;
-        min-height: 100%;
-    }
-
-    .tm-detail-item__label {
-        display: block;
-        font-size: 0.8rem;
-        color: #7b8190;
-        margin-bottom: 0.35rem;
-    }
-
-    .tm-detail-item__value {
-        color: #25396f;
-        font-weight: 700;
-        word-break: break-word;
-    }
-
-    .tm-pill-list {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.5rem;
-    }
-
-    .tm-pill {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.35rem;
-        padding: 0.55rem 0.85rem;
-        border-radius: 999px;
-        background: #fff;
-        border: 1px solid rgba(67, 94, 190, 0.12);
-        color: #25396f;
+    /* Spécificités pour les onglets */
+    .nav-tabs .nav-link {
+        border-radius: 0.5rem 0.5rem 0 0;
         font-weight: 600;
+        color: #7b8190;
     }
-
-    /* Custom extra-small button style */
-    .btn-xs {
-        padding: 0.2rem 0.5rem; /* Réduit le padding */
-        font-size: 0.75rem; /* Réduit la taille de la police */
-        line-height: 1.5;
-        border-radius: 0.2rem;
-    }
-
-    /* Table styling (copié de paiements.html pour cohérence) */
-    .table {
-        width: 100%;
-        border-collapse: separate;
-        border-spacing: 0;
-        border-radius: 1rem;
-        overflow: hidden;
-    }
-
-    .table thead th {
-        background-color: #f8f9fa;
-        color: #25396f;
-        font-weight: 700;
-        padding: 1rem 1.5rem;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-        text-align: left;
-    }
-
-    .table tbody tr {
-        transition: background-color 0.2s ease;
-    }
-
-    .table tbody tr:nth-of-type(odd) {
-        background-color: #ffffff;
-    }
-
-    .table tbody tr:nth-of-type(even) {
-        background-color: #fcfdff;
-    }
-
-    .table tbody tr:hover {
-        background-color: #eef2f7;
-    }
-
-    .table tbody td {
-        padding: 0.8rem 1.5rem;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.03);
-        color: #495057;
-    }
-
-    .table tbody td a {
+    .nav-tabs .nav-link.active {
         color: #435ebe;
-        text-decoration: none;
+        background-color: #fff;
+        border-bottom-color: transparent;
     }
-
-    .table tbody td a:hover {
-        text-decoration: underline;
+    .select2-container--default .select2-selection--single {
+        height: calc(1.5em + 1rem + 2px);
+        padding: 0.5rem 0.75rem;
+        border: 1px solid #dce7f1;
+        border-radius: 0.5rem;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        line-height: 1.2;
+        padding-left: 0;
+        color: #1e293b;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: calc(1.5em + 1rem);
+        right: 8px;
     }
 </style>
 {% endblock style %}
 
 {% block content %}
 <div class="page-heading">
-    <section class="tm-stagiaire-hero p-4 p-lg-5 mb-4">
-        <div class="d-flex justify-content-end mb-3 gap-2">
-            <a href="{% url 'actions' %}" class="btn btn-secondary btn-xs">
-                <i class="bi bi-arrow-left"></i> Retour à la liste
-            </a>
-            <a href="{% url 'action_update' object.pk %}" class="btn btn-primary btn-xs">
-                <i class="bi bi-pencil"></i> Modifier l'action
-            </a>
-            <a href="{% url 'action_delete' object.pk %}" class="btn btn-danger btn-xs">
-                <i class="bi bi-trash"></i> Supprimer l'action
-            </a>
-        </div>
-        <div class="row g-4 align-items-center">
-            <div class="col-12 col-xl-7">
-                <div class="d-flex flex-column flex-sm-row align-items-start align-items-sm-center gap-4">
-                    {# No photo for action, use a generic icon or just text #}
-                    <div>
-                        <div class="tm-pill-list mb-3">
-                            <span class="tm-pill"><i class="bi bi-calendar-event"></i>{{ object.type_action.libelle }}</span>
-                            <span class="tm-pill"><i class="bi bi-bookmark"></i>{{ object.formation.nom }}</span>
-                        </div>
-                        <h2 class="mb-2">{{ object.description }}</h2>
-                        <p class="text-muted mb-0">
-                            Détails complets de l'action de formation, modules associés, performances des formateurs et stagiaires inscrits.
-                        </p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-12 col-xl-5">
-                <div class="row g-3">
-                    <div class="col-6">
-                        <div class="tm-stagiaire-kpi-card">
-                            <span class="tm-stagiaire-kpi-card__label">Date de début</span>
-                            <span class="tm-stagiaire-kpi-card__value">{{ object.date_debut|date:"d M Y" }}</span>
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <div class="tm-stagiaire-kpi-card">
-                            <span class="tm-stagiaire-kpi-card__label">Date de fin</span>
-                            <span class="tm-stagiaire-kpi-card__value">{{ object.date_fin|date:"d M Y" }}</span>
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <div class="tm-stagiaire-kpi-card">
-                            <span class="tm-stagiaire-kpi-card__label">Formateurs</span>
-                            <span class="tm-stagiaire-kpi-card__value">{{ formateurs_assignes.count }}</span>
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <div class="tm-stagiaire-kpi-card">
-                            <span class="tm-stagiaire-kpi-card__label">Stagiaires inscrits</span>
-                            <span class="tm-stagiaire-kpi-card__value">{{ inscription_count }}</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+    {% tm_hero title=object.description subtitle="Détails complets de l'action, modules, formateurs et stagiaires." icon="bi bi-clipboard-check" actions=hero_actions stats=hero_stats theme="primary" %}
 
     <section class="section">
         <div class="card tm-detail-card">
             <div class="card-body">
-                {# Django Messages #}
                 {% if messages %}
                     {% for message in messages %}
                         <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
@@ -238,163 +55,205 @@
                     {% endfor %}
                 {% endif %}
 
-                <ul class="nav nav-tabs nav-fill" id="actionDetailTab" role="tablist">
+                <ul class="nav nav-tabs nav-fill mb-4" id="actionDetailTab" role="tablist">
                     <li class="nav-item" role="presentation">
-                        <a class="nav-link active" id="details-tab" data-bs-toggle="tab" href="#details" role="tab" aria-controls="details" aria-selected="true">Détails de l'Action</a>
+                        <a class="nav-link active" id="details-tab" data-bs-toggle="tab" href="#details" role="tab">Informations</a>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <a class="nav-link" id="modules-progressions-tab" data-bs-toggle="tab" href="#modules-progressions" role="tab" aria-controls="modules-progressions" aria-selected="false">Modules et Progressions</a>
+                        <a class="nav-link" id="modules-tab" data-bs-toggle="tab" href="#modules" role="tab">Modules & Progressions</a>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <a class="nav-link" id="stagiaires-inscrits-tab" data-bs-toggle="tab" href="#stagiaires-inscrits" role="tab" aria-controls="stagiaires-inscrits" aria-selected="false">Stagiaires Inscrits</a>
+                        <a class="nav-link" id="stagiaires-tab" data-bs-toggle="tab" href="#stagiaires" role="tab">Stagiaires ({{ inscription_count }})</a>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link" id="finances-tab" data-bs-toggle="tab" href="#finances" role="tab">Finances</a>
                     </li>
                 </ul>
 
                 <div class="tab-content" id="actionDetailTabContent">
-                    {# Tab 1: Détails de l'Action #}
-                    <div class="tab-pane fade show active" id="details" role="tabpanel" aria-labelledby="details-tab">
-                        <div class="card tm-detail-card mt-4">
-                            <div class="card-header">
-                                <h4 class="card-title mb-1">Informations générales</h4>
-                                <p class="text-muted mb-0">Description et caractéristiques principales de l'action de formation.</p>
+                    <div class="tab-pane fade show active" id="details" role="tabpanel">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="tm-stat-card">
+                                    <span class="tm-stat-card__label">Formation</span>
+                                    <span class="tm-stat-card__value" style="font-size: 1.1rem;">{{ object.formation.nom }}</span>
+                                </div>
                             </div>
-                            <div class="card-body">
-                                <div class="tm-detail-grid">
-                                    <div class="tm-detail-item"><span class="tm-detail-item__label">Description</span><div class="tm-detail-item__value">{{ object.description }}</div></div>
-                                    <div class="tm-detail-item"><span class="tm-detail-item__label">Formation</span><div class="tm-detail-item__value">{{ object.formation.nom }}</div></div>
-                                    <div class="tm-detail-item"><span class="tm-detail-item__label">Filière</span><div class="tm-detail-item__value">{{ object.formation.filiere.nom }}</div></div>
-                                    <div class="tm-detail-item"><span class="tm-detail-item__label">Type d'action</span><div class="tm-detail-item__value">{{ object.type_action.libelle }}</div></div>
-                                    <div class="tm-detail-item"><span class="tm-detail-item__label">Statut</span><div class="tm-detail-item__value"><span class="badge {{ status_meta.badge }}">{{ status_meta.label }}</span></div></div>
-                                    <div class="tm-detail-item"><span class="tm-detail-item__label">Date de début</span><div class="tm-detail-item__value">{{ object.date_debut|date:"d M Y" }}</div></div>
-                                    <div class="tm-detail-item"><span class="tm-detail-item__label">Date de fin</span><div class="tm-detail-item__value">{{ object.date_fin|date:"d M Y" }}</div></div>
-                                    <div class="tm-detail-item"><span class="tm-detail-item__label">Lieu</span><div class="tm-detail-item__value">{{ object.lieu|default:"Non spécifié" }}</div></div>
+                            <div class="col-md-6">
+                                <div class="tm-stat-card">
+                                    <span class="tm-stat-card__label">Filière</span>
+                                    <span class="tm-stat-card__value" style="font-size: 1.1rem;">{{ object.formation.filiere.nom }}</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="tm-stat-card">
+                                    <span class="tm-stat-card__label">Date de début</span>
+                                    <span class="tm-stat-card__value" style="font-size: 1.1rem;">{{ object.date_debut|date:"d/m/Y" }}</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="tm-stat-card">
+                                    <span class="tm-stat-card__label">Date de fin</span>
+                                    <span class="tm-stat-card__value" style="font-size: 1.1rem;">{{ object.date_fin|date:"d/m/Y" }}</span>
                                 </div>
                             </div>
                         </div>
-                    </div>
-
-                    {# Tab 2: Modules et Progressions #}
-                    <div class="tab-pane fade" id="modules-progressions" role="tabpanel" aria-labelledby="modules-progressions-tab">
-                        <div class="mt-4"> {# Added mt-4 for spacing from tabs #}
-                            {% if modules %}
-                                {% for module in modules %}
-                                    <div class="card tm-detail-card mb-2"> {# Marges réduites #}
-                                        <div class="card-header py-2 d-flex justify-content-between align-items-center"> {# Padding réduit #}
-                                            <h6 class="card-title mb-0" style="font-size: 0.9rem;"><i class="bi bi-journal-text me-2"></i>Module: {{ module.titre }} <span class="badge bg-light-primary text-primary ms-1" style="font-size: 0.7rem;">{{ module.duree_heures }}h</span></h6>
-                                        </div>
-                                        <div id="collapse{{ module.pk }}" class="" aria-labelledby="heading{{ module.pk }}">
-                                            <div class="card-body p-2"> {# Padding réduit #}
-                                                <div class="row g-2 mb-2"> {# Gouttière et marge réduites #}
-                                                    <div class="col-md-5">
-                                                        <div class="tm-detail-item p-2"> {# Padding réduit #}
-                                                            <span class="tm-detail-item__label" style="font-size: 0.7rem; margin-bottom: 0.1rem;">Description du module</span>
-                                                            <div class="tm-detail-item__value small" style="font-size: 0.8rem;">{{ module.description|default:"Pas de description." }}</div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-4">
-                                                        <div class="tm-detail-item p-2"> {# Padding réduit #}
-                                                            <span class="tm-detail-item__label" style="font-size: 0.7rem; margin-bottom: 0.1rem;">Formateurs assignés</span>
-                                                            <div class="d-flex flex-wrap gap-1">
-                                                                {% for mp in module.module_progressions %}
-                                                                    <span class="badge bg-light-primary text-primary" style="font-size: 0.65rem;">{{ mp.formateur.get_full_name }}</span>
-                                                                {% empty %}
-                                                                    <span class="text-muted small">Aucun formateur</span>
-                                                                {% endfor %}
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-3">
-                                                        <div class="tm-detail-item p-2">
-                                                            <span class="tm-detail-item__label" style="font-size: 0.7rem; margin-bottom: 0.1rem;">Volume & Ordre</span>
-                                                            <div class="tm-detail-item__value small" style="font-size: 0.8rem;">
-                                                                <span class="fw-bold">{{ module.duree_heures }}h</span> | Seq: {{ module.ordre }}
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                <h6 class="fw-bold mb-1 small text-uppercase text-muted px-1" style="font-size: 0.65rem;">Suivi des progressions</h6>
-                                                {% with module_progressions=module.module_progressions %}
-                                                    {% if module_progressions %}
-                                                        <div class="table-responsive border rounded">
-                                                            <table class="table table-striped table-sm mb-0">
-                                                                <thead>
-                                                                    <tr>
-                                                                        <th>Formateur</th>
-                                                                        <th>Statut</th>
-                                                                        <th>Note</th>
-                                                                        <th class="text-end">Actions</th>
-                                                                    </tr>
-                                                                </thead>
-                                                                <tbody>
-                                                                    {% for mp in module_progressions %}
-                                                                        <tr>
-                                                                            <td class="align-middle">{{ mp.formateur.get_full_name }}</td>
-                                                                            <td class="align-middle"><span class="small">{{ mp.get_statut_module_display }}</span></td>
-                                                                            <td class="align-middle">{{ mp.note|default:"-" }}</td>
-                                                                            <td class="text-end align-middle">
-                                                                                <a href="{% url 'module_progress_detail' mp.pk %}" class="btn btn-link btn-sm p-1" title="Détails"><i class="bi bi-eye"></i></a>
-                                                                                <a href="{% url 'module_progress_update' mp.pk %}" class="btn btn-link btn-sm p-1 text-warning" title="Modifier"><i class="bi bi-pencil"></i></a>
-                                                                                <a href="{% url 'module_progress_delete' mp.pk %}" class="btn btn-link btn-sm p-1 text-danger" title="Supprimer"><i class="bi bi-trash"></i></a>
-                                                                            </td>
-                                                                        </tr>
-                                                                    {% endfor %}
-                                                                </tbody>
-                                                            </table>
-                                                        </div>
-                                                    {% else %}
-                                                        <div class="alert alert-light small mb-0 py-2 border">Aucune progression enregistrée.</div>
-                                                    {% endif %}
-                                                {% endwith %}
-                                            </div>
-                                        </div>
-                                    </div>
-                                {% endfor %}
+                        <div class="mt-4">
+                            <h6 class="mb-3">Créneaux de cours</h6>
+                            {% if course_schedules %}
+                                <div class="d-flex flex-wrap gap-2">
+                                    {% for schedule in course_schedules %}
+                                        <span class="badge bg-light-primary text-primary px-3 py-2">
+                                            {{ schedule.get_jour_semaine_display }} {{ schedule.heure_debut|time:"H:i" }} - {{ schedule.heure_fin|time:"H:i" }}
+                                        </span>
+                                    {% endfor %}
+                                </div>
                             {% else %}
-                                <p>Aucun module défini pour cette formation.</p>
+                                <div class="alert alert-warning mb-0">Aucun créneau de cours n’a encore été défini pour cette action.</div>
                             {% endif %}
+                        </div>
+                        <div class="mt-4">
+                            <h6>Statut actuel : <span class="badge {{ status_meta.badge }}">{{ status_meta.label }}</span></h6>
+                            <p class="text-muted">{{ object.description }}</p>
                         </div>
                     </div>
 
-                    {# Tab 3: Stagiaires Inscrits #}
-                    <div class="tab-pane fade" id="stagiaires-inscrits" role="tabpanel" aria-labelledby="stagiaires-inscrits-tab">
-                        <div class="card tm-detail-card mt-4">
-                            <div class="card-header">
-                                <h4 class="card-title mb-1">Stagiaires Inscrits</h4>
-                                <p class="text-muted mb-0">Liste des stagiaires participant à cette action de formation.</p>
+                    <div class="tab-pane fade" id="modules" role="tabpanel">
+                        {% for module in modules %}
+                        <div class="tm-module-card">
+                            <div class="d-flex justify-content-between mb-3">
+                                <h6 class="fw-bold mb-0">{{ module.titre }}</h6>
+                                <span class="tm-module-badge">{{ module.duree_heures }}h</span>
                             </div>
-                            <div class="card-body">
-                                {% if inscriptions %}
-                                    <div class="table-responsive">
-                                        <table class="table table-striped" id="table1">
-                                            <thead>
-                                                <tr>
-                                                    <th>Nom Stagiaire</th>
-                                                    <th>Statut Inscription</th>
-                                                    <th>Date Inscription</th>
-                                                    <th>Actions</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {% for inscription in inscriptions %}
-                                                    <tr>
-                                                        <td>{{ inscription.stagiaire.get_full_name }}</td>
-                                                        <td>{{ inscription.statut }}</td>
-                                                        <td>{{ inscription.date_inscription|date:"d M Y" }}</td>
-                                                        <td>
-                                                            <a href="{% url 'stagiaire' inscription.stagiaire.pk %}" class="btn btn-sm btn-info btn-xs" title="Voir Stagiaire">
-                                                                <i class="bi bi-person"></i>
-                                                            </a>
-                                                            {# Ajoutez d'autres actions spécifiques à l'inscription si nécessaire #}
-                                                        </td>
-                                                    </tr>
-                                                {% endfor %}
-                                            </tbody>
-                                        </table>
+                            {% if module.subjects.all %}
+                                <div class="mb-3">
+                                    <div class="small text-muted mb-2">Sujets du module</div>
+                                    <div class="d-flex flex-wrap gap-2">
+                                        {% for subject in module.subjects.all %}
+                                            <span class="badge bg-light-secondary text-dark px-3 py-2">
+                                                {{ subject.titre }} <span class="text-muted">({{ subject.nombre_seances }} séance{{ subject.nombre_seances|pluralize }})</span>
+                                            </span>
+                                        {% endfor %}
                                     </div>
-                                {% else %}
-                                    <p>Aucun stagiaire inscrit à cette action de formation.</p>
+                                </div>
+                            {% endif %}
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Formateur</th>
+                                            <th>Statut</th>
+                                            <th class="text-end">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for mp in module.module_progressions %}
+                                        <tr>
+                                            <td>{{ mp.formateur.get_full_name }}</td>
+                                            <td>{{ mp.get_statut_module_display }}</td>
+                                            <td class="text-end">
+                                                <a href="{% url 'module_progress_detail' mp.pk %}" class="btn btn-link btn-sm"><i class="bi bi-eye"></i></a>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="tab-pane fade" id="stagiaires" role="tabpanel">
+                        <div class="card mb-4 border-0 bg-light">
+                            <div class="card-body">
+                                <form method="post" action="{% url 'detailaction_create' %}" class="row g-3 align-items-end">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="{{ object.pk }}">
+                                    <input type="hidden" name="next" value="{{ request.path }}#stagiaires">
+                                    <div class="col-12 col-md-8">
+                                        <label for="stagiaire-select" class="form-label fw-bold">Inscrire un stagiaire</label>
+                                        <select id="stagiaire-select" name="stagiaire" class="form-select" required>
+                                            <option value="">Sélectionner un stagiaire</option>
+                                            {% for stagiaire in stagiaires_disponibles %}
+                                                <option value="{{ stagiaire.pk }}">{{ stagiaire.get_full_name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="col-12 col-md-4">
+                                        <button type="submit" class="btn btn-primary w-100">
+                                            <i class="bi bi-person-plus me-2"></i>Inscrire au parcours
+                                        </button>
+                                    </div>
+                                </form>
+                                {% if not stagiaires_disponibles %}
+                                    <div class="alert alert-warning mt-3 mb-0">Aucun stagiaire disponible à inscrire.</div>
                                 {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-striped" id="stagiaireTable">
+                                <thead>
+                                    <tr>
+                                        <th>Nom Complet</th>
+                                        <th>Date Inscription</th>
+                                        <th class="text-end">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for ins in inscriptions %}
+                                    <tr>
+                                        <td>{{ ins.stagiaire.get_full_name }}</td>
+                                        <td>{{ ins.date_inscription|date:"d/m/Y" }}</td>
+                                        <td class="text-end">
+                                            <a href="{% url 'stagiaire' ins.stagiaire.pk %}" class="btn btn-sm btn-outline-primary">Profil</a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="tab-pane fade" id="finances" role="tabpanel">
+                        <div class="row g-4">
+                            <div class="col-md-4">
+                                <div class="card bg-light-primary border-0">
+                                    <div class="card-body text-center">
+                                        <h6 class="text-muted">Total Attendu</h6>
+                                        <h4 class="text-primary">{{ finance.total_attendu|floatformat:2 }} USD</h4>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card bg-light-success border-0">
+                                    <div class="card-body text-center">
+                                        <h6 class="text-muted">Total Encaissé</h6>
+                                        <h4 class="text-success">{{ finance.total_paye|floatformat:2 }} USD</h4>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card bg-light-danger border-0">
+                                    <div class="card-body text-center">
+                                        <h6 class="text-muted">Reste à recouvrer</h6>
+                                        <h4 class="text-danger">{{ finance.solde|floatformat:2 }} USD</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <h6>Taux de recouvrement</h6>
+                            <div class="progress" style="height: 25px;">
+                                <div class="progress-bar bg-success progress-bar-striped progress-bar-animated"
+                                     role="progressbar"
+                                     style="width: {{ finance.percent }}%"
+                                     aria-valuenow="{{ finance.percent }}"
+                                     aria-valuemin="0"
+                                     aria-valuemax="100">
+                                    {{ finance.percent }}%
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -407,13 +266,34 @@
 
 {% block script %}
 <script src="{% static 'assets/vendors/simple-datatables/simple-datatables.js' %}"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        let table1 = document.querySelector('#table1');
-        if (table1) {
-            new simpleDatatables.DataTable(table1);
+        let table = document.querySelector('#stagiaireTable');
+        if (table) new simpleDatatables.DataTable(table);
+
+        function initStagiaireSelect() {
+            if (typeof $ === 'undefined' || !$.fn.select2) {
+                return;
+            }
+
+            const $select = $('#stagiaire-select');
+            if (!$select.length || $select.data('select2')) {
+                return;
+            }
+
+            $select.select2({
+                placeholder: "Rechercher un stagiaire",
+                width: '100%'
+            });
         }
 
+        initStagiaireSelect();
+
+        const stagiairesTab = document.getElementById('stagiaires-tab');
+        if (stagiairesTab) {
+            stagiairesTab.addEventListener('shown.bs.tab', initStagiaireSelect);
+        }
     });
 </script>
 {% endblock script %}

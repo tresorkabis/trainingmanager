@@ -8,6 +8,7 @@ from django.shortcuts import get_object_or_404
 from django.http import HttpResponseRedirect
 from django.views import View
 from django.contrib import messages
+from progress.services import ActionWorkflowService
 
 class ModuleProgressListView(LoginRequiredMixin, ListView):
     model = ModuleProgress
@@ -53,20 +54,34 @@ class ModuleProgressListView(LoginRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['formateurs'] = Formateur.objects.all().order_by('nom') # Changed from stagiaires
-        context['actions'] = Action.objects.all().order_by('description') # Changed from modules
-        context['modules'] = Module.objects.all().order_by('titre') # Keep modules for potential future filtering or display
+        all_progs = self.get_queryset()
+        
+        context['formateurs'] = Formateur.objects.all().order_by('nom')
+        context['actions'] = Action.objects.all().order_by('description')
+        context['modules'] = Module.objects.all().order_by('titre')
         context['statut_choices'] = ModuleProgress.STATUT_CHOICES
         context['link'] = 'module_progressions'
         
+        # Hero Stats
+        context['hero_stats'] = [
+            {'label': 'Total Suivis', 'value': all_progs.count()},
+            {'label': 'En cours', 'value': all_progs.filter(statut_module='EC').count()},
+            {'label': 'Terminés', 'value': all_progs.filter(statut_module__in=['TE', 'VA']).count()},
+            {'label': 'Non commencés', 'value': all_progs.filter(statut_module='NC').count()},
+        ]
+
+        context['hero_actions'] = [
+            {'label': 'Nouvelle progression', 'url': reverse_lazy('module_progress_create'), 'icon': 'bi bi-plus-circle'},
+        ]
+        
         # Convert query params to int in the view
         try:
-            context['selected_formateur_id'] = int(self.request.GET.get('formateur')) # Updated context key
+            context['selected_formateur_id'] = int(self.request.GET.get('formateur'))
         except (TypeError, ValueError):
             context['selected_formateur_id'] = None
             
         try:
-            context['selected_action_id'] = int(self.request.GET.get('action')) # Updated context key
+            context['selected_action_id'] = int(self.request.GET.get('action'))
         except (TypeError, ValueError):
             context['selected_action_id'] = None
 
@@ -91,6 +106,8 @@ class ModuleProgressDetailView(LoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['sessions'] = self.object.sessions_progress.all()
+        context['next_session_defaults'] = ActionWorkflowService.build_session_initial(self.object)
+        context['subject_planning'] = self.object.get_subject_planning()
         return context
 
 class ModuleProgressCreateView(LoginRequiredMixin, CreateView):
@@ -129,7 +146,9 @@ class SessionProgressCreateView(LoginRequiredMixin, CreateView):
         initial = super().get_initial()
         module_progress_pk = self.kwargs.get('module_progress_pk')
         # module_progress now directly contains action and module
-        initial['module_progress'] = get_object_or_404(ModuleProgress, pk=module_progress_pk)
+        module_progress = get_object_or_404(ModuleProgress, pk=module_progress_pk)
+        initial['module_progress'] = module_progress
+        initial.update(ActionWorkflowService.build_session_initial(module_progress))
         return initial
 
     def form_valid(self, form):
@@ -145,7 +164,9 @@ class SessionProgressCreateView(LoginRequiredMixin, CreateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = "Ajouter une Séance"
-        context['module_progress'] = get_object_or_404(ModuleProgress, pk=self.kwargs.get('module_progress_pk'))
+        module_progress = get_object_or_404(ModuleProgress, pk=self.kwargs.get('module_progress_pk'))
+        context['module_progress'] = module_progress
+        context['next_session_defaults'] = ActionWorkflowService.build_session_initial(module_progress)
         return context
 
 class SessionProgressUpdateView(LoginRequiredMixin, UpdateView):
