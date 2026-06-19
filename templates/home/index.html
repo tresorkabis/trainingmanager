@@ -6,7 +6,7 @@
 
 {% block content %}
 <div class="page-heading">
-    <section class="tm-hero tm-hero--balanced mb-4 p-4 p-lg-5"> {# Added p-4 p-lg-5 for consistent padding #}
+    <section class="tm-hero tm-hero--balanced mb-4 p-4 p-lg-5">
         <div class="row g-4 align-items-center">
             <div class="col-12 col-xl-6">
                 <div class="tm-hero__content">
@@ -69,8 +69,7 @@
     </section>
 </div>
 <section class="row g-4 tm-dashboard-layout">
-    {# New Row 1: Métiers, Filières, Stagiaires, Actions on one line #}
-    <div class="col-12 col-md-3"> {# Column for Formations Stat Card #}
+    <div class="col-12 col-md-3">
         <a href="{% url 'formations' %}" class="tm-stat-card-link">
             <div class="card tm-stat-card">
                 <div class="card-body">
@@ -88,7 +87,7 @@
             </div>
         </a>
     </div>
-    <div class="col-12 col-md-3"> {# Column for Filières Stat Card #}
+    <div class="col-12 col-md-3">
         <a href="{% url 'filieres' %}" class="tm-stat-card-link">
             <div class="card tm-stat-card">
                 <div class="card-body">
@@ -106,7 +105,7 @@
             </div>
         </a>
     </div>
-    <div class="col-12 col-md-3"> {# Column for Stagiaires Stat Card #}
+    <div class="col-12 col-md-3">
         <a href="{% url 'stagiaires' %}" class="tm-stat-card-link">
             <div class="card tm-stat-card">
                 <div class="card-body">
@@ -124,7 +123,7 @@
             </div>
         </a>
     </div>
-    <div class="col-12 col-md-3"> {# Column for Actions Stat Card - Moved here #}
+    <div class="col-12 col-md-3">
         <a href="{% url 'actions' %}" class="tm-stat-card-link">
             <div class="card tm-stat-card">
                 <div class="card-body">
@@ -143,13 +142,13 @@
         </a>
     </div>
 
-    {# New Row 2: Chart Card and Quick Access Card #}
-    <div class="col-12 col-md-8"> {# Chart will take 2/3 width #}
+    {# Row 1: Filières chart + Encaissements #}
+    <div class="col-12 col-lg-8">
         <div class="card tm-chart-card">
             <div class="card-header">
                 <div>
                     <h4>Aperçu activité</h4>
-                    <p class="text-subtitle text-muted mb-0">Comparaison des stagiaires suivis et des actions par filière, avec regroupement des autres catégories.</p>
+                    <p class="text-subtitle text-muted mb-0">Comparaison des stagiaires suivis et des actions par filière</p>
                 </div>
             </div>
             <div class="card-body tm-chart-card__body">
@@ -157,7 +156,44 @@
             </div>
         </div>
     </div>
-    <div class="col-12 col-md-4"> {# Column for Quick Access card - Moved up #}
+    <div class="col-12 col-lg-4">
+        <div class="card tm-chart-card">
+            <div class="card-header">
+                <h4>Statut des actions</h4>
+                <p class="text-subtitle text-muted mb-0">Répartition par état</p>
+            </div>
+            <div class="card-body">
+                <div id="chart-actions-status" style="min-height: 300px;"></div>
+            </div>
+        </div>
+    </div>
+
+    {# Row 2: Encaissements + Séances #}
+    <div class="col-12 col-lg-6">
+        <div class="card tm-chart-card">
+            <div class="card-header">
+                <h4>Encaissements mensuels</h4>
+                <p class="text-subtitle text-muted mb-0">USD - 6 derniers mois</p>
+            </div>
+            <div class="card-body">
+                <div id="chart-paiements" style="min-height: 300px;"></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-lg-6">
+        <div class="card tm-chart-card">
+            <div class="card-header">
+                <h4>Séances par semaine</h4>
+                <p class="text-subtitle text-muted mb-0">Prévues vs Réalisées</p>
+            </div>
+            <div class="card-body">
+                <div id="chart-sessions" style="min-height: 300px;"></div>
+            </div>
+        </div>
+    </div>
+
+    {# Row 3: Accès rapide #}
+    <div class="col-12">
         <div class="card tm-quick-access-card">
             <div class="card-header">
                 <h4>Accès rapide</h4>
@@ -179,11 +215,11 @@
                             <span class="tm-quick-link__text">Ajouter une offre au catalogue.</span>
                         </span>
                     </a>
-                    <a href="{% url 'categorie_create' %}" class="tm-quick-link"> {# Changed categories_create to categorie_create #}
-                        <span class="tm-quick-link__icon"><i class="bi bi-bookmark-check"></i></span>
+                    <a href="{% url 'paiement_create' %}" class="tm-quick-link">
+                        <span class="tm-quick-link__icon"><i class="bi bi-cash"></i></span>
                         <span>
-                            <span class="tm-quick-link__title">Nouvelle catégorie</span>
-                            <span class="tm-quick-link__text">Mettre à jour les référentiels.</span>
+                            <span class="tm-quick-link__title">Nouveau paiement</span>
+                            <span class="tm-quick-link__text">Enregistrer un encaissement.</span>
                         </span>
                     </a>
                     <a href="{% url 'services' %}" class="tm-quick-link">
@@ -198,26 +234,14 @@
             </div>
         </div>
     </div>
-
-    {# New Row 3: Repères Card #}
-    <div class="col-12"> {# Repères card takes full width #}
-        <div class="card">
-            <div class="card-header">
-                <h4>Repères</h4>
-            </div>
-            <div class="card-body">
-                <div class="tm-panel-note">
-                    Suivi centralisé des formations, des filières et des stagiaires.
-                    Pour une présentation encore plus professionnelle, l'étape suivante
-                    sera d'uniformiser aussi les formulaires et tableaux du module `progress`.
-                </div>
-            </div>
-        </div>
-    </div>
 </section>
 {% endblock content %}
+
 {% block script %}
-<script src="{% static 'assets/vendors/apexcharts/apexcharts.js' %}"></script>
+<script src="https://cdn.jsdelivr.net/npm/apexcharts@3.54.1/dist/apexcharts.min.js"></script>
 {{ dashboard_chart|json_script:"dashboard-chart-data" }}
+{{ paiements_chart|json_script:"paiements-chart-data" }}
+{{ actions_status_chart|json_script:"actions-status-chart-data" }}
+{{ sessions_chart|json_script:"sessions-chart-data" }}
 <script src="{% static 'assets/js/pages/dashboard.js' %}"></script>
 {% endblock script %}

@@ -57,7 +57,7 @@
                             <tr>
                                 <td>
                                     <div class="fw-bold text-primary">{{ mp.module.titre }}</div>
-                                    <div class="small text-muted text-truncate" style="max-width: 250px;">{{ mp.action.description }}</div>
+                                    <a href="{% url 'action' mp.action.pk %}" class="small text-primary text-truncate d-block" style="max-width: 250px;" title="Voir l'action de formation">{{ mp.action.description }}</a>
                                 </td>
                                 <td>
                                     <div class="text-dark">{{ mp.formateur.get_full_name }}</div>

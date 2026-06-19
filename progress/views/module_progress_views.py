@@ -70,10 +70,6 @@ class ModuleProgressListView(LoginRequiredMixin, ListView):
             {'label': 'Non commencés', 'value': all_progs.filter(statut_module='NC').count()},
         ]
 
-        context['hero_actions'] = [
-            {'label': 'Nouvelle progression', 'url': reverse_lazy('module_progress_create'), 'icon': 'bi bi-plus-circle'},
-        ]
-        
         # Convert query params to int in the view
         try:
             context['selected_formateur_id'] = int(self.request.GET.get('formateur'))
@@ -86,6 +82,21 @@ class ModuleProgressListView(LoginRequiredMixin, ListView):
             context['selected_action_id'] = None
 
         context['selected_statut'] = self.request.GET.get('statut')
+
+        hero_actions = [
+            {'label': 'Nouvelle progression', 'url': reverse_lazy('module_progress_create'), 'icon': 'bi bi-plus-circle'},
+        ]
+
+        selected_action_id = context.get('selected_action_id')
+        if selected_action_id:
+            hero_actions.append({
+                'label': "Voir l'action",
+                'url': reverse_lazy('action', kwargs={'pk': selected_action_id}),
+                'icon': 'bi bi-eye',
+                'class': 'btn-light-secondary',
+            })
+
+        context['hero_actions'] = hero_actions
         
         query_params = self.request.GET.copy()
         if 'page' in query_params:
@@ -108,6 +119,37 @@ class ModuleProgressDetailView(LoginRequiredMixin, DetailView):
         context['sessions'] = self.object.sessions_progress.all()
         context['next_session_defaults'] = ActionWorkflowService.build_session_initial(self.object)
         context['subject_planning'] = self.object.get_subject_planning()
+        context['hero_actions'] = [
+            {'label': 'Retour à la liste', 'url': reverse_lazy('module_progressions'), 'icon': 'bi bi-arrow-left', 'class': 'btn-light-secondary'},
+            {'label': 'Modifier', 'url': reverse_lazy('module_progress_update', kwargs={'pk': self.object.pk}), 'icon': 'bi bi-pencil'},
+        ]
+
+        # Calcul du volume horaire réalisé
+        from django.db.models import Sum, F, ExpressionWrapper, DurationField
+        import datetime
+        
+        # On calcule la durée totale des séances
+        hours_done = 0
+        hours_planned = 0
+        
+        for s in context['sessions']:
+            if s.statut == 'REALISEE' and s.actual_start_time and s.actual_end_time:
+                start = datetime.datetime.combine(datetime.date.today(), s.actual_start_time)
+                end = datetime.datetime.combine(datetime.date.today(), s.actual_end_time)
+                hours_done += (end - start).total_seconds() / 3600
+            elif s.statut == 'PLANIFIEE' and s.planned_start_time and s.planned_end_time:
+                start = datetime.datetime.combine(datetime.date.today(), s.planned_start_time)
+                end = datetime.datetime.combine(datetime.date.today(), s.planned_end_time)
+                hours_planned += (end - start).total_seconds() / 3600
+
+        context['hours_done'] = round(hours_done, 1)
+        context['hours_planned'] = round(hours_planned, 1)
+        
+        # On masque la planification si le cumul (fait + prévu) atteint le quota
+        total_engaged = hours_done + hours_planned
+        context['can_plan_more'] = total_engaged < self.object.module.duree_heures
+        context['is_finished'] = hours_done >= self.object.module.duree_heures
+
         return context
 
 class ModuleProgressCreateView(LoginRequiredMixin, CreateView):
@@ -167,6 +209,17 @@ class SessionProgressCreateView(LoginRequiredMixin, CreateView):
         module_progress = get_object_or_404(ModuleProgress, pk=self.kwargs.get('module_progress_pk'))
         context['module_progress'] = module_progress
         context['next_session_defaults'] = ActionWorkflowService.build_session_initial(module_progress)
+        context['valid_dates'] = ActionWorkflowService.get_action_valid_dates(module_progress.action)
+        
+        # Passer les créneaux en JSON pour le JS
+        schedules = []
+        for s in module_progress.action.course_schedules.all():
+            schedules.append({
+                'day': s.jour_semaine,
+                'start': s.heure_debut.strftime('%H:%M'),
+                'end': s.heure_fin.strftime('%H:%M')
+            })
+        context['schedules_json'] = schedules
         return context
 
 class SessionProgressUpdateView(LoginRequiredMixin, UpdateView):
@@ -185,6 +238,17 @@ class SessionProgressUpdateView(LoginRequiredMixin, UpdateView):
         context = super().get_context_data(**kwargs)
         context['title'] = "Modifier la Séance"
         context['module_progress'] = self.object.module_progress
+        context['valid_dates'] = ActionWorkflowService.get_action_valid_dates(self.object.module_progress.action)
+        
+        # Passer les créneaux en JSON pour le JS
+        schedules = []
+        for s in self.object.module_progress.action.course_schedules.all():
+            schedules.append({
+                'day': s.jour_semaine,
+                'start': s.heure_debut.strftime('%H:%M'),
+                'end': s.heure_fin.strftime('%H:%M')
+            })
+        context['schedules_json'] = schedules
         return context
 
 class SessionProgressDeleteView(LoginRequiredMixin, DeleteView):

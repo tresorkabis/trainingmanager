@@ -14,8 +14,26 @@
         </div>
         <div class="card-body">
             <div class="alert alert-info border">
-                Les champs de cette séance sont préremplis à partir du module et de la dernière séance connue.
-                Ajustez seulement ce qui change, puis enregistrez.
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div>
+                        <i class="bi bi-calendar-range me-2"></i>
+                        Période : <strong>{{ module_progress.action.date_debut|date:"d/m/Y" }}</strong> au <strong>{{ module_progress.action.date_fin|date:"d/m/Y" }}</strong>
+                    </div>
+                    <div class="small">
+                        Lieu : {{ module_progress.action.lieu|default:"Non spécifié" }}
+                    </div>
+                </div>
+                <div class="mt-2 pt-2 border-top">
+                    <i class="bi bi-clock me-2"></i>
+                    Créneaux prévus :
+                    {% for schedule in module_progress.action.course_schedules.all %}
+                        <span class="badge bg-white text-dark border ms-1">
+                            {{ schedule.get_jour_semaine_display }} {{ schedule.heure_debut|time:"H:i" }}-{{ schedule.heure_fin|time:"H:i" }}
+                        </span>
+                    {% empty %}
+                        <span class="text-muted small">Aucun créneau défini</span>
+                    {% endfor %}
+                </div>
             </div>
             <form method="post" class="form">
                 {% csrf_token %}
@@ -43,7 +61,18 @@
                     <div class="col-md-3">
                         <div class="form-group">
                             <label for="{{ form.planned_date.id_for_label }}">Date prévue</label>
-                            {% render_field form.planned_date class="form-control" type="date" %}
+                            {% if valid_dates %}
+                                <select name="planned_date" id="{{ form.planned_date.id_for_label }}" class="form-select">
+                                    <option value="">Sélectionner une date</option>
+                                    {% for vdate in valid_dates %}
+                                        <option value="{{ vdate|date:'Y-m-d' }}" {% if form.planned_date.value|date:'Y-m-d' == vdate|date:'Y-m-d' %}selected{% endif %}>
+                                            {{ vdate|date:"D d/m/Y" }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            {% else %}
+                                {% render_field form.planned_date class="form-control" type="date" %}
+                            {% endif %}
                             {% for error in form.planned_date.errors %}
                                 <div class="invalid-feedback d-block">{{ error }}</div>
                             {% endfor %}
@@ -81,13 +110,19 @@
                 <hr class="my-4">
 
                 <div class="row">
-                    <div class="col-12">
-                        <h5 class="mb-3">Séance réelle</h5>
+                    <div class="col-12 d-flex justify-content-between align-items-center mb-3">
+                        <h5>Séance réelle</h5>
+                        <button type="button" class="btn btn-sm btn-outline-info" id="copy-planned-btn">
+                            <i class="bi bi-arrow-down-square me-1"></i> Recopier le prévu
+                        </button>
                     </div>
                     <div class="col-md-3">
                         <div class="form-group">
                             <label for="{{ form.actual_date.id_for_label }}">Date réelle</label>
                             {% render_field form.actual_date class="form-control" type="date" %}
+                            <div id="actual-date-warning" class="text-warning small mt-1" style="display: none;">
+                                <i class="bi bi-exclamation-triangle"></i> Hors période action (rattrapage).
+                            </div>
                             {% for error in form.actual_date.errors %}
                                 <div class="invalid-feedback d-block">{{ error }}</div>
                             {% endfor %}
@@ -151,4 +186,101 @@
         </div>
     </div>
 </section>
+
+{# Données des créneaux pour le JavaScript #}
+{% if schedules_json %}
+    {{ schedules_json|json_script:"schedules-data" }}
+{% endif %}
 {% endblock content %}
+
+{% block script %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const dateSelect = document.getElementById('{{ form.planned_date.id_for_label }}');
+        const startTimeInput = document.getElementById('{{ form.planned_start_time.id_for_label }}');
+        const endTimeInput = document.getElementById('{{ form.planned_end_time.id_for_label }}');
+
+        const schedulesElement = document.getElementById('schedules-data');
+        const schedules = schedulesElement ? JSON.parse(schedulesElement.textContent) : [];
+
+        if (dateSelect && schedules.length > 0) {
+            dateSelect.addEventListener('change', function() {
+                const selectedDateStr = this.value;
+                if (!selectedDateStr) return;
+
+                const selectedDate = new Date(selectedDateStr);
+                const jsDay = selectedDate.getDay();
+                const djangoDay = (jsDay + 6) % 7;
+
+                const match = schedules.find(s => s.day === djangoDay);
+
+                if (match) {
+                    if (startTimeInput && !startTimeInput.value) {
+                        startTimeInput.value = match.start;
+                    }
+                    if (endTimeInput && !endTimeInput.value) {
+                        endTimeInput.value = match.end;
+                    }
+                }
+            });
+        }
+
+        // Logique de recopie flexible
+        const copyBtn = document.getElementById('copy-planned-btn');
+        const actualDateInput = document.getElementById('{{ form.actual_date.id_for_label }}');
+        const actualStartInput = document.getElementById('{{ form.actual_start_time.id_for_label }}');
+        const actualEndInput = document.getElementById('{{ form.actual_end_time.id_for_label }}');
+        const topicsInput = document.getElementById('{{ form.planned_topics.id_for_label }}');
+        const coveredInput = document.getElementById('{{ form.topics_covered.id_for_label }}');
+        const statutSelect = document.getElementById('{{ form.statut.id_for_label }}');
+
+        if (copyBtn) {
+            copyBtn.addEventListener('click', function() {
+                if (dateSelect) actualDateInput.value = dateSelect.value;
+                if (startTimeInput) actualStartInput.value = startTimeInput.value;
+                if (endTimeInput) actualEndInput.value = endTimeInput.value;
+                if (topicsInput && !coveredInput.value) coveredInput.value = topicsInput.value;
+                if (statutSelect) statutSelect.value = 'REALISEE';
+                checkActualDate();
+            });
+        }
+
+        function checkActualDate() {
+            const endDateStr = "{{ module_progress.action.date_fin|date:'Y-m-d' }}";
+            const actualDateStr = actualDateInput.value;
+            const warning = document.getElementById('actual-date-warning');
+
+            if (actualDateStr && actualDateStr > endDateStr) {
+                warning.style.display = 'block';
+            } else {
+                warning.style.display = 'none';
+            }
+        }
+
+        if (statutSelect) {
+            function updateStatutColor() {
+                statutSelect.classList.remove('bg-light-info', 'text-info', 'bg-light-success', 'text-success', 'bg-light-warning', 'text-warning');
+                if (statutSelect.value === 'PLANIFIEE') statutSelect.classList.add('bg-light-info', 'text-info');
+                else if (statutSelect.value === 'REALISEE') statutSelect.classList.add('bg-light-success', 'text-success');
+                else if (statutSelect.value === 'REPORTEE') statutSelect.classList.add('bg-light-warning', 'text-warning');
+            }
+            statutSelect.addEventListener('change', updateStatutColor);
+            updateStatutColor();
+        }
+
+        if (actualDateInput) {
+            actualDateInput.addEventListener('change', checkActualDate);
+
+            // Logique intelligente pour la modification : pré-remplissage si vide
+            if (!actualDateInput.value && dateSelect && dateSelect.value) {
+                actualDateInput.value = dateSelect.value;
+                if (startTimeInput && !startTimeInput.value) startTimeInput.value = startTimeInput.value || (schedules.length > 0 ? schedules[0].start : '');
+                if (endTimeInput && !endTimeInput.value) endTimeInput.value = endTimeInput.value || (schedules.length > 0 ? schedules[0].end : '');
+                if (topicsInput && !coveredInput.value) coveredInput.value = topicsInput.value;
+            }
+
+            checkActualDate();
+        }
+    });
+</script>
+{% endblock script %}

@@ -24,11 +24,14 @@
                         <div class="col-md-3">
                             <div class="form-group mb-2">
                                 <label class="fw-bold small text-muted text-uppercase">Action de formation:</label>
-                                <p class="form-control-static">{{ module_progress.action.description }}</p>
+                                <br><a href="{% url 'action' module_progress.action.pk %}" class="form-control-static text-primary" title="Voir l'action de formation">{{ module_progress.action.description }}</a>
                             </div>
                             <div class="form-group mb-2">
                                 <label class="fw-bold small text-muted text-uppercase">Module:</label>
-                                <p class="form-control-static">{{ module_progress.module.titre }}</p>
+                                <p class="form-control-static">
+                                    {{ module_progress.module.titre }}
+                                    <span class="badge bg-light-primary text-primary ms-2">{{ module_progress.module.duree_heures }} h</span>
+                                </p>
                             </div>
                         </div>
                         <div class="col-md-3">
@@ -94,36 +97,54 @@
 
     <div class="card mt-4">
         <div class="card-header">
-            <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
                 <div>
                     <h4 class="card-title mb-1">Séances du Module</h4>
-                    <p class="text-muted mb-0">
-                        La planification rapide ouvre un formulaire déjà prérempli avec la prochaine séance suggérée.
-                    </p>
+                    <p class="text-muted mb-0">Suivi de l'exécution du programme pédagogique.</p>
                 </div>
-                <a href="{% url 'session_progress_create' module_progress_pk=module_progress.pk %}" class="btn btn-primary">
-                    <i class="bi bi-calendar-plus"></i> Planifier une séance
-                </a>
+                <div class="d-flex gap-2">
+                    <div class="badge bg-light-success text-success p-2">
+                        <i class="bi bi-check-circle me-1"></i> {{ hours_done }}h Réalisées
+                    </div>
+                    <div class="badge bg-light-info text-info p-2">
+                        <i class="bi bi-calendar-event me-1"></i> {{ hours_planned }}h Planifiées
+                    </div>
+                </div>
             </div>
         </div>
         <div class="card-body">
-            <div class="alert alert-light border d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
-                <div>
-                    <div class="fw-semibold">Proposition de planification</div>
-                    <div class="small text-muted">
-                        {{ next_session_defaults.planned_date }}
-                        {% if next_session_defaults.planned_start_time and next_session_defaults.planned_end_time %}
-                            - {{ next_session_defaults.planned_start_time|time:"H:i" }} à {{ next_session_defaults.planned_end_time|time:"H:i" }}
-                        {% endif %}
-                        {% if next_session_defaults.planned_topics %}
-                            - {{ next_session_defaults.planned_topics|truncatechars:80 }}
-                        {% endif %}
+            {% if is_finished %}
+                <div class="alert alert-success border d-flex align-items-center mb-4">
+                    <i class="bi bi-check-circle-fill fs-4 me-3"></i>
+                    <div>
+                        <div class="fw-bold">Module complété</div>
+                        <div class="small">Le quota horaire du module ({{ module_progress.module.duree_heures }}h) a été atteint par les séances réalisées ({{ hours_done }}h).</div>
                     </div>
                 </div>
-                <a href="{% url 'session_progress_create' module_progress_pk=module_progress.pk %}" class="btn btn-outline-primary">
-                    Ouvrir le formulaire prérempli
-                </a>
-            </div>
+            {% elif not can_plan_more %}
+                <div class="alert alert-warning border d-flex align-items-center mb-4">
+                    <i class="bi bi-exclamation-triangle-fill fs-4 me-3"></i>
+                    <div>
+                        <div class="fw-bold">Quota atteint par la planification</div>
+                        <div class="small">Le cumul des séances réalisées ({{ hours_done }}h) et planifiées ({{ hours_planned }}h) couvre déjà la totalité du module ({{ module_progress.module.duree_heures }}h). Aucune nouvelle séance ne peut être ajoutée.</div>
+                    </div>
+                </div>
+            {% else %}
+                <div class="alert alert-light border d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+                    <div>
+                        <div class="fw-semibold">Proposition de planification ({{ hours_done }}h faites + {{ hours_planned }}h prévues / {{ module_progress.module.duree_heures }}h)</div>
+                        <div class="small text-muted">
+                            {{ next_session_defaults.planned_date }}
+                            {% if next_session_defaults.planned_start_time and next_session_defaults.planned_end_time %}
+                                - {{ next_session_defaults.planned_start_time|time:"H:i" }} à {{ next_session_defaults.planned_end_time|time:"H:i" }}
+                            {% endif %}
+                        </div>
+                    </div>
+                    <a href="{% url 'session_progress_create' module_progress_pk=module_progress.pk %}" class="btn btn-primary">
+                        Ouvrir le formulaire prérempli
+                    </a>
+                </div>
+            {% endif %}
 
             {% if messages %}
                 {% for message in messages %}

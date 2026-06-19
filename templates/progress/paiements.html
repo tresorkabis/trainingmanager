@@ -36,12 +36,12 @@
                     <table class="table table-hover" id="paiementTable">
                         <thead>
                             <tr>
+                                <th>Référence</th>
                                 <th>Stagiaire</th>
                                 <th>Action / Formation</th>
                                 <th>Montant</th>
                                 <th>Date</th>
                                 <th>Mode</th>
-                                <th>Référence</th>
                                 <th class="text-end">Actions</th>
                             </tr>
                         </thead>
@@ -49,6 +49,11 @@
                             {% if paiement_list %}
                             {% for paiement in paiement_list %}
                             <tr class="paiement-row" data-mode-label="{{ paiement.get_mode_paiement_display }}">
+                                <td>
+                                    <a href="{% url 'paiement' paiement.pk %}" class="text-decoration-none fw-bold text-primary">
+                                        <code class="text-primary fw-bold">{{ paiement.reference|default:"-" }}</code>
+                                    </a>
+                                </td>
                                 <td>
                                     <a href="{% url 'stagiaire' paiement.stagiaire.pk %}" class="tm-action-row__title text-decoration-none fw-bold text-primary">{{ paiement.stagiaire.get_full_name }}</a>
                                     <div class="tm-action-row__meta">{{ paiement.stagiaire.telephone|default:"-" }}</div>
@@ -65,17 +70,13 @@
                                 <td>{{ paiement.date_paiement|date:"d/m/Y" }}</td>
                                 <td>
                                     {% if paiement.mode_paiement == 'ESPECES' %}
-                                        <span class="badge bg-light-success text-success w-100"><i class="bi bi-cash me-1"></i>Espèces</span>
+                                        <span class="badge bg-light-success text-success w-100 d-inline-flex align-items-center justify-content-center"><i class="bi bi-cash me-1"></i>Espèces</span>
                                     {% else %}
-                                        <span class="badge bg-light-primary text-primary w-100"><i class="bi bi-bank me-1"></i>Virement</span>
+                                        <span class="badge bg-light-primary text-primary w-100 d-inline-flex align-items-center justify-content-center"><i class="bi bi-credit-card me-1"></i>Virement</span>
                                     {% endif %}
-                                </td>
-                                <td>
-                                    <code class="text-primary fw-bold">{{ paiement.reference|default:"-" }}</code>
                                 </td>
                                 <td class="text-end">
                                     <div class="d-flex gap-2 justify-content-end">
-                                        <a href="{% url 'paiement' paiement.pk %}" class="btn btn-sm btn-outline-primary" title="Voir"><i class="bi bi-eye"></i></a>
                                         <a href="{% url 'paiement_update' paiement.pk %}" class="btn btn-sm btn-outline-info" title="Modifier"><i class="bi bi-pencil"></i></a>
                                         <a href="{% url 'paiement_delete' paiement.pk %}" class="btn btn-sm btn-outline-danger" title="Supprimer"><i class="bi bi-trash"></i></a>
                                     </div>

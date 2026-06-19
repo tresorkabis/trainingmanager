@@ -1,0 +1,258 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reçu de paiement - {{ paiement.reference }}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 12px;
+            line-height: 1.5;
+            color: #000;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .receipt {
+            border: 2px solid #000;
+            padding: 20px;
+        }
+        .header {
+            text-align: center;
+            border-bottom: 2px dashed #000;
+            padding-bottom: 15px;
+            margin-bottom: 15px;
+        }
+        .header h1 {
+            font-size: 22px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 5px;
+        }
+        .header .ref {
+            font-size: 14px;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+        .header .date {
+            font-size: 11px;
+            color: #555;
+            margin-top: 3px;
+        }
+        .amount-box {
+            text-align: center;
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #000;
+            background: #f0f0f0;
+        }
+        .amount-box .label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .amount-box .amount {
+            font-size: 28px;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+        .amount-box .amount-usd {
+            font-size: 14px;
+            color: #555;
+        }
+        .details {
+            margin: 15px 0;
+        }
+        .details table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .details td {
+            padding: 6px 4px;
+            vertical-align: top;
+        }
+        .details td:first-child {
+            width: 35%;
+            font-weight: bold;
+        }
+        .details td:last-child {
+            width: 65%;
+        }
+        .details .separator {
+            border-top: 1px dotted #999;
+        }
+        .footer {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 2px dashed #000;
+            text-align: center;
+            font-size: 10px;
+        }
+        .footer .signature-line {
+            margin-top: 30px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .footer .signature-line .sign {
+            text-align: center;
+            width: 40%;
+        }
+        .footer .signature-line .sign .line {
+            border-top: 1px solid #000;
+            padding-top: 5px;
+            margin-top: 30px;
+        }
+        .watermark {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-30deg);
+            font-size: 80px;
+            opacity: 0.04;
+            font-weight: bold;
+            pointer-events: none;
+            z-index: -1;
+            text-transform: uppercase;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border: 1px solid #000;
+            font-size: 10px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .solde-info {
+            margin-top: 15px;
+            padding-top: 10px;
+            border-top: 1px solid #ccc;
+            font-size: 11px;
+        }
+        @media print {
+            body {
+                padding: 0;
+            }
+            .receipt {
+                border: none;
+                padding: 10px;
+            }
+            .no-print {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="watermark">PAID</div>
+    <div class="receipt">
+        <div class="header">
+            <h1>Reçu de Paiement</h1>
+            <div class="ref">N° {{ paiement.reference }}</div>
+            <div class="date">Date : {{ paiement.date_paiement|date:"l d F Y" }}</div>
+        </div>
+
+        <div class="amount-box">
+            <div class="label">Montant reçu</div>
+            <div class="amount">{{ paiement.montant|floatformat:0 }}</div>
+            <div class="amount-usd">Dollars américains (USD)</div>
+        </div>
+
+        <div class="details">
+            <table>
+                <tr>
+                    <td>Stagiaire</td>
+                    <td><strong>{{ paiement.stagiaire.get_full_name }}</strong></td>
+                </tr>
+                <tr>
+                    <td>Téléphone</td>
+                    <td>{{ paiement.stagiaire.telephone }}</td>
+                </tr>
+                <tr>
+                    <td>Email</td>
+                    <td>{{ paiement.stagiaire.email|default:"-" }}</td>
+                </tr>
+                <tr><td colspan="2" class="separator"></td></tr>
+                <tr>
+                    <td>Formation</td>
+                    <td><strong>{{ paiement.action.formation.nom|default:"-" }}</strong></td>
+                </tr>
+                <tr>
+                    <td>Action</td>
+                    <td>{{ paiement.action.description|default:"-" }}</td>
+                </tr>
+                <tr><td colspan="2" class="separator"></td></tr>
+                <tr>
+                    <td>Mode de paiement</td>
+                    <td>{{ paiement.get_mode_paiement_display }}</td>
+                </tr>
+                <tr>
+                    <td>Motif</td>
+                    <td>{{ paiement.motif|default:"Frais de formation" }}</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="solde-info">
+            {% if total_cout is not None %}
+                <table style="width: 100%; font-size: 11px;">
+                    <tr>
+                        <td>Coût total de la formation</td>
+                        <td style="text-align: right;"><strong>{{ total_cout|floatformat:0 }} USD</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Total déjà payé</td>
+                        <td style="text-align: right;"><strong>{{ total_paye|floatformat:0 }} USD</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Solde restant</td>
+                        <td style="text-align: right;">
+                            <strong style="color: {% if solde_restant <= 0 %}green{% else %}red{% endif %};">
+                                {{ solde_restant|floatformat:0 }} USD
+                            </strong>
+                        </td>
+                    </tr>
+                </table>
+            {% endif %}
+        </div>
+
+        <div class="footer">
+            <p>Ce reçu est délivré à titre d'information et fait office de preuve de paiement.</p>
+            <p style="margin-top: 5px;">Training Manager &mdash; Document généré le {% now "d/m/Y H:i" %}</p>
+            <div class="signature-line">
+                <div class="sign">
+                    <span class="line">Cachet et signature</span>
+                </div>
+                <div class="sign">
+                    <span class="line">Signature du stagiaire</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="no-print" style="text-align: center; margin-top: 20px;">
+        <button onclick="window.print()" style="padding: 10px 30px; font-size: 14px; cursor: pointer; border: 1px solid #000; background: #fff;">
+            🖨️ Imprimer
+        </button>
+        <button onclick="window.close()" style="padding: 10px 30px; font-size: 14px; cursor: pointer; border: 1px solid #000; background: #fff; margin-left: 10px;">
+            ✕ Fermer
+        </button>
+    </div>
+
+    <script>
+        // Auto-imprimer après chargement
+        window.onload = function() {
+            // Petit délai pour laisser le CSS s'appliquer
+            setTimeout(function() {
+                window.print();
+            }, 500);
+        };
+    </script>
+</body>
+</html>

@@ -66,6 +66,33 @@
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group mb-3">
+                                        <label for="type_action" class="form-label fw-bold">Type d'action</label>
+                                        <select id="type_action" class="form-select" name="type_action" required>
+                                            <option value="">Choisir le type</option>
+                                            {% for type in type_actions %}
+                                            <option value="{{ type.pk }}" data-code="{{ type.code }}" {% if submitted.type_action == type.pk|stringformat:"s" or object.type_action.pk == type.pk %}selected{% endif %}>
+                                                {{ type.libelle }}
+                                            </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label for="lieu" class="form-label fw-bold">Lieu de formation</label>
+                                        <input
+                                            type="text"
+                                            id="lieu"
+                                            class="form-control"
+                                            name="lieu"
+                                            value="{% if submitted.lieu %}{{ submitted.lieu }}{% else %}{{ object.lieu|default:'' }}{% endif %}"
+                                            placeholder="Lieu de déroulement"
+                                            required
+                                        >
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
                                         <label for="date_debut" class="form-label fw-bold">Date de début</label>
                                         <input
                                             type="date"
@@ -226,6 +253,31 @@
         const durationContainer = document.getElementById('duration-info-container');
         const durationDaysSpan = document.getElementById('duration-days');
         const form = document.querySelector('form.form');
+        const typeActionSelect = document.getElementById('type_action');
+        const lieuInput = document.getElementById('lieu');
+
+        function updateLieuBasedOnType() {
+            const selectedOption = typeActionSelect.options[typeActionSelect.selectedIndex];
+            if (!selectedOption) return;
+
+            const code = selectedOption.getAttribute('data-code');
+            if (code === 'INT') {
+                lieuInput.value = "INPP / ESFORCA";
+                lieuInput.readOnly = true;
+                lieuInput.classList.add('bg-light');
+            } else {
+                if (lieuInput.value === "INPP / ESFORCA") {
+                    lieuInput.value = "";
+                }
+                lieuInput.readOnly = false;
+                lieuInput.classList.remove('bg-light');
+            }
+        }
+
+        if (typeActionSelect) {
+            typeActionSelect.addEventListener('change', updateLieuBasedOnType);
+            updateLieuBasedOnType(); // Init on load
+        }
         const courseSchedulesContainer = document.getElementById('course-schedules-container');
         const addCourseScheduleButton = document.getElementById('add-course-schedule');
         const courseScheduleTemplate = `
@@ -309,27 +361,24 @@
             if (removeButton) {
                 removeButton.addEventListener('click', function() {
                     const rows = courseSchedulesContainer.querySelectorAll('.course-schedule-row');
+                    // On ne supprime pas s'il ne reste qu'une ligne, on la vide
                     if (rows.length > 1) {
                         row.remove();
                     } else {
                         row.querySelectorAll('input, select').forEach((field) => {
-                            if (field.tagName === 'SELECT') {
-                                field.selectedIndex = 0;
-                            } else {
-                                field.value = '';
-                            }
+                            field.value = '';
                         });
                     }
                 });
             }
         }
 
-        courseSchedulesContainer.querySelectorAll('.course-schedule-row').forEach(bindCourseScheduleRemoval);
-
         if (addCourseScheduleButton) {
             addCourseScheduleButton.addEventListener('click', function() {
-                courseSchedulesContainer.insertAdjacentHTML('beforeend', courseScheduleTemplate);
-                const newRow = courseSchedulesContainer.querySelector('.course-schedule-row:last-child');
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = courseScheduleTemplate.trim();
+                const newRow = tempDiv.firstChild;
+                courseSchedulesContainer.appendChild(newRow);
                 bindCourseScheduleRemoval(newRow);
             });
         }

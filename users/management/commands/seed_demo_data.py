@@ -8,8 +8,8 @@ from django.core.management import BaseCommand
 from django.db import transaction
 
 from intern.models import Categorie, EtudeStagiaire, Stagiaire, Entreprise, AutreFormation
-from progress.models import Action, DetailAction, Formateur, TypeAction, Paiement, ModuleProgress # Import ModuleProgress
-from training.models import Filiere, Formation, Module, Service # Renommé Metier en Formation
+from progress.models import Action, DetailAction, Formateur, TypeAction, Paiement, ModuleProgress, ModuleSubject # Import ModuleSubject
+from training.models import Filiere, Formation, Module, Service
 from users.models import Profile, User
 from users.utils import createprofile
 
@@ -21,7 +21,8 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         self.stdout.write(self.style.SUCCESS("Nettoyage des donnees existantes..."))
         # Supprimer les données existantes pour éviter les doublons et les conflits
-        ModuleProgress.objects.all().delete() # Add ModuleProgress to cleanup
+        ModuleSubject.objects.all().delete() # Cleanup subjects
+        ModuleProgress.objects.all().delete()
         Paiement.objects.all().delete() # Ajout du nettoyage des paiements
         DetailAction.objects.all().delete()
         Action.objects.all().delete()
@@ -288,17 +289,32 @@ class Command(BaseCommand):
                 
                 formateur_to_assign = formateurs_list[formateur_index % len(formateurs_list)]
                 
-                module_obj = Module.objects.create( # Créer le module d'abord
-                    formation=formation, # Changé metier à formation
+                module_obj = Module.objects.create(
+                    formation=formation,
                     titre=titre,
                     description=description,
                     duree_heures=duree_module_heures,
-                    # formateur=formateur_to_assign, # Ne pas passer ici
                     ordre=ordre,
                 )
-                module_obj.formateurs.add(formateur_to_assign) # Ajouter le formateur au ManyToManyField
+                module_obj.formateurs.add(formateur_to_assign)
 
-                total_duree_heures_for_formation += duree_module_heures # Changé total_duree_heures_for_metier à total_duree_heures_for_formation
+                # --- Ajout de sujets de démonstration ---
+                subjects_data = [
+                    (f"Introduction à {titre}", 2, 1),
+                    (f"Pratique avancée de {titre}", 3, 2),
+                ]
+                for s_titre, s_seances, s_ordre in subjects_data:
+                    ModuleSubject.objects.create(
+                        module=module_obj,
+                        titre=s_titre,
+                        nombre_seances=s_seances,
+                        ordre=s_ordre
+                    )
+                # Recalculer la durée basée sur les sujets (2h par séance)
+                module_obj.duree_heures = sum(s.nombre_seances for s in module_obj.subjects.all()) * 2
+                module_obj.save()
+
+                total_duree_heures_for_formation += module_obj.duree_heures
                 formateur_index += 1
             
             if formation.duree_heures != total_duree_heures_for_formation: # Changé metier.duree_heures à formation.duree_heures
@@ -664,8 +680,6 @@ class Command(BaseCommand):
                 spec["date_debut"],
             )
             
-            self.stdout.write(self.style.NOTICE(f"Processing Action: {action_description} for Formation: {formation_for_action.nom}")) # Changé Metier à Formation
-            
             action, created = Action.objects.get_or_create(
                 description=action_description,
                 defaults={
@@ -686,34 +700,29 @@ class Command(BaseCommand):
                 action.date_fin = spec["date_fin"]
             action.save()
 
-            formateurs_from_modules = Formateur.objects.filter(
-                modules_dispenses__formation=formation_for_action # Changé modules_dispenses__metier à modules_dispenses__formation
-            ).distinct()
-            
-            assigned_formateurs_for_action = list(formateurs_from_modules)
-
-            self.stdout.write(self.style.NOTICE(f"  Assigning Formateurs from modules for '{formation_for_action.nom}': {[str(f) for f in assigned_formateurs_for_action]}")) # Changé metier_for_action à formation_for_action
-
-            action.formateurs.set(assigned_formateurs_for_action)
-
-            # --- Start: Automatic ModuleProgress creation for seeded actions ---
-            # Get all modules associated with the action's formation
-            modules_in_formation = Module.objects.filter(formation=action.formation)
-            
-            # Get the formateurs assigned to this action
-            # Note: assigned_formateurs_for_action is already populated above
+            # --- Start: Revised Automatic ModuleProgress creation (one formateur per module) ---
+            modules_in_formation = formation_for_action.modules.all()
+            assigned_for_this_action = set()
             
             for module in modules_in_formation:
-                for formateur in assigned_formateurs_for_action:
-                    ModuleProgress.objects.get_or_create( # Use get_or_create to prevent duplicates on re-seeding
-                        formateur=formateur,
+                # Récupérer les formateurs éligibles pour ce module spécifique
+                eligible_formateurs = list(module.formateurs.filter(active=True))
+                
+                if eligible_formateurs:
+                    # On en choisit un (le premier pour la demo)
+                    formateur_to_assign = eligible_formateurs[0]
+                    
+                    ModuleProgress.objects.get_or_create(
+                        formateur=formateur_to_assign,
                         action=action,
                         module=module,
-                        defaults={
-                            # Other fields will take their default values (e.g., statut_module='NC')
-                        }
+                        defaults={'statut_module': 'NC'}
                     )
-            # --- End: Automatic ModuleProgress creation ---
+                    assigned_for_this_action.add(formateur_to_assign)
+
+            # Mettre à jour la liste globale des formateurs de l'action
+            action.formateurs.set(list(assigned_for_this_action))
+            # --- End: Revised Automatic ModuleProgress creation ---
 
             actions[action_key] = action
 

@@ -85,6 +85,6 @@ ModuleSubjectFormSet = inlineformset_factory(
     Module,
     ModuleSubject,
     form=ModuleSubjectForm,
-    extra=2,
+    extra=0,
     can_delete=True
 )

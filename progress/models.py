@@ -2,7 +2,7 @@ from django.db import models
 from django.core.exceptions import ValidationError
 from django.db.models import Sum, Q, F
 from decimal import Decimal
-import datetime # Importez le module datetime
+import datetime as dt
 from datetime import timedelta
 import random   # Importez le module random
 import string   # Importez le module string
@@ -84,6 +84,17 @@ class Action(models.Model):
 
     def __str__(self):
         return str(self.id) +"(" + self.description +")"
+
+    def update_statut(self):
+        total_modules = self.formation.modules.count()
+        if total_modules > 0:
+            completed_modules = self.module_progressions.filter(statut_module__in=['TE', 'VA']).values('module').distinct().count()
+            if completed_modules >= total_modules:
+                if self.statut != 'TERMINEE':
+                    self.statut = 'TERMINEE'
+                    self.save(update_fields=['statut', 'updated_at'])
+                return True
+        return False
 
     def clean(self):
         super().clean()
@@ -231,6 +242,40 @@ class ModuleProgress(models.Model):
     def __str__(self):
         return f"Progression de {self.formateur.get_full_name()} pour {self.module.titre} dans {self.action.description} ({self.get_statut_module_display()})"
 
+    def update_statut_module(self):
+        hours_done = self.calculate_hours_done()
+        if hours_done >= self.module.duree_heures:
+            new_statut = 'TE'
+        elif hours_done > 0:
+            new_statut = 'EC'
+        else:
+            new_statut = 'NC'
+        if self.statut_module != new_statut:
+            self.statut_module = new_statut
+            self.save(update_fields=['statut_module', 'updated_at'])
+
+    def calculate_hours_done(self):
+        import datetime as dt
+        total = 0
+        for s in self.sessions_progress.filter(statut='REALISEE'):
+            if s.actual_start_time and s.actual_end_time:
+                start = dt.datetime.combine(dt.date.today(), s.actual_start_time)
+                end = dt.datetime.combine(dt.date.today(), s.actual_end_time)
+                total += (end - start).total_seconds() / 3600
+        return round(total, 1)
+
+    def update_statut_module(self):
+        hours_done = self.calculate_hours_done()
+        if hours_done >= self.module.duree_heures:
+            new_statut = 'TE'
+        elif hours_done > 0:
+            new_statut = 'EC'
+        else:
+            new_statut = 'NC'
+        if self.statut_module != new_statut:
+            self.statut_module = new_statut
+            self.save(update_fields=['statut_module', 'updated_at'])
+
     def clean(self):
         super().clean()
         errors = {}
@@ -272,6 +317,9 @@ class ModuleProgress(models.Model):
     def save(self, *args, **kwargs):
         self.full_clean()
         super().save(*args, **kwargs)
+        self.update_statut_module()
+        if self.action_id:
+            self.action.update_statut()
 
     def delete(self, *args, **kwargs):
         if self.sessions_progress.exists():
@@ -384,16 +432,9 @@ class SessionProgress(models.Model):
 
         if self.module_progress_id and self.actual_date:
             action = self.module_progress.action
-            if action and (self.actual_date < action.date_debut or self.actual_date > action.date_fin):
-                errors["actual_date"] = "La séance réelle doit se situer entre les dates de début et de fin de l'action."
-            if action and action.course_schedules.exists():
-                matched_schedule = action.matches_course_schedule(
-                    self.actual_date,
-                    self.actual_start_time,
-                    self.actual_end_time,
-                )
-                if not matched_schedule:
-                    errors["actual_date"] = "La séance réelle doit respecter un créneau de cours de l'action."
+            # On ne bloque plus la date réelle, on permet le dépassement (rattrapage)
+            # Mais on pourrait logguer ou flagger l'anomalie ici si besoin.
+            pass
 
         if self.module_progress_id and self.formateur_id and self.formateur_id != self.module_progress.formateur_id:
             errors["formateur"] = "Le formateur de la séance doit correspondre au formateur de la progression du module."
@@ -411,13 +452,8 @@ class SessionProgress(models.Model):
 
         self.full_clean()
         super().save(*args, **kwargs)
-        self._sync_module_progress_status()
+        self.module_progress.update_statut_module()
 
-    def _sync_module_progress_status(self):
-        mp = self.module_progress
-        if self.statut == 'REALISEE' and mp.statut_module == 'NC':
-            mp.statut_module = 'EC'
-            mp.save(update_fields=['statut_module'])
 
 
 class FormateurPerformance(models.Model):
@@ -526,7 +562,7 @@ class Paiement(models.Model):
             if self.date_paiement:
                 date_part = self.date_paiement.strftime('%y%m%d') # YYMMDD (6 caractères)
             else:
-                date_part = datetime.date.today().strftime('%y%m%d') # Date du jour si non spécifiée
+                date_part = dt.date.today().strftime('%y%m%d') # Date du jour si non spécifiée
 
             base_ref = f"{stagiaire_initials}{date_part}" # Max 2 + 6 = 8 caractères
 

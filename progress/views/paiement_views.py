@@ -3,6 +3,7 @@ from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.generic import ListView, CreateView, DetailView, UpdateView, DeleteView
 from django.db.models import Sum
+from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
 from datetime import date
 
@@ -137,7 +138,7 @@ class PaiementDetailView(DetailView):
         
         context['hero_actions'] = [
             {'label': 'Retour à la liste', 'url': reverse_lazy('paiements'), 'icon': 'bi bi-arrow-left', 'class': 'btn-light-secondary'},
-            {'label': 'Imprimer', 'url': '#', 'icon': 'bi bi-printer', 'class': 'btn-light-primary'}, # Placeholder for print
+            {'label': 'Imprimer', 'url': reverse_lazy('paiement_print', kwargs={'pk': self.object.pk}), 'icon': 'bi bi-printer', 'class': 'btn-light-primary', 'target': '_blank'},
         ]
         return context
 
@@ -155,6 +156,20 @@ class PaiementUpdateView(UpdateView):
         context['link'] = 'paiements'
         context['titre'] = 'Modifier un paiement'
         return context
+
+@method_decorator(login_required, name='dispatch')
+class PaiementReceiptPrintView(DetailView):
+    model = Paiement
+    template_name = 'progress/paiement_receipt_print.html'
+    context_object_name = 'paiement'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['total_cout'] = self.object.get_total_cout()
+        context['total_paye'] = self.object.get_total_paye()
+        context['solde_restant'] = self.object.get_solde_restant()
+        return context
+
 
 @method_decorator(login_required, name='dispatch')
 class PaiementDeleteView(DeleteView):
