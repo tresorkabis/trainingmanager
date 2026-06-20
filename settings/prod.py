@@ -4,7 +4,7 @@ from .base import *
 DEBUG = False
 
 # SECURITY WARNING: replace this with your production host(s)!
-ALLOWED_HOSTS = ['yourusername.pythonanywhere.com']
+ALLOWED_HOSTS = ['tresorkabis.pythonanywhere.com']
 
 
 # Database
