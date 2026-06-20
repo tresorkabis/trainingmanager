@@ -9,6 +9,7 @@ from progress.views.module_progress_views import (
     ModuleProgressUpdateView, ModuleProgressDeleteView,
     SessionProgressCreateView, SessionProgressUpdateView, SessionProgressDeleteView,
 )
+from progress.views.jury_views import JuryPVCustomView, JuryPVDeleteView, JuryPVGeneratePDFView, JuryPVCoterView
 
 urlpatterns = [
     # Actions
@@ -58,4 +59,10 @@ urlpatterns = [
     path("detailactions/", DetailActionListViews.as_view(), name="detailactions"),
     path("detailactions/create/", DetailActionCreateView.as_view(), name="detailaction_create"),
     path("detailactions/<int:pk>/", DetailActionDetailView.as_view(), name="detailaction"),
+
+    # PV Jury (un seul par action - OneToOne pas de pk nécessaire)
+    path("actions/<int:action_pk>/jury/", JuryPVCustomView.as_view(), name="jurypv_form"),
+    path("actions/<int:action_pk>/jury/supprimer/", JuryPVDeleteView.as_view(), name="jurypv_delete"),
+    path("actions/<int:action_pk>/jury/pdf/", JuryPVGeneratePDFView.as_view(), name="jurypv_generate_pdf"),
+    path("actions/<int:action_pk>/jury/coter/", JuryPVCoterView.as_view(), name="jurypv_coter"),
 ]

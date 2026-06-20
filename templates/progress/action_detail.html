@@ -50,7 +50,89 @@
                             <div class="col-md-6"><div class="tm-stat-card"><span class="tm-stat-card__label">Début</span><span class="tm-stat-card__value" style="font-size: 1.1rem;">{{ object.date_debut|date:"d/m/Y" }}</span></div></div>
                             <div class="col-md-6"><div class="tm-stat-card"><span class="tm-stat-card__label">Fin</span><span class="tm-stat-card__value" style="font-size: 1.1rem;">{{ object.date_fin|date:"d/m/Y" }}</span></div></div>
                         </div>
+                        <div class="row g-3 mt-2">
+                            <div class="col-md-6">
+                                <div class="tm-stat-card">
+                                    <span class="tm-stat-card__label">Jury (examen final)</span>
+                                    <span class="tm-stat-card__value" style="font-size: 1.1rem;">
+                                        {% if object.date_jury %}
+                                            {{ object.date_jury|date:"d/m/Y" }}
+                                        {% else %}
+                                            <span class="text-muted">Non défini</span>
+                                        {% endif %}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
                         <div class="mt-4">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h6 class="mb-0">PV Jury</h6>
+                                <div class="d-flex gap-2">
+                                    {% if object.jury_pv %}
+                                    <a href="{% url 'jurypv_coter' object.pk %}" class="btn btn-sm btn-primary">
+                                        <i class="bi bi-pencil-square me-1"></i>Coter les stagiaires
+                                    </a>
+                                    <a href="{% url 'jurypv_form' object.pk %}" class="btn btn-sm btn-warning">
+                                        <i class="bi bi-pencil me-1"></i>Modifier le PV
+                                    </a>
+                                    <a href="{% url 'jurypv_generate_pdf' object.pk %}" class="btn btn-sm btn-success">
+                                        <i class="bi bi-file-earmark-pdf me-1"></i>Générer le PV
+                                    </a>
+                                    <a href="{% url 'jurypv_delete' object.pk %}" class="btn btn-sm btn-danger">
+                                        <i class="bi bi-trash me-1"></i>Supprimer
+                                    </a>
+                                    {% else %}
+                                    <a href="{% url 'jurypv_form' object.pk %}" class="btn btn-sm btn-primary">
+                                        <i class="bi bi-plus-circle me-1"></i>Ajouter un PV
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% if object.jury_pv %}
+                            <div class="card mb-3 border">
+                                <div class="card-header d-flex justify-content-between align-items-center bg-light">
+                                    <span>
+                                        <i class="bi bi-file-earmark-text me-2"></i>
+                                        <strong>{{ object.jury_pv.date_jury|date:"d/m/Y" }}</strong>
+                                        <span class="text-muted ms-2">| {{ object.jury_pv.observations|default:"-"|truncatechars:80 }}</span>
+                                    </span>
+                                    <div>
+                                        {% if jury_pv_file_url %}
+                                        <a href="{{ jury_pv_file_url }}" target="_blank" class="btn btn-sm btn-outline-primary" title="Voir le PV téléchargé">
+                                            <i class="bi bi-file-pdf"></i> Voir le fichier
+                                        </a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="card-body p-0">
+                                    <table class="table table-sm table-hover mb-0">
+                                        <thead class="table-secondary">
+                                            <tr>
+                                                <th>Stagiaire</th>
+                                                <th class="text-center">Note formation <small class="text-muted">/60</small></th>
+                                                <th class="text-center">Note jury <small class="text-muted">/40</small></th>
+                                                <th class="text-center">Total <small class="text-muted">/100</small></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for ins in inscriptions %}
+                                            <tr>
+                                                <td>{{ ins.stagiaire.get_full_name }}</td>
+                                                <td class="text-center">{{ ins.note_formation|default:"--" }}</td>
+                                                <td class="text-center">{{ ins.note_jury|default:"--" }}</td>
+                                                <td class="text-center fw-bold">{{ ins.note_total|default:"--" }}</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            {% else %}
+                            <div class="alert alert-light border text-center small mb-4">
+                                <i class="bi bi-file-earmark-text me-1"></i>Aucun PV de jury enregistré.
+                            </div>
+                            {% endif %}
+
                             <h6 class="mb-3">Créneaux de cours</h6>
                             {% if course_schedules %}
                                 <div class="d-flex flex-wrap gap-2">

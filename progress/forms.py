@@ -1,7 +1,7 @@
 from django import forms
 from django.core.exceptions import ValidationError
 from django_select2.forms import Select2Widget # Importez Select2Widget
-from .models import Paiement, Stagiaire, Action, Formateur, ModuleProgress, SessionProgress, DetailAction # Removed FormateurPerformance
+from .models import Paiement, Stagiaire, Action, Formateur, ModuleProgress, SessionProgress, DetailAction, JuryPV, JuryNote # Added JuryPV, JuryNote
 from training.models import Module # Import Module
 from users.models import User # Import User pour le formulaire
 
@@ -185,3 +185,57 @@ class SessionProgressForm(forms.ModelForm):
                 field.widget.attrs.update({'class': 'form-control'})
             elif isinstance(field.widget, forms.TimeInput) and 'class' not in field.widget.attrs:
                 field.widget.attrs.update({'class': 'form-control'})
+
+
+class JuryPVForm(forms.ModelForm):
+    fichier = forms.FileField(
+        label="PV du jury (PDF)",
+        widget=forms.FileInput(attrs={'class': 'form-control', 'accept': '.pdf,.jpg,.jpeg,.png'}),
+        help_text="Téléchargez le procès-verbal du jury au format PDF ou image.",
+        required=False
+    )
+    observations = forms.CharField(
+        widget=forms.Textarea(attrs={'rows': 3, 'class': 'form-control'}),
+        label="Observations",
+        required=False
+    )
+
+    class Meta:
+        model = JuryPV
+        fields = ['fichier', 'observations']
+
+
+class JuryNoteForm(forms.ModelForm):
+    note_formation = forms.DecimalField(
+        max_digits=5, decimal_places=2,
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'min': '0', 'max': '60', 'placeholder': '0-60'}),
+        label="Note formation (/60)"
+    )
+    note_jury = forms.DecimalField(
+        max_digits=5, decimal_places=2,
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'min': '0', 'max': '40', 'placeholder': '0-40'}),
+        label="Note jury (/40)"
+    )
+
+    class Meta:
+        model = JuryNote
+        fields = ['stagiaire', 'note_formation', 'note_jury']
+
+    def __init__(self, *args, **kwargs):
+        action = kwargs.pop('action', None)
+        super().__init__(*args, **kwargs)
+        if action:
+            self.fields['stagiaire'].queryset = Stagiaire.objects.filter(
+                detailaction__action=action, detailaction__active=True
+            ).order_by('nom', 'postnom', 'prenom')
+        self.fields['stagiaire'].widget.attrs.update({'class': 'form-select'})
+        self.fields['stagiaire'].label = "Stagiaire"
+
+
+JuryNoteFormSet = forms.inlineformset_factory(
+    JuryPV, JuryNote,
+    form=JuryNoteForm,
+    extra=1,
+    can_delete=True,
+    fields=['stagiaire', 'note_formation', 'note_jury'],
+)

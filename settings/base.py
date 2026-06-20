@@ -1,5 +1,9 @@
-from pathlib import Path
 import os
+
+# Set homebrew library path for WeasyPrint PDF generation on macOS
+os.environ.setdefault('DYLD_LIBRARY_PATH', '/opt/homebrew/lib')
+
+from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent

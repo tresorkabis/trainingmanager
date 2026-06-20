@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ titre }}{% endblock title %}
+{% block page_header %}{{ titre }}{% endblock page_header %}
+
+{% block content %}
+<section class="section">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">Action : {{ action.description }}</h4>
+                    <p class="card-subtitle text-muted">{{ action.formation.nom }}</p>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        {{ formset.management_form }}
+
+                        <!-- PV Jury fields -->
+                        <div class="row g-3 mb-4">
+                            {% for field in form %}
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="{{ field.id_for_label }}" class="form-label fw-bold">{{ field.label }}</label>
+                                    {{ field }}
+                                    {% if field.help_text %}
+                                    <small class="text-muted">{{ field.help_text }}</small>
+                                    {% endif %}
+                                    {% for error in field.errors %}
+                                    <div class="text-danger small">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        <hr class="my-4">
+                        <h5 class="mb-3">
+                            <i class="bi bi-table me-2"></i>Notes des stagiaires
+                        </h5>
+                        <p class="text-muted small mb-4">
+                            Saisissez les cotes de chaque stagiaire :
+                            <strong>Note formation /60</strong> (cotes obtenues pendant la formation) et
+                            <strong>Note jury /40</strong> (cotes obtenues pendant le jury).
+                        </p>
+
+                        <button type="button" class="btn btn-outline-primary btn-sm mb-3" id="add-note-btn">
+                            <i class="bi bi-plus-circle me-1"></i>Ajouter une note
+                        </button>
+
+                        <!-- Formset notes -->
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th style="width: 40%;">Stagiaire</th>
+                                        <th style="width: 25%;">Note formation <small class="text-muted">/60</small></th>
+                                        <th style="width: 25%;">Note jury <small class="text-muted">/40</small></th>
+                                        <th style="width: 10%;" class="text-center">Suppr.</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="notes-formset-body">
+                                    {% for note_form in formset %}
+                                    <tr class="note-form-row">
+                                        <td>
+                                            {% for hidden in note_form.hidden_fields %}{{ hidden }}{% endfor %}
+                                            {{ note_form.stagiaire }}
+                                            {% for error in note_form.stagiaire.errors %}
+                                            <div class="text-danger small">{{ error }}</div>
+                                            {% endfor %}
+                                        </td>
+                                        <td>
+                                            {{ note_form.note_formation }}
+                                            {% for error in note_form.note_formation.errors %}
+                                            <div class="text-danger small">{{ error }}</div>
+                                            {% endfor %}
+                                        </td>
+                                        <td>
+                                            {{ note_form.note_jury }}
+                                            {% for error in note_form.note_jury.errors %}
+                                            <div class="text-danger small">{{ error }}</div>
+                                            {% endfor %}
+                                        </td>
+                                        <td class="text-center">
+                                            {{ note_form.DELETE }}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Template caché pour ligne vide (utilisé par JS) -->
+                        <div id="note-form-template" style="display: none;">
+                            <tr class="note-form-row">
+                                <td>
+                                    <select name="__prefix__-stagiaire" class="form-select">
+                                        <option value="">Sélectionner</option>
+                                        {% for s in all_stagiaires %}
+                                        <option value="{{ s.pk }}">{{ s.get_full_name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </td>
+                                <td><input type="number" step="0.01" min="0" max="60" name="__prefix__-note_formation" class="form-control"></td>
+                                <td><input type="number" step="0.01" min="0" max="40" name="__prefix__-note_jury" class="form-control"></td>
+                                <td class="text-center"></td>
+                            </tr>
+                        </div>
+
+                        {% if formset.non_form_errors %}
+                        <div class="alert alert-danger">
+                            {% for error in formset.non_form_errors %}
+                            <p class="mb-0">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{% url 'action' action.pk %}" class="btn btn-light-secondary">Annuler</a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-save me-2"></i>{{ titre }}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock content %}
+
+{% block script %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const addNoteBtn = document.getElementById('add-note-btn');
+    const tbody = document.getElementById('notes-formset-body');
+    const template = document.getElementById('note-form-template');
+    const totalForms = document.getElementById('id_notes-TOTAL_FORMS');
+
+    if (addNoteBtn && tbody && template && totalForms) {
+        addNoteBtn.addEventListener('click', function() {
+            const currentIndex = parseInt(totalForms.value, 10);
+            const clone = template.innerHTML.replace(/__prefix__/g, currentIndex);
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = clone.trim();
+            const newRow = tempDiv.firstChild;
+            tbody.appendChild(newRow);
+            totalForms.value = currentIndex + 1;
+        });
+    }
+});
+</script>
+{% endblock script %}

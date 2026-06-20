@@ -251,6 +251,7 @@ class ActionDetailViews(ActionPermissionMixin, DetailView):
                 "formation__modules__seances__formateur",
                 "formation__modules__seances__evaluateur",
                 "module_progressions",
+                "jury_pv",
             )
         )
 
@@ -305,6 +306,18 @@ class ActionDetailViews(ActionPermissionMixin, DetailView):
 
         ctx["modules"] = modules_list
         ctx["status_meta"] = self.get_action_status(action)
+        # Attacher les notes de jury à chaque inscription pour simplifier le template
+        jury_notes_map = {}
+        try:
+            for note in action.jury_pv.notes.all().select_related('stagiaire'):
+                jury_notes_map[note.stagiaire_id] = note
+        except Exception:
+            pass
+        for ins in inscriptions:
+            note = jury_notes_map.get(ins.stagiaire_id)
+            ins.note_formation = note.note_formation if note else None
+            ins.note_jury = note.note_jury if note else None
+            ins.note_total = (ins.note_formation or 0) + (ins.note_jury or 0) if note else None
         ctx["inscriptions"] = inscriptions
         ctx["stagiaires_disponibles"] = Stagiaire.objects.filter(active=True).exclude(pk__in=inscrit_ids).order_by("nom", "postnom", "prenom")
         ctx["link"] = "actions"
@@ -375,12 +388,29 @@ class ActionDetailViews(ActionPermissionMixin, DetailView):
             ctx["evolution_chart"] = evolution_data
 
         # Stats pour le Hero
+        # Prépare la map des notes de jury pour l'affichage dans le template
+        jury_notes_map = {}
+        try:
+            for note in object.jury_pv.notes.all().select_related('stagiaire'):
+                jury_notes_map[note.stagiaire_id] = note
+        except Exception:
+            pass
+        ctx["jury_notes_map"] = jury_notes_map
+
         ctx["hero_stats"] = [
             {'label': 'Inscrits', 'value': ctx["inscription_count"]},
             {'label': 'Modules', 'value': len(modules_list)},
             {'label': 'Statut', 'value': ctx["status_meta"]['label']},
             {'label': 'Reste à payer', 'value': f"{ctx['finance']['solde']:,.0f} USD"},
         ]
+
+        # Prépare l'URL du fichier PDF du PV Jury de façon sécurisée (OneToOne peut lever RelatedObjectDoesNotExist)
+        jury_pv_file_url = None
+        try:
+            if action.jury_pv.fichier:
+                jury_pv_file_url = action.jury_pv.fichier.url
+        except Exception:
+            jury_pv_file_url = None
 
         ctx["hero_actions"] = [
             {'label': 'Retour', 'url': reverse_lazy('actions'), 'icon': 'bi bi-arrow-left', 'class': 'btn-light-secondary'},
@@ -389,6 +419,7 @@ class ActionDetailViews(ActionPermissionMixin, DetailView):
             {'label': 'Modifier', 'url': reverse_lazy('action_update', kwargs={'pk': action.pk}), 'icon': 'bi bi-pencil'},
             {'label': 'Imprimer Stagiaires', 'url': reverse_lazy('action_stagiaires_print', kwargs={'pk': action.pk}), 'icon': 'bi bi-printer', 'class': 'btn-info'}, # Nouveau bouton
         ]
+        ctx["jury_pv_file_url"] = jury_pv_file_url
 
         return ctx
 
@@ -414,6 +445,7 @@ class ActionCreateView(ActionPermissionMixin, View):
         formation_id = request.POST["formation"]
         type_action_id = request.POST.get("type_action")
         lieu = request.POST.get("lieu", "").strip()
+        date_jury = request.POST.get("date_jury") or None
 
         formation = get_object_or_404(Formation, pk=formation_id)
         schedules = ActionWorkflowService.extract_action_schedules(request.POST)
@@ -439,6 +471,7 @@ class ActionCreateView(ActionPermissionMixin, View):
                 formation_id=formation_id,
                 type_action_id=type_action_id,
                 lieu=lieu,
+                date_jury=date_jury,
             )
             action.save()
             ActionWorkflowService.sync_action_schedules(action, schedules)
@@ -454,7 +487,7 @@ class ActionCreateView(ActionPermissionMixin, View):
 class ActionUpdateView(ActionPermissionMixin, UpdateView):
     model = Action
     template_name = "progress/action.html"
-    fields = ["description", "date_debut", "date_fin", "formation", "type_action", "lieu"]
+    fields = ["description", "date_debut", "date_fin", "formation", "type_action", "lieu", "date_jury"]
     success_url = reverse_lazy("actions")
 
     def get_form(self, form_class=None):

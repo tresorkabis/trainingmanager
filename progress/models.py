@@ -69,6 +69,7 @@ class Action(models.Model):
     type_action = models.ForeignKey(TypeAction, on_delete=models.SET_NULL, null=True, blank=True, related_name="actions_liees")
     lieu = models.CharField(max_length=100, blank=True, null=True) # Nouveau champ lieu
     statut = models.CharField(max_length=10, choices=STATUT_CHOICES, default='PLANIFIEE') # Nouveau champ statut
+    date_jury = models.DateField(blank=True, null=True, verbose_name="Date de l'examen final (jury)")
 
     active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -511,6 +512,61 @@ class FormateurPerformance(models.Model):
 
     def __str__(self):
         return f"Séance de {self.formateur} pour {self.action.description} - {self.module.titre}"
+
+
+class JuryPV(models.Model):
+    action = models.OneToOneField(Action, on_delete=models.CASCADE, related_name='jury_pv')
+    date_jury = models.DateField(verbose_name="Date du jury")
+    fichier = models.FileField(upload_to="jury/pv/", verbose_name="PV du jury (PDF)")
+    observations = models.TextField(blank=True, null=True, verbose_name="Observations")
+
+    active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "PV Jury"
+        verbose_name_plural = "PVs Jury"
+
+    def __str__(self):
+        return f"PV Jury - {self.action.description} ({self.date_jury})"
+
+
+class JuryNote(models.Model):
+    jury_pv = models.ForeignKey(JuryPV, on_delete=models.CASCADE, related_name='notes')
+    stagiaire = models.ForeignKey(Stagiaire, on_delete=models.CASCADE, related_name='jury_notes')
+    note_formation = models.DecimalField(max_digits=5, decimal_places=2, verbose_name="Note formation (/60)", help_text="Cotes obtenues pendant la formation sur 60")
+    note_jury = models.DecimalField(max_digits=5, decimal_places=2, verbose_name="Note jury (/40)", help_text="Cotes obtenues pendant le jury sur 40")
+
+    active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Note Jury Stagiaire"
+        verbose_name_plural = "Notes Jury Stagiaires"
+        unique_together = ('jury_pv', 'stagiaire')
+
+    def __str__(self):
+        return f"{self.stagiaire.get_full_name} - Formation: {self.note_formation}/60 - Jury: {self.note_jury}/40"
+
+    @property
+    def total(self):
+        return (self.note_formation or 0) + (self.note_jury or 0)
+
+    @property
+    def total_sur_100(self):
+        return self.total
+
+    def clean(self):
+        super().clean()
+        errors = {}
+        if self.note_formation is not None and (self.note_formation < 0 or self.note_formation > 60):
+            errors["note_formation"] = "La note formation doit être comprise entre 0 et 60."
+        if self.note_jury is not None and (self.note_jury < 0 or self.note_jury > 40):
+            errors["note_jury"] = "La note jury doit être comprise entre 0 et 40."
+        if errors:
+            raise ValidationError(errors)
 
 
 class Paiement(models.Model):
