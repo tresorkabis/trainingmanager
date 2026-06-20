@@ -228,7 +228,19 @@
         // 1. Initialisation Datatable
         try {
             const table = document.querySelector('#stagiaireTable');
-            if (table) new simpleDatatables.DataTable(table);
+            if (table) {
+                new simpleDatatables.DataTable(table, {
+                    labels: {
+                        placeholder: "Rechercher...",
+                        perPage: "entrées par page",
+                        noRows: "Aucune entrée trouvée",
+                        info: "Affichage de {start} à {end} sur {rows} entrées",
+                        // Ajoutez d'autres traductions si nécessaire
+                        // par exemple, pour les boutons de pagination si simple-datatables les expose
+                        // ou pour les messages d'erreur
+                    }
+                });
+            }
         } catch (e) { console.error("DataTable error:", e); }
 
         // 2. Initialisation Select2

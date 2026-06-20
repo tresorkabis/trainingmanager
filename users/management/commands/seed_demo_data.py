@@ -48,6 +48,11 @@ class Command(BaseCommand):
         chef_service_profile = Profile.objects.filter(name="Chef de service").first()
         user_profile = Profile.objects.filter(name="User").first()
         formateur_profile = Profile.objects.filter(name="Formateur").first() # Récupérer le profil Formateur
+        caisse_profile = Profile.objects.filter(name="Caisse").first()
+        conseiller_profile = Profile.objects.filter(name="Conseiller").first()
+        inspecteur_profile = Profile.objects.filter(name="Inspecteur").first()
+        pedagogique_profile = Profile.objects.filter(name="Pédagogique").first()
+
 
         manager_user, created = User.objects.get_or_create(
             username="manager",
@@ -85,7 +90,7 @@ class Command(BaseCommand):
             categories[titre] = categorie
 
         services = {}
-        for nom in ["Informatique", "Comptabilité et Administration", "Petites et moyennes entreprises"]:
+        for nom in ["Informatique", "Comptabilité et Administration", "Petites et moyennes entreprises", "Pédagogie", "Inspecteur", "Conseiller"]:
             service, _ = Service.objects.get_or_create(nom=nom)
             services[nom] = service
 
@@ -173,6 +178,64 @@ class Command(BaseCommand):
             standard_user.set_password("demo")
             standard_user.profile = user_profile
             standard_user.save()
+
+        # Création des utilisateurs pour les nouveaux profils
+        caisse_user, created = User.objects.get_or_create(
+            username="caisse",
+            defaults={
+                "email": "caisse@training.local",
+                "first_name": "Demo",
+                "last_name": "Caisse",
+                "profile": caisse_profile,
+            },
+        )
+        if created or not caisse_user.check_password("demo"):
+            caisse_user.set_password("demo")
+            caisse_user.profile = caisse_profile
+            caisse_user.save()
+
+        conseiller_user, created = User.objects.get_or_create(
+            username="conseiller",
+            defaults={
+                "email": "conseiller@training.local",
+                "first_name": "Demo",
+                "last_name": "Conseiller",
+                "profile": conseiller_profile,
+            },
+        )
+        if created or not conseiller_user.check_password("demo"):
+            conseiller_user.set_password("demo")
+            conseiller_user.profile = conseiller_profile
+            conseiller_user.save()
+
+        inspecteur_user, created = User.objects.get_or_create(
+            username="inspecteur",
+            defaults={
+                "email": "inspecteur@training.local",
+                "first_name": "Demo",
+                "last_name": "Inspecteur",
+                "profile": inspecteur_profile,
+            },
+        )
+        if created or not inspecteur_user.check_password("demo"):
+            inspecteur_user.set_password("demo")
+            inspecteur_user.profile = inspecteur_profile
+            inspecteur_user.save()
+
+        pedagogique_user, created = User.objects.get_or_create(
+            username="pedagogique",
+            defaults={
+                "email": "pedagogique@training.local",
+                "first_name": "Demo",
+                "last_name": "Pédagogique",
+                "profile": pedagogique_profile,
+            },
+        )
+        if created or not pedagogique_user.check_password("demo"):
+            pedagogique_user.set_password("demo")
+            pedagogique_user.profile = pedagogique_profile
+            pedagogique_user.save()
+
 
         formateurs = {}
         formateur_specs_data = [
@@ -794,3 +857,7 @@ class Command(BaseCommand):
         self.stdout.write("  - Chef de filière: chef.filiere / demo")
         self.stdout.write("  - Chef de service: chef.service / demo")
         self.stdout.write("  - Utilisateur standard: user.standard / demo")
+        self.stdout.write("  - Caisse: caisse / demo")
+        self.stdout.write("  - Conseiller: conseiller / demo")
+        self.stdout.write("  - Inspecteur: inspecteur / demo")
+        self.stdout.write("  - Pédagogique: pedagogique / demo")

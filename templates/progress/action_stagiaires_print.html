@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Liste des Stagiaires - {{ action.description }}</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; color: #333; }
+        .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #435ebe; padding-bottom: 10px; }
+        .header h1 { margin: 0; color: #435ebe; font-size: 24px; }
+        .header p { margin: 5px 0; color: #666; }
+        .info-section { margin-bottom: 20px; display: flex; justify-content: space-between; }
+        .info-box { font-size: 14px; }
+        .info-box strong { color: #435ebe; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #dee2e6; padding: 12px; text-align: left; font-size: 13px; }
+        th { background-color: #f8f9fa; color: #435ebe; font-weight: bold; }
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; text-transform: uppercase; color: #fff; }
+        .bg-success { background-color: #28a745; }
+        .bg-warning { background-color: #ffc107; color: #212529 !important; }
+        .bg-danger { background-color: #dc3545; }
+        .text-right { text-align: right; }
+        @media print {
+            .no-print { display: none; }
+            body { padding: 0; }
+            .header { border-bottom: 2px solid #000; }
+        }
+    </style>
+</head>
+<body>
+    <div class="no-print" style="margin-bottom: 20px; text-align: right;">
+        <button onclick="window.print()" class="btn btn-primary" style="padding: 10px 20px; background: #435ebe; color: white; border: none; border-radius: 5px; cursor: pointer;">
+            <i class="bi bi-printer"></i> Imprimer la liste
+        </button>
+    </div>
+
+    <div class="header">
+        <h1>Liste des Stagiaires et État des Paiements</h1>
+        <p>Action : {{ action.description }}</p>
+    </div>
+
+    <div class="info-section">
+        <div class="info-box">
+            <p><strong>Formation :</strong> {{ action.formation.nom }}</p>
+            <p><strong>Filière :</strong> {{ action.formation.filiere.nom }}</p>
+        </div>
+        <div class="info-box" style="text-align: right;">
+            <p><strong>Coût de la formation :</strong> {{ formation_cout|floatformat:2 }} USD</p>
+            <p><strong>Date d'impression :</strong> {% now "d/m/Y H:i" %}</p>
+        </div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Nom Complet</th>
+                <th>Date d'Inscription</th>
+                <th class="text-right">Montant Payé</th>
+                <th class="text-right">Statut</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for s in stagiaires_list %}
+            <tr>
+                <td>{{ s.nom }}</td>
+                <td>{{ s.date|date:"d/m/Y" }}</td>
+                <td class="text-right">{{ s.total_paye|floatformat:2 }} USD</td>
+                <td class="text-right">
+                    <span class="badge {{ s.badge }}">{{ s.statut }}</span>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" style="text-align: center; padding: 20px;">Aucun stagiaire inscrit pour cette action.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

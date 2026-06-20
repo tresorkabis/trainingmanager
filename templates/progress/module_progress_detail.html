@@ -200,10 +200,10 @@
                             </span>
                         </td>
                         <td>
-                            <a href="{% url 'session_progress_update' session.pk %}" class="btn btn-sm btn-warning" title="Modifier">
+                            <a href="{% url 'session_progress_update' module_progress.pk session.pk %}" class="btn btn-sm btn-warning" title="Modifier">
                                 <i class="bi bi-pencil"></i>
                             </a>
-                            <a href="{% url 'session_progress_delete' session.pk %}" class="btn btn-sm btn-danger" title="Supprimer">
+                            <a href="{% url 'session_progress_delete' module_progress.pk session.pk %}" class="btn btn-sm btn-danger" title="Supprimer">
                                 <i class="bi bi-trash"></i>
                             </a>
                         </td>

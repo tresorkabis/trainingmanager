@@ -131,25 +131,23 @@ class HomeView(View):
             "series": [{"name": "Encaissements", "data": [m["total"] for m in months_data]}],
         }
 
-        # =========== GRAPHIQUE 2 : Statut des actions (aligné sur la liste /progress/actions/) ===========
-        statut_ordered = ["Terminée", "Planifiée", "En cours", "Annulée"]
+        # =========== GRAPHIQUE 2 : Statut des actions (basé sur action.statut) ===========
+        statut_ordered = ["Planifiée", "En cours", "Terminée", "Annulée"]
         statut_colors_map = {
-            "Terminée": "#198754",
             "Planifiée": "#ffc107",
             "En cours": "#0dcaf0",
+            "Terminée": "#198754",
             "Annulée": "#dc3545",
         }
         statut_counts = {label: 0 for label in statut_ordered}
         for action in actions_queryset:
-            # Même logique que ActionListViews.get_context_data()
-            if action.statut == 'ANNULEE':
-                label = "Annulée"
-            elif action.statut == 'TERMINEE':
-                label = "Terminée"
-            elif action.date_debut > today:
-                label = "Planifiée"
-            else:
-                label = "En cours"
+            label_map = {
+                'PLANIFIEE': "Planifiée",
+                'EN_COURS': "En cours",
+                'TERMINEE': "Terminée",
+                'ANNULEE': "Annulée",
+            }
+            label = label_map.get(action.statut)
             if label in statut_counts:
                 statut_counts[label] += 1
 

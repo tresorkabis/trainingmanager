@@ -87,14 +87,36 @@ class Action(models.Model):
 
     def update_statut(self):
         total_modules = self.formation.modules.count()
-        if total_modules > 0:
-            completed_modules = self.module_progressions.filter(statut_module__in=['TE', 'VA']).values('module').distinct().count()
-            if completed_modules >= total_modules:
-                if self.statut != 'TERMINEE':
-                    self.statut = 'TERMINEE'
-                    self.save(update_fields=['statut', 'updated_at'])
-                return True
-        return False
+        if total_modules == 0:
+            return False
+
+        # Récupère les statuts des modules (un seul par module, même s'il y a plusieurs formateurs)
+        module_statuses = {
+            entry['module']: entry['statut_module']
+            for entry in self.module_progressions.values('module', 'statut_module')
+        }
+
+        # Si tous les modules sont terminés ou validés → TERMINEE
+        completed_count = sum(1 for s in module_statuses.values() if s in ('TE', 'VA'))
+        if completed_count >= total_modules:
+            if self.statut != 'TERMINEE':
+                self.statut = 'TERMINEE'
+                self.save(update_fields=['statut', 'updated_at'])
+            return True
+
+        # Si au moins un module est en cours → EN_COURS
+        in_progress_count = sum(1 for s in module_statuses.values() if s == 'EC')
+        if in_progress_count > 0:
+            if self.statut != 'EN_COURS':
+                self.statut = 'EN_COURS'
+                self.save(update_fields=['statut', 'updated_at'])
+            return True
+
+        # Sinon, au moins un module est non commencé ou en échec → PLANIFIEE
+        if self.statut != 'PLANIFIEE':
+            self.statut = 'PLANIFIEE'
+            self.save(update_fields=['statut', 'updated_at'])
+        return True
 
     def clean(self):
         super().clean()

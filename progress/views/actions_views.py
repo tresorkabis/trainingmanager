@@ -18,6 +18,7 @@ from progress.models import Action, Formateur, ModuleProgress, TypeAction, Sessi
 from progress.services import ActionWorkflowService
 from intern.models import Stagiaire
 from training.models import Formation, Module
+from decimal import Decimal
 
 
 class ActionPermissionMixin:
@@ -141,6 +142,45 @@ class ActionPermissionMixin:
         assignments = ActionWorkflowService.extract_module_assignments(formation, request.POST)
         return ActionWorkflowService.validate_module_assignments(formation, assignments)
 
+
+@method_decorator(login_required, name="dispatch")
+class ActionStagiairesPrintView(ActionPermissionMixin, DetailView): # Changed from ListView to DetailView
+    model = Action
+    template_name = "progress/action_stagiaires_print.html"
+    context_object_name = "action"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        action = self.get_object()
+        
+        inscriptions = action.detailaction_set.select_related("stagiaire").order_by("stagiaire__nom", "stagiaire__postnom")
+        formation_cout = action.formation.cout or Decimal("0.00")
+        
+        stagiaires_data = []
+        for ins in inscriptions:
+            total_paye = sum(p.montant for p in ins.stagiaire.paiements.filter(action=action))
+            
+            if total_paye >= formation_cout:
+                statut_paiement = "Payé"
+                badge_class = "bg-success"
+            elif total_paye > 0:
+                statut_paiement = "Partiel"
+                badge_class = "bg-warning text-dark"
+            else:
+                statut_paiement = "Non payé"
+                badge_class = "bg-danger"
+                
+            stagiaires_data.append({
+                'nom': ins.stagiaire.get_full_name(),
+                'date': ins.date_inscription,
+                'total_paye': total_paye,
+                'statut': statut_paiement,
+                'badge': badge_class,
+            })
+            
+        context['stagiaires_list'] = stagiaires_data
+        context['formation_cout'] = formation_cout
+        return context
 
 @method_decorator(login_required, name="dispatch")
 class ActionListViews(ActionPermissionMixin, ListView):
@@ -347,6 +387,7 @@ class ActionDetailViews(ActionPermissionMixin, DetailView):
             {'label': 'Progressions', 'url': reverse_lazy('module_progressions') + f'?action={action.pk}', 'icon': 'bi bi-list-task'},
             {'label': 'Mettre à jour les statuts', 'url': reverse_lazy('action_update_progressions', kwargs={'pk': action.pk}), 'icon': 'bi bi-arrow-repeat'},
             {'label': 'Modifier', 'url': reverse_lazy('action_update', kwargs={'pk': action.pk}), 'icon': 'bi bi-pencil'},
+            {'label': 'Imprimer Stagiaires', 'url': reverse_lazy('action_stagiaires_print', kwargs={'pk': action.pk}), 'icon': 'bi bi-printer', 'class': 'btn-info'}, # Nouveau bouton
         ]
 
         return ctx

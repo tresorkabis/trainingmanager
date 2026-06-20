@@ -14,8 +14,9 @@ from progress.models import Formateur
 class FormateurPermissionMixin:
     def enforce_manage_permission(self):
         user = self.request.user
-        # Exemple: Seuls les superutilisateurs et managers peuvent gérer les formateurs
-        if not (user.is_superuser or (user.profile and user.profile.name == "Manager")):
+        # Autoriser les superutilisateurs, managers, chefs de service, caisse, conseillers, inspecteurs et pédagogiques
+        allowed_profiles = ["Manager", "Chef de service", "Caisse", "Conseiller", "Inspecteur", "Pédagogique"]
+        if not (user.is_superuser or (user.profile and user.profile.name in allowed_profiles)):
             raise PermissionDenied("Vous n'avez pas la permission de gérer les formateurs.")
 
 class FormateurListView(FormateurPermissionMixin, ListView):
