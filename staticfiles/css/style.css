@@ -193,25 +193,39 @@ a:hover {
 
 /* Hero Section Enhancements */
 .tm-hero {
-    background: linear-gradient(135deg, #435ebe 0%, #697ecb 100%); /* Softer gradient */
+    background:
+        linear-gradient(135deg, rgba(67, 94, 190, 0.98) 0%, rgba(105, 126, 203, 0.96) 45%, rgba(243, 246, 255, 0.98) 100%);
     color: #fff;
     border-radius: 1.5rem;
-    padding: 3rem; /* Increased padding */
+    padding: 1.25rem 2.75rem;
     margin-bottom: 2.5rem;
-    box-shadow: 0 18px 45px rgba(67, 94, 190, 0.35);
+    box-shadow: 0 22px 50px rgba(37, 57, 111, 0.22);
+    border: 1px solid rgba(255, 255, 255, 0.18);
     position: relative;
     overflow: hidden;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    align-items: flex-end; /* Align content and summary to the bottom */
+    align-items: stretch;
     flex-wrap: wrap;
+}
+
+.tm-hero::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(120deg, rgba(255, 255, 255, 0.14), transparent 38%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 40%);
+    pointer-events: none;
 }
 
 .tm-hero__content {
     flex: 1;
     min-width: 300px;
-    padding-right: 1.5rem;
+    padding-right: 1.75rem;
+    position: relative;
+    z-index: 1;
 }
 
 .tm-hero__eyebrow {
@@ -221,8 +235,8 @@ a:hover {
 }
 
 .tm-hero__content h1 {
-    font-size: 2.5rem;
-    line-height: 1.2;
+    font-size: 2.35rem;
+    line-height: 1.1;
     margin-bottom: 1rem;
     font-weight: 800;
 }
@@ -242,18 +256,19 @@ a:hover {
 }
 
 .tm-hero__actions .tm-btn-soft {
-    background-color: rgba(255, 255, 255, 0.15);
+    background-color: rgba(255, 255, 255, 0.16);
     color: #fff;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    padding: 0.8rem 1.8rem;
-    border-radius: 0.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.26);
+    padding: 0.8rem 1.4rem;
+    border-radius: 0.9rem;
     font-weight: 600;
-    transition: all 0.3s ease;
+    transition: transform 0.25s ease, background-color 0.25s ease, border-color 0.25s ease;
+    backdrop-filter: blur(10px);
 }
 
 .tm-hero__actions .tm-btn-soft:hover {
-    background-color: rgba(255, 255, 255, 0.3);
-    border-color: rgba(255, 255, 255, 0.5);
+    background-color: rgba(255, 255, 255, 0.24);
+    border-color: rgba(255, 255, 255, 0.42);
     transform: translateY(-1px);
 }
 
@@ -276,12 +291,12 @@ a:hover {
     max-width: 400px; /* Added max-width for control */
     text-align: left;
     flex-grow: 0; /* Prevent stretching */
-    background-color: rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.16);
     border-radius: 1rem;
-    padding: 1.5rem;
-    backdrop-filter: blur(8px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    padding: 1.35rem;
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    box-shadow: 0 10px 24px rgba(37, 57, 111, 0.12);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     color: #fff; /* Ensure text color is white for links */
     text-decoration: none; /* Remove underline */
@@ -289,7 +304,7 @@ a:hover {
 
 .tm-hero-metric:hover {
     transform: translateY(-5px); /* Lift effect on hover */
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15); /* Stronger shadow on hover */
+    box-shadow: 0 14px 28px rgba(37, 57, 111, 0.18); /* Stronger shadow on hover */
     color: #fff; /* Keep text white on hover */
 }
 
