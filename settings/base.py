@@ -121,9 +121,6 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")] # <-- Ajouté cette ligne
 
-# WhiteNoise configuration with cache busting
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-
 MEDIA_ROOT = os.path.join(BASE_DIR, "mediafiles")
 MEDIA_URL = '/media/'
 
@@ -149,5 +146,3 @@ JAZZMIN_SETTINGS = {
 LOGIN_URL = 'login'
 
 LOGIN_REDIRECT_URL = 'home'
-
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
