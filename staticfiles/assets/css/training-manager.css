@@ -15,36 +15,7 @@
     --tm-card-shadow: 0 16px 32px rgba(15, 23, 42, 0.05);
 }
 
-/* 1. Layout & Hero Sections */
-.tm-hero {
-    background:
-        radial-gradient(circle at top right, rgba(var(--tm-primary-rgb), 0.18), transparent 35%),
-        var(--tm-bg-gradient);
-    border: 1px solid var(--tm-border-color);
-    border-radius: 1.25rem;
-    position: relative;
-    overflow: hidden;
-    transition: all 0.3s ease;
-}
-
-.tm-hero--success {
-    --tm-primary-rgb: var(--tm-success-rgb);
-    --tm-border-color: rgba(var(--tm-success-rgb), 0.15);
-}
-.tm-hero--danger {
-    --tm-primary-rgb: var(--tm-danger-rgb);
-    --tm-border-color: rgba(var(--tm-danger-rgb), 0.15);
-}
-.tm-hero--warning {
-    --tm-primary-rgb: var(--tm-warning-rgb);
-    --tm-border-color: rgba(var(--tm-warning-rgb), 0.15);
-}
-.tm-hero--info {
-    --tm-primary-rgb: var(--tm-info-rgb);
-    --tm-border-color: rgba(var(--tm-info-rgb), 0.15);
-}
-
-/* 2. Section Title Bars */
+/* 1. Section Title Bars */
 .tm-section-titlebar {
     display: flex;
     align-items: center;
