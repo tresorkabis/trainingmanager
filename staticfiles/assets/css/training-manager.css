@@ -15,7 +15,69 @@
     --tm-card-shadow: 0 16px 32px rgba(15, 23, 42, 0.05);
 }
 
-/* 1. Section Title Bars */
+/* 1. Layout du Hero (style de base pour tm_hero.html)
+   Note : le fond/background est géré par style.css (.tm-hero) */
+.tm-hero__layout {
+    display: flex;
+    align-items: center;
+    gap: 1.75rem;
+    width: 100%;
+}
+
+.tm-hero__left,
+.tm-hero__right {
+    position: relative;
+    min-width: 0;
+}
+
+.tm-hero__left {
+    flex: 1 1 auto;
+}
+
+.tm-hero__right {
+    flex: 0 1 620px;
+    margin-left: auto;
+    padding: 0.9rem;
+    display: flex;
+    justify-content: flex-end;
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(37, 57, 111, 0.1);
+    border-radius: 1.15rem;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 18px 34px rgba(37, 57, 111, 0.08);
+    max-width: 100%;
+    box-sizing: border-box;
+    backdrop-filter: blur(12px);
+}
+
+/* Thèmes du Hero */
+.tm-hero--success {
+    --tm-primary-rgb: var(--tm-success-rgb);
+    --tm-border-color: rgba(var(--tm-success-rgb), 0.15);
+}
+.tm-hero--danger {
+    --tm-primary-rgb: var(--tm-danger-rgb);
+    --tm-border-color: rgba(var(--tm-danger-rgb), 0.15);
+}
+.tm-hero--warning {
+    --tm-primary-rgb: var(--tm-warning-rgb);
+    --tm-border-color: rgba(var(--tm-warning-rgb), 0.15);
+}
+.tm-hero--info {
+    --tm-primary-rgb: var(--tm-info-rgb);
+    --tm-border-color: rgba(var(--tm-info-rgb), 0.15);
+}
+
+/* Grille de stats pour le hero */
+.tm-hero__stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(210px, 1fr));
+    gap: 1rem;
+    width: 100%;
+    justify-content: end;
+    justify-items: stretch;
+}
+
+/* 2. Section Title Bars (used in hero and page headers) */
 .tm-section-titlebar {
     display: flex;
     align-items: center;
@@ -30,110 +92,110 @@
 .tm-section-titlebar__text h3 {
     font-size: 1.8rem;
     font-weight: 700;
-    color: var(--tm-text-dark);
+    color: #25396f;
     margin-bottom: 0.2rem;
 }
 
 .tm-section-titlebar__text p {
     font-size: 0.9rem;
-    color: var(--tm-text-muted);
+    color: #6c757d;
     margin-bottom: 0;
 }
 
-/* 3. Cards Premium */
-.tm-card-premium {
-    border: 1px solid rgba(15, 23, 42, 0.07);
+/* 3. Stat Cards (RESTORED) */
+.tm-stat-card {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(244, 247, 255, 0.92) 100%);
+    border: 1px solid rgba(67, 94, 190, 0.12);
     border-radius: 1rem;
-    box-shadow: var(--tm-card-shadow);
+    padding: 1.2rem 1.25rem;
+    box-shadow: 0 10px 24px rgba(17, 24, 39, 0.05);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
 }
 
-/* 4. Stat / KPI Cards */
-.tm-stat-card {
-    border: 1px solid rgba(var(--tm-primary-rgb), 0.1);
-    border-radius: 1rem;
-    background: rgba(255, 255, 255, 0.76);
-    padding: 1rem;
-    height: 100%;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
-    backdrop-filter: blur(8px);
+.tm-stat-card::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 3px;
+    background: linear-gradient(90deg, rgba(67, 94, 190, 0.95), rgba(93, 218, 180, 0.95));
+}
+
+.tm-stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 16px 30px rgba(17, 24, 39, 0.08);
+    border-color: rgba(67, 94, 190, 0.2);
 }
 
 .tm-stat-card__label {
     display: block;
-    font-size: 0.75rem;
-    letter-spacing: 0.04em;
+    font-size: 0.78rem;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
-    color: var(--tm-text-muted);
+    color: #6c757d;
     margin-bottom: 0.35rem;
 }
 
 .tm-stat-card__value {
-    font-size: 1.4rem;
+    font-size: 1.85rem;
     font-weight: 800;
-    color: var(--tm-text-dark);
+    color: #25396f;
+    line-height: 1.2;
 }
 
-/* 5. Premium Tables */
-.tm-table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
+/* 4. Tables & Listing */
+.tm-listing-card {
+    border: 1px solid rgba(15, 23, 42, 0.07);
     border-radius: 1rem;
-    overflow: hidden;
-}
-
-.tm-table thead th {
-    background-color: #f8f9fa;
-    color: var(--tm-text-dark);
-    font-weight: 700;
-    padding: 1rem 1.5rem;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-}
-
-.tm-table tbody tr:hover {
-    background-color: #eef2f7 !important;
-}
-
-.tm-table tbody td {
-    padding: 0.8rem 1.5rem;
-    vertical-align: middle;
-}
-
-/* 6. Pagination */
-.tm-pagination .page-link {
-    border-radius: 0.5rem;
-    margin: 0 0.2rem;
-    color: var(--tm-primary);
-    transition: all 0.2s ease;
-}
-
-.tm-pagination .page-item.active .page-link {
-    background-color: var(--tm-primary);
-    border-color: var(--tm-primary);
-    box-shadow: 0 2px 8px rgba(var(--tm-primary-rgb), 0.2);
-}
-
-/* 7. Search & Utilities */
-.custom-search-container {
-    display: flex;
-    gap: 0.5rem;
+    box-shadow: var(--tm-card-shadow);
+    background: #fff;
     margin-bottom: 1.5rem;
 }
 
-.tm-search-input {
-    border-radius: 0.5rem;
-    max-width: 350px;
-    border: 1px solid #ced4da;
-    padding: 0.5rem 1rem;
-}
-
 .tm-action-row__title {
-    color: var(--tm-text-dark);
+    color: #435ebe;
     font-weight: 700;
     text-decoration: none;
 }
 
 .tm-action-row__meta {
-    color: var(--tm-text-light);
+    color: #7b8190;
     font-size: 0.85rem;
+}
+
+/* 5. Responsive du Hero */
+@media (min-width: 1200px) {
+    .tm-hero__left {
+        flex: 1 1 auto;
+        max-width: none;
+    }
+
+    .tm-hero__right {
+        flex: 0 1 620px;
+        padding: 0.9rem;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .tm-hero__layout {
+        display: block;
+    }
+
+    .tm-hero__right {
+        margin-left: 0;
+        justify-content: flex-start;
+        margin-top: 1.5rem;
+    }
+
+    .tm-hero__stats-grid {
+        grid-template-columns: 1fr;
+        width: 100%;
+    }
 }
