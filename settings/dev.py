@@ -2,7 +2,7 @@ from .base import *
 
 # Paramètres spécifiques au développement
 DEBUG = True
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '[::1]'] # Ajoutez d'autres hôtes si nécessaire pour le développement
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '[::1]']
 
 # Database pour le développement (SQLite par défaut)
 DATABASES = {
