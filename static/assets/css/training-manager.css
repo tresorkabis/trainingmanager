@@ -13,10 +13,191 @@
     --tm-warning-rgb: 255, 193, 7;
     --tm-info-rgb: 13, 202, 240;
     --tm-card-shadow: 0 16px 32px rgba(15, 23, 42, 0.05);
+    --tm-hero-primary: linear-gradient(135deg, rgba(var(--tm-primary-rgb), 0.12) 0%, rgba(var(--tm-primary-rgb), 0.04) 100%);
+    --tm-hero-success: linear-gradient(135deg, rgba(var(--tm-success-rgb), 0.12) 0%, rgba(var(--tm-success-rgb), 0.04) 100%);
+    --tm-hero-danger: linear-gradient(135deg, rgba(var(--tm-danger-rgb), 0.12) 0%, rgba(var(--tm-danger-rgb), 0.04) 100%);
+    --tm-hero-warning: linear-gradient(135deg, rgba(var(--tm-warning-rgb), 0.12) 0%, rgba(var(--tm-warning-rgb), 0.04) 100%);
+    --tm-hero-info: linear-gradient(135deg, rgba(var(--tm-info-rgb), 0.12) 0%, rgba(var(--tm-info-rgb), 0.04) 100%);
+    --tm-stat-accent-primary: linear-gradient(90deg, rgba(var(--tm-primary-rgb), 0.95), rgba(93, 218, 180, 0.95));
+    --tm-stat-accent-success: linear-gradient(90deg, rgba(var(--tm-success-rgb), 0.95), rgba(93, 218, 180, 0.95));
+    --tm-stat-accent-danger: linear-gradient(90deg, rgba(var(--tm-danger-rgb), 0.95), rgba(255, 160, 122, 0.95));
+    --tm-stat-accent-warning: linear-gradient(90deg, rgba(var(--tm-warning-rgb), 0.95), rgba(255, 218, 121, 0.95));
+    --tm-stat-accent-info: linear-gradient(90deg, rgba(var(--tm-info-rgb), 0.95), rgba(121, 232, 255, 0.95));
 }
 
-/* 1. Layout du Hero (style de base pour tm_hero.html)
-   Note : le fond/background est géré par style.css (.tm-hero) */
+/* 1. Layout & Hero Sections */
+.tm-hero {
+    background:
+        radial-gradient(circle at top right, rgba(var(--tm-primary-rgb), 0.18), transparent 35%),
+        var(--tm-bg-gradient) !important;
+    border: 1px solid var(--tm-border-color);
+    border-radius: 1.25rem;
+    position: relative;
+    overflow: hidden;
+    color: #25396f !important;
+    padding-right: 3rem !important;
+    display: block !important;
+}
+
+.tm-hero--primary {
+    background: var(--tm-hero-primary) !important;
+    border-color: rgba(var(--tm-primary-rgb), 0.18);
+    color: #25396f !important;
+}
+
+.tm-hero--success {
+    background: var(--tm-hero-success) !important;
+    border-color: rgba(var(--tm-success-rgb), 0.18);
+    color: #25396f !important;
+}
+
+.tm-hero--danger {
+    background: var(--tm-hero-danger) !important;
+    border-color: rgba(var(--tm-danger-rgb), 0.18);
+    color: #25396f !important;
+}
+
+.tm-hero--warning {
+    background: var(--tm-hero-warning) !important;
+    border-color: rgba(var(--tm-warning-rgb), 0.18);
+    color: #25396f !important;
+}
+
+.tm-hero--info {
+    background: var(--tm-hero-info) !important;
+    border-color: rgba(var(--tm-info-rgb), 0.18);
+    color: #25396f !important;
+}
+
+.tm-hero--balanced {
+    background: linear-gradient(135deg, rgba(var(--tm-primary-rgb), 0.18) 0%, rgba(var(--tm-primary-rgb), 0.04) 100%) !important;
+    border-color: rgba(var(--tm-primary-rgb), 0.18);
+    color: #25396f !important;
+}
+
+.tm-hero--balanced .tm-hero__content,
+.tm-hero--balanced .tm-hero__content h1,
+.tm-hero--balanced .tm-hero__eyebrow {
+    color: #25396f !important;
+}
+
+.tm-hero--balanced .tm-hero__content p {
+    color: #495057 !important;
+}
+
+.tm-hero--balanced .tm-hero__actions .tm-btn-soft {
+    color: #25396f !important;
+    border-color: rgba(var(--tm-primary-rgb), 0.3) !important;
+    background-color: rgba(var(--tm-primary-rgb), 0.08) !important;
+}
+
+.tm-hero--balanced .tm-hero__actions .tm-btn-soft:hover {
+    background-color: rgba(var(--tm-primary-rgb), 0.16) !important;
+}
+
+.tm-hero--balanced .tm-hero-metric {
+    color: #25396f !important;
+    background: rgba(255, 255, 255, 0.7) !important;
+    border-color: rgba(var(--tm-primary-rgb), 0.15) !important;
+}
+
+.tm-hero--balanced .tm-hero-metric__icon {
+    background: rgba(var(--tm-primary-rgb), 0.9) !important;
+    color: #fff !important;
+}
+
+.tm-hero--balanced .tm-hero-metric__label,
+.tm-hero--balanced .tm-hero-metric__text {
+    color: #6c757d !important;
+}
+
+.tm-hero--balanced .tm-hero-metric__value {
+    color: #25396f !important;
+}
+
+.tm-hero--balanced .tm-hero-metric:hover {
+    color: #25396f !important;
+}
+
+/* Variantes hero : boutons pleinement colorés pour un bon contraste */
+.tm-hero--primary .tm-hero__actions .tm-btn-soft {
+    background-color: #435ebe;
+    color: #fff;
+    border-color: #435ebe;
+}
+
+.tm-hero--success .tm-hero__actions .tm-btn-soft {
+    background-color: #19a87e;
+    color: #fff;
+    border-color: #19a87e;
+}
+
+.tm-hero--danger .tm-hero__actions .tm-btn-soft {
+    background-color: #dc3545;
+    color: #fff;
+    border-color: #dc3545;
+}
+
+.tm-hero--warning .tm-hero__actions .tm-btn-soft {
+    background-color: #ffc107;
+    color: #212529;
+    border-color: #ffc107;
+}
+
+.tm-hero--info .tm-hero__actions .tm-btn-soft {
+    background-color: #13caf0;
+    color: #fff;
+    border-color: #13caf0;
+}
+
+.tm-hero--primary .tm-hero__actions .tm-btn-soft:hover,
+.tm-hero--success .tm-hero__actions .tm-btn-soft:hover,
+.tm-hero--danger .tm-hero__actions .tm-btn-soft:hover,
+.tm-hero--warning .tm-hero__actions .tm-btn-soft:hover,
+.tm-hero--info .tm-hero__actions .tm-btn-soft:hover {
+    filter: brightness(1.1);
+}
+
+.tm-section-titlebar {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.tm-section-titlebar__icon {
+    font-size: 2.5rem;
+    color: rgb(var(--tm-primary-rgb));
+}
+
+.tm-hero--success .tm-section-titlebar__icon {
+    color: rgb(var(--tm-success-rgb));
+}
+
+.tm-hero--danger .tm-section-titlebar__icon {
+    color: rgb(var(--tm-danger-rgb));
+}
+
+.tm-hero--warning .tm-section-titlebar__icon {
+    color: rgb(var(--tm-warning-rgb));
+}
+
+.tm-hero--info .tm-section-titlebar__icon {
+    color: rgb(var(--tm-info-rgb));
+}
+
+.tm-section-titlebar__text h3 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #25396f;
+    margin-bottom: 0.2rem;
+}
+
+.tm-section-titlebar__text p {
+    font-size: 0.9rem;
+    color: #6c757d;
+    margin-bottom: 0;
+}
+
 .tm-hero__layout {
     display: flex;
     align-items: center;
@@ -49,25 +230,18 @@
     backdrop-filter: blur(12px);
 }
 
-/* Thèmes du Hero */
-.tm-hero--success {
-    --tm-primary-rgb: var(--tm-success-rgb);
-    --tm-border-color: rgba(var(--tm-success-rgb), 0.15);
-}
-.tm-hero--danger {
-    --tm-primary-rgb: var(--tm-danger-rgb);
-    --tm-border-color: rgba(var(--tm-danger-rgb), 0.15);
-}
-.tm-hero--warning {
-    --tm-primary-rgb: var(--tm-warning-rgb);
-    --tm-border-color: rgba(var(--tm-warning-rgb), 0.15);
-}
-.tm-hero--info {
-    --tm-primary-rgb: var(--tm-info-rgb);
-    --tm-border-color: rgba(var(--tm-info-rgb), 0.15);
+@media (min-width: 1200px) {
+    .tm-hero__left {
+        flex: 1 1 auto;
+        max-width: none;
+    }
+
+    .tm-hero__right {
+        flex: 0 1 620px;
+        padding: 0.9rem;
+    }
 }
 
-/* Grille de stats pour le hero */
 .tm-hero__stats-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(210px, 1fr));
@@ -77,32 +251,24 @@
     justify-items: stretch;
 }
 
-/* 2. Section Title Bars (used in hero and page headers) */
-.tm-section-titlebar {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
+@media (max-width: 575.98px) {
+    .tm-hero__layout {
+        display: block;
+    }
+
+    .tm-hero__right {
+        margin-left: 0;
+        justify-content: flex-start;
+        margin-top: 1.5rem;
+    }
+
+    .tm-hero__stats-grid {
+        grid-template-columns: 1fr;
+        width: 100%;
+    }
 }
 
-.tm-section-titlebar__icon {
-    font-size: 2.5rem;
-    color: rgb(var(--tm-primary-rgb));
-}
-
-.tm-section-titlebar__text h3 {
-    font-size: 1.8rem;
-    font-weight: 700;
-    color: #25396f;
-    margin-bottom: 0.2rem;
-}
-
-.tm-section-titlebar__text p {
-    font-size: 0.9rem;
-    color: #6c757d;
-    margin-bottom: 0;
-}
-
-/* 3. Stat Cards (RESTORED) */
+/* 2. LE DESIGN QUE VOUS AVEZ CRÉÉ (RESTORED) */
 .tm-stat-card {
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(244, 247, 255, 0.92) 100%);
     border: 1px solid rgba(67, 94, 190, 0.12);
@@ -125,7 +291,23 @@
     top: 0;
     width: 100%;
     height: 3px;
-    background: linear-gradient(90deg, rgba(67, 94, 190, 0.95), rgba(93, 218, 180, 0.95));
+    background: var(--tm-stat-accent-primary);
+}
+
+.tm-hero--success .tm-stat-card::after {
+    background: var(--tm-stat-accent-success);
+}
+
+.tm-hero--danger .tm-stat-card::after {
+    background: var(--tm-stat-accent-danger);
+}
+
+.tm-hero--warning .tm-stat-card::after {
+    background: var(--tm-stat-accent-warning);
+}
+
+.tm-hero--info .tm-stat-card::after {
+    background: var(--tm-stat-accent-info);
 }
 
 .tm-stat-card:hover {
@@ -150,7 +332,7 @@
     line-height: 1.2;
 }
 
-/* 4. Tables & Listing */
+/* 3. Tables & Listing */
 .tm-listing-card {
     border: 1px solid rgba(15, 23, 42, 0.07);
     border-radius: 1rem;
@@ -168,34 +350,4 @@
 .tm-action-row__meta {
     color: #7b8190;
     font-size: 0.85rem;
-}
-
-/* 5. Responsive du Hero */
-@media (min-width: 1200px) {
-    .tm-hero__left {
-        flex: 1 1 auto;
-        max-width: none;
-    }
-
-    .tm-hero__right {
-        flex: 0 1 620px;
-        padding: 0.9rem;
-    }
-}
-
-@media (max-width: 575.98px) {
-    .tm-hero__layout {
-        display: block;
-    }
-
-    .tm-hero__right {
-        margin-left: 0;
-        justify-content: flex-start;
-        margin-top: 1.5rem;
-    }
-
-    .tm-hero__stats-grid {
-        grid-template-columns: 1fr;
-        width: 100%;
-    }
 }

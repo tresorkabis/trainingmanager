@@ -181,9 +181,9 @@ class SessionProgressModelTests(TestCase):
         )
         ActionSchedule.objects.create(
             action=self.action,
-            jour_semaine=0,
-            heure_debut=time(8, 0),
-            heure_fin=time(10, 0),
+            jour_semaine=2,
+            heure_debut=time(14, 0),
+            heure_fin=time(16, 0),
         )
 
     def test_session_progress_rejects_invalid_time_range(self):
@@ -245,11 +245,11 @@ class SessionProgressModelTests(TestCase):
         SessionProgress.objects.create(
             module_progress=self.module_progress,
             planned_date=date(2026, 6, 10),
-            planned_start_time=time(8, 0),
-            planned_end_time=time(10, 0),
+            planned_start_time=time(14, 0),
+            planned_end_time=time(16, 0),
             actual_date=date(2026, 6, 10),
-            actual_start_time=time(8, 0),
-            actual_end_time=time(10, 0),
+            actual_start_time=time(14, 0),
+            actual_end_time=time(16, 0),
             statut="REALISEE",
         )
 
@@ -306,7 +306,7 @@ class SessionPlanningWorkflowTests(TestCase):
         )
         self.action = Action.objects.create(
             description="Action A",
-            date_debut=date(2026, 6, 10),
+            date_debut=date(2026, 6, 8),
             date_fin=date(2026, 6, 12),
             formation=self.formation,
         )

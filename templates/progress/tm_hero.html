@@ -13,9 +13,9 @@
                 </div>
             </div>
             {% if actions %}
-            <div class="d-flex flex-wrap gap-2">
+            <div class="tm-hero__actions">
                 {% for action in actions %}
-                <a href="{{ action.url }}" class="btn {{ action.class|default:'btn-primary' }}">
+                <a href="{{ action.url }}" class="tm-btn-soft">
                     {% if action.icon %}<i class="{{ action.icon }} me-2"></i>{% endif %}
                     {{ action.label }}
                 </a>

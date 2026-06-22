@@ -228,8 +228,8 @@ class ActionWorkflowService:
             ActionSchedule.objects.create(
                 action=action,
                 jour_semaine=int(schedule["jour_semaine"]),
-                heure_debut=schedule["heure_debut"],
-                heure_fin=schedule["heure_fin"],
+                heure_debut=datetime.strptime(schedule["heure_debut"], "%H:%M").time(),
+                heure_fin=datetime.strptime(schedule["heure_fin"], "%H:%M").time(),
                 ordre=index,
             )
             created_count += 1

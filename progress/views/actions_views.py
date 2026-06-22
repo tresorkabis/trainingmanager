@@ -391,7 +391,7 @@ class ActionDetailViews(ActionPermissionMixin, DetailView):
         # Prépare la map des notes de jury pour l'affichage dans le template
         jury_notes_map = {}
         try:
-            for note in object.jury_pv.notes.all().select_related('stagiaire'):
+            for note in action.jury_pv.notes.all().select_related('stagiaire'):
                 jury_notes_map[note.stagiaire_id] = note
         except Exception:
             pass

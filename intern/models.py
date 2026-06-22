@@ -73,7 +73,8 @@ class Stagiaire(models.Model):
         """
         Returns the stagiaire's full name.
         """
-        full_name = f"{self.nom} {self.postnom} {self.prenom}"
+        prenom = self.prenom or ""
+        full_name = f"{self.nom} {self.postnom} {prenom}"
         return full_name.strip()
 
 

@@ -222,6 +222,10 @@ class ActionSchedule(models.Model):
                 "heure_fin": "L'heure de fin doit être postérieure à l'heure de début."
             })
 
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
+
     def get_next_occurrence(self, after_date):
         days_ahead = (self.jour_semaine - after_date.weekday()) % 7
         if days_ahead == 0:
@@ -286,18 +290,6 @@ class ModuleProgress(models.Model):
                 end = dt.datetime.combine(dt.date.today(), s.actual_end_time)
                 total += (end - start).total_seconds() / 3600
         return round(total, 1)
-
-    def update_statut_module(self):
-        hours_done = self.calculate_hours_done()
-        if hours_done >= self.module.duree_heures:
-            new_statut = 'TE'
-        elif hours_done > 0:
-            new_statut = 'EC'
-        else:
-            new_statut = 'NC'
-        if self.statut_module != new_statut:
-            self.statut_module = new_statut
-            self.save(update_fields=['statut_module', 'updated_at'])
 
     def clean(self):
         super().clean()

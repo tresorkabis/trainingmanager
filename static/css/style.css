@@ -193,9 +193,6 @@ a:hover {
 
 /* Hero Section Enhancements */
 .tm-hero {
-    background:
-        linear-gradient(135deg, rgba(67, 94, 190, 0.98) 0%, rgba(105, 126, 203, 0.96) 45%, rgba(243, 246, 255, 0.98) 100%);
-    color: #fff;
     border-radius: 1.5rem;
     padding: 1.25rem 2.75rem;
     margin-bottom: 2.5rem;
@@ -208,6 +205,27 @@ a:hover {
     justify-content: space-between;
     align-items: stretch;
     flex-wrap: wrap;
+    color: #fff;
+}
+
+.tm-hero--primary {
+    background: linear-gradient(135deg, rgba(67, 94, 190, 0.98) 0%, rgba(105, 126, 203, 0.96) 45%, rgba(243, 246, 255, 0.98) 100%);
+}
+
+.tm-hero--success {
+    background: linear-gradient(135deg, rgba(25, 135, 84, 0.95) 0%, rgba(76, 175, 119, 0.9) 45%, rgba(223, 240, 229, 0.95) 100%);
+}
+
+.tm-hero--danger {
+    background: linear-gradient(135deg, rgba(220, 53, 69, 0.95) 0%, rgba(232, 92, 102, 0.9) 45%, rgba(255, 235, 236, 0.95) 100%);
+}
+
+.tm-hero--warning {
+    background: linear-gradient(135deg, rgba(255, 193, 7, 0.95) 0%, rgba(255, 213, 79, 0.9) 45%, rgba(255, 248, 225, 0.95) 100%);
+}
+
+.tm-hero--info {
+    background: linear-gradient(135deg, rgba(13, 202, 240, 0.95) 0%, rgba(72, 220, 242, 0.9) 45%, rgba(225, 248, 252, 0.95) 100%);
 }
 
 .tm-hero::before {
@@ -374,10 +392,30 @@ a:hover {
     height: 3.8rem;
     border-radius: 50%;
     box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .stats-icon i {
     font-size: 2rem;
+    color: #fff;
+}
+
+.stats-icon.purple {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.stats-icon.blue {
+    background: linear-gradient(135deg, #435ebe 0%, #6c8cbf 100%);
+}
+
+.stats-icon.green {
+    background: linear-gradient(135deg, #19a87e 0%, #4caf77 100%);
+}
+
+.stats-icon.red {
+    background: linear-gradient(135deg, #dc3545 0%, #e8657a 100%);
 }
 
 .tm-stat-value {
