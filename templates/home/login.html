@@ -15,136 +15,169 @@
     <link rel="stylesheet" href="{% static 'assets/css/pages/auth.css' %}">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <link rel="stylesheet" href="{% static 'assets/css/training-manager.css' %}">
+
     <style>
-        /* Custom styles for a more substantial and modern login page */
+        /* --- Thème Sombre Premium pour la page de Connexion --- */
+
+        /* Couleurs du Thème Sombre */
+        :root {
+            --dark-bg-primary: #1a202c; /* Arrière-plan principal très sombre */
+            --dark-bg-secondary: #2d3748; /* Arrière-plan des cartes/éléments */
+            --dark-text-light: #e2e8f0; /* Texte clair pour le contenu */
+            --dark-text-muted: #a0aec0; /* Texte secondaire/subtil */
+            --dark-border-color: #4a5568; /* Bordures subtiles */
+            --dark-shadow-color: rgba(0, 0, 0, 0.6); /* Ombre plus dense pour le sombre */
+            --dark-accent-color: #63b3ed; /* Bleu clair pour les accents (boutons, focus) */
+            --dark-accent-hover: #4299e1; /* Bleu plus foncé au survol */
+        }
+
         body.tm-login {
-            background: linear-gradient(to right top, #eef3ff, #e0e8f7); /* Light blue gradient */
+            background: var(--dark-bg-primary); /* Fond très sombre */
             display: flex;
             align-items: center;
             justify-content: center;
             min-height: 100vh;
             margin: 0;
-            padding: 1.5rem; /* Increased padding around the card */
+            padding: 2rem; /* Plus de padding autour de la carte */
             font-family: 'Nunito', sans-serif;
-            color: #343a40;
+            color: var(--dark-text-light); /* Texte clair par défaut */
+            overflow: auto; /* Permet le défilement si le contenu est trop grand */
         }
 
         .tm-login__wrapper {
             width: 100%;
-            max-width: 480px; /* Increased max-width for a more generous card size */
+            max-width: 520px; /* Carte plus large pour un aspect plus imposant */
             margin: auto;
         }
 
         .tm-login__card {
-            background-color: #ffffff;
-            padding: 3rem; /* Increased padding inside the card */
-            border-radius: 1rem; /* More rounded corners */
-            box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.15); /* More pronounced shadow */
+            background-color: var(--dark-bg-secondary); /* Fond de carte sombre */
+            padding: 3.5rem; /* Padding généreux à l'intérieur de la carte */
+            border-radius: 1.25rem; /* Coins plus arrondis */
+            box-shadow: 0 1.5rem 3rem var(--dark-shadow-color); /* Ombre forte et profonde */
             text-align: center;
-            border: 1px solid #e9ecef;
+            border: 1px solid var(--dark-border-color); /* Bordure subtile */
         }
 
         .tm-login__brand {
-            margin-bottom: 2.5rem; /* More space below brand section */
+            margin-bottom: 3rem; /* Plus d'espace sous la section marque */
         }
 
         .tm-login__brand img {
-            width: 90px; /* Larger logo */
-            height: 90px;
-            margin-bottom: 1rem; /* More space between logo and title */
+            width: 100px; /* Logo plus grand */
+            height: 100px;
+            margin-bottom: 1.5rem; /* Plus d'espace entre logo et titre */
             display: block;
             margin-left: auto;
             margin-right: auto;
+            box-shadow: none; /* Assurer l'absence d'ombre */
         }
 
         .tm-login__brand-title {
-            font-size: 2.2rem; /* Larger title */
+            font-size: 2.5rem; /* Titre de marque plus grand */
             font-weight: 800;
-            color: #25396f; /* Darker blue for brand title */
+            color: var(--dark-text-light); /* Texte clair */
             line-height: 1.2;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.75rem;
         }
 
         .tm-login__brand-subtitle {
-            font-size: 1rem; /* Slightly larger subtitle */
-            color: #6c757d;
+            font-size: 1.1rem; /* Sous-titre plus lisible */
+            color: var(--dark-text-muted); /* Texte secondaire */
             margin-top: 0;
         }
 
         .tm-login__title {
-            font-size: 1.8rem; /* Larger login title */
+            font-size: 2rem; /* Titre de connexion plus grand */
             font-weight: 700;
-            color: #343a40;
-            margin-top: 2.5rem; /* More space above title */
-            margin-bottom: 2rem; /* More space below title */
+            color: var(--dark-text-light);
+            margin-top: 3rem; /* Plus d'espace */
+            margin-bottom: 2.5rem; /* Plus d'espace */
         }
 
         .tm-login__alert {
             margin-top: 1.5rem;
             margin-bottom: 2rem;
-            font-size: 0.95rem;
-            border-radius: 0.5rem;
+            font-size: 1rem;
+            border-radius: 0.75rem;
+            background-color: #e53e3e; /* Rouge danger */
+            color: white;
+            border: none;
+            padding: 1rem 1.5rem;
         }
 
         /* --- Form Input with Icon Styling --- */
         .input-group-with-icon {
             position: relative;
-            margin-bottom: 1.5rem; /* More space between input groups */
-            box-sizing: border-box; /* Ajout explicite pour s'assurer */
+            margin-bottom: 1.75rem; /* Plus d'espace entre les groupes d'inputs */
+            box-sizing: border-box;
         }
 
         .input-group-with-icon .form-control {
-            padding-left: 3.5rem; /* More space for icon */
-            height: calc(2.5rem + 1rem + 2px); /* Taller input fields */
-            font-size: 1.15rem; /* Larger font in input */
-            border-radius: 0.5rem;
-            border: 1px solid #ced4da;
-            /* Supprimé: width: 100%; - on se repose sur Bootstrap pour cela */
-            box-sizing: border-box; /* Ajout explicite pour s'assurer */
-            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+            padding-left: 4.5rem; /* Augmenté pour plus d'espace après l'icône */
+            height: 3.5rem; /* Hauteur des inputs plus grande */
+            font-size: 1.15rem; /* Taille de police dans l'input */
+            border-radius: 0.75rem; /* Coins plus arrondis */
+            border: 1px solid var(--dark-border-color); /* Bordure sombre */
+            background-color: var(--dark-bg-primary); /* Fond d'input très sombre */
+            color: var(--dark-text-light); /* Texte d'input clair */
+            width: 100%; /* Assure que l'input ne déborde pas */
+            transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            box-sizing: border-box; /* S'assurer que padding est inclus dans la largeur/hauteur */
+            text-align: left; /* Assurer l'alignement à gauche */
+            line-height: normal; /* Assurer une hauteur de ligne normale pour le texte */
+        }
+
+        .input-group-with-icon .form-control::placeholder {
+            color: var(--dark-text-muted); /* Couleur du placeholder */
+            opacity: 0.8;
         }
 
         .input-group-with-icon .form-control:focus {
-            border-color: #435ebe; /* Primary theme color on focus */
+            border-color: var(--dark-accent-color); /* Couleur d'accentuation au focus */
             outline: 0;
-            box-shadow: 0 0 0 0.25rem rgba(67, 94, 190, 0.25); /* Primary theme shadow on focus */
+            box-shadow: 0 0 0 0.25rem rgba(99, 179, 237, 0.4); /* Ombre de focus */
+            background-color: var(--dark-bg-primary); /* Conserver le fond sombre au focus */
+            color: var(--dark-text-light);
         }
 
         .input-group-with-icon .form-control-icon {
             position: absolute;
-            left: 1.2rem; /* Icon position */
+            left: 1.5rem; /* Position de l'icône ajustée */
             top: 50%;
             transform: translateY(-50%);
-            color: #adb5bd;
-            font-size: 1.3rem; /* Larger icon */
+            color: var(--dark-text-muted); /* Icône claire */
+            font-size: 1.5rem; /* Icône plus grande */
             pointer-events: none;
             z-index: 2;
         }
-        /* --- End Form Input with Icon Styling --- */
 
         .btn-primary {
-            background-color: #435ebe; /* Primary theme color */
-            border-color: #435ebe;
-            font-size: 1.25rem; /* Larger button font */
-            padding: 0.9rem 1.5rem; /* More padding for button */
+            background-color: var(--dark-accent-color); /* Couleur d'accentuation pour le bouton */
+            border-color: var(--dark-accent-color);
+            font-size: 1.2rem; /* Texte du bouton plus grand */
+            padding: 1rem 2rem; /* Padding généreux pour le bouton */
             width: 100%;
-            border-radius: 0.5rem;
-            margin-top: 2rem; /* More space above button */
-            transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
-            box-shadow: 0 0.5rem 1rem rgba(67, 94, 190, 0.2); /* Soft shadow for button */
+            border-radius: 0.75rem; /* Coins arrondis */
+            margin-top: 2.5rem; /* Plus d'espace au-dessus du bouton */
+            transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+            box-shadow: 0 0.75rem 1.5rem rgba(99, 179, 237, 0.3); /* Ombre douce */
         }
 
         .btn-primary:hover {
-            background-color: #394f9b;
-            border-color: #394f9b;
-            box-shadow: 0 0.75rem 1.5rem rgba(67, 94, 190, 0.3); /* More pronounced shadow on hover */
-            transform: translateY(-2px); /* Slight lift on hover */
+            background-color: var(--dark-accent-hover);
+            border-color: var(--dark-accent-hover);
+            box-shadow: 0 1rem 2rem rgba(99, 179, 237, 0.4);
+            transform: translateY(-2px); /* Léger soulèvement */
         }
 
         .tm-login__footer {
-            margin-top: 2.5rem; /* More space above footer */
-            font-size: 0.9rem;
-            color: #6c757d;
+            margin-top: 3rem; /* Plus d'espace */
+            font-size: 0.95rem;
+            color: var(--dark-text-muted);
+        }
+        .text-gray-600 { /* Ajustement pour le texte "Pas de compte ?" */
+            color: var(--dark-text-muted) !important;
         }
     </style>
 </head>
@@ -153,7 +186,7 @@
     <div class="tm-login__wrapper">
         <div class="tm-login__card">
             <div class="tm-login__brand">
-                <img src="{% static 'assets/images/logo.png' %}" alt="Logo">
+                <img src="{% static 'assets/images/logo.png' %}" alt="Training Manager Logo">
                 <p class="tm-login__brand-title">Training Manager</p>
                 <p class="tm-login__brand-subtitle">Plateforme de gestion des formations</p>
             </div>
@@ -185,7 +218,7 @@
                 <button type="submit" class="btn btn-primary w-100">Se connecter</button>
             </form>
 
-            <div class="text-center mt-4 fs-6">
+            <div class="text-center mt-5 fs-6">
                 <p class="text-gray-600">Pas de compte ? Contactez l'administrateur de la plateforme.</p>
             </div>
             <div class="tm-login__footer">

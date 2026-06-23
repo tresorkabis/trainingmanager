@@ -1,29 +1,32 @@
-from django.contrib.auth import login,authenticate,logout
+from django.contrib.auth import login, logout
+from django.contrib.auth.forms import AuthenticationForm
 from django.shortcuts import redirect, render
 from django.views import View
 
 
 class LoginPageView(View):
     template_name = 'home/login.html'
-    #form_class = forms.LoginForm
+    form_class = AuthenticationForm
 
     def get(self, request):
-        message = ''
-        return render(request, self.template_name, context={'message': message})
-        
+        if request.user.is_authenticated:
+            return redirect('home')
+        form = self.form_class()
+        return render(request, self.template_name, {'form': form})
+
     def post(self, request):
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-        user = authenticate(
-            username=username,
-            password=password,
-        )
-        if user is not None:
+        if request.user.is_authenticated:
+            return redirect('home')
+
+        form = self.form_class(request, data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
             login(request, user)
-            return redirect('/')
-        message = 'Identifiants invalides.'
-        return render(request, self.template_name, context={'message': message})
-    
+            next_url = request.GET.get('next', '/')
+            return redirect(next_url)
+
+        return render(request, self.template_name, {'form': form})
+
 
 class LogoutPageView(View):
 
