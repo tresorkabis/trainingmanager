@@ -3,177 +3,454 @@
 {% block title %} Dashboard {% endblock title %}
 {% block page_header %}Tableau de bord opérationnel{% endblock page_header %}
 
+{% block style %}
+<style>
+/* ==========================================
+   HERO SECTION
+   ========================================== */
+.tm-dash-hero {
+    background: linear-gradient(135deg, #0028a0 0%, #001870 100%);
+    border-radius: 1.25rem;
+    padding: 1.5rem 2rem;
+    margin-bottom: 1.5rem;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(0, 40, 160, 0.25);
+}
+
+.tm-dash-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(circle at 20% 120%, rgba(240,220,0,0.12) 0%, transparent 60%),
+        radial-gradient(circle at 80% 0%, rgba(255,255,255,0.08) 0%, transparent 50%);
+    pointer-events: none;
+}
+
+.tm-dash-hero__content {
+    position: relative;
+    z-index: 1;
+}
+
+.tm-dash-hero__eyebrow {
+    color: rgba(240,220,0,0.9);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    display: block;
+}
+
+.tm-dash-hero__content h1 {
+    color: #fff;
+    font-size: 1.75rem;
+    font-weight: 800;
+    line-height: 1.2;
+    margin-bottom: 0.5rem;
+}
+
+.tm-dash-hero__content p {
+    color: rgba(255,255,255,0.85);
+    font-size: 0.95rem;
+    max-width: 600px;
+    margin-bottom: 0;
+}
+
+.tm-dash-hero__actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    align-items: flex-end;
+}
+
+.tm-dash-hero__actions .btn {
+    background: rgba(255,255,255,0.12);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.25);
+    color: #fff;
+    border-radius: 0.75rem;
+    padding: 0.6rem 1.25rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.tm-dash-hero__actions .btn:hover {
+    background: rgba(200,0,0,0.8);
+    border-color: rgba(200,0,0,0.9);
+    transform: translateY(-1px);
+    color: #fff;
+}
+
+.tm-dash-hero__metrics {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-left: auto;
+}
+
+.tm-dash-hero__metric {
+    background: rgba(255,255,255,0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 0.6rem;
+    padding: 0.7rem 0.9rem;
+    text-align: center;
+    min-width: 100px;
+    flex: 1;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    color: #fff;
+}
+
+.tm-dash-hero__metric:hover {
+    background: rgba(255,255,255,0.18);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+    color: #fff;
+    border-color: rgba(240,220,0,0.5);
+}
+
+.tm-dash-hero__metric .metric-icon {
+    font-size: 1.2rem;
+    margin-bottom: 0.35rem;
+    opacity: 0.9;
+}
+
+.tm-dash-hero__metric .metric-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    opacity: 0.8;
+    margin-bottom: 0.2rem;
+}
+
+.tm-dash-hero__metric .metric-value {
+    font-size: 1.5rem;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.tm-dash-hero__metric .metric-text {
+    font-size: 0.75rem;
+    opacity: 0.7;
+    margin-top: 0.2rem;
+}
+
+/* ==========================================
+   STAT CARDS
+   ========================================== */
+.tm-dash-stats {
+    margin-bottom: 2rem;
+}
+
+.tm-dash-stat-card {
+    background: #fff;
+    border: 1px solid #eef0f5;
+    border-radius: 1rem;
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    height: 100%;
+    min-height: 100px;
+}
+
+.tm-dash-stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    border-color: var(--tm-primary, #435ebe);
+}
+
+.tm-dash-stat-icon {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.35rem;
+    color: #fff;
+    flex-shrink: 0;
+}
+
+.tm-dash-stat-icon.purple { background: linear-gradient(135deg, #667eea, #764ba2); }
+.tm-dash-stat-icon.blue   { background: linear-gradient(135deg, #435ebe, #6c8cbf); }
+.tm-dash-stat-icon.green  { background: linear-gradient(135deg, #19a87e, #4caf77); }
+.tm-dash-stat-icon.red    { background: linear-gradient(135deg, #dc3545, #e8657a); }
+
+.tm-dash-stat-info { min-width: 0; }
+
+.tm-dash-stat-label {
+    font-size: 0.8rem;
+    color: #6c757d;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.15rem;
+}
+
+.tm-dash-stat-value {
+    font-size: 1.65rem;
+    font-weight: 800;
+    color: var(--tm-text-dark, #1e293b);
+    line-height: 1.1;
+}
+
+.tm-dash-stat-meta {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    margin-top: 0.1rem;
+}
+
+/* ==========================================
+   CHART CARDS
+   ========================================== */
+.tm-dash-chart {
+    border: 1px solid #eef0f5;
+    border-radius: 0.75rem;
+    background: #fff;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+    margin-bottom: 1rem;
+}
+
+.tm-dash-chart .card-header {
+    background: transparent;
+    border-bottom: 1px solid #eef0f5;
+    padding: 0.75rem 1rem;
+    border-radius: 0.75rem 0.75rem 0 0;
+}
+
+.tm-dash-chart .card-header h4 {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--tm-text-dark, #1e293b);
+    margin: 0;
+}
+
+.tm-dash-chart .card-header p {
+    font-size: 0.8rem;
+    margin-bottom: 0;
+    margin-top: 0.15rem;
+}
+
+.tm-dash-chart .card-body {
+    padding: 0.75rem 1rem;
+}
+
+/* ==========================================
+   QUICK ACCESS
+   ========================================== */
+.tm-dash-quick {
+    border: 1px solid #eef0f5;
+    border-radius: 1rem;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+.tm-dash-quick .card-header {
+    background: transparent;
+    border-bottom: 1px solid #eef0f5;
+    padding: 1.25rem 1.5rem;
+    border-radius: 1rem 1rem 0 0;
+}
+
+.tm-dash-quick .card-header h4 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--tm-text-dark, #1e293b);
+    margin: 0;
+}
+
+.tm-dash-quick .card-body {
+    padding: 1.25rem 1.5rem;
+}
+
+.tm-dash-quick-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 0.75rem;
+}
+
+.tm-dash-quick-link {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
+    background: #f8fafc;
+    border: 1px solid #eef0f5;
+    border-radius: 0.75rem;
+    text-decoration: none;
+    color: var(--tm-text-dark, #1e293b);
+    transition: all 0.2s ease;
+}
+
+.tm-dash-quick-link:hover {
+    background: #fff;
+    border-color: var(--tm-primary, #435ebe);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(67,94,190,0.1);
+    color: var(--tm-primary, #435ebe);
+}
+
+.tm-dash-quick-link__icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 0.6rem;
+    background: linear-gradient(135deg, var(--tm-primary, #435ebe), var(--tm-primary-light, #6778e0));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    color: #fff;
+    flex-shrink: 0;
+}
+
+.tm-dash-quick-link__title {
+    font-weight: 700;
+    font-size: 0.95rem;
+    display: block;
+}
+
+.tm-dash-quick-link__text {
+    font-size: 0.8rem;
+    color: #6c757d;
+    display: block;
+}
+</style>
+{% endblock style %}
 
 {% block content %}
-<div class="page-heading">
-    <section class="tm-hero tm-hero--balanced mb-4 p-4 p-lg-5">
-        <div class="row g-4 align-items-center">
-            <div class="col-12 col-xl-6">
-                <div class="tm-hero__content">
-                    <span class="tm-hero__eyebrow">
-                        <i class="bi bi-building"></i>
-                        Vision globale
-                    </span>
-                    <h1>Piloter les processus et les actions de formation depuis un espace unifié.</h1>
-                    <p>
-                        Cette interface centralise les principaux indicateurs du centre et donne un accès rapide
-                        aux opérations essentielles de suivi.
-                    </p>
-                    <div class="tm-hero__actions">
-                        <a href="{% url 'stagiaires' %}" class="tm-btn-soft">
-                            <i class="bi bi-people"></i>
-                            Voir les stagiaires
-                        </a>
-                        <a href="{% url 'formations' %}" class="tm-btn-soft">
-                            <i class="bi bi-journal-text"></i>
-                            Voir les formations
-                        </a>
-                        {% if request.user.is_superuser or request.user.profile and request.user.profile.name == "Manager" %}
-                        <a href="{% url 'admin:index' %}" class="tm-btn-soft">
-                            <i class="bi bi-shield-check"></i>
-                            Administration
-                        </a>
-                        {% endif %}
-                    </div>
-                </div>
+<!-- Hero Section -->
+<section class="tm-dash-hero">
+    <div class="tm-dash-hero__content">
+        <span class="tm-dash-hero__eyebrow">
+            <i class="bi bi-building"></i> Vision globale
+        </span>
+        <h1>Piloter les processus et les actions de formation depuis un espace unifié.</h1>
+        <p>Cette interface centralise les principaux indicateurs du centre et donne un accès rapide aux opérations essentielles de suivi.</p>
+
+        <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 0.5rem; flex-wrap: wrap;">
+            <div class="tm-dash-hero__actions">
+                <a href="{% url 'stagiaires' %}" class="btn">
+                    <i class="bi bi-people"></i> Voir les stagiaires
+                </a>
+                <a href="{% url 'formations' %}" class="btn">
+                    <i class="bi bi-journal-text"></i> Voir les formations
+                </a>
+                {% if request.user.is_superuser or request.user.profile and request.user.profile.name == "Manager" %}
+                <a href="{% url 'admin:index' %}" class="btn">
+                    <i class="bi bi-shield-check"></i> Administration
+                </a>
+                {% endif %}
             </div>
-            <div class="col-12 col-xl-6">
-                <div class="row g-3">
-                    <div class="col-12 col-md-6">
-                        <a href="{% url 'metiers' %}" class="tm-hero-metric">
-                            <div class="tm-hero-metric__icon">
-                                <i class="bi bi-book"></i>
-                            </div>
-                            <div class="tm-hero-metric__content">
-                                <span class="tm-hero-metric__label">Catalogue</span>
-                                <strong class="tm-hero-metric__value">{{ nbmetiers }}</strong>
-                                <span class="tm-hero-metric__text">formations actives</span>
-                            </div>
-                        </a>
-                    </div>
-                    <div class="col-12 col-md-6">
-                        <a href="{% url 'stagiaires' %}" class="tm-hero-metric">
-                            <div class="tm-hero-metric__icon">
-                                <i class="bi bi-people"></i>
-                            </div>
-                            <div class="tm-hero-metric__content">
-                                <span class="tm-hero-metric__label">Population</span>
-                                <strong class="tm-hero-metric__value">{{ nbstagiaires }}</strong>
-                                <span class="tm-hero-metric__text">stagiaires suivis</span>
-                            </div>
-                        </a>
-                    </div>
-                </div>
+
+            <div class="tm-dash-hero__metrics">
+                <a href="{% url 'metiers' %}" class="tm-dash-hero__metric">
+                    <div class="metric-icon"><i class="bi bi-book"></i></div>
+                    <div class="metric-label">Catalogue</div>
+                    <div class="metric-value">{{ nbmetiers }}</div>
+                    <div class="metric-text">formations actives</div>
+                </a>
+                <a href="{% url 'stagiaires' %}" class="tm-dash-hero__metric">
+                    <div class="metric-icon"><i class="bi bi-people"></i></div>
+                    <div class="metric-label">Population</div>
+                    <div class="metric-value">{{ nbstagiaires }}</div>
+                    <div class="metric-text">stagiaires suivis</div>
+                </a>
             </div>
         </div>
-    </section>
-</div>
-<section class="row g-4 tm-dashboard-layout">
-    <div class="col-12 col-md-3">
-        <a href="{% url 'formations' %}" class="tm-stat-card-link">
-            <div class="card tm-stat-card">
-                <div class="card-body">
-                    <div class="tm-stat-card__inner">
-                        <div class="stats-icon purple">
-                            <i class="bi bi-journal-bookmark"></i>
-                        </div>
-                        <div class="tm-stat-card__content">
-                            <div class="tm-stat-label">Formations</div>
-                            <div class="tm-stat-value">{{ nbmetiers }}</div>
-                            <div class="tm-stat-meta">Formations actuellement suivies</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </a>
     </div>
-    <div class="col-12 col-md-3">
-        <a href="{% url 'filieres' %}" class="tm-stat-card-link">
-            <div class="card tm-stat-card">
-                <div class="card-body">
-                    <div class="tm-stat-card__inner">
-                        <div class="stats-icon blue">
-                            <i class="bi bi-signpost-split"></i>
-                        </div>
-                        <div class="tm-stat-card__content">
-                            <div class="tm-stat-label">Filières</div>
-                            <div class="tm-stat-value">{{ nbfilieres }}</div>
-                            <div class="tm-stat-meta">Parcours catalogués</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </a>
-    </div>
-    <div class="col-12 col-md-3">
-        <a href="{% url 'stagiaires' %}" class="tm-stat-card-link">
-            <div class="card tm-stat-card">
-                <div class="card-body">
-                    <div class="tm-stat-card__inner">
-                        <div class="stats-icon green">
-                            <i class="bi bi-people-fill"></i>
-                        </div>
-                        <div class="tm-stat-card__content">
-                            <div class="tm-stat-label">Stagiaires</div>
-                            <div class="tm-stat-value">{{ nbstagiaires }}</div>
-                            <div class="tm-stat-meta">Apprenants enregistrés</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </a>
-    </div>
-    <div class="col-12 col-md-3">
-        <a href="{% url 'actions' %}" class="tm-stat-card-link">
-            <div class="card tm-stat-card">
-                <div class="card-body">
-                    <div class="tm-stat-card__inner">
-                        <div class="stats-icon red">
-                            <i class="bi bi-clipboard-check"></i>
-                        </div>
-                        <div class="tm-stat-card__content">
-                            <div class="tm-stat-label">Actions</div>
-                            <div class="tm-stat-value">{{ nbactions }}</div>
-                            <div class="tm-stat-meta">Sessions et activités planifiées</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </a>
-    </div>
+</section>
 
-    {# Row 1: Filières chart + Encaissements #}
-    <div class="col-12 col-lg-8">
-        <div class="card tm-chart-card">
-            <div class="card-header">
-                <div>
-                    <h4>Aperçu activité</h4>
-                    <p class="text-subtitle text-muted mb-0">Comparaison des stagiaires suivis et des actions par filière</p>
+<!-- Stat Cards -->
+<section class="tm-dash-stats">
+    <div class="row g-3">
+        <div class="col-6 col-md-3">
+            <a href="{% url 'formations' %}" class="tm-dash-stat-card">
+                <div class="tm-dash-stat-icon purple"><i class="bi bi-journal-bookmark"></i></div>
+                <div class="tm-dash-stat-info">
+                    <div class="tm-dash-stat-label">Formations</div>
+                    <div class="tm-dash-stat-value">{{ nbmetiers }}</div>
+                    <div class="tm-dash-stat-meta">Actuellement suivies</div>
                 </div>
+            </a>
+        </div>
+        <div class="col-6 col-md-3">
+            <a href="{% url 'filieres' %}" class="tm-dash-stat-card">
+                <div class="tm-dash-stat-icon blue"><i class="bi bi-signpost-split"></i></div>
+                <div class="tm-dash-stat-info">
+                    <div class="tm-dash-stat-label">Filières</div>
+                    <div class="tm-dash-stat-value">{{ nbfilieres }}</div>
+                    <div class="tm-dash-stat-meta">Parcours catalogués</div>
+                </div>
+            </a>
+        </div>
+        <div class="col-6 col-md-3">
+            <a href="{% url 'stagiaires' %}" class="tm-dash-stat-card">
+                <div class="tm-dash-stat-icon green"><i class="bi bi-people-fill"></i></div>
+                <div class="tm-dash-stat-info">
+                    <div class="tm-dash-stat-label">Stagiaires</div>
+                    <div class="tm-dash-stat-value">{{ nbstagiaires }}</div>
+                    <div class="tm-dash-stat-meta">Apprenants enregistrés</div>
+                </div>
+            </a>
+        </div>
+        <div class="col-6 col-md-3">
+            <a href="{% url 'actions' %}" class="tm-dash-stat-card">
+                <div class="tm-dash-stat-icon red"><i class="bi bi-clipboard-check"></i></div>
+                <div class="tm-dash-stat-info">
+                    <div class="tm-dash-stat-label">Actions</div>
+                    <div class="tm-dash-stat-value">{{ nbactions }}</div>
+                    <div class="tm-dash-stat-meta">Sessions planifiées</div>
+                </div>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Charts Row 1 -->
+<section class="row g-4 mb-4">
+    <div class="col-12 col-lg-8">
+        <div class="card tm-dash-chart">
+            <div class="card-header">
+                <h4>Aperçu activité</h4>
+                <p class="text-muted mb-0">Comparaison des stagiaires suivis et des actions par filière</p>
             </div>
-            <div class="card-body tm-chart-card__body">
+            <div class="card-body">
                 <div id="chart-profile-visit"></div>
             </div>
         </div>
     </div>
     <div class="col-12 col-lg-4">
-        <div class="card tm-chart-card">
+        <div class="card tm-dash-chart">
             <div class="card-header">
                 <h4>Statut des actions</h4>
-                <p class="text-subtitle text-muted mb-0">Répartition par état</p>
+                <p class="text-muted mb-0">Répartition par état</p>
             </div>
             <div class="card-body">
                 <div id="chart-actions-status" style="min-height: 300px;"></div>
             </div>
         </div>
     </div>
+</section>
 
-    {# Row 2: Encaissements + Séances #}
+<!-- Charts Row 2 -->
+<section class="row g-4 mb-4">
     <div class="col-12 col-lg-6">
-        <div class="card tm-chart-card">
+        <div class="card tm-dash-chart">
             <div class="card-header">
                 <h4>Encaissements mensuels</h4>
-                <p class="text-subtitle text-muted mb-0">USD - 6 derniers mois</p>
+                <p class="text-muted mb-0">USD - 6 derniers mois</p>
             </div>
             <div class="card-body">
                 <div id="chart-paiements" style="min-height: 300px;"></div>
@@ -181,56 +458,56 @@
         </div>
     </div>
     <div class="col-12 col-lg-6">
-        <div class="card tm-chart-card">
+        <div class="card tm-dash-chart">
             <div class="card-header">
                 <h4>Séances par semaine</h4>
-                <p class="text-subtitle text-muted mb-0">Prévues vs Réalisées</p>
+                <p class="text-muted mb-0">Prévues vs Réalisées</p>
             </div>
             <div class="card-body">
                 <div id="chart-sessions" style="min-height: 300px;"></div>
             </div>
         </div>
     </div>
+</section>
 
-    {# Row 3: Accès rapide #}
-    <div class="col-12">
-        <div class="card tm-quick-access-card">
-            <div class="card-header">
-                <h4>Accès rapide</h4>
-            </div>
-            <div class="card-body">
-                <div class="tm-quick-grid">
-                    <a href="{% url 'stagiaire_create' %}" class="tm-quick-link">
-                        <span class="tm-quick-link__icon"><i class="bi bi-person-badge"></i></span>
-                        <span>
-                            <span class="tm-quick-link__title">Nouveau stagiaire</span>
-                            <span class="tm-quick-link__text">Créer une nouvelle fiche apprenant.</span>
-                        </span>
-                    </a>
-                    {% if request.user.is_superuser or request.user.profile and request.user.profile.name == "Manager" %}
-                    <a href="{% url 'formation_create' %}" class="tm-quick-link">
-                        <span class="tm-quick-link__icon"><i class="bi bi-folder-plus"></i></span>
-                        <span>
-                            <span class="tm-quick-link__title">Nouvelle formation</span>
-                            <span class="tm-quick-link__text">Ajouter une offre au catalogue.</span>
-                        </span>
-                    </a>
-                    <a href="{% url 'paiement_create' %}" class="tm-quick-link">
-                        <span class="tm-quick-link__icon"><i class="bi bi-cash"></i></span>
-                        <span>
-                            <span class="tm-quick-link__title">Nouveau paiement</span>
-                            <span class="tm-quick-link__text">Enregistrer un encaissement.</span>
-                        </span>
-                    </a>
-                    <a href="{% url 'services' %}" class="tm-quick-link">
-                        <span class="tm-quick-link__icon"><i class="bi bi-building"></i></span>
-                        <span>
-                            <span class="tm-quick-link__title">Services</span>
-                            <span class="tm-quick-link__text">Explorer la structure du centre.</span>
-                        </span>
-                    </a>
-                    {% endif %}
-                </div>
+<!-- Quick Access -->
+<section>
+    <div class="card tm-dash-quick">
+        <div class="card-header">
+            <h4>Accès rapide</h4>
+        </div>
+        <div class="card-body">
+            <div class="tm-dash-quick-grid">
+                <a href="{% url 'stagiaire_create' %}" class="tm-dash-quick-link">
+                    <span class="tm-dash-quick-link__icon"><i class="bi bi-person-badge"></i></span>
+                    <span>
+                        <span class="tm-dash-quick-link__title">Nouveau stagiaire</span>
+                        <span class="tm-dash-quick-link__text">Créer une nouvelle fiche apprenant.</span>
+                    </span>
+                </a>
+                {% if request.user.is_superuser or request.user.profile and request.user.profile.name == "Manager" %}
+                <a href="{% url 'formation_create' %}" class="tm-dash-quick-link">
+                    <span class="tm-dash-quick-link__icon"><i class="bi bi-folder-plus"></i></span>
+                    <span>
+                        <span class="tm-dash-quick-link__title">Nouvelle formation</span>
+                        <span class="tm-dash-quick-link__text">Ajouter une offre au catalogue.</span>
+                    </span>
+                </a>
+                <a href="{% url 'paiement_create' %}" class="tm-dash-quick-link">
+                    <span class="tm-dash-quick-link__icon"><i class="bi bi-cash"></i></span>
+                    <span>
+                        <span class="tm-dash-quick-link__title">Nouveau paiement</span>
+                        <span class="tm-dash-quick-link__text">Enregistrer un encaissement.</span>
+                    </span>
+                </a>
+                <a href="{% url 'services' %}" class="tm-dash-quick-link">
+                    <span class="tm-dash-quick-link__icon"><i class="bi bi-building"></i></span>
+                    <span>
+                        <span class="tm-dash-quick-link__title">Services</span>
+                        <span class="tm-dash-quick-link__text">Explorer la structure du centre.</span>
+                    </span>
+                </a>
+                {% endif %}
             </div>
         </div>
     </div>
