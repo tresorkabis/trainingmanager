@@ -1,0 +1,62 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connexion - Training Manager</title>
+
+    {# Fichier CSS principal de l'application (contenant les variables CSS comme --tm-primary-rgb) #}
+    <link rel="stylesheet" href="{% static 'assets/css/app.css' %}">
+
+    {# Fichier CSS spécifique à la page d'authentification #}
+    <link rel="stylesheet" href="{% static 'assets/css/pages/auth.css' %}">
+
+    {# Icônes Bootstrap (utilisées pour les champs de formulaire) #}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+</head>
+<body class="tm-login">
+
+    <div class="tm-login__wrapper">
+        <div class="tm-login__card">
+
+            <a href="#" class="tm-login__brand">
+                {# Assurez-vous que le chemin vers votre logo est correct #}
+                <img src="{% static 'assets/images/logo/logo.svg' %}" alt="Logo Training Manager">
+                <h1 class="tm-login__brand-title">Training Manager</h1>
+                <p class="tm-login__brand-subtitle">Plateforme de gestion de formations</p>
+            </a>
+
+            <h2 class="tm-login__title">Connexion</h2>
+            <p class="tm-login__text">Veuillez entrer vos identifiants pour continuer.</p>
+
+            {% if form.errors %}
+                <div class="alert tm-login__alert">
+                    Vos identifiants sont incorrects. Veuillez réessayer.
+                </div>
+            {% endif %}
+
+            <form method="post" action="{% url 'login' %}">
+                {% csrf_token %}
+
+                <div class="input-group-with-icon">
+                    <i class="form-control-icon bi bi-person"></i>
+                    {# On ajoute la classe form-control-xl directement ici #}
+                    {{ form.username.as_widget.attrs.class|add:"form-control-xl" }}
+                </div>
+
+                <div class="input-group-with-icon">
+                    <i class="form-control-icon bi bi-shield-lock"></i>
+                    {# On ajoute la classe form-control-xl directement ici #}
+                    {{ form.password.as_widget.attrs.class|add:"form-control-xl" }}
+                </div>
+
+                <button type="submit" class="btn btn-primary">Se connecter</button>
+            </form>
+
+        </div>
+    </div>
+
+</body>
+</html>
