@@ -1,0 +1,242 @@
+/* Auth Page - Premium Design */
+
+/* ==========================================
+   LOGIN / AUTH PAGES
+   ========================================== */
+body.tm-login {
+    background:
+        radial-gradient(circle at 10% 20%, rgba(var(--tm-primary-rgb), 0.15), transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(var(--tm-success-rgb), 0.1), transparent 40%),
+        linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%) !important;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+    font-family: var(--tm-font-family);
+}
+
+.tm-login__wrapper {
+    width: 100%;
+    max-width: 480px;
+}
+
+.tm-login__card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    padding: 3rem 2.5rem;
+    border-radius: 1.5rem;
+    box-shadow:
+        0 20px 25px -5px rgba(0, 0, 0, 0.05),
+        0 10px 10px -5px rgba(0, 0, 0, 0.02),
+        0 0 0 1px rgba(0, 0, 0, 0.02);
+    text-align: center;
+    border: 1px solid rgba(0, 0, 0, 0.04);
+    position: relative;
+    overflow: hidden;
+}
+
+.tm-login__card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg,
+        rgba(var(--tm-primary-rgb), 1) 0%,
+        rgba(var(--tm-success-rgb), 1) 50%,
+        rgba(var(--tm-info-rgb), 1) 100%);
+}
+
+.tm-login__brand {
+    margin-bottom: 2rem;
+    display: block;
+}
+
+.tm-login__brand img {
+    width: 100px;
+    height: 100px;
+    margin: 0 auto 1.5rem;
+    display: block;
+    border-radius: 1.25rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08);
+    transition: transform 0.3s ease;
+}
+
+.tm-login__brand img:hover {
+    transform: scale(1.05) rotate(2deg);
+}
+
+.tm-login__brand-title {
+    font-size: 2.25rem;
+    font-weight: 800;
+    color: var(--tm-text-dark);
+    line-height: 1.2;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.025em;
+}
+
+.tm-login__brand-subtitle {
+    font-size: 1.05rem;
+    color: var(--tm-text-muted);
+    font-weight: 500;
+}
+
+.tm-login__title {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: var(--tm-text-dark);
+    margin-top: 2rem;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.025em;
+}
+
+.tm-login__text {
+    font-size: 0.95rem;
+    color: var(--tm-text-muted);
+    margin-bottom: 2rem;
+}
+
+.tm-login__alert {
+    margin-top: 1.5rem;
+    margin-bottom: 2rem;
+    font-size: 0.95rem;
+    border-radius: 0.75rem;
+    border: none;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    background: linear-gradient(135deg, rgba(var(--tm-danger-rgb), 0.1) 0%, rgba(255, 255, 255, 0.9) 100%);
+    color: var(--tm-danger);
+    font-weight: 600;
+}
+
+/* ==========================================
+   FORM INPUTS PREMIUM
+   ========================================== */
+.input-group-with-icon {
+    position: relative;
+    margin-bottom: 1.25rem;
+}
+
+.input-group-with-icon .form-control-xl {
+    padding-left: 3.5rem;
+    padding-right: 1.25rem;
+    height: calc(2.75rem + 1rem + 2px);
+    font-size: 1.05rem;
+    border-radius: 0.75rem;
+    border: 2px solid var(--tm-border-color);
+    background: var(--tm-bg-primary);
+    color: var(--tm-text-dark);
+    font-weight: 500;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
+}
+
+.input-group-with-icon .form-control-xl:focus {
+    border-color: var(--tm-primary);
+    box-shadow:
+        0 0 0 4px rgba(var(--tm-primary-rgb), 0.1),
+        0 1px 2px 0 rgba(0, 0, 0, 0.04);
+    outline: none;
+}
+
+.input-group-with-icon .form-control-xl::placeholder {
+    color: var(--tm-text-light);
+    opacity: 0.7;
+}
+
+.input-group-with-icon .form-control-icon {
+    position: absolute;
+    left: 1.25rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--tm-text-muted);
+    font-size: 1.25rem;
+    pointer-events: none;
+    z-index: 2;
+    transition: color 0.2s ease;
+}
+
+.input-group-with-icon:focus-within .form-control-icon {
+    color: var(--tm-primary);
+}
+
+/* ==========================================
+   BUTTONS PREMIUM
+   ========================================== */
+.btn-primary {
+    background: linear-gradient(135deg, var(--tm-primary) 0%, var(--tm-primary-light) 100%) !important;
+    border: none !important;
+    font-size: 1.1rem;
+    font-weight: 700;
+    padding: 0.875rem 1.5rem;
+    width: 100%;
+    border-radius: 0.75rem;
+    margin-top: 2rem;
+    box-shadow: 0 10px 15px -3px rgba(var(--tm-primary-rgb), 0.3);
+    transition: all 0.2s ease;
+    letter-spacing: 0.025em;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, var(--tm-primary-dark) 0%, var(--tm-primary) 100%) !important;
+    border: none !important;
+    box-shadow: 0 15px 20px -3px rgba(var(--tm-primary-rgb), 0.4);
+    transform: translateY(-2px);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+}
+
+/* ==========================================
+   LINKS & FOOTER
+   ========================================== */
+.tm-login__footer {
+    margin-top: 2.5rem;
+    font-size: 0.875rem;
+    color: var(--tm-text-muted);
+}
+
+.tm-login__footer a {
+    color: var(--tm-primary);
+    font-weight: 600;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.tm-login__footer a:hover {
+    color: var(--tm-primary-dark);
+    text-decoration: underline;
+}
+
+.text-gray-600 {
+    color: var(--tm-text-muted) !important;
+}
+
+/* ==========================================
+   RESPONSIVE
+   ========================================== */
+@media (max-width: 575.98px) {
+    .tm-login__card {
+        padding: 2rem 1.5rem;
+    }
+
+    .tm-login__brand img {
+        width: 80px;
+        height: 80px;
+    }
+
+    .tm-login__brand-title {
+        font-size: 1.75rem;
+    }
+
+    .tm-login__title {
+        font-size: 1.5rem;
+    }
+
+    .tm-login__brand-subtitle {
+        font-size: 0.95rem;
+    }
+}

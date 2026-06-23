@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "bootstrap": "^5.3.8",
     "simple-datatables": "^10.2.0"
   }
 }

@@ -5,82 +5,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Training Manager</title>
+    <title>Connexion - Training Manager</title>
+
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'assets/css/bootstrap.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/vendors/perfect-scrollbar/perfect-scrollbar.css' %}">
     <link rel="stylesheet" href="{% static 'assets/vendors/bootstrap-icons/bootstrap-icons.css' %}">
     <link rel="stylesheet" href="{% static 'assets/css/app.css' %}">
-    <link rel="stylesheet" href="{% static 'assets/css/pages/auth.css' %}"> {# Keep this for base auth styles #}
-    <link rel="stylesheet" href="{% static 'css/style.css' %}"> {# Your custom project styles #}
+    <link rel="stylesheet" href="{% static 'assets/css/pages/auth.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/training-manager.css' %}">
     <style>
-        /* Custom styles for the revised login page */
+        /* Custom styles for a more substantial and modern login page */
         body.tm-login {
-            background: linear-gradient(to right top, #e0eafc, #cfdef3); /* Light blue gradient */
+            background: linear-gradient(to right top, #eef3ff, #e0e8f7); /* Light blue gradient */
             display: flex;
             align-items: center;
             justify-content: center;
             min-height: 100vh;
             margin: 0;
-            padding: 1rem;
+            padding: 1.5rem; /* Increased padding around the card */
             font-family: 'Nunito', sans-serif;
+            color: #343a40;
         }
 
         .tm-login__wrapper {
             width: 100%;
-            max-width: 500px; /* Increased width to 500px */
+            max-width: 480px; /* Increased max-width for a more generous card size */
             margin: auto;
         }
 
         .tm-login__card {
             background-color: #ffffff;
-            padding: 3rem 2.5rem;
-            border-radius: 1rem;
-            box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.15);
+            padding: 3rem; /* Increased padding inside the card */
+            border-radius: 1rem; /* More rounded corners */
+            box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.15); /* More pronounced shadow */
             text-align: center;
             border: 1px solid #e9ecef;
         }
 
         .tm-login__brand {
-            margin-bottom: 2.5rem;
-            /* Removed flex properties to allow stacking */
-            display: block; /* Ensure it takes full width and allows stacking */
+            margin-bottom: 2.5rem; /* More space below brand section */
         }
 
         .tm-login__brand img {
-            width: 80px;
-            height: 80px;
-            margin-bottom: 1rem; /* Space between logo and title */
-            display: block; /* Ensure logo is a block element */
-            margin-left: auto; /* Center logo */
-            margin-right: auto; /* Center logo */
+            width: 90px; /* Larger logo */
+            height: 90px;
+            margin-bottom: 1rem; /* More space between logo and title */
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         .tm-login__brand-title {
-            font-size: 2rem;
+            font-size: 2.2rem; /* Larger title */
             font-weight: 800;
-            color: #343a40;
+            color: #25396f; /* Darker blue for brand title */
             line-height: 1.2;
-            margin-bottom: 0.5rem; /* Space between title and subtitle */
+            margin-bottom: 0.5rem;
         }
 
         .tm-login__brand-subtitle {
-            font-size: 1.1rem;
+            font-size: 1rem; /* Slightly larger subtitle */
             color: #6c757d;
-            margin-top: 0; /* Reset margin-top */
+            margin-top: 0;
         }
 
         .tm-login__title {
-            font-size: 1.8rem;
+            font-size: 1.8rem; /* Larger login title */
             font-weight: 700;
             color: #343a40;
-            margin-top: 2.5rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .tm-login__text {
-            font-size: 1rem;
-            color: #6c757d;
-            margin-bottom: 2rem;
+            margin-top: 2.5rem; /* More space above title */
+            margin-bottom: 2rem; /* More space below title */
         }
 
         .tm-login__alert {
@@ -93,49 +89,60 @@
         /* --- Form Input with Icon Styling --- */
         .input-group-with-icon {
             position: relative;
-            margin-bottom: 1.5rem; /* Spacing between input groups */
+            margin-bottom: 1.5rem; /* More space between input groups */
+            box-sizing: border-box; /* Ajout explicite pour s'assurer */
         }
 
-        .input-group-with-icon .form-control-xl {
-            padding-left: 3.5rem; /* Make space for the icon */
-            height: calc(2.5rem + 1rem + 2px); /* Consistent height */
-            font-size: 1.15rem;
+        .input-group-with-icon .form-control {
+            padding-left: 3.5rem; /* More space for icon */
+            height: calc(2.5rem + 1rem + 2px); /* Taller input fields */
+            font-size: 1.15rem; /* Larger font in input */
             border-radius: 0.5rem;
             border: 1px solid #ced4da;
-            width: 100%; /* Ensure input takes full width */
+            /* Supprimé: width: 100%; - on se repose sur Bootstrap pour cela */
+            box-sizing: border-box; /* Ajout explicite pour s'assurer */
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+
+        .input-group-with-icon .form-control:focus {
+            border-color: #435ebe; /* Primary theme color on focus */
+            outline: 0;
+            box-shadow: 0 0 0 0.25rem rgba(67, 94, 190, 0.25); /* Primary theme shadow on focus */
         }
 
         .input-group-with-icon .form-control-icon {
             position: absolute;
-            left: 1.2rem; /* Position icon inside the input field */
+            left: 1.2rem; /* Icon position */
             top: 50%;
-            transform: translateY(-50%); /* Vertically center the icon */
+            transform: translateY(-50%);
             color: #adb5bd;
-            font-size: 1.3rem;
-            pointer-events: none; /* Allow clicks to pass through to the input */
-            z-index: 2; /* Ensure icon is above input */
+            font-size: 1.3rem; /* Larger icon */
+            pointer-events: none;
+            z-index: 2;
         }
         /* --- End Form Input with Icon Styling --- */
 
         .btn-primary {
-            background-color: #435ebe;
+            background-color: #435ebe; /* Primary theme color */
             border-color: #435ebe;
-            font-size: 1.25rem;
-            padding: 0.9rem 1.5rem;
+            font-size: 1.25rem; /* Larger button font */
+            padding: 0.9rem 1.5rem; /* More padding for button */
             width: 100%;
             border-radius: 0.5rem;
-            margin-top: 2rem;
+            margin-top: 2rem; /* More space above button */
             transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 0.5rem 1rem rgba(67, 94, 190, 0.2); /* Soft shadow for button */
         }
 
         .btn-primary:hover {
             background-color: #394f9b;
             border-color: #394f9b;
-            box-shadow: 0 0.5rem 1rem rgba(67, 94, 190, 0.3);
+            box-shadow: 0 0.75rem 1.5rem rgba(67, 94, 190, 0.3); /* More pronounced shadow on hover */
+            transform: translateY(-2px); /* Slight lift on hover */
         }
 
         .tm-login__footer {
-            margin-top: 2.5rem;
+            margin-top: 2.5rem; /* More space above footer */
             font-size: 0.9rem;
             color: #6c757d;
         }
@@ -162,27 +169,27 @@
             <form method="post" action="{% url 'login' %}">
                 {% csrf_token %}
                 <div class="input-group-with-icon">
-                    <input type="text" class="form-control form-control-xl" name="username"
-                        placeholder="Nom d'utilisateur" required autofocus>
                     <span class="form-control-icon">
                         <i class="bi bi-person"></i>
                     </span>
+                    <input type="text" class="form-control" name="username"
+                        placeholder="Nom d'utilisateur" required autofocus>
                 </div>
                 <div class="input-group-with-icon">
-                    <input type="password" class="form-control form-control-xl" name="password"
-                        placeholder="Mot de passe" required>
                     <span class="form-control-icon">
                         <i class="bi bi-shield-lock"></i>
                     </span>
+                    <input type="password" class="form-control" name="password"
+                        placeholder="Mot de passe" required>
                 </div>
-                <button type="submit" class="btn btn-primary shadow-lg">Se connecter</button>
+                <button type="submit" class="btn btn-primary w-100">Se connecter</button>
             </form>
 
             <div class="text-center mt-4 fs-6">
                 <p class="text-gray-600">Pas de compte ? Contactez l'administrateur de la plateforme.</p>
             </div>
             <div class="tm-login__footer">
-                <p>2026 &copy; ESFORCA</p> {# Updated footer text #}
+                <p>2026 &copy; ESFORCA</p>
             </div>
         </div>
     </div>
