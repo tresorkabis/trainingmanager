@@ -1,0 +1,109 @@
+/* Training Manager - Global Custom Styles */
+
+:root {
+    --tm-primary: #435ebe;
+    --tm-primary-rgb: 67, 94, 190;
+    --tm-text-dark: #25396f;
+    --tm-text-muted: #6c757d;
+    --tm-text-light: #7b8190;
+    --tm-bg-gradient: linear-gradient(135deg, #f7f8fc 0%, #eef3ff 100%);
+    --tm-border-color: rgba(67, 94, 190, 0.12);
+    --tm-success-rgb: 25, 135, 84;
+    --tm-danger-rgb: 220, 53, 69;
+    --tm-warning-rgb: 255, 193, 7;
+    --tm-info-rgb: 13, 202, 240;
+    --tm-card-shadow: 0 16px 32px rgba(15, 23, 42, 0.05);
+}
+
+/* 1. Section Title Bars (used in hero and page headers) */
+.tm-section-titlebar {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.tm-section-titlebar__icon {
+    font-size: 2.5rem;
+    color: rgb(var(--tm-primary-rgb));
+}
+
+.tm-section-titlebar__text h3 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #25396f;
+    margin-bottom: 0.2rem;
+}
+
+.tm-section-titlebar__text p {
+    font-size: 0.9rem;
+    color: #6c757d;
+    margin-bottom: 0;
+}
+
+/* 2. LE DESIGN QUE VOUS AVEZ CRÉÉ (RESTORED) */
+.tm-stat-card {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(244, 247, 255, 0.92) 100%);
+    border: 1px solid rgba(67, 94, 190, 0.12);
+    border-radius: 1rem;
+    padding: 1.2rem 1.25rem;
+    box-shadow: 0 10px 24px rgba(17, 24, 39, 0.05);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+}
+
+.tm-stat-card::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 3px;
+    background: linear-gradient(90deg, rgba(67, 94, 190, 0.95), rgba(93, 218, 180, 0.95));
+}
+
+.tm-stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 16px 30px rgba(17, 24, 39, 0.08);
+    border-color: rgba(67, 94, 190, 0.2);
+}
+
+.tm-stat-card__label {
+    display: block;
+    font-size: 0.78rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #6c757d;
+    margin-bottom: 0.35rem;
+}
+
+.tm-stat-card__value {
+    font-size: 1.85rem;
+    font-weight: 800;
+    color: #25396f;
+    line-height: 1.2;
+}
+
+/* 3. Tables & Listing */
+.tm-listing-card {
+    border: 1px solid rgba(15, 23, 42, 0.07);
+    border-radius: 1rem;
+    box-shadow: var(--tm-card-shadow);
+    background: #fff;
+    margin-bottom: 1.5rem;
+}
+
+.tm-action-row__title {
+    color: #435ebe;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.tm-action-row__meta {
+    color: #7b8190;
+    font-size: 0.85rem;
+}

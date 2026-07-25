@@ -5,9 +5,9 @@
    ========================================== */
 body.tm-login {
     background:
-        radial-gradient(circle at 10% 20%, rgba(var(--tm-primary-rgb), 0.15), transparent 40%),
-        radial-gradient(circle at 90% 80%, rgba(var(--tm-success-rgb), 0.1), transparent 40%),
-        linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%) !important;
+        radial-gradient(circle at 10% 20%, rgba(var(--tm-primary-rgb), 0.2), transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(var(--tm-success-rgb), 0.15), transparent 40%),
+        linear-gradient(135deg, #1e293b 0%, #111827 100%) !important;
     min-height: 100vh;
     display: flex;
     align-items: center;
@@ -22,17 +22,16 @@ body.tm-login {
 }
 
 .tm-login__card {
-    background: rgba(255, 255, 255, 0.95);
+    background: rgba(30, 41, 59, 0.8); /* Darker, semi-transparent card */
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     padding: 3rem 2.5rem;
     border-radius: 1.5rem;
     box-shadow:
-        0 20px 25px -5px rgba(0, 0, 0, 0.05),
-        0 10px 10px -5px rgba(0, 0, 0, 0.02),
-        0 0 0 1px rgba(0, 0, 0, 0.02);
+        0 25px 50px -12px rgba(0, 0, 0, 0.4),
+        0 0 0 1px rgba(255, 255, 255, 0.05);
     text-align: center;
-    border: 1px solid rgba(0, 0, 0, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     position: relative;
     overflow: hidden;
 }
@@ -45,9 +44,9 @@ body.tm-login {
     right: 0;
     height: 4px;
     background: linear-gradient(90deg,
-        rgba(var(--tm-primary-rgb), 1) 0%,
-        rgba(var(--tm-success-rgb), 1) 50%,
-        rgba(var(--tm-info-rgb), 1) 100%);
+        rgba(0, 40, 160, 1) 0%,
+        rgba(200, 0, 0, 1) 50%,
+        rgba(240, 220, 0, 1) 100%);
 }
 
 .tm-login__brand {
@@ -72,7 +71,7 @@ body.tm-login {
 .tm-login__brand-title {
     font-size: 2.25rem;
     font-weight: 800;
-    color: var(--tm-text-dark);
+    color: #f8fafc; /* Light text */
     line-height: 1.2;
     margin-bottom: 0.5rem;
     letter-spacing: -0.025em;
@@ -80,14 +79,14 @@ body.tm-login {
 
 .tm-login__brand-subtitle {
     font-size: 1.05rem;
-    color: var(--tm-text-muted);
+    color: var(--tm-text-light); /* Lighter muted text */
     font-weight: 500;
 }
 
 .tm-login__title {
     font-size: 1.75rem;
     font-weight: 800;
-    color: var(--tm-text-dark);
+    color: #f8fafc; /* Light text */
     margin-top: 2rem;
     margin-bottom: 0.5rem;
     letter-spacing: -0.025em;
@@ -95,7 +94,7 @@ body.tm-login {
 
 .tm-login__text {
     font-size: 0.95rem;
-    color: var(--tm-text-muted);
+    color: var(--tm-text-light);
     margin-bottom: 2rem;
 }
 
@@ -105,8 +104,8 @@ body.tm-login {
     font-size: 0.95rem;
     border-radius: 0.75rem;
     border: none;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-    background: linear-gradient(135deg, rgba(var(--tm-danger-rgb), 0.1) 0%, rgba(255, 255, 255, 0.9) 100%);
+    box-shadow: 0 4px 6px -1px rgba(var(--tm-danger-rgb), 0.15);
+    background: linear-gradient(135deg, rgba(var(--tm-danger-rgb), 0.15) 0%, rgba(var(--tm-danger-rgb), 0.05) 100%);
     color: var(--tm-danger);
     font-weight: 600;
 }
@@ -117,72 +116,84 @@ body.tm-login {
 .input-group-with-icon {
     position: relative;
     margin-bottom: 1.25rem;
+    /* On déplace le style du champ vers le conteneur */
+    border-radius: 0.75rem;
+    border: 2px solid #334155;
+    background: #1e293b;
+    box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.2);
+    transition: all 0.2s ease;
+    display: flex; /* Pour bien aligner l'icône et le champ */
+    align-items: center;
 }
 
 .input-group-with-icon .form-control-xl {
-    padding-left: 3.5rem;
-    padding-right: 1.25rem;
-    height: calc(2.75rem + 1rem + 2px);
-    font-size: 1.05rem;
-    border-radius: 0.75rem;
-    border: 2px solid var(--tm-border-color);
-    background: var(--tm-bg-primary);
-    color: var(--tm-text-dark);
+    /* On s'assure que le champ est transparent et n'a pas d'ombre propre */
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+    width: 100%;
+    color: #f1f5f9; /* Texte clair */
     font-weight: 500;
-    transition: all 0.2s ease;
-    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
+    font-size: 1.05rem;
+    padding: 1.1rem 1.25rem 1.1rem 3.5rem; /* Padding pour le texte et l'icône */
 }
 
 .input-group-with-icon .form-control-xl:focus {
-    border-color: var(--tm-primary);
-    box-shadow:
-        0 0 0 4px rgba(var(--tm-primary-rgb), 0.1),
-        0 1px 2px 0 rgba(0, 0, 0, 0.04);
-    outline: none;
+    /* Le focus est maintenant géré par le parent */
+}
+
+/* Style du conteneur au focus */
+.input-group-with-icon:focus-within {
+    border-color: rgba(0, 40, 160, 0.8);
+    box-shadow: 0 0 0 4px rgba(0, 40, 160, 0.1), inset 0 2px 4px 0 rgba(0, 0, 0, 0.2);
 }
 
 .input-group-with-icon .form-control-xl::placeholder {
-    color: var(--tm-text-light);
+    color: #64748b; /* Darker placeholder */
     opacity: 0.7;
 }
 
 .input-group-with-icon .form-control-icon {
     position: absolute;
-    left: 1.25rem;
+    left: 1.15rem; /* Léger ajustement */
     top: 50%;
     transform: translateY(-50%);
-    color: var(--tm-text-muted);
+    color: #64748b;
     font-size: 1.25rem;
-    pointer-events: none;
-    z-index: 2;
-    transition: color 0.2s ease;
+    pointer-events: none; /* L'icône ne doit pas être cliquable */
+    z-index: 2; /* On s'assure que l'icône est au-dessus de l'input */
 }
 
 .input-group-with-icon:focus-within .form-control-icon {
-    color: var(--tm-primary);
+    color: rgba(0, 40, 160, 1);
 }
 
 /* ==========================================
    BUTTONS PREMIUM
    ========================================== */
 .btn-primary {
-    background: linear-gradient(135deg, var(--tm-primary) 0%, var(--tm-primary-light) 100%) !important;
+    background: linear-gradient(90deg, rgba(0, 40, 160, 1) 0%, rgba(0, 60, 200, 1) 100%) !important;
     border: none !important;
+    color: #ffffff !important;
     font-size: 1.1rem;
     font-weight: 700;
     padding: 0.875rem 1.5rem;
     width: 100%;
     border-radius: 0.75rem;
-    margin-top: 2rem;
-    box-shadow: 0 10px 15px -3px rgba(var(--tm-primary-rgb), 0.3);
+    margin-top: 1.5rem;
+    box-shadow: 0 10px 20px -5px rgba(0, 40, 160, 0.3);
     transition: all 0.2s ease;
     letter-spacing: 0.025em;
+    background-size: 200% auto;
+    cursor: pointer;
 }
 
 .btn-primary:hover {
-    background: linear-gradient(135deg, var(--tm-primary-dark) 0%, var(--tm-primary) 100%) !important;
+    background: linear-gradient(90deg, rgba(200, 0, 0, 1) 0%, rgba(180, 0, 0, 1) 100%) !important;
     border: none !important;
-    box-shadow: 0 15px 20px -3px rgba(var(--tm-primary-rgb), 0.4);
+    color: #ffffff !important;
+    box-shadow: 0 15px 20px -3px rgba(200, 0, 0, 0.4);
     transform: translateY(-2px);
 }
 
@@ -212,7 +223,7 @@ body.tm-login {
 }
 
 .text-gray-600 {
-    color: var(--tm-text-muted) !important;
+    color: var(--tm-text-light) !important;
 }
 
 /* ==========================================
@@ -239,4 +250,169 @@ body.tm-login {
     .tm-login__brand-subtitle {
         font-size: 0.95rem;
     }
+}
+
+/* ==========================================
+   DARK THEME OVERRIDES (ex-inline) - Couleurs harmonisées avec le logo
+   ========================================== */
+:root {
+    --dark-bg-primary: #1a202c;
+    --dark-bg-secondary: #2d3748;
+    --dark-text-light: #e2e8f0;
+    --dark-text-muted: #a0aec0;
+    --dark-border-color: #4a5568;
+    --dark-shadow-color: rgba(0, 0, 0, 0.6);
+    --dark-accent-color: #0028a0;
+    --dark-accent-hover: #c80000;
+}
+
+body.tm-login {
+    background: var(--dark-bg-primary) !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    margin: 0;
+    padding: 2rem;
+    font-family: 'Nunito', sans-serif;
+    color: var(--dark-text-light);
+    overflow: auto;
+}
+
+.tm-login__wrapper {
+    width: 100%;
+    max-width: 520px;
+    margin: auto;
+}
+
+.tm-login__card {
+    background-color: var(--dark-bg-secondary) !important;
+    padding: 3.5rem;
+    border-radius: 1.25rem !important;
+    box-shadow: 0 1.5rem 3rem var(--dark-shadow-color) !important;
+    text-align: center;
+    border: 1px solid var(--dark-border-color) !important;
+}
+
+.tm-login__brand {
+    margin-bottom: 3rem;
+}
+
+.tm-login__brand img {
+    width: 100px;
+    height: 100px;
+    margin-bottom: 1.5rem;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    box-shadow: none !important;
+}
+
+.tm-login__brand-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--dark-text-light);
+    line-height: 1.2;
+    margin-bottom: 0.75rem;
+}
+
+.tm-login__brand-subtitle {
+    font-size: 1.1rem;
+    color: var(--dark-text-muted);
+    margin-top: 0;
+}
+
+.tm-login__title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--dark-text-light);
+    margin-top: 3rem;
+    margin-bottom: 2.5rem;
+}
+
+.tm-login__alert {
+    margin-top: 1.5rem;
+    margin-bottom: 2rem;
+    font-size: 1rem;
+    border-radius: 0.75rem;
+    background-color: #e53e3e !important;
+    color: white !important;
+    border: none;
+    padding: 1rem 1.5rem;
+}
+
+.input-group-with-icon {
+    position: relative;
+    margin-bottom: 1.75rem;
+    box-sizing: border-box;
+}
+
+.input-group-with-icon .form-control {
+    padding-left: 4.5rem;
+    height: 3.5rem;
+    font-size: 1.15rem;
+    border-radius: 0.75rem;
+    border: 1px solid var(--dark-border-color);
+    background-color: var(--dark-bg-primary);
+    color: var(--dark-text-light);
+    width: 100%;
+    transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    box-sizing: border-box;
+    text-align: left;
+    line-height: normal;
+}
+
+.input-group-with-icon .form-control::placeholder {
+    color: var(--dark-text-muted);
+    opacity: 0.8;
+}
+
+.input-group-with-icon .form-control:focus {
+    border-color: var(--dark-accent-color);
+    outline: 0;
+    box-shadow: 0 0 0 0.25rem rgba(0, 40, 160, 0.4);
+    background-color: var(--dark-bg-primary);
+    color: var(--dark-text-light);
+}
+
+.input-group-with-icon .form-control-icon {
+    position: absolute;
+    left: 1.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--dark-text-muted);
+    font-size: 1.5rem;
+    pointer-events: none;
+    z-index: 2;
+}
+
+.btn-primary {
+    background-color: var(--dark-accent-color) !important;
+    border-color: var(--dark-accent-color) !important;
+    color: #ffffff !important;
+    font-size: 1.2rem !important;
+    padding: 1rem 2rem !important;
+    width: 100%;
+    border-radius: 0.75rem !important;
+    margin-top: 2.5rem !important;
+    transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease !important;
+    box-shadow: 0 0.75rem 1.5rem rgba(0, 40, 160, 0.3) !important;
+}
+
+.btn-primary:hover {
+    background-color: var(--dark-accent-hover) !important;
+    border-color: var(--dark-accent-hover) !important;
+    color: #ffffff !important;
+    box-shadow: 0 1rem 2rem rgba(200, 0, 0, 0.4) !important;
+    transform: translateY(-2px);
+}
+
+.tm-login__footer {
+    margin-top: 3rem;
+    font-size: 0.95rem;
+    color: var(--dark-text-muted);
+}
+
+.text-gray-600 {
+    color: var(--dark-text-muted) !important;
 }

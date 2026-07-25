@@ -48,7 +48,7 @@ class StagiairePermissionMixin:
         user = self.request.user
         queryset = Stagiaire.objects.all()
 
-        if user.is_superuser or (user.profile and user.profile.name == "Manager"):
+        if user.is_superuser or (user.profile and user.profile.name in ["Manager", "Conseiller"]):
             return queryset
         
         if user.profile and user.profile.name == "Chef de filière" and user.filiere:
@@ -70,7 +70,8 @@ class StagiairePermissionMixin:
 
     def enforce_manage_permission(self):
         user = self.request.user
-        if not (user.is_superuser or (user.profile and user.profile.name == "Manager")):
+        allowed_profiles = ["Manager", "Conseiller"]
+        if not (user.is_superuser or (user.profile and user.profile.name in allowed_profiles)):
             raise PermissionDenied("Vous n'avez pas la permission de gérer les stagiaires.")
 
 

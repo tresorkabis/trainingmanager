@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+ {% extends "base.html" %}
 {% load static %}
 {% block title %} Dashboard {% endblock title %}
 {% block page_header %}Tableau de bord opérationnel{% endblock page_header %}
@@ -148,21 +148,39 @@
    ========================================== */
 .tm-dash-stats {
     margin-bottom: 2rem;
+    padding: 0 2rem;
+}
+
+.tm-dash-stats .row {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    width: 100%;
+    overflow-x: hidden;
+    gap: 0.5rem;
+    justify-content: space-between;
+}
+
+.tm-dash-stats .row .col-3 {
+    flex: 0 0 calc(25% - 0.375rem) !important; /* Adjusted width to account for gap */
+    max-width: calc(25% - 0.375rem) !important;
 }
 
 .tm-dash-stat-card {
     background: #fff;
     border: 1px solid #eef0f5;
     border-radius: 1rem;
-    padding: 1.25rem 1.5rem;
+    padding: 0.5rem 0.2rem;
+    padding-left: 0.5rem;
+    width: 100%;
     display: flex;
     align-items: center;
     gap: 1rem;
     text-decoration: none;
     transition: all 0.3s ease;
     box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-    height: 100%;
-    min-height: 100px;
+    min-height: 120px;
+    margin-top: 0.5rem;
 }
 
 .tm-dash-stat-card:hover {
@@ -220,7 +238,8 @@
     border-radius: 0.75rem;
     background: #fff;
     box-shadow: 0 1px 4px rgba(0,0,0,0.03);
-    margin-bottom: 1rem;
+    width: 80%;
+    margin: 0 auto 1rem auto;
 }
 
 .tm-dash-chart .card-header {
@@ -374,18 +393,18 @@
 
 <!-- Stat Cards -->
 <section class="tm-dash-stats">
-    <div class="row g-3">
-        <div class="col-6 col-md-3">
-            <a href="{% url 'formations' %}" class="tm-dash-stat-card">
+    <div class="row g-3 flex-nowrap">
+        <div class="col-3">
+            <a href="{% url 'metiers' %}" class="tm-dash-stat-card">
                 <div class="tm-dash-stat-icon purple"><i class="bi bi-journal-bookmark"></i></div>
                 <div class="tm-dash-stat-info">
-                    <div class="tm-dash-stat-label">Formations</div>
+                    <div class="tm-dash-stat-label">Métiers</div>
                     <div class="tm-dash-stat-value">{{ nbmetiers }}</div>
-                    <div class="tm-dash-stat-meta">Actuellement suivies</div>
+                    <div class="tm-dash-stat-meta">Formations actives</div>
                 </div>
             </a>
         </div>
-        <div class="col-6 col-md-3">
+        <div class="col-3">
             <a href="{% url 'filieres' %}" class="tm-dash-stat-card">
                 <div class="tm-dash-stat-icon blue"><i class="bi bi-signpost-split"></i></div>
                 <div class="tm-dash-stat-info">
@@ -395,17 +414,17 @@
                 </div>
             </a>
         </div>
-        <div class="col-6 col-md-3">
+        <div class="col-3">
             <a href="{% url 'stagiaires' %}" class="tm-dash-stat-card">
                 <div class="tm-dash-stat-icon green"><i class="bi bi-people-fill"></i></div>
                 <div class="tm-dash-stat-info">
                     <div class="tm-dash-stat-label">Stagiaires</div>
                     <div class="tm-dash-stat-value">{{ nbstagiaires }}</div>
-                    <div class="tm-dash-stat-meta">Apprenants enregistrés</div>
+                    <div class="tm-dash-stat-meta">Apprenants suivis</div>
                 </div>
             </a>
         </div>
-        <div class="col-6 col-md-3">
+        <div class="col-3">
             <a href="{% url 'actions' %}" class="tm-dash-stat-card">
                 <div class="tm-dash-stat-icon red"><i class="bi bi-clipboard-check"></i></div>
                 <div class="tm-dash-stat-info">
@@ -420,7 +439,7 @@
 
 <!-- Charts Row 1 -->
 <section class="row g-4 mb-4">
-    <div class="col-12 col-lg-8">
+    <div class="col-6">
         <div class="card tm-dash-chart">
             <div class="card-header">
                 <h4>Aperçu activité</h4>
@@ -431,7 +450,7 @@
             </div>
         </div>
     </div>
-    <div class="col-12 col-lg-4">
+    <div class="col-6">
         <div class="card tm-dash-chart">
             <div class="card-header">
                 <h4>Statut des actions</h4>
@@ -446,7 +465,7 @@
 
 <!-- Charts Row 2 -->
 <section class="row g-4 mb-4">
-    <div class="col-12 col-lg-6">
+    <div class="col-6">
         <div class="card tm-dash-chart">
             <div class="card-header">
                 <h4>Encaissements mensuels</h4>
@@ -457,7 +476,7 @@
             </div>
         </div>
     </div>
-    <div class="col-12 col-lg-6">
+    <div class="col-6">
         <div class="card tm-dash-chart">
             <div class="card-header">
                 <h4>Séances par semaine</h4>
