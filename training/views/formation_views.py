@@ -67,23 +67,19 @@ class FormationListView(FormationPermissionMixin, ListView):
         ctx = super().get_context_data(**kwargs)
         ctx["link"] = "formations"
 
-        all_formations = self.get_queryset()
+        # Utiliser le queryset de base (non paginé) pour les statistiques globales
+        all_formations = self.get_queryset().all()
         total = all_formations.count()
-        active = all_formations.filter(active=True).count()
-        total_modules = all_formations.aggregate(total_modules=Count('modules', distinct=True))['total_modules'] or 0
-        total_actions = all_formations.aggregate(total_actions=Count('actions', distinct=True))['total_actions'] or 0
-
-        ctx['stats'] = {
-            'total': total,
-            'active': active,
-            'inactive': all_formations.filter(active=False).count(),
-            'total_modules': total_modules,
-            'total_actions': total_actions,
-        }
+        active_count = all_formations.filter(active=True).count()
+        
+        # Utiliser l'agrégation pour des totaux corrects et performants
+        aggregates = all_formations.aggregate(total_modules=Sum('modules_count'), total_actions=Sum('actions_count'))
+        total_modules = aggregates.get('total_modules') or 0
+        total_actions = aggregates.get('total_actions') or 0
 
         ctx["hero_stats"] = [
             {'label': 'Total Formations', 'value': total},
-            {'label': 'Actives', 'value': active},
+            {'label': 'Actives', 'value': active_count},
             {'label': 'Modules', 'value': total_modules},
             {'label': 'Actions', 'value': total_actions},
         ]

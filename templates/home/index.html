@@ -1,4 +1,4 @@
- {% extends "base.html" %}
+{% extends "base.html" %}
 {% load static %}
 {% block title %} Dashboard {% endblock title %}
 {% block page_header %}Tableau de bord opérationnel{% endblock page_header %}
@@ -9,13 +9,13 @@
    HERO SECTION
    ========================================== */
 .tm-dash-hero {
-    background: linear-gradient(135deg, #0028a0 0%, #001870 100%);
+    background: linear-gradient(135deg, #435ebe 0%, #6778e0 100%);
     border-radius: 1.25rem;
-    padding: 1.5rem 2rem;
+    padding: 1.75rem 2.25rem;
     margin-bottom: 1.5rem;
     position: relative;
     overflow: hidden;
-    box-shadow: 0 8px 24px rgba(0, 40, 160, 0.25);
+    box-shadow: 0 10px 30px rgba(67, 94, 190, 0.25);
 }
 
 .tm-dash-hero::before {
@@ -23,7 +23,7 @@
     position: absolute;
     inset: 0;
     background:
-        radial-gradient(circle at 20% 120%, rgba(240,220,0,0.12) 0%, transparent 60%),
+        radial-gradient(circle at 20% 120%, rgba(255,255,255,0.15) 0%, transparent 60%),
         radial-gradient(circle at 80% 0%, rgba(255,255,255,0.08) 0%, transparent 50%);
     pointer-events: none;
 }
@@ -34,8 +34,8 @@
 }
 
 .tm-dash-hero__eyebrow {
-    color: rgba(240,220,0,0.9);
-    font-size: 0.85rem;
+    color: rgba(255,255,255,0.9);
+    font-size: 0.8rem;
     text-transform: uppercase;
     letter-spacing: 0.1em;
     font-weight: 700;
@@ -45,305 +45,357 @@
 
 .tm-dash-hero__content h1 {
     color: #fff;
-    font-size: 1.75rem;
+    font-size: 1.6rem;
     font-weight: 800;
-    line-height: 1.2;
+    line-height: 1.3;
     margin-bottom: 0.5rem;
 }
 
 .tm-dash-hero__content p {
     color: rgba(255,255,255,0.85);
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     max-width: 600px;
     margin-bottom: 0;
 }
 
 .tm-dash-hero__actions {
     display: flex;
-    gap: 0.75rem;
+    gap: 0.6rem;
     flex-wrap: wrap;
     align-items: flex-end;
+    margin-top: 1rem;
 }
 
 .tm-dash-hero__actions .btn {
-    background: rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.15);
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255,255,255,0.25);
     color: #fff;
-    border-radius: 0.75rem;
-    padding: 0.6rem 1.25rem;
+    border-radius: 0.7rem;
+    padding: 0.55rem 1.15rem;
     font-weight: 600;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.4rem;
     text-decoration: none;
     transition: all 0.2s ease;
 }
 
 .tm-dash-hero__actions .btn:hover {
-    background: rgba(200,0,0,0.8);
-    border-color: rgba(200,0,0,0.9);
+    background: rgba(255,255,255,0.25);
+    border-color: rgba(255,255,255,0.4);
     transform: translateY(-1px);
     color: #fff;
 }
 
 .tm-dash-hero__metrics {
     display: flex;
-    gap: 0.75rem;
+    gap: 0.6rem;
     flex-wrap: wrap;
     margin-left: auto;
 }
 
 .tm-dash-hero__metric {
     background: rgba(255,255,255,0.1);
-    backdrop-filter: blur(10px);
     border: 1px solid rgba(255,255,255,0.15);
-    border-radius: 0.6rem;
-    padding: 0.7rem 0.9rem;
-    text-align: center;
-    min-width: 100px;
-    flex: 1;
+    border-radius: 0.7rem;
+    padding: 0.6rem 0.9rem;
     text-decoration: none;
-    transition: all 0.3s ease;
     color: #fff;
+    min-width: 140px;
+    text-align: center;
+    backdrop-filter: blur(5px);
+    transition: all 0.2s ease;
 }
 
 .tm-dash-hero__metric:hover {
     background: rgba(255,255,255,0.18);
     transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(0,0,0,0.2);
-    color: #fff;
-    border-color: rgba(240,220,0,0.5);
 }
 
-.tm-dash-hero__metric .metric-icon {
-    font-size: 1.2rem;
-    margin-bottom: 0.35rem;
-    opacity: 0.9;
+.metric-icon {
+    font-size: 1.3rem;
+    margin-bottom: 0.2rem;
 }
 
-.tm-dash-hero__metric .metric-label {
-    font-size: 0.7rem;
+.metric-label {
+    font-size: 0.65rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
     opacity: 0.8;
     margin-bottom: 0.2rem;
 }
 
-.tm-dash-hero__metric .metric-value {
-    font-size: 1.5rem;
+.metric-value {
+    font-size: 1.3rem;
     font-weight: 800;
-    line-height: 1;
 }
 
-.tm-dash-hero__metric .metric-text {
-    font-size: 0.75rem;
-    opacity: 0.7;
-    margin-top: 0.2rem;
+.metric-text {
+    font-size: 0.6rem;
+    opacity: 0.6;
+    margin-top: 0.1rem;
 }
 
 /* ==========================================
    STAT CARDS
    ========================================== */
 .tm-dash-stats {
-    margin-bottom: 2rem;
-    padding: 0 2rem;
+    margin-bottom: 1.5rem;
 }
 
-.tm-dash-stats .row {
-    display: flex !important;
-    flex-direction: row !important;
-    flex-wrap: nowrap !important;
-    width: 100%;
-    overflow-x: hidden;
-    gap: 0.5rem;
-    justify-content: space-between;
-}
-
-.tm-dash-stats .row .col-3 {
-    flex: 0 0 calc(25% - 0.375rem) !important; /* Adjusted width to account for gap */
-    max-width: calc(25% - 0.375rem) !important;
+.tm-dash-stats__grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
 }
 
 .tm-dash-stat-card {
-    background: #fff;
-    border: 1px solid #eef0f5;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    border: 1px solid rgba(0, 0, 0, 0.05);
     border-radius: 1rem;
-    padding: 0.5rem 0.2rem;
-    padding-left: 0.5rem;
-    width: 100%;
+    padding: 0.75rem;
+    text-decoration: none;
+    color: #1e293b;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease;
     display: flex;
     align-items: center;
-    gap: 1rem;
-    text-decoration: none;
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-    min-height: 120px;
-    margin-top: 0.5rem;
+    gap: 0.75rem;
+    height: 100%;
 }
 
 .tm-dash-stat-card:hover {
     transform: translateY(-3px);
-    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
-    border-color: var(--tm-primary, #435ebe);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+    border-color: rgba(67, 94, 190, 0.2);
 }
 
 .tm-dash-stat-icon {
-    width: 3rem;
-    height: 3rem;
+    width: 44px;
+    height: 44px;
     border-radius: 0.75rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.35rem;
-    color: #fff;
+    font-size: 1.25rem;
     flex-shrink: 0;
 }
 
-.tm-dash-stat-icon.purple { background: linear-gradient(135deg, #667eea, #764ba2); }
-.tm-dash-stat-icon.blue   { background: linear-gradient(135deg, #435ebe, #6c8cbf); }
-.tm-dash-stat-icon.green  { background: linear-gradient(135deg, #19a87e, #4caf77); }
-.tm-dash-stat-icon.red    { background: linear-gradient(135deg, #dc3545, #e8657a); }
+.tm-dash-stat-icon.purple {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+}
 
-.tm-dash-stat-info { min-width: 0; }
+.tm-dash-stat-icon.blue {
+    background: linear-gradient(135deg, #435ebe 0%, #6778e0 100%);
+    color: #fff;
+}
+
+.tm-dash-stat-icon.green {
+    background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+    color: #fff;
+}
+
+.tm-dash-stat-icon.red {
+    background: linear-gradient(135deg, #ef4444 0%, #fb923c 100%);
+    color: #fff;
+}
+
+.tm-dash-stat-info {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
 
 .tm-dash-stat-label {
-    font-size: 0.8rem;
-    color: #6c757d;
-    font-weight: 600;
+    font-size: 0.65rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    margin-bottom: 0.15rem;
+    color: #64748b;
+    font-weight: 700;
 }
 
 .tm-dash-stat-value {
-    font-size: 1.65rem;
+    font-size: 1.5rem;
     font-weight: 800;
-    color: var(--tm-text-dark, #1e293b);
-    line-height: 1.1;
+    color: #1e293b;
+    line-height: 1.2;
 }
 
 .tm-dash-stat-meta {
-    font-size: 0.75rem;
+    font-size: 0.65rem;
     color: #94a3b8;
-    margin-top: 0.1rem;
+}
+
+/* ==========================================
+   CHARTS ROWS
+   ========================================== */
+.tm-dash-charts-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
 }
 
 /* ==========================================
    CHART CARDS
    ========================================== */
 .tm-dash-chart {
-    border: 1px solid #eef0f5;
-    border-radius: 0.75rem;
+    border-radius: 1rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    height: 100%;
     background: #fff;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.03);
-    width: 80%;
-    margin: 0 auto 1rem auto;
 }
 
 .tm-dash-chart .card-header {
-    background: transparent;
-    border-bottom: 1px solid #eef0f5;
-    padding: 0.75rem 1rem;
-    border-radius: 0.75rem 0.75rem 0 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    padding: 1.1rem 1.4rem;
+    background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
 }
 
 .tm-dash-chart .card-header h4 {
     font-size: 0.95rem;
     font-weight: 700;
-    color: var(--tm-text-dark, #1e293b);
+    color: #1e293b;
     margin: 0;
 }
 
 .tm-dash-chart .card-header p {
-    font-size: 0.8rem;
-    margin-bottom: 0;
-    margin-top: 0.15rem;
+    font-size: 0.78rem;
+    color: #94a3b8;
+    margin: 0;
 }
 
 .tm-dash-chart .card-body {
-    padding: 0.75rem 1rem;
+    padding: 1.1rem;
 }
 
 /* ==========================================
    QUICK ACCESS
    ========================================== */
 .tm-dash-quick {
-    border: 1px solid #eef0f5;
     border-radius: 1rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.05);
     background: #fff;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }
 
 .tm-dash-quick .card-header {
-    background: transparent;
-    border-bottom: 1px solid #eef0f5;
-    padding: 1.25rem 1.5rem;
-    border-radius: 1rem 1rem 0 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    padding: 1.1rem 1.4rem;
+    background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
 }
 
 .tm-dash-quick .card-header h4 {
-    font-size: 1.05rem;
+    font-size: 0.95rem;
     font-weight: 700;
-    color: var(--tm-text-dark, #1e293b);
+    color: #1e293b;
     margin: 0;
-}
-
-.tm-dash-quick .card-body {
-    padding: 1.25rem 1.5rem;
 }
 
 .tm-dash-quick-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 0.75rem;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.7rem;
 }
 
 .tm-dash-quick-link {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    padding: 1rem 1.25rem;
-    background: #f8fafc;
-    border: 1px solid #eef0f5;
-    border-radius: 0.75rem;
+    gap: 0.65rem;
+    padding: 0.8rem 1rem;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    border-radius: 0.7rem;
     text-decoration: none;
-    color: var(--tm-text-dark, #1e293b);
+    color: #1e293b;
     transition: all 0.2s ease;
 }
 
 .tm-dash-quick-link:hover {
-    background: #fff;
-    border-color: var(--tm-primary, #435ebe);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(67,94,190,0.1);
-    color: var(--tm-primary, #435ebe);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border-color: rgba(67, 94, 190, 0.2);
 }
 
 .tm-dash-quick-link__icon {
-    width: 2.5rem;
-    height: 2.5rem;
+    width: 36px;
+    height: 36px;
     border-radius: 0.6rem;
-    background: linear-gradient(135deg, var(--tm-primary, #435ebe), var(--tm-primary-light, #6778e0));
+    background: linear-gradient(135deg, rgba(67, 94, 190, 0.1) 0%, rgba(67, 94, 190, 0.05) 100%);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.2rem;
-    color: #fff;
+    font-size: 1.1rem;
+    color: #435ebe;
     flex-shrink: 0;
 }
 
 .tm-dash-quick-link__title {
+    font-size: 0.82rem;
     font-weight: 700;
-    font-size: 0.95rem;
+    color: #1e293b;
     display: block;
 }
 
 .tm-dash-quick-link__text {
-    font-size: 0.8rem;
-    color: #6c757d;
+    font-size: 0.68rem;
+    color: #64748b;
     display: block;
+}
+
+/* ==========================================
+   RESPONSIVE
+   ========================================== */
+@media (max-width: 767.98px) {
+    .tm-dash-hero {
+        padding: 1.2rem;
+    }
+
+    .tm-dash-hero__content h1 {
+        font-size: 1.3rem;
+    }
+
+    .tm-dash-hero__actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .tm-dash-hero__metrics {
+        margin-left: 0;
+    }
+
+    .tm-dash-stats .row {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding-bottom: 0.5rem;
+    }
+
+    .tm-dash-stats .col-3 {
+        min-width: 135px;
+        flex-shrink: 0;
+    }
+
+    .tm-dash-stat-card {
+        padding: 0.6rem;
+    }
+
+    .tm-dash-stat-icon {
+        width: 38px;
+        height: 38px;
+        font-size: 1.1rem;
+    }
+
+    .tm-dash-stat-value {
+        font-size: 1.2rem;
+    }
+
+    .tm-dash-quick-grid {
+        grid-template-columns: 1fr;
+    }
 }
 </style>
 {% endblock style %}
@@ -393,97 +445,89 @@
 
 <!-- Stat Cards -->
 <section class="tm-dash-stats">
-    <div class="row g-3 flex-nowrap">
-        <div class="col-3">
-            <a href="{% url 'metiers' %}" class="tm-dash-stat-card">
-                <div class="tm-dash-stat-icon purple"><i class="bi bi-journal-bookmark"></i></div>
-                <div class="tm-dash-stat-info">
-                    <div class="tm-dash-stat-label">Métiers</div>
-                    <div class="tm-dash-stat-value">{{ nbmetiers }}</div>
-                    <div class="tm-dash-stat-meta">Formations actives</div>
-                </div>
-            </a>
-        </div>
-        <div class="col-3">
-            <a href="{% url 'filieres' %}" class="tm-dash-stat-card">
-                <div class="tm-dash-stat-icon blue"><i class="bi bi-signpost-split"></i></div>
-                <div class="tm-dash-stat-info">
-                    <div class="tm-dash-stat-label">Filières</div>
-                    <div class="tm-dash-stat-value">{{ nbfilieres }}</div>
-                    <div class="tm-dash-stat-meta">Parcours catalogués</div>
-                </div>
-            </a>
-        </div>
-        <div class="col-3">
-            <a href="{% url 'stagiaires' %}" class="tm-dash-stat-card">
-                <div class="tm-dash-stat-icon green"><i class="bi bi-people-fill"></i></div>
-                <div class="tm-dash-stat-info">
-                    <div class="tm-dash-stat-label">Stagiaires</div>
-                    <div class="tm-dash-stat-value">{{ nbstagiaires }}</div>
-                    <div class="tm-dash-stat-meta">Apprenants suivis</div>
-                </div>
-            </a>
-        </div>
-        <div class="col-3">
-            <a href="{% url 'actions' %}" class="tm-dash-stat-card">
-                <div class="tm-dash-stat-icon red"><i class="bi bi-clipboard-check"></i></div>
-                <div class="tm-dash-stat-info">
-                    <div class="tm-dash-stat-label">Actions</div>
-                    <div class="tm-dash-stat-value">{{ nbactions }}</div>
-                    <div class="tm-dash-stat-meta">Sessions planifiées</div>
-                </div>
-            </a>
-        </div>
+    <div class="tm-dash-stats__grid">
+        <a href="{% url 'metiers' %}" class="tm-dash-stat-card">
+            <div class="tm-dash-stat-icon purple"><i class="bi bi-journal-bookmark"></i></div>
+            <div class="tm-dash-stat-info">
+                <div class="tm-dash-stat-label">Métiers</div>
+                <div class="tm-dash-stat-value">{{ nbmetiers }}</div>
+                <div class="tm-dash-stat-meta">Formations actives</div>
+            </div>
+        </a>
+        <a href="{% url 'filieres' %}" class="tm-dash-stat-card">
+            <div class="tm-dash-stat-icon blue"><i class="bi bi-signpost-split"></i></div>
+            <div class="tm-dash-stat-info">
+                <div class="tm-dash-stat-label">Filières</div>
+                <div class="tm-dash-stat-value">{{ nbfilieres }}</div>
+                <div class="tm-dash-stat-meta">Parcours catalogués</div>
+            </div>
+        </a>
+        <a href="{% url 'stagiaires' %}" class="tm-dash-stat-card">
+            <div class="tm-dash-stat-icon green"><i class="bi bi-people-fill"></i></div>
+            <div class="tm-dash-stat-info">
+                <div class="tm-dash-stat-label">Stagiaires</div>
+                <div class="tm-dash-stat-value">{{ nbstagiaires }}</div>
+                <div class="tm-dash-stat-meta">Apprenants suivis</div>
+            </div>
+        </a>
+        <a href="{% url 'actions' %}" class="tm-dash-stat-card">
+            <div class="tm-dash-stat-icon red"><i class="bi bi-clipboard-check"></i></div>
+            <div class="tm-dash-stat-info">
+                <div class="tm-dash-stat-label">Actions</div>
+                <div class="tm-dash-stat-value">{{ nbactions }}</div>
+                <div class="tm-dash-stat-meta">Sessions planifiées</div>
+            </div>
+        </a>
     </div>
 </section>
 
 <!-- Charts Row 1 -->
-<section class="row g-4 mb-4">
-    <div class="col-6">
+<section class="tm-dash-charts-row">
+    <div class="tm-dash-chart-col">
         <div class="card tm-dash-chart">
             <div class="card-header">
                 <h4>Aperçu activité</h4>
                 <p class="text-muted mb-0">Comparaison des stagiaires suivis et des actions par filière</p>
             </div>
-            <div class="card-body">
-                <div id="chart-profile-visit"></div>
+            <div class="card-body" style="overflow: visible;">
+                <div id="chart-profile-visit" style="min-height: 400px;"></div>
             </div>
         </div>
     </div>
-    <div class="col-6">
+    <div class="tm-dash-chart-col">
         <div class="card tm-dash-chart">
             <div class="card-header">
                 <h4>Statut des actions</h4>
                 <p class="text-muted mb-0">Répartition par état</p>
             </div>
             <div class="card-body">
-                <div id="chart-actions-status" style="min-height: 300px;"></div>
+                <div id="chart-actions-status" style="min-height: 450px;"></div>
             </div>
         </div>
     </div>
 </section>
 
 <!-- Charts Row 2 -->
-<section class="row g-4 mb-4">
-    <div class="col-6">
+<section class="tm-dash-charts-row">
+    <div class="tm-dash-chart-col">
         <div class="card tm-dash-chart">
             <div class="card-header">
                 <h4>Encaissements mensuels</h4>
                 <p class="text-muted mb-0">USD - 6 derniers mois</p>
             </div>
             <div class="card-body">
-                <div id="chart-paiements" style="min-height: 300px;"></div>
+                <div id="chart-paiements" style="min-height: 400px;"></div>
             </div>
         </div>
     </div>
-    <div class="col-6">
+    <div class="tm-dash-chart-col">
         <div class="card tm-dash-chart">
             <div class="card-header">
                 <h4>Séances par semaine</h4>
                 <p class="text-muted mb-0">Prévues vs Réalisées</p>
             </div>
             <div class="card-body">
-                <div id="chart-sessions" style="min-height: 300px;"></div>
+                <div id="chart-sessions" style="min-height: 400px;"></div>
             </div>
         </div>
     </div>

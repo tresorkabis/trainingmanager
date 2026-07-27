@@ -27,7 +27,7 @@ class HomeView(View):
         filieres_queryset = Filiere.objects.all()
 
         # Filtrage basé sur le rôle de l'utilisateur
-        if user.is_superuser or (user.profile and user.profile.name == "Manager"):
+        if user.is_superuser or (user.profile and user.profile.name in ["Manager", "Conseiller"]):
             pass
         elif user.profile and user.profile.name == "Chef de filière" and user.filiere:
             stagiaires_ids = DetailAction.objects.filter(
@@ -53,35 +53,29 @@ class HomeView(View):
             filieres_queryset = Filiere.objects.none()
 
         # =========== GRAPHIQUE EXISTANT : Répartition par filière ===========
-        stagiaire_counts_list = DetailAction.objects.filter(stagiaire__in=stagiaires_queryset).values(
-            "action__formation__filiere__nom"
-        ).annotate(total=Count("stagiaire", distinct=True))
+        # Agréger les stagiaires et les actions par filière en une seule fois
+        filiere_stats = filieres_queryset.annotate(
+            stagiaire_count=Count('formations__actions__detailaction__stagiaire', distinct=True),
+            action_count=Count('formations__actions', distinct=True)
+        ).filter(nom__isnull=False) # Exclure les filières sans nom
 
-        stagiaire_counts = {
-            item["action__formation__filiere__nom"]: item["total"]
-            for item in stagiaire_counts_list if item["action__formation__filiere__nom"]
-        }
+        # Calculer un score total pour le tri
+        filiere_totals_list = [
+            (f.nom, f.stagiaire_count, f.action_count, f.stagiaire_count + f.action_count)
+            for f in filiere_stats if (f.stagiaire_count + f.action_count) > 0
+        ]
 
-        action_counts = {
-            item["formation__filiere__nom"]: item["total"]
-            for item in actions_queryset.exclude(formation__filiere__nom__isnull=True)
-            .values("formation__filiere__nom")
-            .annotate(total=Count("id"))
-        }
-
-        filiere_names = set(stagiaire_counts.keys()) | set(action_counts.keys())
-        filiere_totals = {
-            name: stagiaire_counts.get(name, 0) + action_counts.get(name, 0)
-            for name in filiere_names if name
-        }
-
+        # Trier par score total (décroissant) puis par nom (alphabétique)
         sorted_filieres = sorted(
-            filiere_totals.items(),
-            key=lambda item: (-item[1], item[0]),
+            filiere_totals_list,
+            key=lambda item: (-item[3], item[0]),
         )
 
         top_limit = 6
-        top_filiere_names = [name for name, _ in sorted_filieres[:top_limit]]
+        top_filiere_names = [item[0] for item in sorted_filieres[:top_limit]]
+
+        stagiaire_counts = {item[0]: item[1] for item in sorted_filieres}
+        action_counts = {item[0]: item[2] for item in sorted_filieres}
 
         categories = top_filiere_names[:]
         stagiaire_data = [stagiaire_counts.get(name, 0) for name in top_filiere_names]
@@ -90,8 +84,8 @@ class HomeView(View):
         if len(sorted_filieres) > top_limit:
             other_filieres = sorted_filieres[top_limit:]
             categories.append("Autres")
-            stagiaire_data.append(sum(stagiaire_counts.get(name, 0) for name, _ in other_filieres))
-            action_data.append(sum(action_counts.get(name, 0) for name, _ in other_filieres))
+            stagiaire_data.append(sum(item[1] for item in other_filieres))
+            action_data.append(sum(item[2] for item in other_filieres))
 
         dashboard_chart = {
             "title": "Répartition par filière",
@@ -102,36 +96,38 @@ class HomeView(View):
             ],
         }
 
-        # =========== GRAPHIQUE 1 : Encaissements mensuels ===========
-        paiements = Paiement.objects.all()
-        if not (user.is_superuser or (user.profile and user.profile.name == "Manager")):
-            paiements = paiements.filter(action__in=actions_queryset)
-
+        # =========== GRAPHIQUE : Encaissements mensuels ===========
+        paiements_qs = Paiement.objects.filter(action__in=actions_queryset) if not (user.is_superuser or (user.profile and user.profile.name in ["Manager", "Conseiller"])) else Paiement.objects.all()
+        
         today = date.today()
-        months_data = []
-        for i in range(5, -1, -1):
-            m = today.month - i
-            y = today.year
-            while m < 1:
-                m += 12
-                y -= 1
-            month_total = paiements.filter(
-                date_paiement__year=y,
-                date_paiement__month=m,
-            ).aggregate(total=Sum('montant'))['total'] or 0
-            month_label = f"{y}-{m:02d}"
-            months_data.append({
-                "label": month_label,
-                "total": float(month_total),
-            })
+        # Date de début pour la période de 6 mois
+        six_months_ago = today - timedelta(days=180)
+
+        # Générer tous les mois des 6 derniers mois pour s'assurer qu'il n'y a pas de trous
+        all_months = {}
+        current_month = today
+        for _ in range(6):
+            all_months[current_month.strftime("%Y-%m")] = 0.0
+            # Aller au mois précédent
+            current_month = (current_month.replace(day=1) - timedelta(days=1))
+
+        # Agréger les paiements par mois avec une seule requête
+        monthly_totals = paiements_qs.filter(date_paiement__gte=six_months_ago)\
+            .annotate(month=TruncMonth('date_paiement'))\
+            .values('month').annotate(total=Sum('montant')).values('month', 'total')
+
+        for item in monthly_totals:
+            all_months[item['month'].strftime("%Y-%m")] = float(item['total'])
+
+        sorted_months = sorted(all_months.items())
 
         paiements_chart = {
             "title": "Encaissements mensuels (USD)",
-            "categories": [m["label"] for m in months_data],
-            "series": [{"name": "Encaissements", "data": [m["total"] for m in months_data]}],
+            "categories": [item[0] for item in sorted_months],
+            "series": [{"name": "Encaissements", "data": [item[1] for item in sorted_months]}],
         }
 
-        # =========== GRAPHIQUE 2 : Statut des actions (basé sur action.statut) ===========
+        # =========== GRAPHIQUE : Statut des actions ===========
         statut_ordered = ["Planifiée", "En cours", "Terminée", "Annulée"]
         statut_colors_map = {
             "Planifiée": "#ffc107",
@@ -139,17 +135,14 @@ class HomeView(View):
             "Terminée": "#198754",
             "Annulée": "#dc3545",
         }
+        
+        statut_counts_query = actions_queryset.values('statut').annotate(count=Count('id'))
+        statut_map = {'PLANIFIEE': "Planifiée", 'EN_COURS': "En cours", 'TERMINEE': "Terminée", 'ANNULEE': "Annulée"}
         statut_counts = {label: 0 for label in statut_ordered}
-        for action in actions_queryset:
-            label_map = {
-                'PLANIFIEE': "Planifiée",
-                'EN_COURS': "En cours",
-                'TERMINEE': "Terminée",
-                'ANNULEE': "Annulée",
-            }
-            label = label_map.get(action.statut)
-            if label in statut_counts:
-                statut_counts[label] += 1
+        for item in statut_counts_query:
+            label = statut_map.get(item['statut'])
+            if label:
+                statut_counts[label] = item['count']
 
         actions_status_chart = {
             "title": "Statut des actions",
@@ -158,20 +151,25 @@ class HomeView(View):
             "colors": [statut_colors_map[s] for s in statut_ordered],
         }
 
-        # =========== GRAPHIQUE 3 : Progression des séances par semaine ===========
+        # =========== GRAPHIQUE : Progression des séances par semaine ===========
         sessions = SessionProgress.objects.filter(module_progress__action__in=actions_queryset)
         six_weeks_ago = today - timedelta(weeks=6)
         sessions_recent = sessions.filter(planned_date__gte=six_weeks_ago)
 
-        weekly_data = {}
-        for s in sessions_recent:
-            if s.planned_date:
-                week_start = s.planned_date - timedelta(days=s.planned_date.weekday())
-                if week_start not in weekly_data:
-                    weekly_data[week_start] = {"planned": 0, "realized": 0}
-                weekly_data[week_start]["planned"] += 1
-                if s.statut == "REALISEE":
-                    weekly_data[week_start]["realized"] += 1
+        # Agréger les séances planifiées par semaine
+        planned_by_week = sessions_recent.annotate(week=TruncWeek('planned_date'))\
+            .values('week').annotate(count=Count('id')).order_by('week')
+
+        # Agréger les séances réalisées par semaine
+        realized_by_week = sessions_recent.filter(statut="REALISEE")\
+            .annotate(week=TruncWeek('planned_date'))\
+            .values('week').annotate(count=Count('id')).order_by('week')
+
+        # Fusionner les données
+        weekly_data = {item['week']: {'planned': item['count'], 'realized': 0} for item in planned_by_week}
+        for item in realized_by_week:
+            if item['week'] in weekly_data:
+                weekly_data[item['week']]['realized'] = item['count']
 
         sorted_weeks = sorted(weekly_data.keys())
         sessions_chart = {
@@ -183,13 +181,28 @@ class HomeView(View):
             ],
         }
 
+        # Préparation des données pour le composant tm_hero
+        hero_stats = [
+            {'label': 'Formations', 'value': metiers_queryset.count()},
+            {'label': 'Filières', 'value': filieres_queryset.count()},
+            {'label': 'Stagiaires', 'value': stagiaires_queryset.count()},
+            {'label': 'Actions', 'value': actions_queryset.count()},
+        ] 
+
+        # Variables individuelles pour les métriques du template
+        nbmetiers = metiers_queryset.count()
+        nbfilieres = filieres_queryset.count()
+        nbstagiaires = stagiaires_queryset.count()
+        nbactions = actions_queryset.count()
+
         ctx = {
             "link": "home",
-            "nbmetiers": metiers_queryset.count(),
-            "nbfilieres": filieres_queryset.count(),
-            "nbstagiaires": stagiaires_queryset.count(),
-            "nbactions": actions_queryset.count(),
             "user": user,
+            "hero_stats": hero_stats,
+            "nbmetiers": nbmetiers,
+            "nbfilieres": nbfilieres,
+            "nbstagiaires": nbstagiaires,
+            "nbactions": nbactions,
             "dashboard_chart": dashboard_chart,
             "paiements_chart": paiements_chart,
             "actions_status_chart": actions_status_chart,

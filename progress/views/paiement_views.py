@@ -32,13 +32,6 @@ class PaiementListView(ListView):
         total_virement = all_paiements.filter(mode_paiement='VIREMENT').aggregate(total=Sum('montant'))['total'] or 0
         total_mois = all_paiements.filter(date_paiement__month=today.month, date_paiement__year=today.year).aggregate(total=Sum('montant'))['total'] or 0
 
-        context['stats'] = {
-            'total_recu': total_recu,
-            'total_especes': total_especes,
-            'total_virement': total_virement,
-            'total_mois': total_mois,
-        }
-
         context['hero_stats'] = [
             {'label': 'Total Encaissé', 'value': f"{total_recu:,.0f} USD"},
             {'label': 'Ce mois', 'value': f"{total_mois:,.0f} USD"},

@@ -74,7 +74,7 @@
             var profileChart = new ApexCharts(chartProfileVisit, {
                 chart: {
                     type: "bar",
-                    height: 300,
+                    height: 400,
                     toolbar: { show: false },
                 },
                 plotOptions: {
@@ -91,8 +91,7 @@
                     width: 0,
                 },
                 legend: {
-                    position: "top",
-                    horizontalAlign: "right",
+                    show: false,
                 },
                 colors: ["#435ebe", "#667eea"],
                 series: profileData.series || [],
@@ -105,14 +104,7 @@
                         show: false,
                     },
                 },
-                title: {
-                    text: profileData.title || "Aperçu activité",
-                    style: {
-                        fontSize: "0.95rem",
-                        fontWeight: 700,
-                        color: "#1e293b",
-                    },
-                },
+                // Titre supprimé car déjà présent dans le card-header du template
                 ...apexTheme,
             });
             profileChart.render();
@@ -128,7 +120,7 @@
             var statusChart = new ApexCharts(chartActionsStatus, {
                 chart: {
                     type: "donut",
-                    height: 300,
+                    height: 450,
                     toolbar: { show: false },
                 },
                 plotOptions: {
@@ -139,27 +131,25 @@
                     },
                 },
                 dataLabels: {
-                    enabled: false,
+                    enabled: true,
+                    style: {
+                        fontSize: "0.75rem",
+                        fontWeight: 600,
+                    },
+                    dropShadow: {
+                        enabled: false,
+                    },
                 },
                 stroke: {
                     width: 2,
                 },
                 legend: {
-                    position: "bottom",
-                    horizontalAlign: "center",
-                    fontSize: "0.8125rem",
+                    show: false,
                 },
                 colors: statusData.colors || ["#ffc107", "#0dcaf0", "#198754", "#dc3545"],
                 series: statusData.series || [],
                 labels: statusData.labels || [],
-                title: {
-                    text: statusData.title || "Statut des actions",
-                    style: {
-                        fontSize: "0.95rem",
-                        fontWeight: 700,
-                        color: "#1e293b",
-                    },
-                },
+                // Titre supprimé car déjà présent dans le card-header du template
                 ...apexTheme,
             });
             statusChart.render();
@@ -175,7 +165,7 @@
             var paiementsChart = new ApexCharts(chartPaiements, {
                 chart: {
                     type: "bar",
-                    height: 300,
+                    height: 400,
                     toolbar: { show: false },
                 },
                 plotOptions: {
@@ -191,8 +181,7 @@
                     width: 0,
                 },
                 legend: {
-                    position: "top",
-                    horizontalAlign: "right",
+                    show: false,
                 },
                 colors: ["#10b981"],
                 series: paiementsData.series || [],
@@ -205,14 +194,7 @@
                         show: false,
                     },
                 },
-                title: {
-                    text: paiementsData.title || "Encaissements mensuels",
-                    style: {
-                        fontSize: "0.95rem",
-                        fontWeight: 700,
-                        color: "#1e293b",
-                    },
-                },
+                // Titre supprimé car déjà présent dans le card-header du template
                 ...apexTheme,
             });
             paiementsChart.render();
@@ -228,7 +210,7 @@
             var sessionsChart = new ApexCharts(chartSessions, {
                 chart: {
                     type: "bar",
-                    height: 300,
+                    height: 400,
                     toolbar: { show: false },
                 },
                 plotOptions: {
@@ -244,8 +226,7 @@
                     width: 0,
                 },
                 legend: {
-                    position: "top",
-                    horizontalAlign: "right",
+                    show: false,
                 },
                 colors: ["#435ebe", "#10b981"],
                 series: sessionsData.series || [],
@@ -258,14 +239,7 @@
                         show: false,
                     },
                 },
-                title: {
-                    text: sessionsData.title || "Séances par semaine",
-                    style: {
-                        fontSize: "0.95rem",
-                        fontWeight: 700,
-                        color: "#1e293b",
-                    },
-                },
+                // Titre supprimé car déjà présent dans le card-header du template
                 ...apexTheme,
             });
             sessionsChart.render();

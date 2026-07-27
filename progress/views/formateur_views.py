@@ -44,19 +44,12 @@ class FormateurListView(FormateurPermissionMixin, ListView):
         total = all_formateurs.count()
         active = all_formateurs.filter(active=True).count()
         inactive = total - active
-
-        ctx['stats'] = {
-            'total': total,
-            'active': active,
-            'inactive': inactive,
-        }
-
+        
         ctx["hero_stats"] = [
             {'label': 'Total Formateurs', 'value': total},
             {'label': 'Actifs', 'value': active},
             {'label': 'Inactifs', 'value': inactive},
         ]
-
         ctx["hero_actions"] = [
             {'label': 'Nouveau formateur', 'url': reverse_lazy('formateur_create'), 'icon': 'bi bi-person-plus'},
         ]

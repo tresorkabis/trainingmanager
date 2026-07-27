@@ -45,13 +45,6 @@ class ServiceListView(ServicePermissionMixin, ListView):
         active = all_services.filter(active=True).count()
         total_filieres = all_services.aggregate(total_filieres=Count('filieres', distinct=True))['total_filieres'] or 0
         
-        ctx['stats'] = {
-            'total': total,
-            'active': active,
-            'inactive': total - active,
-            'total_filieres': total_filieres,
-        }
-
         ctx["hero_stats"] = [
             {'label': 'Total Services', 'value': total},
             {'label': 'Actifs', 'value': active},

@@ -69,13 +69,6 @@ class FiliereListView(FilierePermissionMixin, ListView):
         active = all_filieres.filter(active=True).count()
         total_metiers = all_filieres.aggregate(total_metiers=Count('formations', distinct=True))['total_metiers'] or 0
         
-        ctx['stats'] = {
-            'total': total,
-            'active': active,
-            'inactive': total - active,
-            'total_metiers': total_metiers,
-        }
-
         ctx["hero_stats"] = [
             {'label': 'Total Filières', 'value': total},
             {'label': 'Actives', 'value': active},

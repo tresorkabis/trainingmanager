@@ -125,26 +125,20 @@ class StagiaireListView(StagiairePermissionMixin, ListView):
         ctx = super().get_context_data(**kwargs)
         ctx["link"] = "stagiaires"
         
-        all_stagiaires = self.get_queryset()
+        # Utiliser le queryset de base (non paginé) pour les statistiques globales
+        all_stagiaires = self.get_queryset().all()
         total = all_stagiaires.count()
         dans_emploi = all_stagiaires.filter(categorie__titre="dans l'emploi").count()
         sans_emploi = all_stagiaires.filter(categorie__titre="sans emploi").count()
         masculin = all_stagiaires.filter(sexe='M').count()
         feminin = all_stagiaires.filter(sexe='F').count()
 
-        ctx['stats'] = {
-            'total': total,
-            'dans_emploi': dans_emploi,
-            'sans_emploi': sans_emploi,
-            'masculin': masculin,
-            'feminin': feminin,
-        }
-
         ctx["hero_stats"] = [
             {'label': 'Total Stagiaires', 'value': total},
             {'label': "Dans l'emploi", 'value': dans_emploi},
             {'label': 'Sans emploi', 'value': sans_emploi},
             {'label': 'Féminin', 'value': feminin},
+            {'label': 'Masculin', 'value': masculin},
         ]
 
         ctx["hero_actions"] = [

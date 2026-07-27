@@ -44,13 +44,6 @@ class CategorieListView(CategoriePermissionMixin, ListView):
         active = all_categories.filter(active=True).count()
         total_stagiaires = all_categories.aggregate(total_stagiaires=Count('stagiaire', distinct=True))['total_stagiaires'] or 0
 
-        ctx['stats'] = {
-            'total': total,
-            'active': active,
-            'inactive': total - active,
-            'total_stagiaires': total_stagiaires,
-        }
-
         ctx['hero_stats'] = [
             {'label': 'Total Catégories', 'value': total},
             {'label': 'Actives', 'value': active},

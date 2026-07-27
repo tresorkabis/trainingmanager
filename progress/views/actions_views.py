@@ -209,13 +209,10 @@ class ActionListViews(ActionPermissionMixin, ListView):
 
         ctx["object_list"] = page_actions
         ctx["link"] = "actions"
-        ctx["stats"] = {
-            "total": all_actions.count(),
-            "planned": all_actions.filter(statut='PLANIFIEE').count(),
-            "ongoing": all_actions.filter(statut='EN_COURS').count(),
-            "completed": all_actions.filter(statut='TERMINEE').count(),
-            "enrolled": all_actions.aggregate(total=Count("detailaction", distinct=True))["total"] or 0,
-        }
+        total = all_actions.count()
+        ongoing = all_actions.filter(statut='EN_COURS').count()
+        completed = all_actions.filter(statut='TERMINEE').count()
+        enrolled = all_actions.aggregate(total=Count("detailaction", distinct=True))["total"] or 0
 
         # Préparation des données pour le composant tm_hero
         ctx["hero_actions"] = [
@@ -224,10 +221,10 @@ class ActionListViews(ActionPermissionMixin, ListView):
         ]
 
         ctx["hero_stats"] = [
-            {'label': 'Total Actions', 'value': ctx['stats']['total']},
-            {'label': 'En cours', 'value': ctx['stats']['ongoing']},
-            {'label': 'Terminées', 'value': ctx['stats']['completed']},
-            {'label': 'Inscrits', 'value': ctx['stats']['enrolled']},
+            {'label': 'Total Actions', 'value': total},
+            {'label': 'En cours', 'value': ongoing},
+            {'label': 'Terminées', 'value': completed},
+            {'label': 'Inscrits', 'value': enrolled},
         ]
         return ctx
 

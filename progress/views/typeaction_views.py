@@ -39,12 +39,11 @@ class TypeActionListView(TypeActionPermissionMixin, ListView):
         
         # Calcul des statistiques globales
         all_typeactions = self.get_queryset() # Utiliser le queryset
-        ctx['stats'] = {
-            'total': all_typeactions.count(),
-            'active': all_typeactions.filter(active=True).count(),
-            'inactive': all_typeactions.filter(active=False).count(),
-            'actions_total': all_typeactions.aggregate(total=Count("actions_liees", distinct=True))["total"],
-        }
+        total = all_typeactions.count()
+        active = all_typeactions.filter(active=True).count()
+        inactive = all_typeactions.filter(active=False).count()
+        actions_total = all_typeactions.aggregate(total=Count("actions_liees", distinct=True))["total"] or 0
+        
         ctx["hero_actions"] = [
             {
                 "label": "Nouveau type d'action",
@@ -53,10 +52,10 @@ class TypeActionListView(TypeActionPermissionMixin, ListView):
             }
         ]
         ctx["hero_stats"] = [
-            {"label": "Total", "value": ctx["stats"]["total"]},
-            {"label": "Actifs", "value": ctx["stats"]["active"]},
-            {"label": "Inactifs", "value": ctx["stats"]["inactive"]},
-            {"label": "Actions liées", "value": ctx["stats"]["actions_total"]},
+            {"label": "Total", "value": total},
+            {"label": "Actifs", "value": active},
+            {"label": "Inactifs", "value": inactive},
+            {"label": "Actions liées", "value": actions_total},
         ]
         return ctx
 

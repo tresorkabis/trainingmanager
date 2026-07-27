@@ -25,7 +25,8 @@ class UserListView(ListView):
         context = super().get_context_data(**kwargs)
         context['link'] = 'users' # Pour activer le lien dans le menu latéral
         context['titre'] = 'Liste des utilisateurs'
-        users_qs = self.get_queryset()
+        # Utiliser le queryset de base (non paginé) pour les statistiques globales
+        users_qs = self.get_queryset().all()
         context['hero_actions'] = [
             {
                 'label': 'Créer un utilisateur',
@@ -35,9 +36,9 @@ class UserListView(ListView):
         ]
         context['hero_stats'] = [
             {'label': 'Total', 'value': users_qs.count()},
-            {'label': 'Profils', 'value': users_qs.exclude(profile__isnull=True).count()},
-            {'label': 'Filières', 'value': users_qs.exclude(filiere__isnull=True).count()},
-            {'label': 'Services', 'value': users_qs.exclude(service__isnull=True).count()},
+            {'label': 'Avec Profil', 'value': users_qs.exclude(profile__isnull=True).count()},
+            {'label': 'Avec Filière', 'value': users_qs.exclude(filiere__isnull=True).count()},
+            {'label': 'Avec Service', 'value': users_qs.exclude(service__isnull=True).count()},
         ]
         return context
 
