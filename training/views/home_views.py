@@ -1,17 +1,15 @@
 from datetime import date, timedelta
-from decimal import Decimal
 
 from django.shortcuts import render
 from django.views.generic import View
 from django.db.models import Count, Sum
 from django.db.models.functions import TruncMonth, TruncWeek
-
-from intern.models import Stagiaire
-from progress.models import Action, DetailAction, Paiement, SessionProgress, ModuleProgress
-from training.models import Filiere, Formation, Service
-from users.models import User, Profile
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
+
+from intern.models import Stagiaire
+from progress.models import Action, DetailAction, Paiement, SessionProgress
+from training.models import Filiere, Formation
 
 
 class HomeView(View):
@@ -22,9 +20,9 @@ class HomeView(View):
 
         # Initialisation des querysets de base
         stagiaires_queryset = Stagiaire.objects.all()
-        actions_queryset = Action.objects.all()
-        metiers_queryset = Formation.objects.all()
-        filieres_queryset = Filiere.objects.all()
+        actions_queryset = Action.objects.select_related('formation__filiere').all()
+        metiers_queryset = Formation.objects.select_related('filiere').all()
+        filieres_queryset = Filiere.objects.select_related('service').all()
 
         # Filtrage basé sur le rôle de l'utilisateur
         if user.is_superuser or (user.profile and user.profile.name in ["Manager", "Conseiller"]):

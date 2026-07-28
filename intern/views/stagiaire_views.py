@@ -74,16 +74,24 @@ class StagiairePermissionMixin:
         if not (user.is_superuser or (user.profile and user.profile.name in allowed_profiles)):
             raise PermissionDenied("Vous n'avez pas la permission de gérer les stagiaires.")
 
+    def enforce_view_permission(self):
+        """Permission moins stricte : autorise aussi Chef de filière et Chef de service à voir la liste."""
+        user = self.request.user
+        if user.is_superuser:
+            return
+        if user.profile and user.profile.name in ["Manager", "Conseiller", "Chef de filière", "Chef de service"]:
+            return
+        raise PermissionDenied("Vous n'avez pas la permission de consulter les stagiaires.")
+
 
 @method_decorator(login_required, name="dispatch")
 class StagiaireListView(StagiairePermissionMixin, ListView):
     context_object_name = "stagiaire_list"
-    paginate_by = 6
+    paginate_by = 12
     template_name = "intern/stagiaires.html"
 
     def get_queryset(self):
-        self.enforce_manage_permission()
-        # Suppression de 'filiere' de select_related
+        self.enforce_view_permission()
         queryset = self.get_stagiaire_queryset().select_related("categorie", "entreprise")
 
         from django.utils import timezone
@@ -109,12 +117,9 @@ class StagiaireListView(StagiairePermissionMixin, ListView):
             pk=Subquery(latest_detail_action_pk)
         ).values("action__formation__nom")[:1]
 
-        queryset = queryset.annotate(
-            etudes_count=Count('etudes', distinct=True),
-            autres_formations_count=Count('autres_formations', distinct=True)
-        )
-
         return queryset.annotate(
+            etudes_count=Count('etudes', distinct=True),
+            autres_formations_count=Count('autres_formations', distinct=True),
             current_formation_name=Coalesce(
                 Subquery(active_formation_name, output_field=models.CharField()),
                 Subquery(latest_formation_name, output_field=models.CharField())
@@ -125,13 +130,13 @@ class StagiaireListView(StagiairePermissionMixin, ListView):
         ctx = super().get_context_data(**kwargs)
         ctx["link"] = "stagiaires"
         
-        # Utiliser le queryset de base (non paginé) pour les statistiques globales
-        all_stagiaires = self.get_queryset().all()
-        total = all_stagiaires.count()
-        dans_emploi = all_stagiaires.filter(categorie__titre="dans l'emploi").count()
-        sans_emploi = all_stagiaires.filter(categorie__titre="sans emploi").count()
-        masculin = all_stagiaires.filter(sexe='M').count()
-        feminin = all_stagiaires.filter(sexe='F').count()
+        # Utiliser le queryset source (non paginé, sans annotations coûteuses) pour les stats
+        base_queryset = self.get_stagiaire_queryset()
+        total = base_queryset.count()
+        dans_emploi = base_queryset.filter(categorie__titre="dans l'emploi").count()
+        sans_emploi = base_queryset.filter(categorie__titre="sans emploi").count()
+        masculin = base_queryset.filter(sexe='M').count()
+        feminin = base_queryset.filter(sexe='F').count()
 
         ctx["hero_stats"] = [
             {'label': 'Total Stagiaires', 'value': total},
