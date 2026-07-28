@@ -766,7 +766,25 @@ footer a:hover {
 }
 
 /* ==========================================
-   11. QUICK LINKS PREMIUM
+   11. PAGE HEADING & PREMIUM LISTINGS
+   ========================================== */
+.page-heading {
+    margin-bottom: 0;
+}
+
+.tm-stagiaire-card {
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    border-radius: 1.25rem;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.tm-stagiaire-card:hover {
+    box-shadow: 0 16px 40px rgba(15, 23, 42, 0.1);
+}
+
+/* ==========================================
+   12. QUICK LINKS PREMIUM
    ========================================== */
 .tm-quick-link {
     display: block;
