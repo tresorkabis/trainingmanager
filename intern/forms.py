@@ -64,62 +64,27 @@ class StagiaireForm(forms.ModelForm):
                     field.widget.attrs.update({'class': 'form-control'})
 
     def clean_entreprise(self):
-        entreprise_data = self.cleaned_data.get('entreprise')
-
-        # Normalize: Select2 may return a list/tuple, or a JSON array string like '["SNEL"]'.
-        if isinstance(entreprise_data, (list, tuple)):
-            entreprise_data = entreprise_data[0] if entreprise_data else None
-
-        if isinstance(entreprise_data, str):
-            s = entreprise_data.strip()
-            # Normalize common array-like representations, e.g. "['SNEL']", '["SNEL"]', or plain 'SNEL'
-            # If it's a Python-like list with single quotes, json.loads will fail — try to strip brackets/quotes manually.
-            if s.startswith('[') and s.endswith(']'):
-                # Remove outer brackets
-                inner = s[1:-1].strip()
-                # If inner looks like a quoted string, strip quotes
-                if (inner.startswith("'") and inner.endswith("'")) or (inner.startswith('"') and inner.endswith('"')):
-                    entreprise_data = inner[1:-1].strip()
-                else:
-                    # try json.loads for well-formed JSON
-                    try:
-                        import json
-                        parsed = json.loads(s)
-                        if isinstance(parsed, (list, tuple)) and parsed:
-                            entreprise_data = parsed[0]
-                    except Exception:
-                        # fallback: split by comma and take first token
-                        entreprise_data = inner.split(',')[0].strip().strip('"\'')
-            else:
-                # not bracketed, keep trimmed string
-                entreprise_data = s
-
-        # Si entreprise_data est déjà une instance d'Entreprise (cas d'une sélection existante)
-        if isinstance(entreprise_data, Entreprise):
-            return entreprise_data
-
-        # Si entreprise_data est None ou vide, et que le champ n'est pas requis, on retourne None
-        if not entreprise_data and not self.fields['entreprise'].required:
+        data = self.cleaned_data.get('entreprise')
+        
+        if not data:
             return None
-
-        # Si c'est une chaîne, cela peut être un nouveau nom ou un ID existant sous forme de chaîne
-        if isinstance(entreprise_data, str):
-            # Tente de convertir en int pour voir si c'est un ID existant
+        
+        # Si la donnée est déjà une instance du modèle, c'est une sélection existante.
+        if isinstance(data, Entreprise):
+            return data
+        
+        # ModelSelect2TagWidget envoie l'ID en chaîne pour les sélections existantes
+        # et le texte brut pour les nouvelles balises.
+        if isinstance(data, str):
             try:
-                entreprise_id = int(entreprise_data)
-                # Si c'est un ID, récupère l'entreprise existante
+                # C'est un ID d'une entreprise existante
+                entreprise_id = int(data)
                 return Entreprise.objects.get(pk=entreprise_id)
             except (ValueError, Entreprise.DoesNotExist):
-                # Si ce n'est pas un ID numérique ou si l'entreprise n'existe pas,
-                # c'est un nouveau nom d'entreprise à créer.
-                new_entreprise_name = entreprise_data.strip()
-                if new_entreprise_name:
-                    entreprise, created = Entreprise.objects.get_or_create(
-                        nom=new_entreprise_name,
-                        defaults={'active': True} # Définir d'autres valeurs par défaut si nécessaire
-                    )
+                # C'est un nouveau nom d'entreprise à créer
+                entreprise_nom = data.strip()
+                if entreprise_nom:
+                    entreprise, _ = Entreprise.objects.get_or_create(nom=entreprise_nom)
                     return entreprise
-                else:
-                    raise forms.ValidationError("Le nom de l'entreprise ne peut pas être vide.")
         
-        return entreprise_data # Retourne la donnée nettoyée si c'est déjà une instance ou None
+        return None

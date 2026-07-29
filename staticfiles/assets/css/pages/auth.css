@@ -43,10 +43,7 @@ body.tm-login {
     left: 0;
     right: 0;
     height: 4px;
-    background: linear-gradient(90deg,
-        rgba(0, 40, 160, 1) 0%,
-        rgba(200, 0, 0, 1) 50%,
-        rgba(240, 220, 0, 1) 100%);
+    background: linear-gradient(90deg, var(--dark-accent-color) 0%, rgba(0, 40, 160, 0.7) 100%); /* Harmonisé avec la couleur d'accentuation sombre */
 }
 
 .tm-login__brand {
@@ -190,10 +187,10 @@ body.tm-login {
 }
 
 .btn-primary:hover {
-    background: linear-gradient(90deg, rgba(200, 0, 0, 1) 0%, rgba(180, 0, 0, 1) 100%) !important;
+    background: linear-gradient(90deg, rgba(0, 30, 120, 1) 0%, rgba(0, 50, 180, 1) 100%) !important; /* Harmonisé avec le bleu primaire */
     border: none !important;
     color: #ffffff !important;
-    box-shadow: 0 15px 20px -3px rgba(200, 0, 0, 0.4);
+    box-shadow: 0 15px 20px -3px rgba(0, 40, 160, 0.4); /* Maintien de l'ombre bleue */
     transform: translateY(-2px);
 }
 
@@ -263,7 +260,7 @@ body.tm-login {
     --dark-border-color: #4a5568;
     --dark-shadow-color: rgba(0, 0, 0, 0.6);
     --dark-accent-color: #0028a0;
-    --dark-accent-hover: #c80000;
+    --dark-accent-hover: #001f80; /* Bleu plus foncé pour la cohérence du survol */
 }
 
 body.tm-login {
@@ -390,7 +387,7 @@ body.tm-login {
     background-color: var(--dark-accent-color) !important;
     border-color: var(--dark-accent-color) !important;
     color: #ffffff !important;
-    font-size: 1.2rem !important;
+    font-size: 1.2rem !important; /* Taille de police cohérente */
     padding: 1rem 2rem !important;
     width: 100%;
     border-radius: 0.75rem !important;
@@ -403,7 +400,7 @@ body.tm-login {
     background-color: var(--dark-accent-hover) !important;
     border-color: var(--dark-accent-hover) !important;
     color: #ffffff !important;
-    box-shadow: 0 1rem 2rem rgba(200, 0, 0, 0.4) !important;
+    box-shadow: 0 1rem 2rem rgba(0, 40, 160, 0.4) !important; /* Maintien de l'ombre bleue */
     transform: translateY(-2px);
 }
 

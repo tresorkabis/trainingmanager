@@ -772,10 +772,11 @@ class Command(BaseCommand):
                 eligible_formateurs = list(module.formateurs.filter(active=True))
                 
                 if eligible_formateurs:
-                    # On en choisit un (le premier pour la demo)
-                    formateur_to_assign = eligible_formateurs[0]
+                    # On en choisit un au hasard pour la démo
+                    formateur_to_assign = random.choice(eligible_formateurs)
                     
                     ModuleProgress.objects.get_or_create(
+                        # Assurez-vous que la combinaison est unique si nécessaire
                         formateur=formateur_to_assign,
                         action=action,
                         module=module,

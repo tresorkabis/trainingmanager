@@ -9,6 +9,14 @@ else
     exit 1
 fi
 
+echo "ATTENTION : Ce script va supprimer tous les fichiers de migration existants."
+echo "Ne l'utilisez que si vous êtes sûr de vouloir réinitialiser l'historique des migrations."
+read -p "Voulez-vous continuer ? (o/N) " -n 1 -r
+echo
+if [[ ! $REPLY =~ ^[Oo]$ ]]
+then
+    exit 1
+fi
 # Supprimer les anciennes migrations (sauf __init__.py)
 echo "Removing old migration files..."
 find . -type f -path "*/migrations/*.py" -not -name "__init__.py" -delete

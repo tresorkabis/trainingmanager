@@ -1,9 +1,9 @@
 <section class="tm-hero tm-hero--{{ theme }} mb-4">
     <div class="tm-hero__layout">
         <div class="tm-hero__left">
-            <div class="tm-section-titlebar mb-3">
+            <div class="tm-section-titlebar mb-4">
                 {% if photo_url %}
-                <img src="{{ photo_url }}" alt="{{ title }}" style="width: 80px; height: 80px; border-radius: 1rem; object-fit: cover; border: 3px solid #fff; box-shadow: 0 5px 15px rgba(0,0,0,0.08);" class="me-3">
+                <img src="{{ photo_url }}" alt="{{ title }}" class="tm-hero__photo">
                 {% else %}
                 <span class="tm-section-titlebar__icon"><i class="{{ icon }}"></i></span>
                 {% endif %}
