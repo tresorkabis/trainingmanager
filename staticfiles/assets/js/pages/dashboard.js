@@ -27,9 +27,16 @@
         return;
     }
 
-    // Ensure ApexCharts is available
+    // Helper: show a "no data" placeholder inside a chart container
+    function showNoData(el) {
+        if (!el) return;
+        el.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;min-height:200px;color:#94a3b8;font-size:0.9rem;font-weight:600;"><i class="bi bi-inbox" style="font-size:1.5rem;margin-right:0.5rem;"></i> Aucune donnée à afficher</div>';
+    }
+
+    // Check if ApexCharts is available, show fallback if not
     if (typeof ApexCharts === "undefined") {
         console.error("ApexCharts is not loaded. Make sure the CDN script is included.");
+        [chartProfileVisit, chartActionsStatus, chartPaiements, chartSessions].forEach(showNoData);
         return;
     }
 
@@ -65,16 +72,35 @@
         ],
     };
 
+    // Helper: check if all series data is zero
+    function isEmptyData(data) {
+        if (!data) return true;
+        if (!data.series || data.series.length === 0) return true;
+        var hasNonZero = false;
+        for (var i = 0; i < data.series.length; i++) {
+            if (data.series[i].data) {
+                for (var j = 0; j < data.series[i].data.length; j++) {
+                    if (data.series[i].data[j] > 0) {
+                        hasNonZero = true;
+                        break;
+                    }
+                }
+            }
+            if (hasNonZero) break;
+        }
+        return !hasNonZero;
+    }
+
     // -------------------------------------------------------
     // 1. Aperçu activité – Bar chart (stagiaires vs actions)
     // -------------------------------------------------------
     if (chartProfileVisit) {
         var profileData = getJsonData("dashboard-chart-data");
-        if (profileData) {
+        if (profileData && !isEmptyData(profileData)) {
             var profileChart = new ApexCharts(chartProfileVisit, {
                 chart: {
                     type: "bar",
-                    height: 300,
+                    height: 400,
                     toolbar: { show: false },
                 },
                 plotOptions: {
@@ -91,8 +117,20 @@
                     width: 0,
                 },
                 legend: {
-                    position: "top",
-                    horizontalAlign: "right",
+                    show: true,
+                    position: "bottom",
+                    horizontalAlign: "center",
+                    fontSize: "0.8rem",
+                    fontFamily: "'Nunito', sans-serif",
+                    fontWeight: 600,
+                    markers: {
+                        width: 10,
+                        height: 10,
+                        radius: 3,
+                    },
+                    itemMargin: {
+                        horizontal: 10,
+                    },
                 },
                 colors: ["#435ebe", "#667eea"],
                 series: profileData.series || [],
@@ -105,14 +143,7 @@
                         show: false,
                     },
                 },
-                title: {
-                    text: profileData.title || "Aperçu activité",
-                    style: {
-                        fontSize: "0.95rem",
-                        fontWeight: 700,
-                        color: "#1e293b",
-                    },
-                },
+                // Titre supprimé car déjà présent dans le card-header du template
                 ...apexTheme,
             });
             profileChart.render();
@@ -124,11 +155,11 @@
     // -------------------------------------------------------
     if (chartActionsStatus) {
         var statusData = getJsonData("actions-status-chart-data");
-        if (statusData) {
+        if (statusData && !isEmptyData(statusData)) {
             var statusChart = new ApexCharts(chartActionsStatus, {
                 chart: {
                     type: "donut",
-                    height: 300,
+                    height: 450,
                     toolbar: { show: false },
                 },
                 plotOptions: {
@@ -139,27 +170,38 @@
                     },
                 },
                 dataLabels: {
-                    enabled: false,
+                    enabled: true,
+                    style: {
+                        fontSize: "0.75rem",
+                        fontWeight: 600,
+                    },
+                    dropShadow: {
+                        enabled: false,
+                    },
                 },
                 stroke: {
                     width: 2,
                 },
                 legend: {
+                    show: true,
                     position: "bottom",
                     horizontalAlign: "center",
-                    fontSize: "0.8125rem",
+                    fontSize: "0.8rem",
+                    fontFamily: "'Nunito', sans-serif",
+                    fontWeight: 600,
+                    markers: {
+                        width: 10,
+                        height: 10,
+                        radius: 3,
+                    },
+                    itemMargin: {
+                        horizontal: 10,
+                    },
                 },
                 colors: statusData.colors || ["#ffc107", "#0dcaf0", "#198754", "#dc3545"],
                 series: statusData.series || [],
                 labels: statusData.labels || [],
-                title: {
-                    text: statusData.title || "Statut des actions",
-                    style: {
-                        fontSize: "0.95rem",
-                        fontWeight: 700,
-                        color: "#1e293b",
-                    },
-                },
+                // Titre supprimé car déjà présent dans le card-header du template
                 ...apexTheme,
             });
             statusChart.render();
@@ -171,11 +213,11 @@
     // -------------------------------------------------------
     if (chartPaiements) {
         var paiementsData = getJsonData("paiements-chart-data");
-        if (paiementsData) {
+        if (paiementsData && !isEmptyData(paiementsData)) {
             var paiementsChart = new ApexCharts(chartPaiements, {
                 chart: {
                     type: "bar",
-                    height: 300,
+                    height: 400,
                     toolbar: { show: false },
                 },
                 plotOptions: {
@@ -191,8 +233,7 @@
                     width: 0,
                 },
                 legend: {
-                    position: "top",
-                    horizontalAlign: "right",
+                    show: false,
                 },
                 colors: ["#10b981"],
                 series: paiementsData.series || [],
@@ -205,14 +246,7 @@
                         show: false,
                     },
                 },
-                title: {
-                    text: paiementsData.title || "Encaissements mensuels",
-                    style: {
-                        fontSize: "0.95rem",
-                        fontWeight: 700,
-                        color: "#1e293b",
-                    },
-                },
+                // Titre supprimé car déjà présent dans le card-header du template
                 ...apexTheme,
             });
             paiementsChart.render();
@@ -224,11 +258,11 @@
     // -------------------------------------------------------
     if (chartSessions) {
         var sessionsData = getJsonData("sessions-chart-data");
-        if (sessionsData) {
+        if (sessionsData && !isEmptyData(sessionsData)) {
             var sessionsChart = new ApexCharts(chartSessions, {
                 chart: {
                     type: "bar",
-                    height: 300,
+                    height: 400,
                     toolbar: { show: false },
                 },
                 plotOptions: {
@@ -244,8 +278,20 @@
                     width: 0,
                 },
                 legend: {
-                    position: "top",
-                    horizontalAlign: "right",
+                    show: true,
+                    position: "bottom",
+                    horizontalAlign: "center",
+                    fontSize: "0.8rem",
+                    fontFamily: "'Nunito', sans-serif",
+                    fontWeight: 600,
+                    markers: {
+                        width: 10,
+                        height: 10,
+                        radius: 3,
+                    },
+                    itemMargin: {
+                        horizontal: 10,
+                    },
                 },
                 colors: ["#435ebe", "#10b981"],
                 series: sessionsData.series || [],
@@ -258,14 +304,7 @@
                         show: false,
                     },
                 },
-                title: {
-                    text: sessionsData.title || "Séances par semaine",
-                    style: {
-                        fontSize: "0.95rem",
-                        fontWeight: 700,
-                        color: "#1e293b",
-                    },
-                },
+                // Titre supprimé car déjà présent dans le card-header du template
                 ...apexTheme,
             });
             sessionsChart.render();
