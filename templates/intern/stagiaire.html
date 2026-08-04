@@ -15,14 +15,42 @@
         border-radius: 0.9rem;
         padding: 1rem;
         height: 100%;
+        transition: all 0.2s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    .tm-detail-item::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 3px;
+        height: 100%;
+        background: linear-gradient(180deg, #435ebe, #2a3f8f);
+        opacity: 0;
+        transition: opacity 0.2s ease;
+    }
+    .tm-detail-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(67, 94, 190, 0.08);
+        border-color: rgba(67, 94, 190, 0.2);
+    }
+    .tm-detail-item:hover::before {
+        opacity: 1;
     }
     .tm-detail-item__label {
-        display: block;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
         font-size: 0.72rem;
         text-transform: uppercase;
         letter-spacing: 0.08em;
         color: #6c757d;
         margin-bottom: 0.35rem;
+    }
+    .tm-detail-item__label i {
+        font-size: 0.8rem;
+        color: #435ebe;
     }
     .tm-detail-item__value {
         display: block;
@@ -35,6 +63,15 @@
         font-weight: 800;
         color: #25396f;
         margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .tm-subsection-title::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: linear-gradient(90deg, #e2e8f0, transparent);
     }
     .select2-container--default .select2-selection--single {
         height: calc(1.5em + 1rem + 2px);
@@ -51,6 +88,257 @@
         height: calc(1.5em + 1rem);
         right: 8px;
     }
+
+    /* ===== Onglets premium ===== */
+    /* Bootstrap CSS nécessaire car bootstrap.css est un placeholder */
+    .nav {
+        display: flex;
+        flex-wrap: wrap;
+        padding-left: 0;
+        margin-bottom: 0;
+        list-style: none;
+    }
+    .nav-tabs {
+        border-bottom: 1px solid #e2e8f0;
+    }
+    .nav-tabs .nav-item {
+        margin-bottom: -1px;
+    }
+    .nav-link {
+        display: block;
+        padding: 0.5rem 1rem;
+        text-decoration: none;
+        transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out;
+    }
+    .nav-tabs .nav-link {
+        margin-bottom: -1px;
+        border: 1px solid transparent;
+        border-top-left-radius: 0.75rem;
+        border-top-right-radius: 0.75rem;
+    }
+    .nav-tabs .nav-link:hover,
+    .nav-tabs .nav-link:focus {
+        border-color: #e2e8f0 #e2e8f0 #e2e8f0;
+        isolation: isolate;
+    }
+    .nav-tabs .nav-link.active,
+    .nav-tabs .nav-item.show .nav-link {
+        color: #435ebe;
+        background-color: #ffffff;
+        border-color: #e2e8f0 #e2e8f0 #ffffff;
+    }
+    .tab-content > .tab-pane {
+        display: none;
+    }
+    .tab-content > .active {
+        display: block;
+    }
+
+    /* Styles premium personnalisés */
+    .tm-tabs-wrap {
+        background: #f8fafc;
+        border-bottom: 1px solid #e2e8f0;
+        padding: 0.5rem 1.75rem 0;
+        overflow-x: auto;
+    }
+    .tm-tabs {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        align-items: flex-end;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        gap: 0.25rem;
+        min-width: 0;
+    }
+    .tm-tabs .nav-item {
+        display: inline-flex;
+        flex: 0 0 auto;
+        margin: 0;
+        padding: 0;
+    }
+    .tm-tabs .nav-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.875rem 1.5rem;
+        font-weight: 700;
+        font-size: 0.875rem;
+        color: #64748b;
+        text-decoration: none;
+        border: 1px solid transparent;
+        border-bottom: none;
+        border-radius: 0.75rem 0.75rem 0 0;
+        margin-bottom: -1px;
+        background: transparent;
+        white-space: nowrap;
+        transition: all 0.2s ease;
+        position: relative;
+        cursor: pointer;
+        width: auto;
+        line-height: 1.5;
+    }
+    .tm-tabs .nav-link i {
+        font-size: 1rem;
+        opacity: 0.6;
+        transition: all 0.2s ease;
+    }
+    .tm-tabs .nav-link:hover {
+        color: #435ebe;
+        background: rgba(67, 94, 190, 0.05);
+        border-color: #e2e8f0;
+        text-decoration: none;
+    }
+    .tm-tabs .nav-link:hover i {
+        opacity: 1;
+    }
+    .tm-tabs .nav-link.active {
+        color: #435ebe;
+        background: #ffffff;
+        font-weight: 800;
+        border-color: #e2e8f0;
+        border-bottom-color: #ffffff;
+    }
+    .tm-tabs .nav-link.active::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #435ebe, #2a3f8f);
+        border-radius: 0.75rem 0.75rem 0 0;
+    }
+    .tm-tabs .nav-link.active i {
+        opacity: 1;
+        color: #435ebe;
+    }
+    .tm-listing-card > .card-header {
+        padding: 0 !important;
+    }
+    .tm-listing-card > .card-body {
+        border-top: 1px solid #e2e8f0;
+    }
+    @media (max-width: 767.98px) {
+        .tm-tabs .nav-link {
+            padding: 0.75rem 1rem;
+            font-size: 0.8rem;
+        }
+        .tm-tabs .nav-link i {
+            display: none;
+        }
+    }
+
+    /* ===== Badges statut ===== */
+    .tm-status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.4rem 0.9rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .tm-status-badge::before {
+        content: '';
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: currentColor;
+    }
+
+    /* ===== Tableau paiements amélioré ===== */
+    .tm-payment-row {
+        transition: all 0.2s ease;
+    }
+    .tm-payment-row:hover {
+        background: rgba(67, 94, 190, 0.03) !important;
+    }
+    .tm-payment-ref {
+        font-family: 'SF Mono', 'Fira Code', monospace;
+        font-weight: 700;
+        color: #435ebe;
+        background: #eef2ff;
+        padding: 0.25rem 0.6rem;
+        border-radius: 0.4rem;
+        font-size: 0.8rem;
+    }
+    .tm-payment-amount {
+        font-weight: 800;
+        color: #10b981;
+        font-size: 0.95rem;
+    }
+
+    /* ===== Carte inscription améliorée ===== */
+    .tm-inscription-card {
+        background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%);
+        border: 1px solid #e0e7ff;
+        border-radius: 1rem;
+        padding: 1.25rem;
+    }
+    .tm-inscription-card .form-label {
+        color: #25396f;
+        font-weight: 700;
+    }
+
+    /* ===== Liste formations améliorée ===== */
+    .tm-formation-item {
+        border: 1px solid #f1f5f9;
+        border-radius: 0.75rem;
+        padding: 1rem 1.25rem;
+        margin-bottom: 0.75rem;
+        transition: all 0.2s ease;
+        background: #fff;
+    }
+    .tm-formation-item:hover {
+        border-color: rgba(67, 94, 190, 0.2);
+        box-shadow: 0 4px 12px rgba(67, 94, 190, 0.06);
+        transform: translateX(4px);
+    }
+    .tm-formation-item__title {
+        font-weight: 700;
+        color: #1e293b;
+        font-size: 0.95rem;
+    }
+    .tm-formation-item__meta {
+        font-size: 0.8rem;
+        color: #64748b;
+    }
+
+    /* ===== Études et formations listes ===== */
+    .tm-study-item {
+        border: 1px solid #f1f5f9;
+        border-radius: 0.75rem;
+        padding: 0.875rem 1rem;
+        margin-bottom: 0.5rem;
+        transition: all 0.2s ease;
+        background: #fff;
+    }
+    .tm-study-item:hover {
+        border-color: rgba(67, 94, 190, 0.2);
+        box-shadow: 0 2px 8px rgba(67, 94, 190, 0.05);
+    }
+    .tm-study-item__title {
+        font-weight: 700;
+        color: #1e293b;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .tm-study-item__title i {
+        color: #435ebe;
+        font-size: 1rem;
+    }
+    .tm-study-item__meta {
+        font-size: 0.8rem;
+        color: #64748b;
+        margin-top: 0.25rem;
+    }
+
 </style>
 {% endblock style %}
 
@@ -220,18 +508,18 @@
     {% if not form %}
     <section class="section">
         <div class="card tm-listing-card">
-            <div class="card-header">
-                <ul class="nav nav-tabs card-header-tabs" id="stagiaireTab" role="tablist">
-                    <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#identity">Identité</a></li>
+            <div class="tm-tabs-wrap">
+                <ul class="nav nav-tabs tm-tabs" id="stagiaireTab" role="tablist">
+                    <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#identity"><i class="bi bi-person-vcard"></i>Identité</a></li>
                     {% if object.categorie and object.categorie.titre == "dans l'emploi" %}
-                    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#employment">Emploi</a></li>
+                    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#employment"><i class="bi bi-briefcase"></i>Emploi</a></li>
                     {% endif %}
-                    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#formations">Formations</a></li>
-                    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#studies">Cursus</a></li>
+                    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#formations"><i class="bi bi-mortarboard"></i>Formations</a></li>
+                    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#studies"><i class="bi bi-journal-bookmark"></i>Cursus</a></li>
                     {% if object.nom_pere or object.nom_mere %}
-                    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#family">Famille</a></li>
+                    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#family"><i class="bi bi-people"></i>Famille</a></li>
                     {% endif %}
-                    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#payments">Paiements</a></li>
+                    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#payments"><i class="bi bi-cash-coin"></i>Paiements</a></li>
                 </ul>
             </div>
             <div class="card-body">
@@ -239,60 +527,60 @@
                     <div class="tab-pane fade show active" id="identity">
                         <div class="row g-3">
                             <div class="col-12">
-                                <div class="tm-subsection-title">Identité civile</div>
+                                <div class="tm-subsection-title"><i class="bi bi-person-badge"></i>Identité civile</div>
                             </div>
                             <div class="col-md-4">
-                                <div class="tm-detail-item"><span class="tm-detail-item__label">Nom complet</span><span class="tm-detail-item__value">{{ object.get_full_name }}</span></div>
+                                <div class="tm-detail-item"><span class="tm-detail-item__label"><i class="bi bi-person"></i>Nom complet</span><span class="tm-detail-item__value">{{ object.get_full_name }}</span></div>
                             </div>
                             <div class="col-md-4">
-                                <div class="tm-detail-item"><span class="tm-detail-item__label">Catégorie</span><span class="tm-detail-item__value">{{ object.categorie }}</span></div>
+                                <div class="tm-detail-item"><span class="tm-detail-item__label"><i class="bi bi-tags"></i>Catégorie</span><span class="tm-detail-item__value">{{ object.categorie }}</span></div>
                             </div>
                             <div class="col-md-4">
-                                <div class="tm-detail-item"><span class="tm-detail-item__label">Statut</span><span class="tm-detail-item__value">{% if object.active %}Actif{% else %}Inactif{% endif %}</span></div>
+                                <div class="tm-detail-item"><span class="tm-detail-item__label"><i class="bi bi-toggle-on"></i>Statut</span><span class="tm-detail-item__value">{% if object.active %}<span class="tm-status-badge bg-light-success">Actif</span>{% else %}<span class="tm-status-badge bg-light-secondary">Inactif</span>{% endif %}</span></div>
                             </div>
                             <div class="col-md-4">
-                                <div class="tm-detail-item"><span class="tm-detail-item__label">Sexe</span><span class="tm-detail-item__value">{{ object.get_sexe_display }}</span></div>
+                                <div class="tm-detail-item"><span class="tm-detail-item__label"><i class="bi bi-gender-ambiguous"></i>Sexe</span><span class="tm-detail-item__value">{{ object.get_sexe_display }}</span></div>
                             </div>
                             <div class="col-md-4">
-                                <div class="tm-detail-item"><span class="tm-detail-item__label">Date de naissance</span><span class="tm-detail-item__value">{{ object.date_naissance|date:"d/m/Y"|default:"-" }}</span></div>
+                                <div class="tm-detail-item"><span class="tm-detail-item__label"><i class="bi bi-calendar-event"></i>Date de naissance</span><span class="tm-detail-item__value">{{ object.date_naissance|date:"d/m/Y"|default:"-" }}</span></div>
                             </div>
                             <div class="col-md-4">
-                                <div class="tm-detail-item"><span class="tm-detail-item__label">Lieu de naissance</span><span class="tm-detail-item__value">{{ object.lieu_naissance|default:"-" }}</span></div>
+                                <div class="tm-detail-item"><span class="tm-detail-item__label"><i class="bi bi-geo-alt"></i>Lieu de naissance</span><span class="tm-detail-item__value">{{ object.lieu_naissance|default:"-" }}</span></div>
                             </div>
                             <div class="col-md-4">
-                                <div class="tm-detail-item"><span class="tm-detail-item__label">Nationalité</span><span class="tm-detail-item__value">{{ object.nationalite|default:"-" }}</span></div>
+                                <div class="tm-detail-item"><span class="tm-detail-item__label"><i class="bi bi-globe"></i>Nationalité</span><span class="tm-detail-item__value">{{ object.nationalite|default:"-" }}</span></div>
                             </div>
                             <div class="col-md-8">
-                                <div class="tm-detail-item"><span class="tm-detail-item__label">Adresse</span><span class="tm-detail-item__value">{{ object.adresse|default:"-" }}</span></div>
+                                <div class="tm-detail-item"><span class="tm-detail-item__label"><i class="bi bi-house"></i>Adresse</span><span class="tm-detail-item__value">{{ object.adresse|default:"-" }}</span></div>
                             </div>
 
                             <div class="col-12 mt-2">
-                                <div class="tm-subsection-title">Contacts et pièces</div>
+                                <div class="tm-subsection-title"><i class="bi bi-telephone"></i>Contacts et pièces</div>
                             </div>
                             <div class="col-md-4">
-                                <div class="tm-detail-item"><span class="tm-detail-item__label">Téléphone</span><span class="tm-detail-item__value">{{ object.telephone|default:"-" }}</span></div>
+                                <div class="tm-detail-item"><span class="tm-detail-item__label"><i class="bi bi-telephone"></i>Téléphone</span><span class="tm-detail-item__value">{{ object.telephone|default:"-" }}</span></div>
                             </div>
                             <div class="col-md-4">
-                                <div class="tm-detail-item"><span class="tm-detail-item__label">Email</span><span class="tm-detail-item__value">{{ object.email|default:"-" }}</span></div>
+                                <div class="tm-detail-item"><span class="tm-detail-item__label"><i class="bi bi-envelope"></i>Email</span><span class="tm-detail-item__value">{{ object.email|default:"-" }}</span></div>
                             </div>
                             <div class="col-md-4">
-                                <div class="tm-detail-item"><span class="tm-detail-item__label">Référence dossier</span><span class="tm-detail-item__value">#STG-{{ object.pk }}</span></div>
+                                <div class="tm-detail-item"><span class="tm-detail-item__label"><i class="bi bi-hash"></i>Référence dossier</span><span class="tm-detail-item__value">#STG-{{ object.pk }}</span></div>
                             </div>
                             <div class="col-md-4">
-                                <div class="tm-detail-item"><span class="tm-detail-item__label">Type de pièce</span><span class="tm-detail-item__value">{{ object.get_type_piece_display|default:"-" }}</span></div>
+                                <div class="tm-detail-item"><span class="tm-detail-item__label"><i class="bi bi-card-text"></i>Type de pièce</span><span class="tm-detail-item__value">{{ object.get_type_piece_display|default:"-" }}</span></div>
                             </div>
                             <div class="col-md-4">
-                                <div class="tm-detail-item"><span class="tm-detail-item__label">Numéro de pièce</span><span class="tm-detail-item__value">{{ object.numero_piece|default:"-" }}</span></div>
+                                <div class="tm-detail-item"><span class="tm-detail-item__label"><i class="bi bi-credit-card"></i>Numéro de pièce</span><span class="tm-detail-item__value">{{ object.numero_piece|default:"-" }}</span></div>
                             </div>
 
                             <div class="col-12 mt-2">
-                                <div class="tm-subsection-title">Historique du dossier</div>
+                                <div class="tm-subsection-title"><i class="bi bi-clock-history"></i>Historique du dossier</div>
                             </div>
                             <div class="col-md-4">
-                                <div class="tm-detail-item"><span class="tm-detail-item__label">Créé le</span><span class="tm-detail-item__value">{{ object.created_at|date:"d/m/Y H:i" }}</span></div>
+                                <div class="tm-detail-item"><span class="tm-detail-item__label"><i class="bi bi-plus-circle"></i>Créé le</span><span class="tm-detail-item__value">{{ object.created_at|date:"d/m/Y H:i" }}</span></div>
                             </div>
                             <div class="col-md-4">
-                                <div class="tm-detail-item"><span class="tm-detail-item__label">Mis à jour</span><span class="tm-detail-item__value">{{ object.updated_at|date:"d/m/Y H:i" }}</span></div>
+                                <div class="tm-detail-item"><span class="tm-detail-item__label"><i class="bi bi-arrow-repeat"></i>Mis à jour</span><span class="tm-detail-item__value">{{ object.updated_at|date:"d/m/Y H:i" }}</span></div>
                             </div>
                         </div>
                     </div>
@@ -301,68 +589,64 @@
                     <div class="tab-pane fade" id="employment">
                         <div class="row g-3">
                             <div class="col-12">
-                                <div class="tm-subsection-title">Situation professionnelle</div>
+                                <div class="tm-subsection-title"><i class="bi bi-briefcase"></i>Situation professionnelle</div>
                             </div>
                             <div class="col-md-6">
-                                <div class="tm-detail-item"><span class="tm-detail-item__label">Entreprise</span><span class="tm-detail-item__value">{{ object.entreprise|default:"-" }}</span></div>
+                                <div class="tm-detail-item"><span class="tm-detail-item__label"><i class="bi bi-building"></i>Entreprise</span><span class="tm-detail-item__value">{{ object.entreprise|default:"-" }}</span></div>
                             </div>
                             <div class="col-md-6">
-                                <div class="tm-detail-item"><span class="tm-detail-item__label">Fonction</span><span class="tm-detail-item__value">{{ object.fonction|default:"-" }}</span></div>
+                                <div class="tm-detail-item"><span class="tm-detail-item__label"><i class="bi bi-person-workspace"></i>Fonction</span><span class="tm-detail-item__value">{{ object.fonction|default:"-" }}</span></div>
                             </div>
                             <div class="col-md-6">
-                                <div class="tm-detail-item"><span class="tm-detail-item__label">Ancienneté dans l'emploi</span><span class="tm-detail-item__value">{{ object.anciennete_emploi|default:"-" }} ans</span></div>
+                                <div class="tm-detail-item"><span class="tm-detail-item__label"><i class="bi bi-hourglass-split"></i>Ancienneté dans l'emploi</span><span class="tm-detail-item__value">{{ object.anciennete_emploi|default:"-" }} ans</span></div>
                             </div>
                             <div class="col-md-6">
-                                <div class="tm-detail-item"><span class="tm-detail-item__label">Ancienneté dans l'entreprise</span><span class="tm-detail-item__value">{{ object.anciennete_entreprise|default:"-" }} ans</span></div>
+                                <div class="tm-detail-item"><span class="tm-detail-item__label"><i class="bi bi-building-check"></i>Ancienneté dans l'entreprise</span><span class="tm-detail-item__value">{{ object.anciennete_entreprise|default:"-" }} ans</span></div>
                             </div>
                         </div>
                     </div>
                     {% endif %}
 
-                    <div class="tab-pane fade" id="family"> {# This tab seems to be a duplicate of some identity fields #}
+                    <div class="tab-pane fade" id="family">
                         <div class="row g-3">
                             <div class="col-12">
-                                <div class="tm-subsection-title">Informations familiales</div> {# Renamed title #}
+                                <div class="tm-subsection-title"><i class="bi bi-people"></i>Informations familiales</div>
                             </div>
                             <div class="col-md-4">
-                                <div class="tm-detail-item"><span class="tm-detail-item__label">Nom du père</span><span class="tm-detail-item__value">{{ object.nom_pere|default:"-" }}</span></div>
+                                <div class="tm-detail-item"><span class="tm-detail-item__label"><i class="bi bi-person"></i>Nom du père</span><span class="tm-detail-item__value">{{ object.nom_pere|default:"-" }}</span></div>
                             </div>
                             <div class="col-md-4">
-                                <div class="tm-detail-item"><span class="tm-detail-item__label">Nom de la mère</span><span class="tm-detail-item__value">{{ object.nom_mere|default:"-" }}</span></div>
+                                <div class="tm-detail-item"><span class="tm-detail-item__label"><i class="bi bi-person"></i>Nom de la mère</span><span class="tm-detail-item__value">{{ object.nom_mere|default:"-" }}</span></div>
                             </div>
-                            {# Removed duplicated created_at and updated_at fields from here #}
-                            {# Removed duplicated niveau_etude from here as it's in identity #}
                         </div>
                     </div>
 
                     <div class="tab-pane fade" id="formations">
-                        <div class="card mb-4 border-0 bg-light">
-                            <div class="card-body">
-                                <form method="post" action="{% url 'detailaction_create' %}" class="row g-3 align-items-end">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="stagiaire" value="{{ object.pk }}">
-                                    <input type="hidden" name="next" value="{{ request.path }}#formations">
-                                    <div class="col-12 col-md-8">
-                                        <label for="action-select" class="form-label fw-bold">Inscrire à une action</label>
-                                        <select id="action-select" name="action" class="form-select" required>
-                                            <option value="">Sélectionner une action</option>
-                                            {% for action in actions_disponibles %}
-                                                <option value="{{ action.pk }}">
-                                                    {{ action.description }} - {{ action.formation.nom }} ({{ action.date_debut|date:"d/m/Y" }})
-                                                </option>
-                                            {% endfor %}
-                                        </select>
-                                    </div>
-                                    <div class="col-12 col-md-4">
-                                        <button type="submit" class="btn btn-primary w-100">
-                                            <i class="bi bi-person-plus me-2"></i>Ajouter l'inscription
-                                        </button>
-                                    </div>
-                                </form>
-                                {% if not actions_disponibles %}
-                                    <div class="alert alert-warning mt-3 mb-0">Aucune action disponible à laquelle inscrire ce stagiaire.</div>
-                                {% endif %}
-                            </div>
+                        <div class="tm-inscription-card mb-4">
+                            <form method="post" action="{% url 'detailaction_create' %}" class="row g-3 align-items-end">
+                                {% csrf_token %}
+                                <input type="hidden" name="stagiaire" value="{{ object.pk }}">
+                                <input type="hidden" name="next" value="{{ request.path }}#formations">
+                                <div class="col-12 col-md-8">
+                                    <label for="action-select" class="form-label fw-bold"><i class="bi bi-person-plus me-1"></i>Inscrire à une action</label>
+                                    <select id="action-select" name="action" class="form-select" required>
+                                        <option value="">Sélectionner une action</option>
+                                        {% for action in actions_disponibles %}
+                                            <option value="{{ action.pk }}">
+                                                {{ action.description }} - {{ action.formation.nom }} ({{ action.date_debut|date:"d/m/Y" }})
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <button type="submit" class="btn btn-primary w-100">
+                                        <i class="bi bi-person-plus me-2"></i>Ajouter l'inscription
+                                    </button>
+                                </div>
+                            </form>
+                            {% if not actions_disponibles %}
+                                <div class="alert alert-warning mt-3 mb-0"><i class="bi bi-exclamation-triangle me-2"></i>Aucune action disponible à laquelle inscrire ce stagiaire.</div>
+                            {% endif %}
                         </div>
 
                         <div class="table-responsive">
@@ -391,7 +675,7 @@
                                         </td>
                                     </tr>
                                     {% empty %}
-                                    <tr><td colspan="4" class="text-center p-4 text-muted">Aucune inscription.</td></tr>
+                                    <tr><td colspan="4" class="text-center p-4 text-muted"><i class="bi bi-inbox d-block mb-2 fs-3"></i>Aucune inscription.</td></tr>
                                     {% endfor %}
                                 </tbody>
                             </table>
@@ -401,35 +685,35 @@
                     <div class="tab-pane fade" id="studies">
                         <div class="row g-4">
                             <div class="col-md-6">
-                                <h6 class="fw-bold mb-3">Études & Diplômes</h6>
-                                <div class="list-group list-group-flush border-top">
+                                <h6 class="fw-bold mb-3"><i class="bi bi-journal-bookmark me-2 text-primary"></i>Études & Diplômes</h6>
+                                <div>
                                     {% for etude in object.etudes.all %}
-                                    <div class="list-group-item px-0">
-                                        <div class="fw-bold text-dark">{{ etude.intitule }}</div>
-                                        <div class="small text-muted">
+                                    <div class="tm-study-item">
+                                        <div class="tm-study-item__title"><i class="bi bi-award"></i>{{ etude.intitule }}</div>
+                                        <div class="tm-study-item__meta">
                                             {{ etude.etablissement|default:"-" }}
                                             {% if etude.niveau %} - {{ etude.niveau }}{% endif %}
                                             {% if etude.annee_fin %} ({{ etude.annee_fin }}){% endif %}
                                         </div>
                                     </div>
                                     {% empty %}
-                                    <div class="p-3 text-muted small">Aucun diplôme renseigné.</div>
+                                    <div class="p-3 text-muted small"><i class="bi bi-inbox me-2"></i>Aucun diplôme renseigné.</div>
                                     {% endfor %}
                                 </div>
                             </div>
                             <div class="col-md-6">
-                                <h6 class="fw-bold mb-3">Autres Formations</h6>
-                                <div class="list-group list-group-flush border-top">
+                                <h6 class="fw-bold mb-3"><i class="bi bi-mortarboard me-2 text-primary"></i>Autres Formations</h6>
+                                <div>
                                     {% for af in object.autres_formations.all %}
-                                    <div class="list-group-item px-0">
-                                        <div class="fw-bold text-dark">{{ af.intitule }}</div>
-                                        <div class="small text-muted">
+                                    <div class="tm-study-item">
+                                        <div class="tm-study-item__title"><i class="bi bi-book"></i>{{ af.intitule }}</div>
+                                        <div class="tm-study-item__meta">
                                             {{ af.etablissement|default:"-" }}
                                             {% if af.annee_fin %} ({{ af.annee_fin }}){% endif %}
                                         </div>
                                     </div>
                                     {% empty %}
-                                    <div class="p-3 text-muted small">Aucune formation supplémentaire.</div>
+                                    <div class="p-3 text-muted small"><i class="bi bi-inbox me-2"></i>Aucune formation supplémentaire.</div>
                                     {% endfor %}
                                 </div>
                             </div>
@@ -449,14 +733,14 @@
                                 </thead>
                                 <tbody>
                                     {% for p in paiements %}
-                                    <tr>
-                                        <td><code class="fw-bold text-primary">{{ p.reference }}</code></td>
+                                    <tr class="tm-payment-row">
+                                        <td><span class="tm-payment-ref">{{ p.reference }}</span></td>
                                         <td>{{ p.date_paiement|date:"d/m/Y" }}</td>
                                         <td>{{ p.get_mode_paiement_display }}</td>
-                                        <td class="text-end"><span class="fw-bold text-success">{{ p.montant|floatformat:0 }} USD</span></td>
+                                        <td class="text-end"><span class="tm-payment-amount">{{ p.montant|floatformat:0 }} USD</span></td>
                                     </tr>
                                     {% empty %}
-                                    <tr><td colspan="4" class="text-center p-4 text-muted">Aucun paiement.</td></tr>
+                                    <tr><td colspan="4" class="text-center p-4 text-muted"><i class="bi bi-cash-coin d-block mb-2 fs-3"></i>Aucun paiement.</td></tr>
                                     {% endfor %}
                                 </tbody>
                             </table>
@@ -477,6 +761,39 @@
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // ===== Gestion manuelle des onglets (fallback si Bootstrap JS ne fonctionne pas) =====
+    var tabLinks = document.querySelectorAll('#stagiaireTab .nav-link[data-bs-toggle="tab"]');
+    tabLinks.forEach(function(link) {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            var targetId = this.getAttribute('href');
+            var targetPane = document.querySelector(targetId);
+
+            if (!targetPane) return;
+
+            // Retirer la classe active de tous les liens
+            tabLinks.forEach(function(l) {
+                l.classList.remove('active');
+            });
+            // Activer le lien cliqué
+            this.classList.add('active');
+
+            // Masquer tous les panneaux
+            var allPanes = document.querySelectorAll('.tab-content .tab-pane');
+            allPanes.forEach(function(pane) {
+                pane.classList.remove('active', 'show');
+            });
+
+            // Afficher le panneau cible
+            targetPane.classList.add('active', 'show');
+
+            // Initialiser Select2 si on ouvre l'onglet Formations
+            if (targetId === '#formations') {
+                initActionSelect();
+            }
+        });
+    });
+
     function initActionSelect() {
         if (typeof $ === 'undefined' || !$.fn.select2) {
             return;
@@ -495,9 +812,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     initActionSelect();
 
-    const formationsTab = document.querySelector('a[href="#formations"]');
-    if (formationsTab) {
-        formationsTab.addEventListener('shown.bs.tab', initActionSelect);
+    // Initialiser la visibilité des panneaux au chargement
+    var activePane = document.querySelector('.tab-content .tab-pane.active');
+    if (activePane) {
+        activePane.classList.add('show');
     }
 });
 </script>
