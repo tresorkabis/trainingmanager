@@ -2,7 +2,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
-from django.db.models import Count
+from django.db.models import Count, Sum
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse_lazy
@@ -12,7 +12,7 @@ from django.views.generic import DetailView, ListView, DeleteView
 
 from training.models import Filiere, Formation, Module
 from progress.models import Formateur, Action, ModuleSubject # Import ModuleSubject
-from training.forms import MetierForm, ModuleFormSet, ModuleSubjectFormSet # Import ModuleSubjectFormSet
+from training.forms import FormationForm, ModuleFormSet, ModuleSubjectFormSet # Import ModuleSubjectFormSet
 
 
 class FormationPermissionMixin:
@@ -136,12 +136,12 @@ class FormationCreateUpdateView(FormationPermissionMixin, View): # Vue unifiée 
         formation = None
         if pk:
             formation = get_object_or_404(Formation, pk=pk)
-            form = MetierForm(instance=formation)
+            form = FormationForm(instance=formation)
             formset = ModuleFormSet(instance=formation)
             mode = "edit"
             titre = "Modifier une formation"
         else:
-            form = MetierForm()
+            form = FormationForm()
             formset = ModuleFormSet()
             mode = "new"
             titre = "Créer une formation"
@@ -162,12 +162,12 @@ class FormationCreateUpdateView(FormationPermissionMixin, View): # Vue unifiée 
         formation = None
         if pk:
             formation = get_object_or_404(Formation, pk=pk)
-            form = MetierForm(request.POST, instance=formation)
+            form = FormationForm(request.POST, instance=formation)
             formset = ModuleFormSet(request.POST, instance=formation)
             mode = "edit"
             titre = "Modifier une formation"
         else:
-            form = MetierForm(request.POST)
+            form = FormationForm(request.POST)
             formset = ModuleFormSet(request.POST)
             mode = "new"
             titre = "Créer une formation"

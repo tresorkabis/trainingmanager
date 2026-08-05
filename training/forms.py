@@ -5,7 +5,7 @@ from django_select2.forms import Select2Widget
 from .models import Formation, Module, Filiere
 from progress.models import Formateur, ModuleSubject
 
-class MetierForm(forms.ModelForm):
+class FormationForm(forms.ModelForm):
     filiere = forms.ModelChoiceField(
         queryset=Filiere.objects.all().order_by('nom'),
         label="Filière",

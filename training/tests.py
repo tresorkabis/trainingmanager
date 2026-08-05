@@ -276,7 +276,7 @@ class FormationViewTests(TestCase):
 
     def test_formation_create_as_admin(self):
         self.client.force_login(self.user)
-        # The view uses both MetierForm and ModuleFormSet - provide empty formset data
+                # The view uses both FormationForm and ModuleFormSet - provide empty formset data
         response = self.client.post(reverse("formation_create"), {
             "nom": "Python Avancé",
             "duree": 20,

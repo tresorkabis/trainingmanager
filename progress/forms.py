@@ -1,7 +1,7 @@
 from django import forms
 from django.core.exceptions import ValidationError
 from django_select2.forms import Select2Widget # Importez Select2Widget
-from .models import Paiement, Stagiaire, Action, Formateur, ModuleProgress, SessionProgress, DetailAction, JuryPV, JuryNote # Added JuryPV, JuryNote
+from .models import Paiement, Stagiaire, Formateur, ModuleProgress, SessionProgress, DetailAction, JuryPV, JuryNote # Added JuryPV, JuryNote
 from training.models import Module # Import Module
 from users.models import User # Import User pour le formulaire
 
@@ -12,6 +12,7 @@ class PaiementForm(forms.ModelForm):
         label="Stagiaire",
         widget=Select2Widget(attrs={'data-width': '100%', 'class': 'form-select'}) # Ajout des classes pour Select2
     )
+    from .models import Action
     action = forms.ModelChoiceField(
         queryset=Action.objects.all().order_by('description'), # Ordonner pour une meilleure UX
         required=False,
@@ -55,6 +56,7 @@ class ModuleProgressForm(forms.ModelForm):
         label="Formateur",
         widget=Select2Widget(attrs={'data-width': '100%', 'class': 'form-select'})
     )
+    from .models import Action
     action = forms.ModelChoiceField(
         queryset=Action.objects.all().order_by('description'),
         label="Action de formation",
@@ -105,6 +107,7 @@ class ModuleProgressForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         # Filtrer dynamiquement les modules basés sur la formation de l'action sélectionnée
         if 'action' in self.data:
+            from .models import Action
             try:
                 action_id = int(self.data.get('action'))
                 action_obj = Action.objects.get(pk=action_id)

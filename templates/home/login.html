@@ -30,9 +30,9 @@
 
             <h1 class="tm-login__title">Connexion</h1>
 
-            {% if message %}
+            {% if form.non_field_errors %}
             <div class="alert alert-danger tm-login__alert" role="alert">
-                {{ message }}
+                {% for error in form.non_field_errors %}{{ error }}{% endfor %}
             </div>
             {% endif %}
 

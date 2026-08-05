@@ -1,9 +1,17 @@
 from django import forms
-from django.contrib.auth.forms import UserCreationForm, UserChangeForm
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm, AuthenticationForm
 from django_select2.forms import Select2Widget
 
 from .models import User, Profile
 from training.models import Filiere, Service
+
+
+class CustomAuthenticationForm(AuthenticationForm):
+    """Formulaire d'authentification avec un message d'erreur en français."""
+    error_messages = {
+        'invalid_login': "Identifiants invalides",
+        'inactive': "Ce compte est inactif.",
+    }
 
 class CustomUserCreationForm(UserCreationForm):
     profile = forms.ModelChoiceField(

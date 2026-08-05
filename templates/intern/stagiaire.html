@@ -89,144 +89,52 @@
         right: 8px;
     }
 
-    /* ===== Onglets premium ===== */
-    /* Bootstrap CSS nécessaire car bootstrap.css est un placeholder */
-    .nav {
-        display: flex;
-        flex-wrap: wrap;
-        padding-left: 0;
-        margin-bottom: 0;
-        list-style: none;
-    }
-    .nav-tabs {
-        border-bottom: 1px solid #e2e8f0;
-    }
-    .nav-tabs .nav-item {
-        margin-bottom: -1px;
-    }
-    .nav-link {
-        display: block;
-        padding: 0.5rem 1rem;
-        text-decoration: none;
-        transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out;
-    }
-    .nav-tabs .nav-link {
-        margin-bottom: -1px;
-        border: 1px solid transparent;
-        border-top-left-radius: 0.75rem;
-        border-top-right-radius: 0.75rem;
-    }
-    .nav-tabs .nav-link:hover,
-    .nav-tabs .nav-link:focus {
-        border-color: #e2e8f0 #e2e8f0 #e2e8f0;
-        isolation: isolate;
-    }
-    .nav-tabs .nav-link.active,
-    .nav-tabs .nav-item.show .nav-link {
-        color: #435ebe;
-        background-color: #ffffff;
-        border-color: #e2e8f0 #e2e8f0 #ffffff;
-    }
-    .tab-content > .tab-pane {
-        display: none;
-    }
-    .tab-content > .active {
-        display: block;
-    }
-
-    /* Styles premium personnalisés */
+    /* ===== Onglets Premium (Basé sur Bootstrap) ===== */
     .tm-tabs-wrap {
         background: #f8fafc;
         border-bottom: 1px solid #e2e8f0;
-        padding: 0.5rem 1.75rem 0;
-        overflow-x: auto;
+        padding: 0 1.5rem;
+        margin-bottom: 1.5rem;
     }
     .tm-tabs {
         display: flex;
-        flex-direction: row;
         flex-wrap: nowrap;
-        align-items: flex-end;
-        list-style: none;
-        margin: 0;
-        padding: 0;
-        gap: 0.25rem;
-        min-width: 0;
+        overflow-x: auto;
+        border-bottom: 1px solid #e2e8f0 !important;
     }
     .tm-tabs .nav-item {
-        display: inline-flex;
         flex: 0 0 auto;
-        margin: 0;
-        padding: 0;
     }
     .tm-tabs .nav-link {
-        display: inline-flex;
+        border: none !important;
+        background: transparent !important;
+        color: #64748b !important;
+        font-weight: 600;
+        padding: 1rem 1.25rem !important;
+        border-bottom: 3px solid transparent !important;
+        transition: all 0.2s ease !important;
+        display: flex;
         align-items: center;
         gap: 0.5rem;
-        padding: 0.875rem 1.5rem;
-        font-weight: 700;
-        font-size: 0.875rem;
-        color: #64748b;
-        text-decoration: none;
-        border: 1px solid transparent;
-        border-bottom: none;
-        border-radius: 0.75rem 0.75rem 0 0;
-        margin-bottom: -1px;
-        background: transparent;
-        white-space: nowrap;
-        transition: all 0.2s ease;
-        position: relative;
-        cursor: pointer;
-        width: auto;
-        line-height: 1.5;
-    }
-    .tm-tabs .nav-link i {
-        font-size: 1rem;
-        opacity: 0.6;
-        transition: all 0.2s ease;
     }
     .tm-tabs .nav-link:hover {
-        color: #435ebe;
-        background: rgba(67, 94, 190, 0.05);
-        border-color: #e2e8f0;
-        text-decoration: none;
-    }
-    .tm-tabs .nav-link:hover i {
-        opacity: 1;
+        color: #435ebe !important;
+        background: rgba(67, 94, 190, 0.05) !important;
     }
     .tm-tabs .nav-link.active {
-        color: #435ebe;
-        background: #ffffff;
-        font-weight: 800;
-        border-color: #e2e8f0;
-        border-bottom-color: #ffffff;
+        color: #435ebe !important;
+        background: #ffffff !important;
+        font-weight: 700 !important;
+        border-bottom-color: #435ebe !important;
     }
-    .tm-tabs .nav-link.active::after {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 3px;
-        background: linear-gradient(90deg, #435ebe, #2a3f8f);
-        border-radius: 0.75rem 0.75rem 0 0;
+    .tm-tabs .nav-link i {
+        font-size: 1.1rem;
     }
-    .tm-tabs .nav-link.active i {
-        opacity: 1;
-        color: #435ebe;
-    }
-    .tm-listing-card > .card-header {
-        padding: 0 !important;
-    }
-    .tm-listing-card > .card-body {
-        border-top: 1px solid #e2e8f0;
-    }
+
     @media (max-width: 767.98px) {
         .tm-tabs .nav-link {
-            padding: 0.75rem 1rem;
+            padding: 0.75rem 1rem !important;
             font-size: 0.8rem;
-        }
-        .tm-tabs .nav-link i {
-            display: none;
         }
     }
 
@@ -345,6 +253,7 @@
 {% block content %}
 <div class="page-heading">
     {% if form %}
+// ...existing code...
         {% if mode == "edit" %}
             {% tm_hero title="Modifier le stagiaire" subtitle="Mettez à jour les informations du dossier." icon="bi bi-pencil" actions=hero_actions theme="primary" photo_url=photo_url %}
         {% else %}
@@ -507,19 +416,43 @@
 
     {% if not form %}
     <section class="section">
-        <div class="card tm-listing-card">
-            <div class="tm-tabs-wrap">
+        <div class="tm-listing-card">
+<div class="tm-tabs-wrap">
                 <ul class="nav nav-tabs tm-tabs" id="stagiaireTab" role="tablist">
-                    <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#identity"><i class="bi bi-person-vcard"></i>Identité</a></li>
+                    <li class="nav-item">
+                        <a class="nav-link active" data-bs-toggle="tab" data-bs-target="#identity" href="#identity">
+                            <i class="bi bi-person-vcard"></i>Identité
+                        </a>
+                    </li>
                     {% if object.categorie and object.categorie.titre == "dans l'emploi" %}
-                    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#employment"><i class="bi bi-briefcase"></i>Emploi</a></li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-bs-toggle="tab" data-bs-target="#employment" href="#employment">
+                            <i class="bi bi-briefcase"></i>Emploi
+                        </a>
+                    </li>
                     {% endif %}
-                    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#formations"><i class="bi bi-mortarboard"></i>Formations</a></li>
-                    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#studies"><i class="bi bi-journal-bookmark"></i>Cursus</a></li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-bs-toggle="tab" data-bs-target="#studies" href="#studies">
+                            <i class="bi bi-journal-bookmark"></i>Cursus
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-bs-toggle="tab" data-bs-target="#formations" href="#formations">
+                            <i class="bi bi-mortarboard"></i>Formations
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-bs-toggle="tab" data-bs-target="#payments" href="#payments">
+                            <i class="bi bi-cash-coin"></i>Paiements
+                        </a>
+                    </li>
                     {% if object.nom_pere or object.nom_mere %}
-                    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#family"><i class="bi bi-people"></i>Famille</a></li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-bs-toggle="tab" data-bs-target="#family" href="#family">
+                            <i class="bi bi-people"></i>Famille
+                        </a>
+                    </li>
                     {% endif %}
-                    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#payments"><i class="bi bi-cash-coin"></i>Paiements</a></li>
                 </ul>
             </div>
             <div class="card-body">
@@ -607,16 +540,40 @@
                     </div>
                     {% endif %}
 
-                    <div class="tab-pane fade" id="family">
-                        <div class="row g-3">
-                            <div class="col-12">
-                                <div class="tm-subsection-title"><i class="bi bi-people"></i>Informations familiales</div>
+                    <div class="tab-pane fade" id="studies">
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <h6 class="fw-bold mb-3"><i class="bi bi-journal-bookmark me-2 text-primary"></i>Études & Diplômes</h6>
+                                <div>
+                                    {% for etude in object.etudes.all %}
+                                    <div class="tm-study-item">
+                                        <div class="tm-study-item__title"><i class="bi bi-award"></i>{{ etude.intitule }}</div>
+                                        <div class="tm-study-item__meta">
+                                            {{ etude.etablissement|default:"-" }}
+                                            {% if etude.niveau %} - {{ etude.niveau }}{% endif %}
+                                            {% if etude.annee_fin %} ({{ etude.annee_fin }}){% endif %}
+                                        </div>
+                                    </div>
+                                    {% empty %}
+                                    <div class="p-3 text-muted small"><i class="bi bi-inbox me-2"></i>Aucun diplôme renseigné.</div>
+                                    {% endfor %}
+                                </div>
                             </div>
-                            <div class="col-md-4">
-                                <div class="tm-detail-item"><span class="tm-detail-item__label"><i class="bi bi-person"></i>Nom du père</span><span class="tm-detail-item__value">{{ object.nom_pere|default:"-" }}</span></div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="tm-detail-item"><span class="tm-detail-item__label"><i class="bi bi-person"></i>Nom de la mère</span><span class="tm-detail-item__value">{{ object.nom_mere|default:"-" }}</span></div>
+                            <div class="col-md-6">
+                                <h6 class="fw-bold mb-3"><i class="bi bi-mortarboard me-2 text-primary"></i>Autres Formations</h6>
+                                <div>
+                                    {% for af in object.autres_formations.all %}
+                                    <div class="tm-study-item">
+                                        <div class="tm-study-item__title"><i class="bi bi-book"></i>{{ af.intitule }}</div>
+                                        <div class="tm-study-item__meta">
+                                            {{ af.etablissement|default:"-" }}
+                                            {% if af.annee_fin %} ({{ af.annee_fin }}){% endif %}
+                                        </div>
+                                    </div>
+                                    {% empty %}
+                                    <div class="p-3 text-muted small"><i class="bi bi-inbox me-2"></i>Aucune formation supplémentaire.</div>
+                                    {% endfor %}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -682,44 +639,6 @@
                         </div>
                     </div>
 
-                    <div class="tab-pane fade" id="studies">
-                        <div class="row g-4">
-                            <div class="col-md-6">
-                                <h6 class="fw-bold mb-3"><i class="bi bi-journal-bookmark me-2 text-primary"></i>Études & Diplômes</h6>
-                                <div>
-                                    {% for etude in object.etudes.all %}
-                                    <div class="tm-study-item">
-                                        <div class="tm-study-item__title"><i class="bi bi-award"></i>{{ etude.intitule }}</div>
-                                        <div class="tm-study-item__meta">
-                                            {{ etude.etablissement|default:"-" }}
-                                            {% if etude.niveau %} - {{ etude.niveau }}{% endif %}
-                                            {% if etude.annee_fin %} ({{ etude.annee_fin }}){% endif %}
-                                        </div>
-                                    </div>
-                                    {% empty %}
-                                    <div class="p-3 text-muted small"><i class="bi bi-inbox me-2"></i>Aucun diplôme renseigné.</div>
-                                    {% endfor %}
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <h6 class="fw-bold mb-3"><i class="bi bi-mortarboard me-2 text-primary"></i>Autres Formations</h6>
-                                <div>
-                                    {% for af in object.autres_formations.all %}
-                                    <div class="tm-study-item">
-                                        <div class="tm-study-item__title"><i class="bi bi-book"></i>{{ af.intitule }}</div>
-                                        <div class="tm-study-item__meta">
-                                            {{ af.etablissement|default:"-" }}
-                                            {% if af.annee_fin %} ({{ af.annee_fin }}){% endif %}
-                                        </div>
-                                    </div>
-                                    {% empty %}
-                                    <div class="p-3 text-muted small"><i class="bi bi-inbox me-2"></i>Aucune formation supplémentaire.</div>
-                                    {% endfor %}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
                     <div class="tab-pane fade" id="payments">
                         <div class="table-responsive">
                             <table class="table table-hover tm-table">
@@ -746,6 +665,22 @@
                             </table>
                         </div>
                     </div>
+
+                    {% if object.nom_pere or object.nom_mere %}
+                    <div class="tab-pane fade" id="family">
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <div class="tm-subsection-title"><i class="bi bi-people"></i>Informations familiales</div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="tm-detail-item"><span class="tm-detail-item__label"><i class="bi bi-person"></i>Nom du père</span><span class="tm-detail-item__value">{{ object.nom_pere|default:"-" }}</span></div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="tm-detail-item"><span class="tm-detail-item__label"><i class="bi bi-person"></i>Nom de la mère</span><span class="tm-detail-item__value">{{ object.nom_mere|default:"-" }}</span></div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -761,39 +696,6 @@
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // ===== Gestion manuelle des onglets (fallback si Bootstrap JS ne fonctionne pas) =====
-    var tabLinks = document.querySelectorAll('#stagiaireTab .nav-link[data-bs-toggle="tab"]');
-    tabLinks.forEach(function(link) {
-        link.addEventListener('click', function(e) {
-            e.preventDefault();
-            var targetId = this.getAttribute('href');
-            var targetPane = document.querySelector(targetId);
-
-            if (!targetPane) return;
-
-            // Retirer la classe active de tous les liens
-            tabLinks.forEach(function(l) {
-                l.classList.remove('active');
-            });
-            // Activer le lien cliqué
-            this.classList.add('active');
-
-            // Masquer tous les panneaux
-            var allPanes = document.querySelectorAll('.tab-content .tab-pane');
-            allPanes.forEach(function(pane) {
-                pane.classList.remove('active', 'show');
-            });
-
-            // Afficher le panneau cible
-            targetPane.classList.add('active', 'show');
-
-            // Initialiser Select2 si on ouvre l'onglet Formations
-            if (targetId === '#formations') {
-                initActionSelect();
-            }
-        });
-    });
-
     function initActionSelect() {
         if (typeof $ === 'undefined' || !$.fn.select2) {
             return;
@@ -811,12 +713,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     initActionSelect();
-
-    // Initialiser la visibilité des panneaux au chargement
-    var activePane = document.querySelector('.tab-content .tab-pane.active');
-    if (activePane) {
-        activePane.classList.add('show');
-    }
 });
 </script>
 {% endblock script %}

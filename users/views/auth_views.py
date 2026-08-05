@@ -1,12 +1,13 @@
 from django.contrib.auth import login, logout
-from django.contrib.auth.forms import AuthenticationForm
 from django.shortcuts import redirect, render
 from django.views import View
+
+from users.forms import CustomAuthenticationForm
 
 
 class LoginPageView(View):
     template_name = 'home/login.html'
-    form_class = AuthenticationForm
+    form_class = CustomAuthenticationForm
 
     def get(self, request):
         if request.user.is_authenticated:
