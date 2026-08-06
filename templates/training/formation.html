@@ -118,9 +118,11 @@
                                             {% endfor %}
                                         </td>
                                         <td class="text-end">
+                                            {% if request.user.is_superuser or request.user.profile and request.user.profile.name == "Manager" or request.user.profile and request.user.profile.name == "Chef de filière" or request.user.profile and request.user.profile.name == "Chef de service" %}
                                             <a href="{% url 'module_subjects_manage' m.pk %}" class="btn btn-sm btn-outline-info" title="Gérer les sujets">
                                                 <i class="bi bi-list-check"></i>
                                             </a>
+                                            {% endif %}
                                         </td>
                                     </tr>
                                     {% if m.subjects.all %}

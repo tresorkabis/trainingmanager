@@ -17,9 +17,11 @@
         <div class="card tm-listing-card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h4 class="card-title mb-0">Historique des paiements</h4>
+                {% if can_manage_paiement %}
                 <a href="{% url 'paiement_create' %}" class="btn btn-primary btn-sm">
                     <i class="bi bi-plus-circle me-2"></i>Nouveau paiement
                 </a>
+                {% endif %}
             </div>
             <div class="card-body">
                 <div class="d-flex flex-wrap gap-2 mb-3">
@@ -42,7 +44,9 @@
                                 <th>Montant</th>
                                 <th>Date</th>
                                 <th>Mode</th>
+                                {% if can_manage_paiement or can_delete_paiement %}
                                 <th class="text-end">Actions</th>
+                                {% endif %}
                             </tr>
                         </thead>
                         <tbody id="paiementTableBody">
@@ -76,15 +80,17 @@
                                     {% endif %}
                                 </td>
                                 <td class="text-end">
+                                    {% if can_manage_paiement %}
                                     <div class="d-flex gap-2 justify-content-end">
                                         <a href="{% url 'paiement_update' paiement.pk %}" class="btn btn-sm btn-outline-info" title="Modifier"><i class="bi bi-pencil"></i></a>
                                         <a href="{% url 'paiement_delete' paiement.pk %}" class="btn btn-sm btn-outline-danger" title="Supprimer"><i class="bi bi-trash"></i></a>
                                     </div>
+                                    {% endif %}
                                 </td>
                             </tr>
                             {% endfor %}
                             {% else %}
-                            <tr><td colspan="7" class="text-center p-5 text-muted">Aucun paiement enregistré.</td></tr>
+                            <tr><td colspan="{% if can_manage_paiement %}7{% else %}6{% endif %}" class="text-center p-5 text-muted">Aucun paiement enregistré.</td></tr>
                             {% endif %}
                         </tbody>
                     </table>

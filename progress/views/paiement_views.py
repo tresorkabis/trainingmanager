@@ -1,4 +1,5 @@
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.generic import ListView, CreateView, DetailView, UpdateView, DeleteView
@@ -9,6 +10,85 @@ from datetime import date
 
 from progress.models import Paiement
 from progress.forms import PaiementForm
+
+# Rôles autorisés à ENREGISTRER (créer/modifier/supprimer) un paiement.
+# Seule la Caisse peut enregistrer un paiement (un conseiller ne peut que consulter).
+MANAGE_PAIEMENT_PROFILES = ["Caisse"]
+
+# Seul la Caisse peut imprimer un reçu de paiement.
+RECEIPT_PRINT_PROFILES = ["Caisse"]
+
+
+# La Caisse ne peut pas supprimer un paiement : la suppression relève de la
+# supervision (Manager / superuser). La Caisse reste autorisée à créer/modifier.
+DELETE_PAIEMENT_PROFILES = ["Manager"]
+
+
+def can_manage_paiements(user):
+    """Seuls le superuser et la Caisse peuvent créer/modifier un paiement."""
+    if not user or not user.is_authenticated:
+        return False
+    if user.is_superuser:
+        return True
+    profile = getattr(user, "profile", None)
+    return bool(profile and getattr(profile, "name", None) in MANAGE_PAIEMENT_PROFILES)
+
+
+def can_delete_paiements(user):
+    """Seuls le superuser et le Manager peuvent supprimer un paiement (pas la Caisse)."""
+    if not user or not user.is_authenticated:
+        return False
+    if user.is_superuser:
+        return True
+    profile = getattr(user, "profile", None)
+    return bool(profile and getattr(profile, "name", None) in DELETE_PAIEMENT_PROFILES)
+
+
+def can_print_receipts(user):
+    """Seuls le superuser et la Caisse peuvent imprimer un reçu de paiement."""
+    if not user or not user.is_authenticated:
+        return False
+    if user.is_superuser:
+        return True
+    profile = getattr(user, "profile", None)
+    return bool(profile and getattr(profile, "name", None) in RECEIPT_PRINT_PROFILES)
+
+
+class PaiementManagePermissionMixin:
+    """Vérifie que l'utilisateur est autorisé à enregistrer un paiement."""
+
+    def dispatch(self, request, *args, **kwargs):
+        if not can_manage_paiements(request.user):
+            raise PermissionDenied(
+                "Vous n'avez pas la permission d'enregistrer un paiement. "
+                "Cette opération est réservée à la Caisse."
+            )
+        return super().dispatch(request, *args, **kwargs)
+
+
+class PaiementReceiptPrintPermissionMixin:
+    """Vérifie que l'utilisateur est autorisé à imprimer un reçu de paiement."""
+
+    def dispatch(self, request, *args, **kwargs):
+        if not can_print_receipts(request.user):
+            raise PermissionDenied(
+                "Vous n'avez pas la permission d'imprimer un reçu de paiement. "
+                "Cette opération est réservée à la Caisse."
+            )
+        return super().dispatch(request, *args, **kwargs)
+
+
+class PaiementDeletePermissionMixin:
+    """Vérifie que l'utilisateur est autorisé à supprimer un paiement (superuser/Manager, pas la Caisse)."""
+
+    def dispatch(self, request, *args, **kwargs):
+        if not can_delete_paiements(request.user):
+            raise PermissionDenied(
+                "Vous n'avez pas la permission de supprimer un paiement. "
+                "Cette opération est réservée au Manager."
+            )
+        return super().dispatch(request, *args, **kwargs)
+
 
 @method_decorator(login_required, name='dispatch')
 class PaiementListView(ListView):
@@ -39,16 +119,21 @@ class PaiementListView(ListView):
             {'label': 'Virements', 'value': f"{total_virement:,.0f} USD"},
         ]
 
-        context['hero_actions'] = [
-            {'label': 'Nouveau paiement', 'url': reverse_lazy('paiement_create'), 'icon': 'bi bi-plus-circle', 'class': 'btn-primary'},
-        ]
+        # Bouton d'ajout visible uniquement pour les rôles autorisés à enregistrer
+        context['can_manage_paiement'] = can_manage_paiements(self.request.user)
+        context['can_delete_paiement'] = can_delete_paiements(self.request.user)
+        context['hero_actions'] = []
+        if context['can_manage_paiement']:
+            context['hero_actions'].append(
+                {'label': 'Nouveau paiement', 'url': reverse_lazy('paiement_create'), 'icon': 'bi bi-plus-circle', 'class': 'btn-primary'},
+            )
 
         context['link'] = 'paiements'
         context['titre'] = 'Liste des paiements'
         return context
 
 @method_decorator(login_required, name='dispatch')
-class PaiementCreateView(CreateView):
+class PaiementCreateView(PaiementManagePermissionMixin, CreateView):
     model = Paiement
     form_class = PaiementForm
     template_name = 'progress/paiement_form.html'
@@ -131,12 +216,18 @@ class PaiementDetailView(DetailView):
         
         context['hero_actions'] = [
             {'label': 'Retour à la liste', 'url': reverse_lazy('paiements'), 'icon': 'bi bi-arrow-left', 'class': 'btn-light-secondary'},
-            {'label': 'Imprimer', 'url': reverse_lazy('paiement_print', kwargs={'pk': self.object.pk}), 'icon': 'bi bi-printer', 'class': 'btn-light-primary', 'target': '_blank'},
         ]
+        context['can_manage_paiement'] = can_manage_paiements(self.request.user)
+        context['can_delete_paiement'] = can_delete_paiements(self.request.user)
+        # Le bouton d'impression du reçu n'est visible que pour la Caisse (ou superuser)
+        if can_print_receipts(self.request.user):
+            context['hero_actions'].append(
+                {'label': 'Imprimer', 'url': reverse_lazy('paiement_print', kwargs={'pk': self.object.pk}), 'icon': 'bi bi-printer', 'class': 'btn-light-primary', 'target': '_blank'},
+            )
         return context
 
 @method_decorator(login_required, name='dispatch')
-class PaiementUpdateView(UpdateView):
+class PaiementUpdateView(PaiementManagePermissionMixin, UpdateView):
     model = Paiement
     form_class = PaiementForm
     template_name = 'progress/paiement_form.html'
@@ -151,7 +242,7 @@ class PaiementUpdateView(UpdateView):
         return context
 
 @method_decorator(login_required, name='dispatch')
-class PaiementReceiptPrintView(DetailView):
+class PaiementReceiptPrintView(PaiementReceiptPrintPermissionMixin, DetailView):
     model = Paiement
     template_name = 'progress/paiement_receipt_print.html'
     context_object_name = 'paiement'
@@ -165,7 +256,7 @@ class PaiementReceiptPrintView(DetailView):
 
 
 @method_decorator(login_required, name='dispatch')
-class PaiementDeleteView(DeleteView):
+class PaiementDeleteView(PaiementDeletePermissionMixin, DeleteView):
     model = Paiement
     template_name = 'progress/paiement_confirm_delete.html'
     success_url = reverse_lazy('paiements')

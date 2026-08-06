@@ -6,7 +6,7 @@ class StagiaireForm(forms.ModelForm):
     categorie = forms.ModelChoiceField(
         queryset=Categorie.objects.filter(titre__in=["dans l'emploi", "sans emploi"]).order_by('titre'),
         label="Catégorie",
-        widget=Select2Widget(attrs={'data-width': '100%', 'class': 'form-select'}) # Utilisation de Select2Widget ici aussi
+        widget=Select2Widget(attrs={'data-width': '100%', 'class': 'form-select select2'}) # Utilisation de Select2Widget ici aussi
     )
     # Use a CharField with Select2 tagging enabled so users can type a new company name.
     # clean_entreprise will return an Entreprise instance so ModelForm assigns the FK correctly.

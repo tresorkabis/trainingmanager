@@ -10,12 +10,13 @@
 
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'assets/css/bootstrap.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/bootstrap.min.css' %}">
     {% block style %}{% endblock style %}
 
     <link rel="stylesheet" href="{% static 'assets/vendors/perfect-scrollbar/perfect-scrollbar.css' %}">
     <link rel="stylesheet" href="{% static 'assets/vendors/bootstrap-icons/bootstrap-icons.css' %}">
     <link rel="stylesheet" href="{% static 'assets/css/app.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/training-manager.css' %}">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <link rel="shortcut icon" href="{% static 'assets/images/favicon.svg' %}" type="image/x-icon">
 </head>
@@ -39,122 +40,156 @@
 
                 <div class="sidebar-menu">
                     <ul class="menu">
-                        <li class="sidebar-item {% if link == 'home' %} active {% endif %} ">
+                        <li class="sidebar-item {% if link == 'home' %} active {% endif %}">
                             <a href="{% url 'home' %}" class='sidebar-link'>
                                 <i class="bi bi-grid-fill"></i>
                                 <span>Dashboard</span>
                             </a>
                         </li>
 
-                        {% comment %} Gestion des Apprenants et Formateurs section {% endcomment %}
-                        {% if request.user.is_superuser or request.user.profile.name == "Manager" or request.user.profile.name == "Chef de filière" or request.user.profile.name == "Chef de service" or request.user.profile.name == "Conseiller" or request.user.profile.name == "Inspecteur" or request.user.profile.name == "Pédagogique" %}
-                            <li class="sidebar-title">Gestion des Apprenants et Formateurs</li>
-                            {% if request.user.is_superuser or request.user.profile.name == "Manager" or request.user.profile.name == "Chef de filière" or request.user.profile.name == "Chef de service" or request.user.profile.name == "Conseiller" or request.user.profile.name == "Inspecteur" or request.user.profile.name == "Pédagogique" %}
+                        {% if request.user.is_authenticated and request.user.profile and request.user.profile.name == "Conseiller" %}
+
+                            <li class="sidebar-title">Raccourcis</li>
+                            <li class="sidebar-item">
+                                <a href="{% url 'stagiaire_create' %}" class='sidebar-link'>
+                                    <i class="bi bi-person-plus-fill"></i>
+                                    <span>Nouveau Stagiaire</span>
+                                </a>
+                            </li>
+
                             <li class="sidebar-item {% if link == 'stagiaires' %} active {% endif %}">
                                 <a href="{% url 'stagiaires' %}" class='sidebar-link'>
                                     <i class="bi bi-people"></i>
                                     <span>Stagiaires</span>
                                 </a>
                             </li>
-                            {% endif %}
 
-                            {% if request.user.is_superuser or request.user.profile.name == "Manager" or request.user.profile.name == "Chef de filière" or request.user.profile.name == "Chef de service" or request.user.profile.name == "Inspecteur" or request.user.profile.name == "Pédagogique" %}
-                            <li class="sidebar-item {% if link == 'formateurs' %} active {% endif %}">
-                                <a href="{% url 'formateurs' %}" class='sidebar-link'>
-                                    <i class="bi bi-person-badge"></i>
-                                    <span>Formateurs</span>
+                            <li class="sidebar-item {% if link == 'actions' %} active {% endif %}">
+                                <a href="{% url 'actions' %}" class='sidebar-link'>
+                                    <i class="bi bi-clipboard-check"></i>
+                                    <span>Actions</span>
                                 </a>
                             </li>
-                            {% endif %}
 
-                            {% if request.user.is_superuser or request.user.profile.name == "Manager" %}
-                            <li class="sidebar-item {% if link == 'users' %} active {% endif %}"> {# Nouveau lien pour les utilisateurs #}
-                                <a href="{% url 'users' %}" class='sidebar-link'>
-                                    <i class="bi bi-person-lines-fill"></i> {# Icône pour les utilisateurs #}
-                                    <span>Utilisateurs</span>
-                                </a>
-                            </li>
-                            {% endif %}
-                        {% endif %}
-
-                        {% comment %} Référentiels section {% endcomment %}
-                        {% if request.user.is_superuser or request.user.profile.name == "Manager" or request.user.profile.name == "Chef de filière" or request.user.profile.name == "Chef de service" or request.user.profile.name == "Conseiller" or request.user.profile.name == "Inspecteur" or request.user.profile.name == "Pédagogique" %}
-                            <li class="sidebar-title">Référentiels</li>
-                            {% if request.user.is_superuser or request.user.profile.name == "Manager" or request.user.profile.name == "Chef de filière" or request.user.profile.name == "Chef de service" or request.user.profile.name == "Conseiller" or request.user.profile.name == "Inspecteur" or request.user.profile.name == "Pédagogique" %}
                             <li class="sidebar-item {% if link == 'formations' %} active {% endif %}">
                                 <a href="{% url 'formations' %}" class='sidebar-link'>
                                     <i class="bi bi-journal-text"></i>
                                     <span>Formations</span>
                                 </a>
                             </li>
-                            {% endif %}
 
-                            {% if request.user.is_superuser or request.user.profile.name == "Manager" or request.user.profile.name == "Chef de filière" or request.user.profile.name == "Chef de service" %}
-                            <li class="sidebar-item {% if link == 'filieres' %} active {% endif %}">
-                                <a href="{% url 'filieres' %}" class='sidebar-link'>
-                                    <i class="bi bi-signpost-2"></i>
-                                    <span>Filières</span>
-                                </a>
-                            </li>
-                            {% endif %}
-
-                            {% if request.user.is_superuser or request.user.profile.name == "Manager" %}
-                            <li class="sidebar-item {% if link == 'services' %} active {% endif %}">
-                                <a href="{% url 'services' %}" class='sidebar-link'>
-                                    <i class="bi bi-building"></i>
-                                    <span>Services</span>
-                                </a>
-                            </li>
-                            {% endif %}
-
-                            {% if request.user.is_superuser or request.user.profile.name == "Manager" %}
-                            <li class="sidebar-item {% if link == 'categories' %} active {% endif %}">
-                                <a href="{% url 'categories' %}" class='sidebar-link'>
-                                    <i class="bi bi-tags"></i>
-                                    <span>Catégories</span>
-                                </a>
-                            </li>
-                            {% endif %}
-                        {% endif %}
-
-                        {% comment %} Suivi des Activités section {% endcomment %}
-                        {% if request.user.is_superuser or request.user.profile.name == "Manager" or request.user.profile.name == "Chef de filière" or request.user.profile.name == "Chef de service" or request.user.profile.name == "Caisse" or request.user.profile.name == "Conseiller" or request.user.profile.name == "Inspecteur" or request.user.profile.name == "Pédagogique" or request.user.profile.name == "Formateur" %}
-                            <li class="sidebar-title">Suivi des Activités</li>
-                            {% if request.user.is_superuser or request.user.profile.name == "Manager" or request.user.profile.name == "Chef de filière" or request.user.profile.name == "Chef de service" or request.user.profile.name == "Conseiller" or request.user.profile.name == "Inspecteur" or request.user.profile.name == "Pédagogique" %}
-                            <li class="sidebar-item {% if link == 'actions' %} active {% endif %}">
-                                <a href="{% url 'actions' %}" class='sidebar-link'>
-                                    <i class="bi bi-clipboard-check"></i>
-                                    <span>Actions de formation</span>
-                                </a>
-                            </li>
-                            {% endif %}
-
-                            {% if request.user.is_superuser or request.user.profile.name == "Manager" %}
-                            <li class="sidebar-item {% if link == 'typeactions' %} active {% endif %}">
-                                <a href="{% url 'typeactions' %}" class='sidebar-link'>
-                                    <i class="bi bi-tag"></i>
-                                    <span>Types d'actions</span>
-                                </a>
-                            </li>
-                            {% endif %}
-
-                            {% if request.user.is_superuser or request.user.profile.name == "Manager" or request.user.profile.name == "Caisse" %}
                             <li class="sidebar-item {% if link == 'paiements' %} active {% endif %}">
                                 <a href="{% url 'paiements' %}" class='sidebar-link'>
-                                    <i class="bi bi-wallet-fill"></i> {# Changé bi-cash-coin à bi-wallet-fill #}
+                                    <i class="bi bi-wallet-fill"></i>
                                     <span>Paiements</span>
                                 </a>
                             </li>
+
+
+                        {% else %}
+
+                            <li class="sidebar-title">Gestion des Apprenants et Formateurs</li>
+                            {% if request.user.is_superuser or request.user.profile.name == "Manager" or request.user.profile.name == "Chef de filière" or request.user.profile.name == "Chef de service" or request.user.profile.name == "Conseiller" or request.user.profile.name == "Inspecteur" or request.user.profile.name == "Pédagogique" %}
+                                <li class="sidebar-item {% if link == 'stagiaires' %} active {% endif %}">
+                                    <a href="{% url 'stagiaires' %}" class='sidebar-link'>
+                                        <i class="bi bi-people"></i>
+                                        <span>Stagiaires</span>
+                                    </a>
+                                </li>
+                            {% endif %}
+
+                            {% if request.user.is_superuser or request.user.profile.name == "Manager" or request.user.profile.name == "Chef de filière" or request.user.profile.name == "Chef de service" or request.user.profile.name == "Inspecteur" or request.user.profile.name == "Pédagogique" %}
+                                <li class="sidebar-item {% if link == 'formateurs' %} active {% endif %}">
+                                    <a href="{% url 'formateurs' %}" class='sidebar-link'>
+                                        <i class="bi bi-person-badge"></i>
+                                        <span>Formateurs</span>
+                                    </a>
+                                </li>
+                            {% endif %}
+
+                            {% if request.user.is_superuser or request.user.profile.name == "Manager" %}
+                                <li class="sidebar-item {% if link == 'users' %} active {% endif %}"> {# Nouveau lien pour les utilisateurs #}
+                                    <a href="{% url 'users' %}" class='sidebar-link'>
+                                        <i class="bi bi-person-lines-fill"></i> {# Icône pour les utilisateurs #}
+                                        <span>Utilisateurs</span>
+                                    </a>
+                                </li>
+                            {% endif %}
+
+                            <li class="sidebar-title">Référentiels</li>
+                            {% if request.user.is_superuser or request.user.profile.name == "Manager" or request.user.profile.name == "Chef de filière" or request.user.profile.name == "Chef de service" or request.user.profile.name == "Conseiller" or request.user.profile.name == "Inspecteur" or request.user.profile.name == "Pédagogique" %}
+                                <li class="sidebar-item {% if link == 'formations' %} active {% endif %}">
+                                    <a href="{% url 'formations' %}" class='sidebar-link'>
+                                        <i class="bi bi-journal-text"></i>
+                                        <span>Formations</span>
+                                    </a>
+                                </li>
+                            {% endif %}
+
+                            {% if request.user.is_superuser or request.user.profile.name == "Manager" or request.user.profile.name == "Chef de filière" or request.user.profile.name == "Chef de service" %}
+                                <li class="sidebar-item {% if link == 'filieres' %} active {% endif %}">
+                                    <a href="{% url 'filieres' %}" class='sidebar-link'>
+                                        <i class="bi bi-signpost-2"></i>
+                                        <span>Filières</span>
+                                    </a>
+                                </li>
+                            {% endif %}
+
+                            {% if request.user.is_superuser or request.user.profile.name == "Manager" %}
+                                <li class="sidebar-item {% if link == 'services' %} active {% endif %}">
+                                    <a href="{% url 'services' %}" class='sidebar-link'>
+                                        <i class="bi bi-building"></i>
+                                        <span>Services</span>
+                                    </a>
+                                </li>
+                            {% endif %}
+
+                            {% if request.user.is_superuser or request.user.profile.name == "Manager" %}
+                                <li class="sidebar-item {% if link == 'categories' %} active {% endif %}">
+                                    <a href="{% url 'categories' %}" class='sidebar-link'>
+                                        <i class="bi bi-tags"></i>
+                                        <span>Catégories</span>
+                                    </a>
+                                </li>
+                            {% endif %}
+
+                            <li class="sidebar-title">Suivi des Activités</li>
+                            {% if request.user.is_superuser or request.user.profile.name == "Manager" or request.user.profile.name == "Chef de filière" or request.user.profile.name == "Chef de service" or request.user.profile.name == "Caisse" or request.user.profile.name == "Conseiller" or request.user.profile.name == "Inspecteur" or request.user.profile.name == "Pédagogique" or request.user.profile.name == "Formateur" %}
+                                <li class="sidebar-item {% if link == 'actions' %} active {% endif %}">
+                                    <a href="{% url 'actions' %}" class='sidebar-link'>
+                                        <i class="bi bi-clipboard-check"></i>
+                                        <span>Actions de formation</span>
+                                    </a>
+                                </li>
+                            {% endif %}
+
+                            {% if request.user.is_superuser or request.user.profile.name == "Manager" %}
+                                <li class="sidebar-item {% if link == 'typeactions' %} active {% endif %}">
+                                    <a href="{% url 'typeactions' %}" class='sidebar-link'>
+                                        <i class="bi bi-tag"></i>
+                                        <span>Types d'actions</span>
+                                    </a>
+                                </li>
+                            {% endif %}
+
+                            {% if request.user.is_superuser or request.user.profile.name == "Manager" or request.user.profile.name == "Caisse" %}
+                                <li class="sidebar-item {% if link == 'paiements' %} active {% endif %}">
+                                    <a href="{% url 'paiements' %}" class='sidebar-link'>
+                                        <i class="bi bi-wallet-fill"></i>
+                                        <span>Paiements</span>
+                                    </a>
+                                </li>
                             {% endif %}
 
                             {% if request.user.is_superuser or request.user.profile.name == "Manager" or request.user.profile.name == "Chef de filière" or request.user.profile.name == "Chef de service" or request.user.profile.name == "Inspecteur" or request.user.profile.name == "Pédagogique" or request.user.profile.name == "Formateur" %}
-                            <li class="sidebar-item {% if link == 'module_progressions' %} active {% endif %}">
-                                <a href="{% url 'module_progressions' %}" class='sidebar-link'>
-                                    <i class="bi bi-journal-check"></i>
-                                    <span>Progression du module</span>
-                                </a>
-                            </li>
+                                <li class="sidebar-item {% if link == 'module_progressions' %} active {% endif %}">
+                                    <a href="{% url 'module_progressions' %}" class='sidebar-link'>
+                                        <i class="bi bi-journal-check"></i>
+                                        <span>Progression du module</span>
+                                    </a>
+                                </li>
                             {% endif %}
+
                         {% endif %}
 
                     </ul>

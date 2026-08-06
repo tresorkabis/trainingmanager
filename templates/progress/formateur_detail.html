@@ -6,7 +6,6 @@
 {% block page_header %}Fiche Formateur{% endblock page_header %}
 
 {% block style %}
-<link rel="stylesheet" href="{% static 'assets/css/training-manager.css' %}">
 <style>
     .tm-detail-item {
         background: #f8fafc;
@@ -97,7 +96,7 @@
                     <!-- Modules Tab -->
                     <div class="tab-pane fade" id="modules">
                         <div class="table-responsive">
-                            <table class="table table-hover">
+                            <table class="table table-hover tm-table">
                                 <thead>
                                     <tr>
                                         <th>Formation</th>
@@ -123,7 +122,7 @@
                     <!-- Actions Tab -->
                     <div class="tab-pane fade" id="actions">
                         <div class="table-responsive">
-                            <table class="table table-hover">
+                            <table class="table table-hover tm-table">
                                 <thead>
                                     <tr>
                                         <th>Action</th>

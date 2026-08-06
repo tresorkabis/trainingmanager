@@ -34,6 +34,9 @@ class FormationPermissionMixin:
 
         if user.is_superuser or (user.profile and user.profile.name == "Manager"):
             return queryset
+        # Allow Conseiller to view formations (read-only)
+        if user.profile and user.profile.name == "Conseiller":
+            return queryset
         if user.profile and user.profile.name == "Chef de filière" and user.filiere:
             return queryset.filter(filiere=user.filiere)
         if user.profile and user.profile.name == "Chef de service" and user.service:
@@ -54,7 +57,7 @@ class FormationListView(FormationPermissionMixin, ListView):
     template_name = "training/formations.html"
 
     def get_queryset(self):
-        self.enforce_manage_permission()
+        # Allow viewing for users; management actions are enforced on create/update/delete views
         queryset = self.get_formation_queryset().select_related("filiere", "filiere__service")
 
         queryset = queryset.annotate(
@@ -84,10 +87,14 @@ class FormationListView(FormationPermissionMixin, ListView):
             {'label': 'Actions', 'value': total_actions},
         ]
 
-        ctx["hero_actions"] = [
-            {'label': 'Nouvelle formation', 'url': reverse_lazy('formation_create'), 'icon': 'bi bi-folder-plus'},
+        # Construire actions du hero en respectant les permissions
+        user = self.request.user
+        hero_actions = [
             {'label': 'Voir les formateurs', 'url': reverse_lazy('formateurs'), 'icon': 'bi bi-person-badge', 'class': 'btn-light-secondary'},
         ]
+        if user.is_superuser or (getattr(user, 'profile', None) and getattr(user.profile, 'name', None) in ['Manager', 'Chef de filière', 'Chef de service']):
+            hero_actions.insert(0, {'label': 'Nouvelle formation', 'url': reverse_lazy('formation_create'), 'icon': 'bi bi-folder-plus'})
+        ctx['hero_actions'] = hero_actions
         return ctx
 
 
@@ -119,10 +126,15 @@ class FormationDetailView(FormationPermissionMixin, DetailView):
             {'label': 'Sessions', 'value': formation.actions.count()},
         ]
         
-        ctx["hero_actions"] = [
+        # Construire hero_actions en respectant les permissions de gestion
+        hero_actions = [
             {'label': 'Retour à la liste', 'url': reverse_lazy('formations'), 'icon': 'bi bi-arrow-left', 'class': 'btn-light-secondary'},
-            {'label': 'Modifier', 'url': reverse_lazy('formation_update', kwargs={'pk': formation.pk}), 'icon': 'bi bi-pencil'},
         ]
+        user = self.request.user
+        if user.is_superuser or (getattr(user, 'profile', None) and getattr(user.profile, 'name', None) in ['Manager', 'Chef de filière', 'Chef de service']):
+            hero_actions.append({'label': 'Modifier', 'url': reverse_lazy('formation_update', kwargs={'pk': formation.pk}), 'icon': 'bi bi-pencil'})
+
+        ctx['hero_actions'] = hero_actions
 
         return ctx
 
@@ -271,6 +283,11 @@ class FormationDeleteView(FormationPermissionMixin, DeleteView):
     template_name = "training/formation_confirm_delete.html"
     success_url = reverse_lazy("formations")
     context_object_name = "object"
+
+    def dispatch(self, request, *args, **kwargs):
+        # Enforce management permission for delete
+        self.enforce_manage_permission()
+        return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)

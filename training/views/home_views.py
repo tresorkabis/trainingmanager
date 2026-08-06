@@ -6,6 +6,7 @@ from django.db.models import Count, Sum
 from django.db.models.functions import TruncMonth, TruncWeek
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
+from django.core.cache import cache
 
 from intern.models import Stagiaire
 from progress.models import Action, DetailAction, Paiement, SessionProgress
@@ -193,6 +194,50 @@ class HomeView(View):
         nbstagiaires = stagiaires_queryset.count()
         nbactions = actions_queryset.count()
 
+        # Si l'utilisateur est Conseiller, fournir un tableau de bord allégé et ciblé
+        is_conseiller = bool(user.profile and user.profile.name == 'Conseiller')
+        if is_conseiller:
+            cache_key = f"conseiller_dashboard_{user.id}"
+            cached = cache.get(cache_key)
+            if cached:
+                return render(request, "home/conseiller_dashboard.html", cached)
+
+            # Récupérer les stagiaires récents (champ limité pour performance)
+            # Eviter N+1: inclure updated_at pour la miniature et limiter les champs visités
+            recent_stagiaires = stagiaires_queryset.order_by('-updated_at').only('id','nom','postnom','prenom','photo','updated_at')[:8]
+
+            # Récupérer les inscriptions récentes (limitée) et inclure formation pour éviter requêtes supplémentaires
+            recent_inscriptions = DetailAction.objects.filter(action__in=actions_queryset)\
+                .select_related('stagiaire','action__formation')\
+                .only('id','stagiaire_id','action_id')\
+                .order_by('-id')[:8]
+
+            # Récupérer les paiements récents filtrés par les actions autorisées pour le conseiller
+            recent_paiements = Paiement.objects.filter(action__in=actions_queryset)\
+                .select_related('stagiaire','action')\
+                .only('id','montant','date_paiement','stagiaire_id','action_id')\
+                .order_by('-date_paiement')[:6]
+
+            ctx = {
+                "link": "home",
+                "user": user,
+                "hero_stats": hero_stats,
+                "nbmetiers": nbmetiers,
+                "nbfilieres": nbfilieres,
+                "nbstagiaires": nbstagiaires,
+                "nbactions": nbactions,
+                "is_conseiller": True,
+                "recent_stagiaires": list(recent_stagiaires),
+                "recent_inscriptions": list(recent_inscriptions),
+                "recent_paiements": list(recent_paiements),
+            }
+
+            # Mettre en cache la vue du conseiller pour courte durée (spécifique à l'utilisateur)
+            cache.set(cache_key, ctx, timeout=60)
+
+            return render(request, "home/conseiller_dashboard.html", ctx)
+
+        # Par défaut: tableau de bord complet
         ctx = {
             "link": "home",
             "user": user,

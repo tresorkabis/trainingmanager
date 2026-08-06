@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.humanize', # Pour les filtres comme intcomma
 
     'import_export',
 
@@ -137,6 +138,8 @@ JAZZMIN_SETTINGS = {
 
     "topmenu_links": [
         {"name": "Home",  "url": "home"},
+        {"name": "Formations", "url": "formations"},
+        {"name": "Actions", "url": "actions"},
         {"app": "users"},
     ],
     "show_ui_builder": False,

@@ -32,6 +32,20 @@ class DetailActionCreateView(View):
     After creation, redirects to the stagiaire detail page.
     """
     def post(self, request):
+        # Permission: only superuser, Manager or Conseiller can create inscriptions
+        user = request.user
+        allowed = False
+        if user and user.is_authenticated:
+            if user.is_superuser:
+                allowed = True
+            else:
+                profile = getattr(user, 'profile', None)
+                if profile and getattr(profile, 'name', None) in ['Manager', 'Conseiller']:
+                    allowed = True
+        if not allowed:
+            messages.error(request, 'Vous n\'avez pas la permission d\'inscrire un stagiaire à une action.')
+            return HttpResponseRedirect(request.META.get('HTTP_REFERER', reverse_lazy('detailactions')))
+
         stagiaire_id = request.POST.get('stagiaire') or request.GET.get('stagiaire')
         action_id = request.POST.get('action') or request.GET.get('action')
         next_url = request.POST.get('next') or request.GET.get('next')

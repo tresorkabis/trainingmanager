@@ -249,6 +249,11 @@ class StagiaireCreateUpdateView(StagiairePermissionMixin, View):
                 {'label': 'Retour', 'url': reverse_lazy('stagiaires'), 'icon': 'bi bi-arrow-left', 'class': 'btn-light-secondary'},
             ],
         }
+        # Fournir l'URL de la photo si elle existe (utile pour l'aperçu dans le formulaire)
+        ctx['photo_url'] = stagiaire.photo.url if stagiaire and getattr(stagiaire, 'photo', None) else None
+        # Si création (mode new), demander l'ouverture automatique de l'assistant
+        if mode == "new":
+            ctx['auto_open_assistant'] = True
         return render(request, self.template_name, ctx)
 
     def post(self, request, pk=None):
@@ -341,6 +346,8 @@ class StagiaireCreateUpdateView(StagiairePermissionMixin, View):
                 {'label': 'Retour', 'url': reverse_lazy('stagiaires'), 'icon': 'bi bi-arrow-left', 'class': 'btn-light-secondary'},
             ],
         }
+        # Inclure l'aperçu photo lors d'une validation invalide (si stagiaire existant)
+        ctx['photo_url'] = stagiaire.photo.url if stagiaire and getattr(stagiaire, 'photo', None) else None
         reconstructed_studies = []
         etude_intitules = request.POST.getlist("etude_intitule[]")
         etude_etablissements = request.POST.getlist("etude_etablissement[]")

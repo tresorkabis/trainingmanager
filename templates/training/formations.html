@@ -28,9 +28,11 @@
         <div class="card tm-listing-card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h4 class="card-title mb-0">Programmes disponibles</h4>
-                <a href="{% url 'formation_create' %}" class="btn btn-primary btn-sm">
-                    <i class="bi bi-plus-circle me-2"></i>Nouveau programme
-                </a>
+            {% if request.user.is_superuser or request.user.profile and request.user.profile.name == "Manager" or request.user.profile and request.user.profile.name == "Chef de filière" or request.user.profile and request.user.profile.name == "Chef de service" %}
+            <a href="{% url 'formation_create' %}" class="btn btn-primary btn-sm">
+                <i class="bi bi-plus-circle me-2"></i>Nouveau programme
+            </a>
+            {% endif %}
             </div>
             <div class="card-body">
                 {# Custom Search Input #}
@@ -79,12 +81,14 @@
                                         <a href="{% url 'formation' item.pk %}" class="btn btn-sm btn-outline-primary" title="Voir">
                                             <i class="bi bi-eye"></i>
                                         </a>
+                                        {% if request.user.is_superuser or request.user.profile and request.user.profile.name == "Manager" or request.user.profile and request.user.profile.name == "Chef de filière" or request.user.profile and request.user.profile.name == "Chef de service" %}
                                         <a href="{% url 'formation_update' item.pk %}" class="btn btn-sm btn-outline-info" title="Modifier">
                                             <i class="bi bi-pencil"></i>
                                         </a>
                                         <a href="{% url 'formation_delete' item.pk %}" class="btn btn-sm btn-outline-danger" title="Supprimer">
                                             <i class="bi bi-trash"></i>
                                         </a>
+                                        {% endif %}
                                     </div>
                                 </td>
                             </tr>

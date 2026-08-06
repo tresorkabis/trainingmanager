@@ -1,4 +1,10 @@
 <section class="tm-hero tm-hero--{{ theme }} mb-4">
+    <style>
+        /* Forcer la disposition horizontale des stats (fallback si un CSS surcharge) */
+        .tm-hero__stats-grid{display:flex !important;flex-wrap:wrap !important;gap:0.625rem;justify-content:flex-end;align-items:center}
+        .tm-stat-card{flex:0 0 auto !important;min-width:120px}
+        .tm-hero__right{display:flex;align-items:center}
+    </style>
     <div class="tm-hero__layout">
         <div class="tm-hero__left">
             <div class="tm-section-titlebar mb-4">

@@ -114,12 +114,14 @@
                         </div>
                     </div>
                     <div class="card-footer bg-transparent border-top p-3 d-flex justify-content-end gap-2">
+                        {% if can_manage_paiement %}
                         <a href="{% url 'paiement_update' paiement.pk %}" class="btn btn-outline-primary">
                             <i class="bi bi-pencil me-2"></i>Modifier
                         </a>
                         <a href="{% url 'paiement_delete' paiement.pk %}" class="btn btn-outline-danger">
                             <i class="bi bi-trash me-2"></i>Supprimer
                         </a>
+                        {% endif %}
                     </div>
                 </div>
             </div>

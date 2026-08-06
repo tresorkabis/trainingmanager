@@ -1,6 +1,7 @@
-{% extends "base.html" %}
+ {% extends "base.html" %}
 {% load static %}
 {% load tm_tags %}
+{% load widget_tweaks %}
 
 {% block title %}{% if form %}{% if mode == "edit" %}Modifier un Stagiaire{% else %}Créer un Stagiaire{% endif %}{% else %}Fiche Stagiaire - {{ object.get_full_name }}{% endif %}{% endblock title %}
 {% block page_header %}{% if form %}{% if mode == "edit" %}Modifier un Stagiaire{% else %}Créer un Stagiaire{% endif %}{% else %}Fiche Stagiaire - {{ object.get_full_name }}{% endif %}{% endblock page_header %}
@@ -8,6 +9,7 @@
 {% block style %}
 <link rel="stylesheet" href="{% static 'assets/css/training-manager.css' %}">
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    {% if form %}{{ form.media.css }}{% endif %}
 <style>
     .tm-detail-item {
         background: #fbfcfe;
@@ -100,32 +102,32 @@
         display: flex;
         flex-wrap: nowrap;
         overflow-x: auto;
-        border-bottom: 1px solid #e2e8f0 !important;
+        border-bottom: 1px solid #e2e8f0;
     }
     .tm-tabs .nav-item {
         flex: 0 0 auto;
     }
     .tm-tabs .nav-link {
-        border: none !important;
-        background: transparent !important;
-        color: #64748b !important;
+        border: none;
+        background: transparent;
+        color: #64748b;
         font-weight: 600;
-        padding: 1rem 1.25rem !important;
-        border-bottom: 3px solid transparent !important;
-        transition: all 0.2s ease !important;
+        padding: 1rem 1.25rem;
+        border-bottom: 3px solid transparent;
+        transition: all 0.2s ease;
         display: flex;
         align-items: center;
         gap: 0.5rem;
     }
     .tm-tabs .nav-link:hover {
-        color: #435ebe !important;
-        background: rgba(67, 94, 190, 0.05) !important;
+        color: #435ebe;
+        background: rgba(67, 94, 190, 0.05);
     }
     .tm-tabs .nav-link.active {
-        color: #435ebe !important;
-        background: #ffffff !important;
-        font-weight: 700 !important;
-        border-bottom-color: #435ebe !important;
+        color: #435ebe;
+        background: #ffffff;
+        font-weight: 700;
+        border-bottom-color: #435ebe;
     }
     .tm-tabs .nav-link i {
         font-size: 1.1rem;
@@ -133,7 +135,7 @@
 
     @media (max-width: 767.98px) {
         .tm-tabs .nav-link {
-            padding: 0.75rem 1rem !important;
+            padding: 0.75rem 1rem;
             font-size: 0.8rem;
         }
     }
@@ -253,7 +255,6 @@
 {% block content %}
 <div class="page-heading">
     {% if form %}
-// ...existing code...
         {% if mode == "edit" %}
             {% tm_hero title="Modifier le stagiaire" subtitle="Mettez à jour les informations du dossier." icon="bi bi-pencil" actions=hero_actions theme="primary" photo_url=photo_url %}
         {% else %}
@@ -295,120 +296,217 @@
                 </div>
                 {% endif %}
 
-                <form method="post" enctype="multipart/form-data">
+                                <form id="createStagiaireWizardForm" method="post" enctype="multipart/form-data">
                     {% csrf_token %}
-                    <div class="row g-3">
-                        <div class="col-md-4">
-                            <label class="form-label" for="{{ form.nom.id_for_label }}">{{ form.nom.label }}</label>
-                            {{ form.nom }}
-                            {{ form.nom.errors }}
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label" for="{{ form.postnom.id_for_label }}">{{ form.postnom.label }}</label>
-                            {{ form.postnom }}
-                            {{ form.postnom.errors }}
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label" for="{{ form.prenom.id_for_label }}">{{ form.prenom.label }}</label>
-                            {{ form.prenom }}
-                            {{ form.prenom.errors }}
-                        </div>
-                        <div class="col-md-8">
-                            <label class="form-label" for="{{ form.adresse.id_for_label }}">{{ form.adresse.label }}</label>
-                            {{ form.adresse }}
-                            {{ form.adresse.errors }}
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label" for="{{ form.sexe.id_for_label }}">{{ form.sexe.label }}</label>
-                            {{ form.sexe }}
-                            {{ form.sexe.errors }}
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label" for="{{ form.telephone.id_for_label }}">{{ form.telephone.label }}</label>
-                            {{ form.telephone }}
-                            {{ form.telephone.errors }}
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label" for="{{ form.email.id_for_label }}">{{ form.email.label }}</label>
-                            {{ form.email }}
-                            {{ form.email.errors }}
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label" for="{{ form.date_naissance.id_for_label }}">{{ form.date_naissance.label }}</label>
-                            {{ form.date_naissance }}
-                            {{ form.date_naissance.errors }}
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label" for="{{ form.lieu_naissance.id_for_label }}">{{ form.lieu_naissance.label }}</label>
-                            {{ form.lieu_naissance }}
-                            {{ form.lieu_naissance.errors }}
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label" for="{{ form.nationalite.id_for_label }}">{{ form.nationalite.label }}</label>
-                            {{ form.nationalite }}
-                            {{ form.nationalite.errors }}
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label" for="{{ form.type_piece.id_for_label }}">{{ form.type_piece.label }}</label>
-                            {{ form.type_piece }}
-                            {{ form.type_piece.errors }}
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label" for="{{ form.numero_piece.id_for_label }}">{{ form.numero_piece.label }}</label>
-                            {{ form.numero_piece }}
-                            {{ form.numero_piece.errors }}
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label" for="{{ form.nom_pere.id_for_label }}">{{ form.nom_pere.label }}</label>
-                            {{ form.nom_pere }}
-                            {{ form.nom_pere.errors }}
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label" for="{{ form.nom_mere.id_for_label }}">{{ form.nom_mere.label }}</label>
-                            {{ form.nom_mere }}
-                            {{ form.nom_mere.errors }}
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label" for="{{ form.niveau_etude.id_for_label }}">{{ form.niveau_etude.label }}</label>
-                            {{ form.niveau_etude }}
-                            {{ form.niveau_etude.errors }}
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label" for="{{ form.categorie.id_for_label }}">{{ form.categorie.label }}</label>
-                            {{ form.categorie }}
-                            {{ form.categorie.errors }}
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label" for="{{ form.entreprise.id_for_label }}">{{ form.entreprise.label }}</label>
-                            {{ form.entreprise }}
-                            {{ form.entreprise.errors }}
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label" for="{{ form.fonction.id_for_label }}">{{ form.fonction.label }}</label>
-                            {{ form.fonction }}
-                            {{ form.fonction.errors }}
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label" for="{{ form.anciennete_emploi.id_for_label }}">{{ form.anciennete_emploi.label }}</label>
-                            {{ form.anciennete_emploi }}
-                            {{ form.anciennete_emploi.errors }}
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label" for="{{ form.anciennete_entreprise.id_for_label }}">{{ form.anciennete_entreprise.label }}</label>
-                            {{ form.anciennete_entreprise }}
-                            {{ form.anciennete_entreprise.errors }}
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label" for="{{ form.photo.id_for_label }}">{{ form.photo.label }}</label>
-                            {{ form.photo }}
-                            {{ form.photo.errors }}
+                    <div class="wizard-step" data-step="1">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label" for="{{ form.nom.id_for_label }}">{{ form.nom.label }}</label>
+                                {{ form.nom }}
+                                {{ form.nom.errors }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label" for="{{ form.postnom.id_for_label }}">{{ form.postnom.label }}</label>
+                                {{ form.postnom }}
+                                {{ form.postnom.errors }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label" for="{{ form.prenom.id_for_label }}">{{ form.prenom.label }}</label>
+                                {{ form.prenom }}
+                                {{ form.prenom.errors }}
+                            </div>
                         </div>
                     </div>
+
+                    <div class="wizard-step d-none" data-step="2">
+                        <div class="row g-3">
+                            <div class="col-md-8">
+                                <label class="form-label" for="{{ form.adresse.id_for_label }}">{{ form.adresse.label }}</label>
+                                {{ form.adresse }}
+                                {{ form.adresse.errors }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label" for="{{ form.sexe.id_for_label }}">{{ form.sexe.label }}</label>
+                                {{ form.sexe }}
+                                {{ form.sexe.errors }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label" for="{{ form.telephone.id_for_label }}">{{ form.telephone.label }}</label>
+                                {{ form.telephone }}
+                                {{ form.telephone.errors }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label" for="{{ form.email.id_for_label }}">{{ form.email.label }}</label>
+                                {{ form.email }}
+                                {{ form.email.errors }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="wizard-step d-none" data-step="3">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label" for="{{ form.date_naissance.id_for_label }}">{{ form.date_naissance.label }}</label>
+                                {{ form.date_naissance }}
+                                {{ form.date_naissance.errors }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label" for="{{ form.lieu_naissance.id_for_label }}">{{ form.lieu_naissance.label }}</label>
+                                {{ form.lieu_naissance }}
+                                {{ form.lieu_naissance.errors }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label" for="{{ form.nationalite.id_for_label }}">{{ form.nationalite.label }}</label>
+                                {{ form.nationalite }}
+                                {{ form.nationalite.errors }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label" for="{{ form.type_piece.id_for_label }}">{{ form.type_piece.label }}</label>
+                                {{ form.type_piece }}
+                                {{ form.type_piece.errors }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label" for="{{ form.numero_piece.id_for_label }}">{{ form.numero_piece.label }}</label>
+                                {{ form.numero_piece }}
+                                {{ form.numero_piece.errors }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="wizard-step d-none" data-step="4">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label" for="{{ form.nom_pere.id_for_label }}">{{ form.nom_pere.label }}</label>
+                                {{ form.nom_pere }}
+                                {{ form.nom_pere.errors }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label" for="{{ form.nom_mere.id_for_label }}">{{ form.nom_mere.label }}</label>
+                                {{ form.nom_mere }}
+                                {{ form.nom_mere.errors }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label" for="{{ form.niveau_etude.id_for_label }}">{{ form.niveau_etude.label }}</label>
+                                {{ form.niveau_etude }}
+                                {{ form.niveau_etude.errors }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label" for="{{ form.categorie.id_for_label }}">{{ form.categorie.label }}</label>
+                                {{ form.categorie }}
+                                {{ form.categorie.errors }}
+                            </div>
+                            <div class="col-md-4 employment-only">
+                                <label class="form-label" for="{{ form.entreprise.id_for_label }}">{{ form.entreprise.label }}</label>
+                                {{ form.entreprise }}
+                                {{ form.entreprise.errors }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="wizard-step d-none" data-step="5">
+                        <div class="row g-3">
+                            <div class="col-md-4 employment-only">
+                                <label class="form-label" for="{{ form.fonction.id_for_label }}">{{ form.fonction.label }}</label>
+                                {{ form.fonction }}
+                                {{ form.fonction.errors }}
+                            </div>
+                            <div class="col-md-4 employment-only">
+                                <label class="form-label" for="{{ form.anciennete_emploi.id_for_label }}">{{ form.anciennete_emploi.label }}</label>
+                                {{ form.anciennete_emploi }}
+                                {{ form.anciennete_emploi.errors }}
+                            </div>
+                            <div class="col-md-4 employment-only">
+                                <label class="form-label" for="{{ form.anciennete_entreprise.id_for_label }}">{{ form.anciennete_entreprise.label }}</label>
+                                {{ form.anciennete_entreprise }}
+                                {{ form.anciennete_entreprise.errors }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label" for="{{ form.photo.id_for_label }}">{{ form.photo.label }}</label>
+                                {{ form.photo }}
+                                {{ form.photo.errors }}
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="d-flex justify-content-end gap-2 mt-4">
+                        <div class="me-auto align-self-center small text-muted" id="wizard-remaining">Pages restantes: <span id="wizard-remaining-count">0</span></div>
                         <a href="{% url 'stagiaires' %}" class="btn btn-light-secondary">Annuler</a>
-                        <button type="submit" class="btn btn-primary">{% if mode == "edit" %}Enregistrer les modifications{% else %}Créer le stagiaire{% endif %}</button>
+                        <button type="button" class="btn btn-secondary d-none" id="wizard-prev">Précédent</button>
+                        <button type="button" class="btn btn-primary" id="wizard-next">Suivant</button>
+                        <button type="submit" class="btn btn-success d-none" id="wizard-submit">{% if mode == "edit" %}Enregistrer{% else %}Créer le stagiaire{% endif %}</button>
                     </div>
                 </form>
+
+                <script>
+                (function(){
+                    var root = document.getElementById('createStagiaireWizardForm');
+                    if (!root) return;
+                    var steps = Array.from(root.querySelectorAll('.wizard-step'));
+                    var step = 1, total = steps.length;
+                    var btnNext = document.getElementById('wizard-next');
+                    var btnPrev = document.getElementById('wizard-prev');
+                    var btnSubmit = document.getElementById('wizard-submit');
+
+                    var catEl = root.querySelector('[name="categorie"]');
+                    var employmentBlocks = Array.from(root.querySelectorAll('.employment-only'));
+
+                    function updateEmploymentFields(){
+                        if (!catEl) return;
+                        var opt = catEl.options[catEl.selectedIndex];
+                        var txt = (opt && (opt.textContent || opt.innerText) || '').toLowerCase();
+                        var isSans = txt.indexOf('sans emploi') !== -1;
+                        employmentBlocks.forEach(function(block){
+                            if (isSans){
+                                block.classList.add('d-none');
+                                // clear and remove required from inputs inside
+                                var inputs = block.querySelectorAll('input,select,textarea');
+                                inputs.forEach(function(i){ try { i.value = ''; i.removeAttribute('required'); i.classList.remove('is-invalid'); } catch(e){} });
+                            } else {
+                                block.classList.remove('d-none');
+                                // do not force required — rely on original widget attributes
+                            }
+                        });
+                    }
+
+                    function show(n){
+                        steps.forEach(function(s){ s.classList.add('d-none'); });
+                        var el = root.querySelector('.wizard-step[data-step="'+n+'"]');
+                        if (el) el.classList.remove('d-none');
+                        if (n<=1) btnPrev.classList.add('d-none'); else btnPrev.classList.remove('d-none');
+                        if (n>=total) { btnNext.classList.add('d-none'); btnSubmit.classList.remove('d-none'); } else { btnNext.classList.remove('d-none'); btnSubmit.classList.add('d-none'); }
+                        // update remaining pages count
+                        var remEl = document.getElementById('wizard-remaining-count');
+                        if (remEl) {
+                            try { remEl.textContent = Math.max(0, total - n); } catch(e) { remEl.textContent = '0'; }
+                        }
+                        // ensure employment fields visibility follows category
+                        updateEmploymentFields();
+                        // scroll into view for small screens
+                        try { el && el.scrollIntoView({behavior:'smooth', block:'center'}); } catch(e){}
+                    }
+
+                    function validateStep(n){
+                        var ok = true;
+                        var inputs = Array.from(root.querySelectorAll('.wizard-step[data-step="'+n+'"] [required]'));
+                        inputs.forEach(function(i){
+                            // skip inputs inside hidden employment block
+                            var emp = i.closest('.employment-only');
+                            if (emp && emp.classList.contains('d-none')) return;
+                            if(!i.value) { i.classList.add('is-invalid'); ok = false; } else { i.classList.remove('is-invalid'); }
+                        });
+                        return ok;
+                    }
+
+                    btnNext && btnNext.addEventListener('click', function(){ if(!validateStep(step)) return; step = Math.min(total, step+1); show(step); });
+                    btnPrev && btnPrev.addEventListener('click', function(){ step = Math.max(1, step-1); show(step); });
+
+                    if (catEl) catEl.addEventListener('change', updateEmploymentFields);
+
+                    // initialize
+                    document.addEventListener('DOMContentLoaded', function(){ updateEmploymentFields(); show(1); });
+                })();
+                </script>
+
             </div>
         </div>
     </section>
@@ -416,7 +514,7 @@
 
     {% if not form %}
     <section class="section">
-        <div class="tm-listing-card">
+        <div class="card tm-listing-card">
 <div class="tm-tabs-wrap">
                 <ul class="nav nav-tabs tm-tabs" id="stagiaireTab" role="tablist">
                     <li class="nav-item">
@@ -446,13 +544,6 @@
                             <i class="bi bi-cash-coin"></i>Paiements
                         </a>
                     </li>
-                    {% if object.nom_pere or object.nom_mere %}
-                    <li class="nav-item">
-                        <a class="nav-link" data-bs-toggle="tab" data-bs-target="#family" href="#family">
-                            <i class="bi bi-people"></i>Famille
-                        </a>
-                    </li>
-                    {% endif %}
                 </ul>
             </div>
             <div class="card-body">
@@ -516,6 +607,21 @@
                                 <div class="tm-detail-item"><span class="tm-detail-item__label"><i class="bi bi-arrow-repeat"></i>Mis à jour</span><span class="tm-detail-item__value">{{ object.updated_at|date:"d/m/Y H:i" }}</span></div>
                             </div>
                         </div>
+
+                        {% if object.nom_pere or object.nom_mere %}
+                        <hr class="my-3" />
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <div class="tm-subsection-title"><i class="bi bi-people"></i>Informations familiales</div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="tm-detail-item"><span class="tm-detail-item__label"><i class="bi bi-person"></i>Nom du père</span><span class="tm-detail-item__value">{{ object.nom_pere|default:"-" }}</span></div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="tm-detail-item"><span class="tm-detail-item__label"><i class="bi bi-person"></i>Nom de la mère</span><span class="tm-detail-item__value">{{ object.nom_mere|default:"-" }}</span></div>
+                            </div>
+                        </div>
+                        {% endif %}
                     </div>
 
                     {% if object.categorie and object.categorie.titre == "dans l'emploi" %}
@@ -579,32 +685,144 @@
                     </div>
 
                     <div class="tab-pane fade" id="formations">
+                        {% if request.user.is_superuser or request.user.profile.name == "Manager" or request.user.profile.name == "Conseiller" %}
                         <div class="tm-inscription-card mb-4">
-                            <form method="post" action="{% url 'detailaction_create' %}" class="row g-3 align-items-end">
-                                {% csrf_token %}
-                                <input type="hidden" name="stagiaire" value="{{ object.pk }}">
-                                <input type="hidden" name="next" value="{{ request.path }}#formations">
+                            <div class="row g-3 align-items-center">
                                 <div class="col-12 col-md-8">
-                                    <label for="action-select" class="form-label fw-bold"><i class="bi bi-person-plus me-1"></i>Inscrire à une action</label>
-                                    <select id="action-select" name="action" class="form-select" required>
-                                        <option value="">Sélectionner une action</option>
-                                        {% for action in actions_disponibles %}
-                                            <option value="{{ action.pk }}">
-                                                {{ action.description }} - {{ action.formation.nom }} ({{ action.date_debut|date:"d/m/Y" }})
-                                            </option>
-                                        {% endfor %}
-                                    </select>
+                                    <label class="form-label fw-bold"><i class="bi bi-person-plus me-1"></i>Inscription (Assistant)</label>
+                                    <p class="text-muted mb-0">Utiliser l'assistant pour guider l'inscription pas à pas.</p>
                                 </div>
-                                <div class="col-12 col-md-4">
-                                    <button type="submit" class="btn btn-primary w-100">
-                                        <i class="bi bi-person-plus me-2"></i>Ajouter l'inscription
+                                <div class="col-12 col-md-4 text-end">
+                                    <button type="button" class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#inscriptionWizardModal">
+                                        <i class="bi bi-robot me-2"></i>Ouvrir l'assistant
                                     </button>
                                 </div>
-                            </form>
+                            </div>
+
+                            <!-- Modal: Assistant d'inscription -->
+                            <div class="modal fade" id="inscriptionWizardModal" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog modal-lg modal-dialog-centered">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Assistant d'inscription</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                                        </div>
+
+                                        <form id="inscriptionWizardForm" method="post" action="{% url 'detailaction_create' %}">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="stagiaire" value="{{ object.pk }}">
+                                            <input type="hidden" name="action" id="wizard-action-input" value="">
+                                            <input type="hidden" name="next" value="{{ request.path }}#formations">
+
+                                            <div class="modal-body">
+                                                <div class="wizard-step" data-step="1">
+                                                    <h6>1. Choisir l'action</h6>
+                                                    <div class="mb-3">
+                                                        <select id="wizard-action-select" class="form-select" required>
+                                                            <option value="">Sélectionner une action</option>
+                                                            {% for action in actions_disponibles %}
+                                                            <option value="{{ action.pk }}" data-desc="{{ action.description|escape }}" data-formation="{{ action.formation.nom|escape }}" data-debut="{{ action.date_debut|date:'d/m/Y' }}" data-fin="{{ action.date_fin|date:'d/m/Y' }}">
+                                                                {{ action.description }} - {{ action.formation.nom }} ({{ action.date_debut|date:"d/m/Y" }})
+                                                            </option>
+                                                            {% endfor %}
+                                                        </select>
+                                                    </div>
+                                                </div>
+
+                                                <div class="wizard-step d-none" data-step="2">
+                                                    <h6>2. Vérifier les informations</h6>
+                                                    <p><strong>Stagiaire:</strong> {{ object.get_full_name }}</p>
+                                                    <p><strong>Action sélectionnée:</strong> <span id="wizard-selected-action">—</span></p>
+                                                    <p class="text-muted">Confirmez que vous souhaitez inscrire ce stagiaire.</p>
+                                                </div>
+
+                                                <div class="wizard-step d-none" data-step="3">
+                                                    <h6>3. Confirmation</h6>
+                                                    <p>Prêt à inscrire. Cliquez sur Confirmer pour procéder.</p>
+                                                </div>
+                                            </div>
+
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary me-auto d-none" id="wizard-prev">Précédent</button>
+                                                <button type="button" class="btn btn-light-secondary" data-bs-dismiss="modal">Annuler</button>
+                                                <button type="button" class="btn btn-primary" id="wizard-next">Suivant</button>
+                                                <button type="submit" class="btn btn-success d-none" id="wizard-submit">Confirmer l'inscription</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+
                             {% if not actions_disponibles %}
                                 <div class="alert alert-warning mt-3 mb-0"><i class="bi bi-exclamation-triangle me-2"></i>Aucune action disponible à laquelle inscrire ce stagiaire.</div>
                             {% endif %}
                         </div>
+
+                        <script>
+                        (function(){
+                            function qs(selector, parent){ return (parent||document).querySelector(selector); }
+                            var modal = qs('#inscriptionWizardModal');
+                            if (!modal) return;
+
+                            var step = 1;
+                            var totalSteps = 3;
+                            var nextBtn = qs('#wizard-next', modal);
+                            var prevBtn = qs('#wizard-prev', modal);
+                            var submitBtn = qs('#wizard-submit', modal);
+                            var actionSelect = qs('#wizard-action-select', modal);
+                            var actionInput = qs('#wizard-action-input', modal);
+                            var selectedActionLabel = qs('#wizard-selected-action', modal);
+                            var steps = Array.from(modal.querySelectorAll('.wizard-step'));
+
+                            function showStep(n){
+                                steps.forEach(function(el){ el.classList.add('d-none'); });
+                                var el = modal.querySelector('.wizard-step[data-step="'+n+'"]');
+                                if (el) el.classList.remove('d-none');
+                                // buttons
+                                if (n <= 1) prevBtn.classList.add('d-none'); else prevBtn.classList.remove('d-none');
+                                if (n >= totalSteps) { nextBtn.classList.add('d-none'); submitBtn.classList.remove('d-none'); } else { nextBtn.classList.remove('d-none'); submitBtn.classList.add('d-none'); }
+                            }
+
+                            function updateSelectedActionPreview(){
+                                var opt = actionSelect && actionSelect.options[actionSelect.selectedIndex];
+                                if (opt && opt.value) {
+                                    var desc = opt.dataset.desc || opt.textContent.trim();
+                                    var formation = opt.dataset.formation || '';
+                                    var debut = opt.dataset.debut || '';
+                                    var fin = opt.dataset.fin || '';
+                                    selectedActionLabel.textContent = desc + (formation ? (' — ' + formation) : '') + (debut ? (' ('+debut+(fin?(' — '+fin):'')+')') : '');
+                                } else {
+                                    selectedActionLabel.textContent = '—';
+                                }
+                            }
+
+                            // Navigation
+                            nextBtn.addEventListener('click', function(){
+                                if (step === 1) {
+                                    if (!actionSelect.value) { actionSelect.classList.add('is-invalid'); return; } else { actionSelect.classList.remove('is-invalid'); }
+                                    // set hidden input
+                                    actionInput.value = actionSelect.value;
+                                    updateSelectedActionPreview();
+                                }
+                                if (step < totalSteps) step++; showStep(step);
+                            });
+
+                            prevBtn.addEventListener('click', function(){ if (step>1) { step--; showStep(step); } });
+
+                            // When modal opened, reset
+                            modal.addEventListener('show.bs.modal', function(){
+                                step = 1; showStep(step);
+                                // reset fields
+                                if (actionSelect) actionSelect.value = '';
+                                if (actionInput) actionInput.value = '';
+                                updateSelectedActionPreview();
+                            });
+
+                        })();
+                        </script>
+                        {% else %}
+                        <div class="alert alert-secondary mb-4"><i class="bi bi-lock-fill me-2"></i>Vous ne disposez pas des droits pour inscrire ce stagiaire.</div>
+                        {% endif %}
 
                         <div class="table-responsive">
                             <table class="table table-hover tm-table">
@@ -666,21 +884,6 @@
                         </div>
                     </div>
 
-                    {% if object.nom_pere or object.nom_mere %}
-                    <div class="tab-pane fade" id="family">
-                        <div class="row g-3">
-                            <div class="col-12">
-                                <div class="tm-subsection-title"><i class="bi bi-people"></i>Informations familiales</div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="tm-detail-item"><span class="tm-detail-item__label"><i class="bi bi-person"></i>Nom du père</span><span class="tm-detail-item__value">{{ object.nom_pere|default:"-" }}</span></div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="tm-detail-item"><span class="tm-detail-item__label"><i class="bi bi-person"></i>Nom de la mère</span><span class="tm-detail-item__value">{{ object.nom_mere|default:"-" }}</span></div>
-                            </div>
-                        </div>
-                    </div>
-                    {% endif %}
                 </div>
             </div>
         </div>
@@ -691,28 +894,120 @@
 
 {% block script %}
 {% if form %}
-{{ form.media }}
+{{ form.media.js }}
 {% endif %}
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('*** SCRIPT CHARGE - DEBUT ***');
+
+    // Focus on the first textual input for faster editing
+    try {
+        var firstInput = document.querySelector('form input:not([type=hidden]):not([type=file])');
+        if (firstInput) firstInput.focus();
+    } catch (e) { /* ignore */ }
+
+    // Image preview for photo field
+    try {
+        var photoInput = document.querySelector('form input[type="file"][name="photo"], form input[type="file"][id*="photo"]');
+        var preview = document.getElementById('photoPreview');
+        if (photoInput) {
+            photoInput.addEventListener('change', function(evt) {
+                var file = this.files && this.files[0];
+                if (file) {
+                    if (!preview) {
+                        preview = document.createElement('img');
+                        preview.id = 'photoPreview';
+                        preview.className = 'img-thumbnail';
+                        preview.style.width = '120px';
+                        preview.style.height = '120px';
+                        preview.style.objectFit = 'cover';
+                        var container = document.getElementById('photoPreviewContainer');
+                        if (container) container.innerHTML = '';
+                        if (container) container.appendChild(preview);
+                    }
+                    preview.src = URL.createObjectURL(file);
+                    preview.classList.remove('d-none');
+                } else if (preview) {
+                    preview.src = '';
+                    preview.classList.add('d-none');
+                }
+            });
+        }
+    } catch (e) { /* ignore preview errors */ }
+
     function initActionSelect() {
         if (typeof $ === 'undefined' || !$.fn.select2) {
             return;
         }
 
-        const $select = $('#action-select');
-        if (!$select.length || $select.data('select2')) {
-            return;
+        // Init specific action select
+        const $action = $('#action-select');
+        if ($action.length && !$action.data('select2')) {
+            $action.select2({ placeholder: "Rechercher une action", width: '100%' });
         }
 
-        $select.select2({
-            placeholder: "Rechercher une action",
-            width: '100%'
+        // Init any element using .select2 class (categorie, others)
+        $('.select2').each(function() {
+            var $s = $(this);
+            if ($s.data('select2')) return;
+            var ph = $s.data('placeholder') || $s.attr('data-placeholder') || 'Sélectionner';
+            $s.select2({ placeholder: ph, width: '100%' });
         });
     }
 
+    // Initialisation des onglets (robuste)
+    function initTabs() {
+        var stagiaireTab = document.getElementById('stagiaireTab');
+        if (!stagiaireTab) return;
+
+        var links = Array.from(stagiaireTab.querySelectorAll('.nav-link'));
+        var tabPanes = Array.from(document.querySelectorAll('.tab-pane'));
+
+        // Masquer tous les panneaux
+        tabPanes.forEach(function(p) { p.classList.remove('show','active'); });
+
+        links.forEach(function(link) {
+            // Résoudre le sélecteur cible : data-bs-target, data-bs-target attr, href (fragment)
+            var selector = link.dataset.bsTarget || link.getAttribute('data-bs-target') || link.getAttribute('href');
+            if (!selector) return;
+            // Normaliser pour ne garder que le fragment (#id)
+            var hashIndex = selector.indexOf('#');
+            if (hashIndex !== -1) selector = selector.slice(hashIndex);
+            var target = document.querySelector(selector);
+
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                // Désactiver tous
+                links.forEach(function(l){ l.classList.remove('active'); });
+                tabPanes.forEach(function(p){ p.classList.remove('show','active'); });
+
+                // Activer cible
+                if (target) {
+                    target.classList.add('active','show');
+                }
+                link.classList.add('active');
+
+                // Mettre à jour le hash sans provoquer le scroll
+                try {
+                    if (history && history.replaceState && selector) history.replaceState(null, '', selector);
+                } catch (err) { /* ignore */ }
+            });
+        });
+
+        // Activer le premier onglet (celui marqué .active sinon le premier)
+        var activeLink = stagiaireTab.querySelector('.nav-link.active') || links[0];
+        if (activeLink) {
+            var sel = activeLink.dataset.bsTarget || activeLink.getAttribute('data-bs-target') || activeLink.getAttribute('href') || '';
+            if (sel.indexOf('#') !== -1) sel = sel.slice(sel.indexOf('#'));
+            var t = document.querySelector(sel);
+            if (t) t.classList.add('active','show');
+            activeLink.classList.add('active');
+        }
+    }
+
     initActionSelect();
+    initTabs();
 });
 </script>
 {% endblock script %}

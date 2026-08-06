@@ -10,12 +10,12 @@
    ========================================== */
 .tm-dash-hero {
     background: linear-gradient(135deg, #435ebe 0%, #6778e0 100%);
-    border-radius: 1.25rem;
-    padding: 2rem 2.5rem;
-    margin-bottom: 1.5rem;
+    border-radius: 1rem;
+    padding: 1.1rem 1.4rem;
+    margin-bottom: 0.75rem;
     position: relative;
     overflow: hidden;
-    box-shadow: 0 10px 30px rgba(67, 94, 190, 0.25);
+    box-shadow: 0 6px 16px rgba(67, 94, 190, 0.18);
 }
 
 .tm-dash-hero::before {
@@ -57,10 +57,10 @@
 
 .tm-dash-hero__actions {
     display: flex;
-    gap: 0.6rem;
+    gap: 0.5rem;
     flex-wrap: wrap;
     align-items: flex-end;
-    margin-top: 1rem;
+    margin-top: 0.45rem;
 }
 
 .tm-dash-hero__actions .btn {
@@ -120,20 +120,20 @@
    STAT CARDS
    ========================================== */
 .tm-dash-stats { margin-bottom: 2.5rem; }
-.tm-dash-stats__grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.25rem; }
+.tm-dash-stats__grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.6rem; }
 
 .tm-dash-stat-card {
     background: #fff;
     border: 1px solid #eef2f7;
-    border-radius: 1rem;
-    padding: 1rem 1.25rem;
+    border-radius: 0.8rem;
+    padding: 0.6rem 0.8rem;
     text-decoration: none;
     color: #1e293b;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
-    transition: all 0.2s ease;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+    transition: all 0.15s ease;
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: 0.6rem;
     height: 100%;
 }
 
@@ -144,13 +144,13 @@
 }
 
 .tm-dash-stat-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 0.75rem;
+    width: 40px;
+    height: 40px;
+    border-radius: 0.6rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.25rem;
+    font-size: 1.05rem;
     flex-shrink: 0;
 }
 
@@ -167,7 +167,7 @@
 /* ==========================================
    CHARTS
    ========================================== */
-.tm-dash-charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2.5rem; }
+.tm-dash-charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
 
 .tm-dash-chart {
     border-radius: 1rem;
@@ -179,13 +179,13 @@
 
 .tm-dash-chart .card-header {
     border-bottom: 1px solid #f1f5f9;
-    padding: 1rem 1.25rem;
+    padding: 0.6rem 0.8rem;
     background: transparent;
 }
 
 .tm-dash-chart .card-header h4 { font-size: 0.9rem; font-weight: 700; color: #0f172a; margin: 0; }
 .tm-dash-chart .card-header p { font-size: 0.75rem; color: #94a3b8; margin: 0.15rem 0 0; }
-.tm-dash-chart .card-body { padding: 1rem; }
+.tm-dash-chart .card-body { padding: 0.6rem; }
 
 /* ==========================================
    QUICK ACCESS
@@ -205,7 +205,7 @@
 
 .tm-dash-quick .card-header h4 { font-size: 0.9rem; font-weight: 700; color: #0f172a; margin: 0; }
 
-.tm-dash-quick-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
+.tm-dash-quick-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; }
 
 .tm-dash-quick-link {
     display: flex;
@@ -280,14 +280,17 @@
                 <a href="{% url 'stagiaires' %}" class="btn">
                     <i class="bi bi-people"></i> Stagiaires
                 </a>
-                <a href="{% url 'formations' %}" class="btn">
-                    <i class="bi bi-journal-text"></i> Formations
+            <a href="{% url 'stagiaire_create' %}" class="btn btn-light">
+                <i class="bi bi-person-plus"></i> Nouveau stagiaire
                 </a>
-                {% if request.user.is_superuser or request.user.profile and request.user.profile.name == "Manager" %}
-                <a href="{% url 'admin:index' %}" class="btn">
-                    <i class="bi bi-shield-check"></i> Administration
-                </a>
-                {% endif %}
+            <a href="{% url 'formations' %}" class="btn">
+                <i class="bi bi-journal-text"></i> Formations
+            </a>
+            {% if request.user.is_superuser or request.user.profile and request.user.profile.name == "Manager" %}
+            <a href="{% url 'admin:index' %}" class="btn">
+                <i class="bi bi-shield-check"></i> Administration
+            </a>
+            {% endif %}
             </div>
 
             <div class="tm-dash-hero__metrics">
@@ -346,6 +349,119 @@
     </div>
 </section>
 
+{# Vue allégée pour Conseiller: listes récentes et actions rapides #}
+{% if is_conseiller %}
+<section class="tm-dash-charts-row">
+    <div class="tm-dash-chart-col">
+        <div class="card tm-dash-chart mb-3">
+            <div class="card-header">
+            <h4>Stagiaires récents</h4>
+            <p>Derniers stagiaires créés / modifiés</p>
+            </div>
+            <div class="card-body">
+            <div class="list-group">
+                {% for s in recent_stagiaires %}
+                    <a href="{% url 'stagiaire' s.pk %}" class="list-group-item list-group-item-action d-flex align-items-center gap-3">
+                        {% if s.photo %}
+                            <img src="{{ s.photo.url }}" alt="" style="width:44px;height:44px;object-fit:cover;border-radius:6px;">
+                        {% else %}
+                            <img src="{% static 'assets/images/avatar.png' %}" alt="" style="width:44px;height:44px;object-fit:cover;border-radius:6px;">
+                        {% endif %}
+                        <div>
+                            <div class="fw-bold">{{ s.get_full_name }}</div>
+                            <div class="small text-muted">Mis à jour {{ s.updated_at|date:"d/m/Y" }}</div>
+                        </div>
+                    </a>
+                {% empty %}
+                    <div class="text-muted p-3">Aucun stagiaire récent.</div>
+                {% endfor %}
+            </div>
+            </div>
+        </div>
+
+        <div class="card tm-dash-chart mb-3">
+            <div class="card-header">
+            <h4>Inscriptions récentes</h4>
+            <p>Dernières inscriptions réalisées</p>
+            </div>
+            <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <div class="small text-muted">Dernières inscriptions</div>
+                <a href="{% url 'detailactions' %}" class="small">Voir tout</a>
+            </div>
+            <div class="list-group">
+                {% for ins in recent_inscriptions %}
+                    <div class="list-group-item d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="fw-bold">{{ ins.stagiaire.get_full_name }}</div>
+                            <div class="small text-muted">{{ ins.action.description }} — {{ ins.action.formation.nom }}</div>
+                        </div>
+                        <div class="small text-muted">Réf. #{{ ins.pk }}</div>
+                    </div>
+                {% empty %}
+                    <div class="text-muted p-3">Aucune inscription récente.</div>
+                {% endfor %}
+            </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="tm-dash-chart-col">
+        <div class="card tm-dash-chart mb-3">
+            <div class="card-header">
+            <h4>Paiements récents</h4>
+            <p>Vérifier encaissements</p>
+            </div>
+            <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <div class="small text-muted">Encaissements récents</div>
+                <a href="{% url 'paiements' %}" class="small">Voir tout</a>
+            </div>
+            <div class="list-group">
+                {% for p in recent_paiements %}
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="fw-bold">{{ p.stagiaire.get_full_name }}</div>
+                            <div class="small text-muted">{{ p.reference }} — {{ p.date_paiement|date:"d/m/Y" }}</div>
+                        </div>
+                        <div class="fw-bold">{{ p.montant|floatformat:0 }} USD</div>
+                    </div>
+                {% empty %}
+                    <div class="text-muted p-3">Aucun paiement récent.</div>
+                {% endfor %}
+            </div>
+            </div>
+        </div>
+
+        <div class="card tm-dash-chart">
+            <div class="card-header">
+            <h4>Raccourcis</h4>
+            <p>Actions rapides</p>
+            </div>
+            <div class="card-body">
+            <div class="tm-dash-quick-grid">
+                <a href="{% url 'stagiaire_create' %}" class="tm-dash-quick-link">
+                    <span class="tm-dash-quick-link__icon"><i class="bi bi-person-plus"></i></span>
+                    <div>
+                        <span class="tm-dash-quick-link__title">Nouvel apprenant</span>
+                        <span class="tm-dash-quick-link__text">Créer un dossier stagiaire</span>
+                    </div>
+                </a>
+                <a href="{% url 'detailactions' %}" class="tm-dash-quick-link">
+                    <span class="tm-dash-quick-link__icon"><i class="bi bi-people"></i></span>
+                    <div>
+                        <span class="tm-dash-quick-link__title">Inscriptions</span>
+                        <span class="tm-dash-quick-link__text">Gérer les inscriptions</span>
+                    </div>
+                </a>
+            </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% else %}
+
 <!-- Charts Row 1 -->
 <section class="tm-dash-charts-row">
     <div class="tm-dash-chart-col">
@@ -398,6 +514,8 @@
     </div>
 </section>
 
+{% endif %}
+
 <!-- Quick Access -->
 <section>
     <div class="card tm-dash-quick">
@@ -413,19 +531,21 @@
                         <span class="tm-dash-quick-link__text">Créer une fiche apprenant</span>
                     </span>
                 </a>
+                {% if request.user.is_superuser or request.user.profile and request.user.profile.name == "Caisse" %}
+                <a href="{% url 'paiement_create' %}" class="tm-dash-quick-link">
+                    <span class="tm-dash-quick-link__icon"><i class="bi bi-cash-stack"></i></span>
+                    <span>
+                        <span class="tm-dash-quick-link__title">Nouveau paiement</span>
+                        <span class="tm-dash-quick-link__text">Enregistrer un encaissement</span>
+                    </span>
+                </a>
+                {% endif %}
                 {% if request.user.is_superuser or request.user.profile and request.user.profile.name == "Manager" %}
                 <a href="{% url 'formation_create' %}" class="tm-dash-quick-link">
                     <span class="tm-dash-quick-link__icon"><i class="bi bi-folder-plus"></i></span>
                     <span>
                         <span class="tm-dash-quick-link__title">Nouvelle formation</span>
                         <span class="tm-dash-quick-link__text">Ajouter au catalogue</span>
-                    </span>
-                </a>
-                <a href="{% url 'paiement_create' %}" class="tm-dash-quick-link">
-                    <span class="tm-dash-quick-link__icon"><i class="bi bi-cash-stack"></i></span>
-                    <span>
-                        <span class="tm-dash-quick-link__title">Nouveau paiement</span>
-                        <span class="tm-dash-quick-link__text">Enregistrer un encaissement</span>
                     </span>
                 </a>
                 <a href="{% url 'services' %}" class="tm-dash-quick-link">
