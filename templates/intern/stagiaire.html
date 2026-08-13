@@ -1,4 +1,4 @@
- {% extends "base.html" %}
+{% extends "base.html" %}
 {% load static %}
 {% load tm_tags %}
 {% load widget_tweaks %}
@@ -216,9 +216,15 @@
     .tm-formation-item__meta {
         font-size: 0.8rem;
         color: #64748b;
+        margin-top: 0.25rem;
     }
 
-    /* ===== Études et formations listes ===== */
+    .form-label i {
+        color: #435ebe;
+        font-weight: 500;
+        margin-right: 0.3rem;
+    }
+
     .tm-study-item {
         border: 1px solid #f1f5f9;
         border-radius: 0.75rem;
@@ -301,17 +307,17 @@
                     <div class="wizard-step" data-step="1">
                         <div class="row g-3">
                             <div class="col-md-4">
-                                <label class="form-label" for="{{ form.nom.id_for_label }}">{{ form.nom.label }}</label>
+                                <label class="form-label" for="{{ form.nom.id_for_label }}"><i class="bi bi-person"></i> {{ form.nom.label }}</label>
                                 {{ form.nom }}
                                 {{ form.nom.errors }}
                             </div>
                             <div class="col-md-4">
-                                <label class="form-label" for="{{ form.postnom.id_for_label }}">{{ form.postnom.label }}</label>
+                                <label class="form-label" for="{{ form.postnom.id_for_label }}"><i class="bi bi-person"></i> {{ form.postnom.label }}</label>
                                 {{ form.postnom }}
                                 {{ form.postnom.errors }}
                             </div>
                             <div class="col-md-4">
-                                <label class="form-label" for="{{ form.prenom.id_for_label }}">{{ form.prenom.label }}</label>
+                                <label class="form-label" for="{{ form.prenom.id_for_label }}"><i class="bi bi-person"></i> {{ form.prenom.label }}</label>
                                 {{ form.prenom }}
                                 {{ form.prenom.errors }}
                             </div>
@@ -321,22 +327,22 @@
                     <div class="wizard-step d-none" data-step="2">
                         <div class="row g-3">
                             <div class="col-md-8">
-                                <label class="form-label" for="{{ form.adresse.id_for_label }}">{{ form.adresse.label }}</label>
+                                <label class="form-label" for="{{ form.adresse.id_for_label }}"><i class="bi bi-geo-alt"></i> {{ form.adresse.label }}</label>
                                 {{ form.adresse }}
                                 {{ form.adresse.errors }}
                             </div>
                             <div class="col-md-4">
-                                <label class="form-label" for="{{ form.sexe.id_for_label }}">{{ form.sexe.label }}</label>
+                                <label class="form-label" for="{{ form.sexe.id_for_label }}"><i class="bi bi-gender-ambiguous"></i> {{ form.sexe.label }}</label>
                                 {{ form.sexe }}
                                 {{ form.sexe.errors }}
                             </div>
                             <div class="col-md-4">
-                                <label class="form-label" for="{{ form.telephone.id_for_label }}">{{ form.telephone.label }}</label>
+                                <label class="form-label" for="{{ form.telephone.id_for_label }}"><i class="bi bi-telephone"></i> {{ form.telephone.label }}</label>
                                 {{ form.telephone }}
                                 {{ form.telephone.errors }}
                             </div>
                             <div class="col-md-4">
-                                <label class="form-label" for="{{ form.email.id_for_label }}">{{ form.email.label }}</label>
+                                <label class="form-label" for="{{ form.email.id_for_label }}"><i class="bi bi-envelope"></i> {{ form.email.label }}</label>
                                 {{ form.email }}
                                 {{ form.email.errors }}
                             </div>
@@ -346,27 +352,27 @@
                     <div class="wizard-step d-none" data-step="3">
                         <div class="row g-3">
                             <div class="col-md-4">
-                                <label class="form-label" for="{{ form.date_naissance.id_for_label }}">{{ form.date_naissance.label }}</label>
+                                <label class="form-label" for="{{ form.date_naissance.id_for_label }}"><i class="bi bi-calendar-event"></i> {{ form.date_naissance.label }}</label>
                                 {{ form.date_naissance }}
                                 {{ form.date_naissance.errors }}
                             </div>
                             <div class="col-md-4">
-                                <label class="form-label" for="{{ form.lieu_naissance.id_for_label }}">{{ form.lieu_naissance.label }}</label>
+                                <label class="form-label" for="{{ form.lieu_naissance.id_for_label }}"><i class="bi bi-map"></i> {{ form.lieu_naissance.label }}</label>
                                 {{ form.lieu_naissance }}
                                 {{ form.lieu_naissance.errors }}
                             </div>
                             <div class="col-md-4">
-                                <label class="form-label" for="{{ form.nationalite.id_for_label }}">{{ form.nationalite.label }}</label>
+                                <label class="form-label" for="{{ form.nationalite.id_for_label }}"><i class="bi bi-globe"></i> {{ form.nationalite.label }}</label>
                                 {{ form.nationalite }}
                                 {{ form.nationalite.errors }}
                             </div>
                             <div class="col-md-4">
-                                <label class="form-label" for="{{ form.type_piece.id_for_label }}">{{ form.type_piece.label }}</label>
+                                <label class="form-label" for="{{ form.type_piece.id_for_label }}"><i class="bi bi-card-text"></i> {{ form.type_piece.label }}</label>
                                 {{ form.type_piece }}
                                 {{ form.type_piece.errors }}
                             </div>
                             <div class="col-md-4">
-                                <label class="form-label" for="{{ form.numero_piece.id_for_label }}">{{ form.numero_piece.label }}</label>
+                                <label class="form-label" for="{{ form.numero_piece.id_for_label }}"><i class="bi bi-hash"></i> {{ form.numero_piece.label }}</label>
                                 {{ form.numero_piece }}
                                 {{ form.numero_piece.errors }}
                             </div>
@@ -376,27 +382,27 @@
                     <div class="wizard-step d-none" data-step="4">
                         <div class="row g-3">
                             <div class="col-md-4">
-                                <label class="form-label" for="{{ form.nom_pere.id_for_label }}">{{ form.nom_pere.label }}</label>
+                                <label class="form-label" for="{{ form.nom_pere.id_for_label }}"><i class="bi bi-person-fill"></i> {{ form.nom_pere.label }}</label>
                                 {{ form.nom_pere }}
                                 {{ form.nom_pere.errors }}
                             </div>
                             <div class="col-md-4">
-                                <label class="form-label" for="{{ form.nom_mere.id_for_label }}">{{ form.nom_mere.label }}</label>
+                                <label class="form-label" for="{{ form.nom_mere.id_for_label }}"><i class="bi bi-person-fill"></i> {{ form.nom_mere.label }}</label>
                                 {{ form.nom_mere }}
                                 {{ form.nom_mere.errors }}
                             </div>
                             <div class="col-md-4">
-                                <label class="form-label" for="{{ form.niveau_etude.id_for_label }}">{{ form.niveau_etude.label }}</label>
+                                <label class="form-label" for="{{ form.niveau_etude.id_for_label }}"><i class="bi bi-book"></i> {{ form.niveau_etude.label }}</label>
                                 {{ form.niveau_etude }}
                                 {{ form.niveau_etude.errors }}
                             </div>
                             <div class="col-md-4">
-                                <label class="form-label" for="{{ form.categorie.id_for_label }}">{{ form.categorie.label }}</label>
+                                <label class="form-label" for="{{ form.categorie.id_for_label }}"><i class="bi bi-tags"></i> {{ form.categorie.label }}</label>
                                 {{ form.categorie }}
                                 {{ form.categorie.errors }}
                             </div>
                             <div class="col-md-4 employment-only">
-                                <label class="form-label" for="{{ form.entreprise.id_for_label }}">{{ form.entreprise.label }}</label>
+                                <label class="form-label" for="{{ form.entreprise.id_for_label }}"><i class="bi bi-building"></i> {{ form.entreprise.label }}</label>
                                 {{ form.entreprise }}
                                 {{ form.entreprise.errors }}
                             </div>
@@ -406,22 +412,22 @@
                     <div class="wizard-step d-none" data-step="5">
                         <div class="row g-3">
                             <div class="col-md-4 employment-only">
-                                <label class="form-label" for="{{ form.fonction.id_for_label }}">{{ form.fonction.label }}</label>
+                                <label class="form-label" for="{{ form.fonction.id_for_label }}"><i class="bi bi-person-workspace"></i> {{ form.fonction.label }}</label>
                                 {{ form.fonction }}
                                 {{ form.fonction.errors }}
                             </div>
                             <div class="col-md-4 employment-only">
-                                <label class="form-label" for="{{ form.anciennete_emploi.id_for_label }}">{{ form.anciennete_emploi.label }}</label>
+                                <label class="form-label" for="{{ form.anciennete_emploi.id_for_label }}"><i class="bi bi-hourglass-split"></i> {{ form.anciennete_emploi.label }}</label>
                                 {{ form.anciennete_emploi }}
                                 {{ form.anciennete_emploi.errors }}
                             </div>
                             <div class="col-md-4 employment-only">
-                                <label class="form-label" for="{{ form.anciennete_entreprise.id_for_label }}">{{ form.anciennete_entreprise.label }}</label>
+                                <label class="form-label" for="{{ form.anciennete_entreprise.id_for_label }}"><i class="bi bi-building-check"></i> {{ form.anciennete_entreprise.label }}</label>
                                 {{ form.anciennete_entreprise }}
                                 {{ form.anciennete_entreprise.errors }}
                             </div>
                             <div class="col-md-4">
-                                <label class="form-label" for="{{ form.photo.id_for_label }}">{{ form.photo.label }}</label>
+                                <label class="form-label" for="{{ form.photo.id_for_label }}"><i class="bi bi-image"></i> {{ form.photo.label }}</label>
                                 {{ form.photo }}
                                 {{ form.photo.errors }}
                             </div>
@@ -429,11 +435,11 @@
                     </div>
 
                     <div class="d-flex justify-content-end gap-2 mt-4">
-                        <div class="me-auto align-self-center small text-muted" id="wizard-remaining">Pages restantes: <span id="wizard-remaining-count">0</span></div>
+                        <div class="me-auto align-self-center small text-muted" id="wizard-remaining"><i class="bi bi-layers me-1"></i>Étape: <span id="wizard-current-step">1</span> / <span id="wizard-total-steps">0</span></div>
                         <a href="{% url 'stagiaires' %}" class="btn btn-light-secondary">Annuler</a>
-                        <button type="button" class="btn btn-secondary d-none" id="wizard-prev">Précédent</button>
-                        <button type="button" class="btn btn-primary" id="wizard-next">Suivant</button>
-                        <button type="submit" class="btn btn-success d-none" id="wizard-submit">{% if mode == "edit" %}Enregistrer{% else %}Créer le stagiaire{% endif %}</button>
+                        <button type="button" class="btn btn-secondary d-none" id="wizard-prev"><i class="bi bi-arrow-left me-2"></i>Précédent</button>
+                        <button type="button" class="btn btn-primary" id="wizard-next">Suivant<i class="bi bi-arrow-right ms-2"></i></button>
+                        <button type="submit" class="btn btn-success d-none" id="wizard-submit"><i class="bi bi-check-circle me-2"></i>{% if mode == "edit" %}Enregistrer{% else %}Créer le stagiaire{% endif %}</button>
                     </div>
                 </form>
 
@@ -474,11 +480,13 @@
                         if (el) el.classList.remove('d-none');
                         if (n<=1) btnPrev.classList.add('d-none'); else btnPrev.classList.remove('d-none');
                         if (n>=total) { btnNext.classList.add('d-none'); btnSubmit.classList.remove('d-none'); } else { btnNext.classList.remove('d-none'); btnSubmit.classList.add('d-none'); }
-                        // update remaining pages count
-                        var remEl = document.getElementById('wizard-remaining-count');
-                        if (remEl) {
-                            try { remEl.textContent = Math.max(0, total - n); } catch(e) { remEl.textContent = '0'; }
-                        }
+                        
+                        // Mise à jour du compteur d'étapes (ex: 1 / 5)
+                        var currEl = document.getElementById('wizard-current-step');
+                        var totalEl = document.getElementById('wizard-total-steps');
+                        if (currEl) currEl.textContent = n;
+                        if (totalEl) totalEl.textContent = total;
+
                         // ensure employment fields visibility follows category
                         updateEmploymentFields();
                         // scroll into view for small screens

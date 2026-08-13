@@ -262,6 +262,36 @@
     .tm-dash-stat-value { font-size: 1.3rem; }
     .tm-dash-quick-grid { grid-template-columns: 1fr; }
 }
+
+/* Compact overrides for denser display (applied to all users on the homepage)
+   Reduce paddings, gaps, avatar sizes and font sizes for a compact Conseiller view */
+
+.compact-dashboard .tm-dash-hero {
+    padding: 0.6rem 0.8rem !important;
+    margin-bottom: 0.5rem !important;
+    border-radius: 0.6rem !important;
+}
+.compact-dashboard .tm-dash-hero__content h1 { font-size: 1.1rem !important; }
+.compact-dashboard .tm-dash-hero__actions { margin-top: 0.35rem !important; }
+
+.compact-dashboard .tm-dash-stats__grid { grid-template-columns: repeat(2, 1fr) !important; gap: 0.4rem !important; }
+.compact-dashboard .tm-dash-stat-card { padding: 0.35rem 0.5rem !important; gap: 0.4rem !important; border-radius: 0.5rem !important; }
+.compact-dashboard .tm-dash-stat-icon { width: 32px !important; height: 32px !important; font-size: 0.95rem !important; }
+.compact-dashboard .tm-dash-stat-value { font-size: 1.15rem !important; }
+
+.compact-dashboard .tm-dash-charts-row { gap: 0.6rem !important; margin-bottom: 0.6rem !important; }
+.compact-dashboard .tm-dash-chart .card-header { padding: 0.4rem 0.6rem !important; }
+.compact-dashboard .tm-dash-chart .card-body { padding: 0.4rem !important; }
+
+.compact-dashboard .list-group-item { padding: 0.35rem 0.5rem !important; font-size: 0.9rem; }
+.compact-dashboard .list-group-item img { width: 32px !important; height: 32px !important; border-radius: 4px !important; }
+
+.compact-dashboard .tm-dash-quick-grid { gap: 0.4rem !important; }
+.compact-dashboard .tm-dash-quick-link { padding: 0.6rem 0.7rem !important; }
+
+/* Apply compact mode to body.homepage for safer scoping */
+body.homepage .page-content { padding-top: 0.25rem; }
+
 </style>
 {% endblock style %}
 

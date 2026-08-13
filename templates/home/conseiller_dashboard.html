@@ -101,7 +101,7 @@
                                 <div class="fw-600">{{ s.get_full_name }}</div>
                                 <small class="small-muted">Mis à jour: {{ s.updated_at|naturaltime }}</small>
                             </div>
-                            <a href="{% url 'stagiaires' %}" class="ms-2 text-decoration-none" title="Voir stagiaires"><i class="bi bi-arrow-right-circle"></i></a>
+                            <a href="{% url 'stagiaire' s.pk %}" class="ms-2 text-decoration-none" title="Voir le stagiaire"><i class="bi bi-arrow-right-circle"></i></a>
                         </li>
                     {% empty %}
                         <li class="list-group-item text-muted">Aucun stagiaire récent</li>

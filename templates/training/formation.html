@@ -39,9 +39,9 @@
         <div class="card tm-detail-card">
             <div class="card-header">
                 <ul class="nav nav-tabs card-header-tabs" id="formationTab" role="tablist">
-                    <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#details">Configuration</a></li>
-                    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#modules">Modules ({{ object.modules.count }})</a></li>
-                    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#actions">Sessions ({{ object.actions.count }})</a></li>
+                    <li class="nav-item"><a class="nav-link active" data-tab="details" href="#details">Configuration</a></li>
+                    <li class="nav-item"><a class="nav-link" data-tab="modules" href="#modules">Modules <span class="badge rounded-pill bg-light-primary text-primary ms-1">{{ object.modules.count }}</span></a></li>
+                    <li class="nav-item"><a class="nav-link" data-tab="actions" href="#actions">Sessions <span class="badge rounded-pill bg-light-info text-info ms-1">{{ object.actions.count }}</span></a></li>
                 </ul>
             </div>
             <div class="card-body">
@@ -139,7 +139,9 @@
                                     </tr>
                                     {% endif %}
                                     {% empty %}
-                                    <tr><td colspan="4" class="text-center text-muted p-4">Aucun module configuré.</td></tr>
+                                    <tr><td colspan="4" class="text-center text-muted p-4">
+                                        <i class="bi bi-info-circle me-2"></i>Aucun module configuré pour ce programme. Veuillez contacter le Manager ou le Chef de Filière.
+                                    </td></tr>
                                     {% endfor %}
                                 </tbody>
                             </table>
@@ -169,7 +171,9 @@
                                         <td><a href="{% url 'action' a.pk %}" class="btn btn-sm btn-light-primary">Voir</a></td>
                                     </tr>
                                     {% empty %}
-                                    <tr><td colspan="5" class="text-center text-muted p-4">Aucune session planifiée pour cette formation.</td></tr>
+                                    <tr><td colspan="5" class="text-center text-muted p-4">
+                                        <i class="bi bi-calendar-x me-2"></i>Aucune session n'a encore été planifiée pour ce programme.
+                                    </td></tr>
                                     {% endfor %}
                                 </tbody>
                             </table>
@@ -181,3 +185,43 @@
     </section>
 </div>
 {% endblock content %}
+
+{% block script %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const tabLinks = document.querySelectorAll('#formationTab .nav-link');
+        const tabPanes = document.querySelectorAll('.tab-content .tab-pane');
+
+        if (tabLinks.length === 0) {
+            console.error('Erreur: Aucun lien d\'onglet trouvé dans #formationTab');
+            return;
+        }
+
+        tabLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                console.log('Clic sur l\'onglet:', targetId);
+
+                // 1. Mise à jour visuelle des liens
+                tabLinks.forEach(l => l.classList.remove('active'));
+                this.classList.add('active');
+
+                // 2. Basculement des panneaux
+                tabPanes.forEach(pane => {
+                    pane.classList.remove('show', 'active');
+                    pane.classList.add('fade');
+                });
+
+                const targetPane = document.querySelector(targetId);
+                if (targetPane) {
+                    targetPane.classList.add('show', 'active');
+                    console.log('Panneau activé:', targetId);
+                } else {
+                    console.error('Erreur: Panneau non trouvé pour l\'id', targetId);
+                }
+            });
+        });
+    });
+</script>
+{% endblock script %}
