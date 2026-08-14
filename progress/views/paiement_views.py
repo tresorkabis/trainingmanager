@@ -8,6 +8,7 @@ from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
 from datetime import date
 
+
 from progress.models import Paiement
 from progress.forms import PaiementForm
 
@@ -52,6 +53,52 @@ def can_print_receipts(user):
         return True
     profile = getattr(user, "profile", None)
     return bool(profile and getattr(profile, "name", None) in RECEIPT_PRINT_PROFILES)
+
+
+def build_action_stagiaire_map():
+    """Retourne (actions_by_stagiaire, actions_map, preferred_action_by_stagiaire)
+    pour le filtrage dynamique du champ 'Action de formation' selon le stagiaire choisi."""
+    from progress.models import DetailAction, Action
+    by_sid = {}
+    preferred = {}
+    # La plus récente action (par date de début) est retenue comme valeur par défaut.
+    rows = DetailAction.objects.filter(stagiaire__active=True).order_by(
+        "stagiaire_id", "-action__date_debut", "-id"
+    ).values_list("stagiaire_id", "action_id")
+    for sid, aid in rows:
+        by_sid.setdefault(sid, [])
+        if aid not in by_sid[sid]:
+            by_sid[sid].append(aid)
+        if sid not in preferred:
+            preferred[sid] = aid
+    actions_map = {}
+    for a in Action.objects.select_related("formation").order_by("description"):
+        actions_map[a.pk] = f"{a.description} ({a.formation.nom})"
+    return by_sid, actions_map, preferred
+
+
+def build_paiement_financial_maps(exclude_paiement_id=None):
+    """Retourne (action_costs, already_paid) pour l'affichage dynamique du
+    montant a payer / montant deja paye sur le formulaire de paiement.
+
+    action_costs : {action_pk: cout_formation}
+    already_paid : {stagiaire_pk: {action_pk: total_verse}}
+    """
+    from progress.models import Action, Paiement
+    from django.db.models import Sum
+    action_costs = {
+        a.pk: float(a.formation.cout or 0)
+        for a in Action.objects.select_related("formation").only("pk", "formation__cout")
+    }
+    already_paid = {}
+    qs = Paiement.objects.all()
+    if exclude_paiement_id is not None:
+        qs = qs.exclude(pk=exclude_paiement_id)
+    for row in qs.values("stagiaire_id", "action_id").annotate(total=Sum("montant")):
+        if row["action_id"] is None:
+            continue
+        already_paid.setdefault(row["stagiaire_id"], {})[row["action_id"]] = float(row["total"] or 0)
+    return action_costs, already_paid
 
 
 class PaiementManagePermissionMixin:
@@ -130,7 +177,30 @@ class PaiementListView(ListView):
 
         context['link'] = 'paiements'
         context['titre'] = 'Liste des paiements'
+
+        # Calcul des soldes restants par paiement (évite N+1)
+        action_costs, already_paid = build_paiement_financial_maps()
+        soldes = {}
+        for p in all_paiements:
+            if p.action_id and p.stagiaire_id:
+                cout = action_costs.get(p.action_id, 0)
+                paye = already_paid.get(p.stagiaire_id, {}).get(p.action_id, 0)
+                soldes[p.pk] = cout - paye
+            else:
+                soldes[p.pk] = None
+        context['soldes'] = soldes
+
+        # Injecte les soldes directement sur chaque objet paiement pour éviter N+1
+        # lorsque le template appelle paiement.get_solde_restant
+        for p in context['paiement_list']:
+            setattr(p, '_precomputed_solde', soldes.get(p.pk))
+
         return context
+
+        
+
+
+
 
 @method_decorator(login_required, name='dispatch')
 class PaiementCreateView(PaiementManagePermissionMixin, CreateView):
@@ -189,6 +259,13 @@ class PaiementCreateView(PaiementManagePermissionMixin, CreateView):
         else:
             context['prefill_action'] = False
 
+        # Données pour le filtrage dynamique action <-> stagiaire
+        context['actions_by_stagiaire'], context['actions_map'], context['preferred_action_by_stagiaire'] = build_action_stagiaire_map()
+        # Donneess financieres (montant a payer / deja paye) pour l'affichage dynamique
+        context['action_costs'], context['already_paid'] = build_paiement_financial_maps(
+            exclude_paiement_id=getattr(self.object, 'pk', None)
+        )
+
         return context
 
 @method_decorator(login_required, name='dispatch')
@@ -239,6 +316,12 @@ class PaiementUpdateView(PaiementManagePermissionMixin, UpdateView):
         context = super().get_context_data(**kwargs)
         context['link'] = 'paiements'
         context['titre'] = 'Modifier un paiement'
+        # Données pour le filtrage dynamique action <-> stagiaire
+        context['actions_by_stagiaire'], context['actions_map'], context['preferred_action_by_stagiaire'] = build_action_stagiaire_map()
+        # Donneess financieres (montant a payer / deja paye) pour l'affichage dynamique
+        context['action_costs'], context['already_paid'] = build_paiement_financial_maps(
+            exclude_paiement_id=getattr(self.object, 'pk', None)
+        )
         return context
 
 @method_decorator(login_required, name='dispatch')

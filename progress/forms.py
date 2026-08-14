@@ -42,11 +42,25 @@ class PaiementForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Assurez-vous que tous les champs ont la classe form-control ou form-select
-        for field_name, field in self.fields.items():
-            # Les champs stagiaire, action, date_paiement, motif, mode_paiement, montant ont déjà leurs classes définies
-            # Soit via le widget directement, soit via Meta.widgets
-            pass # Plus besoin de boucle générique ici car tout est géré explicitement
+        # L'action de formation doit être liée au stagiaire : on ne propose que les
+        # actions auxquelles le stagiaire est inscrit (DetailAction). Ce filtre est
+        # appliqué côté serveur lors d'un POST ou d'une modification.
+        from progress.models import DetailAction, Action
+        stagiaire_id = None
+        if self.data.get('stagiaire'):
+            try:
+                stagiaire_id = int(self.data.get('stagiaire'))
+            except (TypeError, ValueError):
+                stagiaire_id = None
+        if stagiaire_id is None and self.instance and self.instance.pk and self.instance.stagiaire_id:
+            stagiaire_id = self.instance.stagiaire_id
+        if stagiaire_id:
+            action_ids = DetailAction.objects.filter(
+                stagiaire_id=stagiaire_id
+            ).values_list('action_id', flat=True).distinct()
+            self.fields['action'].queryset = Action.objects.filter(
+                pk__in=action_ids
+            ).order_by('description')
 
 # Removed FormateurPerformanceForm class
 

@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Tableau de bord Caisse{% endblock title %}
+
+{% block style %}
+<style>
+/* Dashboard Caisse - Trésorerie */
+.caisse-card { border-radius: 0.9rem; box-shadow: 0 8px 24px rgba(15,23,42,0.06); overflow: hidden; border:1px solid #eef2f7; }
+.caisse-card .card-header { background: linear-gradient(90deg,#f8faff 0%,#ffffff 100%); padding:0.75rem 1rem; font-weight:700; display:flex; justify-content:space-between; align-items:center; }
+.caisse-card .list-group-item { padding:0.6rem 1rem; }
+.caisse-card .card-footer { background:#fbfbfc; padding:0.5rem 0.8rem; text-align:right; }
+.montant { font-weight:800; color:#0f172a; }
+.small-muted { font-size:0.82rem; color:#6b7280; }
+@media (max-width:767px){ .caisse-card .card-header h5{font-size:0.95rem;} }
+</style>
+{% endblock style %}
+
+{% block content %}
+
+{# HERO SECTION #}
+<div class="tm-hero tm-hero--primary mb-4">
+    <div class="tm-hero__layout">
+        <div class="tm-hero__left">
+            <div class="tm-section-titlebar">
+                <div class="tm-section-titlebar__icon">
+                    <i class="bi bi-cash-stack"></i>
+                </div>
+                <div class="tm-section-titlebar__text">
+                    <h3>Bienvenue, {{ user.get_full_name|default:user.username }} !</h3>
+                    <p>Votre tableau de bord des encaissements (trésorerie).</p>
+                </div>
+            </div>
+            <div class="tm-hero__actions">
+                <a href="{% url 'paiement_create' %}" class="tm-btn-soft">
+                    <i class="bi bi-plus-circle me-2"></i> Nouveau paiement
+                </a>
+                <a href="{% url 'paiements' %}" class="tm-btn-soft">
+                    <i class="bi bi-receipt me-2"></i> Tous les paiements
+                </a>
+            </div>
+        </div>
+        <div class="tm-hero__right">
+            <div class="tm-hero__stats-grid">
+                {% for stat in hero_stats %}
+                <div class="tm-stat-card">
+                    <span class="tm-stat-card__label">{{ stat.label }}</span>
+                    <span class="tm-stat-card__value">{{ stat.value }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{# TRESORERIE SUMMARY #}
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card caisse-card">
+            <div class="card-body text-center">
+                <div class="text-uppercase small-muted mb-1">Nombre de paiements</div>
+                <div class="display-6 fw-bold text-primary">{{ nb_paiements }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-8">
+        <div class="card caisse-card">
+            <div class="card-header"><h5 class="mb-0">Encaissements cumulés</h5></div>
+            <div class="card-body">
+                <div class="row text-center g-2">
+                    {% for stat in hero_stats %}
+                    <div class="col-6 col-md-3">
+                        <div class="text-uppercase small-muted">{{ stat.label }}</div>
+                        <div class="fw-bold text-dark fs-5">{{ stat.value }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# RECENT PAYMENTS #}
+<div class="card caisse-card">
+    <div class="card-header">
+        <h5 class="mb-0">Derniers paiements enregistrés</h5>
+        <a href="{% url 'paiements' %}" class="small text-decoration-none">Voir plus &raquo;</a>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Stagiaire</th>
+                    <th>Action / Formation</th>
+                    <th>Mode</th>
+                    <th>Date</th>
+                    <th class="text-end">Montant</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in recent_paiements %}
+                <tr>
+                    <td class="fw-bold">{{ p.stagiaire.get_full_name }}</td>
+                    <td>
+                        <div>{{ p.action.description }}</div>
+                        <small class="small-muted">{{ p.action.formation.nom }}</small>
+                    </td>
+                    <td>
+                        <span class="badge {% if p.mode_paiement == 'ESPECES' %}bg-light-success text-success{% else %}bg-light-info text-info{% endif %}">
+                            {{ p.get_mode_paiement_display }}
+                        </span>
+                    </td>
+                    <td>{{ p.date_paiement|date:"d/m/Y" }}</td>
+                    <td class="text-end montant">{{ p.montant|floatformat:2 }} USD</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center text-muted p-4">Aucun paiement enregistré pour le moment.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="card-footer">
+        <a href="{% url 'paiement_create' %}" class="text-decoration-none">Enregistrer un paiement &raquo;</a>
+    </div>
+</div>
+
+{% endblock content %}

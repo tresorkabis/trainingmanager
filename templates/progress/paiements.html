@@ -42,6 +42,7 @@
                                 <th>Stagiaire</th>
                                 <th>Action / Formation</th>
                                 <th>Montant</th>
+                                <th>Solde restant</th>
                                 <th>Date</th>
                                 <th>Mode</th>
                                 {% if can_manage_paiement or can_delete_paiement %}
@@ -71,6 +72,21 @@
                                     {% endif %}
                                 </td>
                                 <td><span class="fw-bold text-success">{{ paiement.montant|floatformat:0 }} USD</span></td>
+                                <td>
+                                    {% with solde=paiement.get_solde_restant %}
+                                        {% if solde is not none %}
+                                            {% if solde == 0 %}
+                                                <span class="fw-bold text-success">Soldé</span>
+                                            {% elif solde < 0 %}
+                                                <span class="fw-bold text-danger">{{ solde|abs|floatformat:0 }} USD (soldé excédentaire)</span>
+                                            {% else %}
+                                                <span class="fw-bold text-warning">{{ solde|floatformat:0 }} USD</span>
+                                            {% endif %}
+                                        {% else %}
+                                            <span class="text-muted">-</span>
+                                        {% endif %}
+                                    {% endwith %}
+                                </td>
                                 <td>{{ paiement.date_paiement|date:"d/m/Y" }}</td>
                                 <td>
                                     {% if paiement.mode_paiement == 'ESPECES' %}

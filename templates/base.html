@@ -86,6 +86,36 @@
                             </li>
 
 
+                        {% elif request.user.profile and request.user.profile.name == "Caisse" %}
+
+                            <li class="sidebar-title">Trésorerie</li>
+                            <li class="sidebar-item">
+                                <a href="{% url 'paiement_create' %}" class='sidebar-link'>
+                                    <i class="bi bi-plus-circle"></i>
+                                    <span>Nouveau paiement</span>
+                                </a>
+                            </li>
+                            <li class="sidebar-item {% if link == 'paiements' %} active {% endif %}">
+                                <a href="{% url 'paiements' %}" class='sidebar-link'>
+                                    <i class="bi bi-wallet-fill"></i>
+                                    <span>Paiements</span>
+                                </a>
+                            </li>
+
+                            <li class="sidebar-title">Consultation</li>
+                            <li class="sidebar-item {% if link == 'actions' %} active {% endif %}">
+                                <a href="{% url 'actions' %}" class='sidebar-link'>
+                                    <i class="bi bi-clipboard-check"></i>
+                                    <span>Actions de formation</span>
+                                </a>
+                            </li>
+                            <li class="sidebar-item {% if link == 'formations' %} active {% endif %}">
+                                <a href="{% url 'formations' %}" class='sidebar-link'>
+                                    <i class="bi bi-journal-text"></i>
+                                    <span>Formations</span>
+                                </a>
+                            </li>
+
                         {% else %}
 
                             <li class="sidebar-title">Gestion des Apprenants et Formateurs</li>

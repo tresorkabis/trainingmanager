@@ -11,8 +11,51 @@
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 <link href="https://cdn.jsdelivr.net/npm/simple-datatables@latest/dist/style.css" rel="stylesheet" type="text/css">
 <style>
-    .nav-tabs .nav-link { border-radius: 0.5rem 0.5rem 0 0; font-weight: 600; color: #7b8190; }
-    .nav-tabs .nav-link.active { color: #435ebe; background-color: #fff; border-bottom-color: transparent; }
+    .nav-tabs { gap: 0.3rem; border-bottom: 1px solid #e2e8f0; }
+    .nav-tabs .nav-link {
+        border-radius: 0.5rem 0.5rem 0 0;
+        font-weight: 600;
+        color: #435ebe;                 /* couleur foncée pour une lecture claire */
+        border: 1px solid #e2e8f0;
+        border-bottom: none;
+        background: #f4f7ff;            /* fond léger pour rendre la barre d'onglets visible */
+        padding: 0.6rem 1rem;
+        transition: color 0.15s ease, background-color 0.15s ease;
+    }
+    .nav-tabs .nav-link:hover,
+    .nav-tabs .nav-link:focus-visible {
+        color: #25396f;
+        background: #e8edff;
+        outline: none;
+    }
+    .nav-tabs .nav-link.active {
+        color: #435ebe;
+        background-color: #fff;
+        font-weight: 700;
+        border-color: #d6e0ff;
+        border-bottom-color: transparent;
+        box-shadow: 0 -2px 8px rgba(67, 94, 190, 0.08);
+    }
+    /* Les cartes .tm-stat-card sont conçues pour le hero (fond bleu / texte blanc).
+       Dans la carte détail (fond clair) elles deviennent blanches sur blanc → on
+       applique un style lisible sur fond clair via un scoping sur la carte détail. */
+    .tm-detail-card .tm-stat-card {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        color: #25396f;
+        text-align: left;
+        min-width: 0;
+        box-shadow: 0 1px 3px rgba(17, 24, 39, 0.05);
+    }
+    .tm-detail-card .tm-stat-card__label {
+        color: #6c757d;
+        text-shadow: none;
+    }
+    .tm-detail-card .tm-stat-card__value {
+        color: #25396f;
+        font-size: 1.1rem !important;
+        text-shadow: none;
+    }
     .select2-container--default .select2-selection--single { height: calc(1.5em + 1rem + 2px); padding: 0.5rem 0.75rem; border: 1px solid #dce7f1; border-radius: 0.5rem; }
     .tm-chart-container { background: #fcfcfc; border: 1px solid #eef2f7; border-radius: 1rem; padding: 1.5rem; }
 </style>
@@ -35,10 +78,10 @@
                 {% endif %}
 
                 <ul class="nav nav-tabs nav-fill mb-4" id="actionDetailTab" role="tablist">
-                    <li class="nav-item" role="presentation"><a class="nav-link active" id="details-tab" data-bs-toggle="tab" href="#details" role="tab">Informations</a></li>
-                    <li class="nav-item" role="presentation"><a class="nav-link" id="modules-tab" data-bs-toggle="tab" href="#modules" role="tab">Modules & Progressions</a></li>
-                    <li class="nav-item" role="presentation"><a class="nav-link" id="stagiaires-tab" data-bs-toggle="tab" href="#stagiaires" role="tab">Stagiaires ({{ inscription_count }})</a></li>
-                    <li class="nav-item" role="presentation"><a class="nav-link" id="finances-tab" data-bs-toggle="tab" href="#finances" role="tab">Finances</a></li>
+                    <li class="nav-item" role="presentation"><a class="nav-link active" id="details-tab" href="#details" role="tab">Informations</a></li>
+                    <li class="nav-item" role="presentation"><a class="nav-link" id="modules-tab" href="#modules" role="tab">Modules & Progressions <span class="badge rounded-pill bg-light-primary text-primary ms-1">{{ modules|length }}</span></a></li>
+                    <li class="nav-item" role="presentation"><a class="nav-link" id="stagiaires-tab" href="#stagiaires" role="tab">Stagiaires <span class="badge rounded-pill bg-light-info text-info ms-1">{{ inscription_count }}</span></a></li>
+                    <li class="nav-item" role="presentation"><a class="nav-link" id="finances-tab" href="#finances" role="tab">Finances</a></li>
                 </ul>
 
                 <div class="tab-content" id="actionDetailTabContent">
@@ -307,6 +350,23 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // 0. Bascule des onglets (même approche que la page formations)
+        const detailTabLinks = document.querySelectorAll('#actionDetailTab .nav-link');
+        const detailTabPanes = document.querySelectorAll('#actionDetailTabContent .tab-pane');
+        detailTabLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                detailTabLinks.forEach(l => l.classList.remove('active'));
+                this.classList.add('active');
+                detailTabPanes.forEach(pane => {
+                    pane.classList.remove('show', 'active');
+                    pane.classList.add('fade');
+                });
+                const targetPane = document.querySelector(this.getAttribute('href'));
+                if (targetPane) targetPane.classList.add('show', 'active');
+            });
+        });
+
         // 1. Initialisation Datatable
         try {
             const table = document.querySelector('#stagiaireTable');

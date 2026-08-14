@@ -54,10 +54,30 @@
                         <div class="col-md-6 col-12">
                             <div class="form-group mb-3">
                                 <label for="{{ form.montant.id_for_label }}" class="form-label">{{ form.montant.label }}</label>
-                                {{ form.montant|add_class:"form-control" }}
+                                                                                                {{ form.montant|add_class:"form-control" }}
                                 {% for error in form.montant.errors %}
                                     <div class="invalid-feedback d-block">{{ error }}</div>
                                 {% endfor %}
+                            </div>
+                        </div>
+                        <div class="col-12" id="montant-info-wrapper" style="display:none;">
+                            <div class="card bg-light border mt-2">
+                                <div class="card-body py-2 px-3">
+                                    <div class="row g-2 align-items-center text-center text-md-start">
+                                        <div class="col-4">
+                                            <small class="text-muted d-block">Montant à payer</small>
+                                            <span id="montant-a-payer" class="fw-bold text-primary mb-0">-</span>
+                                        </div>
+                                        <div class="col-4">
+                                            <small class="text-muted d-block">Déjà payé</small>
+                                            <span id="montant-deja-paye" class="fw-bold text-success mb-0">-</span>
+                                        </div>
+                                        <div class="col-4">
+                                            <small class="text-muted d-block">Solde restant</small>
+                                            <span id="solde-restant" class="fw-bold text-warning mb-0">-</span>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <div class="col-md-6 col-12">
@@ -126,6 +146,11 @@
 
 {% block script %}
     {{ form.media }} {# Charge les fichiers JS et CSS de Select2 #}
+    {{ actions_by_stagiaire|json_script:"actions-by-stagiaire-data" }}
+    {{ actions_map|json_script:"actions-map-data" }}
+    {{ preferred_action_by_stagiaire|json_script:"preferred-action-data" }}
+    {{ action_costs|json_script:"action-costs-data" }}
+    {{ already_paid|json_script:"already-paid-data" }}
     <script>
         // Initialisation manuelle de Select2 après le chargement du DOM
         $(document).ready(function() {
@@ -155,6 +180,89 @@
                 allowClear: true,
                 width: '100%'
             });
+
+            // --- Filtrage dynamique : l'action doit être liée au stagiaire choisi ---
+            try {
+                const actionByStagiaire = JSON.parse(document.getElementById('actions-by-stagiaire-data').textContent);
+                const actionsMap = JSON.parse(document.getElementById('actions-map-data').textContent);
+                const preferredAction = JSON.parse(document.getElementById('preferred-action-data').textContent);
+                const actionCosts = JSON.parse(document.getElementById('action-costs-data').textContent);
+                const alreadyPaid = JSON.parse(document.getElementById('already-paid-data').textContent);
+
+                function formatMoney(value) {
+                    var n = parseFloat(value);
+                    if (isNaN(n)) n = 0;
+                    return new Intl.NumberFormat('fr-FR', {style: 'currency', currency: 'USD', minimumFractionDigits: 2}).format(n);
+                }
+
+                function updateMontantInfo(stagiaireId, actionId) {
+                    var wrapper = document.getElementById('montant-info-wrapper');
+                    if (!wrapper) return;
+                    var aPayer = document.getElementById('montant-a-payer');
+                    var deja = document.getElementById('montant-deja-paye');
+                    var solde = document.getElementById('solde-restant');
+                    if (!stagiaireId || !actionId) { wrapper.style.display = 'none'; return; }
+                    var cout = parseFloat(actionCosts[actionId]) || 0;
+                    var stagMap = alreadyPaid[stagiaireId] || {};
+                    var paye = parseFloat(stagMap[actionId]) || 0;
+                    if (aPayer) aPayer.textContent = formatMoney(cout);
+                    if (deja) deja.textContent = formatMoney(paye);
+                    if (solde) solde.textContent = formatMoney(cout - paye);
+                    wrapper.style.display = '';
+                }
+
+                // Actualiser les montants quand l'action de formation est changee
+                $('#id_action').on('change', function () {
+                    updateMontantInfo($('#id_stagiaire').val(), $(this).val());
+                });
+
+                function rebuildActionOptions(stagiaireId, keepSelection, autoSelect) {
+                    const $action = $('#id_action');
+                    const allowed = (stagiaireId && actionByStagiaire[stagiaireId]) ? actionByStagiaire[stagiaireId] : [];
+                    const oldVal = $action.val();
+                    $action.select2('destroy');
+                    $action.find('option').remove();
+                    $action.append($('<option value=""></option>'));
+                    (allowed || []).forEach(function(aid) {
+                        const label = actionsMap[aid];
+                        if (label) {
+                            $action.append($('<option>').val(aid).text(label));
+                        }
+                    });
+                    // Auto-sélection : la plus récente action du stagiaire (ou la 1ère disponible)
+                    if (autoSelect && stagiaireId && allowed.length) {
+                        const pref = preferredAction[stagiaireId] ? parseInt(preferredAction[stagiaireId], 10) : null;
+                        if (pref && allowed.indexOf(pref) !== -1) {
+                            $action.val(pref);
+                        } else {
+                            $action.val(allowed[0]);
+                        }
+                    } else if (keepSelection && allowed && allowed.indexOf(parseInt(oldVal, 10)) !== -1) {
+                        $action.val(oldVal);
+                    }
+                    $action.select2({
+                        placeholder: "Sélectionnez une action de formation (optionnel)",
+                        allowClear: true,
+                        width: '100%'
+                    });
+                }
+
+                const stagiaireSelect = document.getElementById('id_stagiaire');
+                if (stagiaireSelect) {
+                    $('#id_stagiaire').on('change', function() {
+                        var sid = $(this).val();
+                        rebuildActionOptions(sid, false, true);
+                        updateMontantInfo(sid, $('#id_action').val());
+                    });
+                    // Au chargement (ex. modification), on filtre si un stagiaire est présélectionné
+                    if (stagiaireSelect.value) {
+                        rebuildActionOptions(stagiaireSelect.value, true, false);
+                        updateMontantInfo(stagiaireSelect.value, $('#id_action').val());
+                    }
+                }
+            } catch (e) {
+                console.error("Filtrage action/stagiaire:", e);
+            }
 
             if (modePaiementSelect) {
                 modePaiementSelect.addEventListener('change', toggleBordereauField);

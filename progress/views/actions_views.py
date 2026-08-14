@@ -22,6 +22,11 @@ from decimal import Decimal
 
 
 class ActionPermissionMixin:
+    # Profils autorisés à GÉRER les actions (créer/modifier/supprimer)
+    MANAGE_ACTION_PROFILES = ["Manager", "Chef de filière", "Chef de service"]
+    # Profils autorisés à CONSULTER les actions en lecture seule (sans les gérer)
+    VIEW_ACTION_PROFILES = ["Caisse", "Conseiller", "Inspecteur", "Pédagogique", "Formateur"]
+
     def normalize_formateur_ids(self, formateur_ids):
         return [int(formateur_id) for formateur_id in formateur_ids if str(formateur_id).isdigit()]
 
@@ -37,12 +42,19 @@ class ActionPermissionMixin:
             return queryset.filter(filiere__service=user.service)
         return Formation.objects.none()
 
+    def get_view_allowed_formations(self):
+        """Formations dont l'utilisateur peut CONSULTER les actions (lecture seule incluse)."""
+        user = self.request.user
+        if user.profile and user.profile.name in self.VIEW_ACTION_PROFILES:
+            return Formation.objects.all().prefetch_related("modules__formateurs")
+        return self.get_allowed_formations()
+
     def get_queryset(self):
-        allowed_formations = self.get_allowed_formations()
-        if not allowed_formations.exists():
+        view_formations = self.get_view_allowed_formations()
+        if not view_formations.exists():
             return Action.objects.none()
         return (
-            Action.objects.filter(formation__in=allowed_formations)
+            Action.objects.filter(formation__in=view_formations)
             .select_related("formation", "formation__filiere")
             .prefetch_related("formateurs")
             .annotate(stagiaire_total=Count("detailaction", distinct=True), formateur_total=Count("formateurs", distinct=True))
@@ -56,7 +68,8 @@ class ActionPermissionMixin:
         return obj
 
     def enforce_manage_permission(self):
-        if not self.get_allowed_formations().exists():
+        user = self.request.user
+        if not (user.is_superuser or (user.profile and user.profile.name in self.MANAGE_ACTION_PROFILES)):
             raise PermissionDenied("Vous n'avez pas la permission de gérer les actions.")
 
     def get_action_status(self, action):

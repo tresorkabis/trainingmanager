@@ -51,6 +51,40 @@ class HomeView(View):
             metiers_queryset = Formation.objects.none()
             filieres_queryset = Filiere.objects.none()
 
+        # =========== TABLEAU DE BORD DÉDIÉ À LA CAISSE (Trésorerie) ===========
+        # La Caisse gère les encaissements : on lui affiche des stats de trésorerie
+        # plutôt qu'un dashboard général vide (les querysets ci-dessus sont vides pour elle).
+        if user.profile and user.profile.name == "Caisse":
+            paiements_qs = (
+                Paiement.objects.select_related("stagiaire", "action__formation")
+                .order_by("-date_paiement", "-id")
+            )
+            today = date.today()
+            total_encaisse = paiements_qs.aggregate(t=Sum("montant"))["t"] or 0
+            total_especes = paiements_qs.filter(mode_paiement="ESPECES").aggregate(t=Sum("montant"))["t"] or 0
+            total_virement = paiements_qs.filter(mode_paiement="VIREMENT").aggregate(t=Sum("montant"))["t"] or 0
+            total_mois = paiements_qs.filter(
+                date_paiement__year=today.year, date_paiement__month=today.month
+            ).aggregate(t=Sum("montant"))["t"] or 0
+            nb_paiements = paiements_qs.count()
+            recent_paiements = list(paiements_qs[:8])
+
+            hero_stats = [
+                {"label": "Total Encaissé", "value": f"{total_encaisse:,.0f} USD"},
+                {"label": "Ce mois", "value": f"{total_mois:,.0f} USD"},
+                {"label": "Espèces", "value": f"{total_especes:,.0f} USD"},
+                {"label": "Virements", "value": f"{total_virement:,.0f} USD"},
+            ]
+            ctx = {
+                "link": "home",
+                "user": user,
+                "hero_stats": hero_stats,
+                "nb_paiements": nb_paiements,
+                "recent_paiements": recent_paiements,
+                "is_caisse": True,
+            }
+            return render(request, "home/caisse_dashboard.html", ctx)
+
         # =========== GRAPHIQUE EXISTANT : Répartition par filière ===========
         # Agréger les stagiaires et les actions par filière en une seule fois
         filiere_stats = filieres_queryset.annotate(

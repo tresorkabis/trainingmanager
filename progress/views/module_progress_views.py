@@ -16,8 +16,28 @@ class ModuleProgressListView(LoginRequiredMixin, ListView):
     context_object_name = 'module_progressions'
     paginate_by = 10
 
+    def get_allowed_action_ids(self):
+        """Retourne les ids d'actions accessibles selon le rôle, ou None si toutes."""
+        user = self.request.user
+        if user.is_superuser or (user.profile and user.profile.name == "Manager"):
+            return None  # Accès à toutes les actions
+        if user.profile and user.profile.name == "Chef de filière" and user.filiere:
+            return Action.objects.filter(
+                formation__filiere=user.filiere
+            ).values_list('pk', flat=True)
+        if user.profile and user.profile.name == "Chef de service" and user.service:
+            return Action.objects.filter(
+                formation__filiere__service=user.service
+            ).values_list('pk', flat=True)
+        return Action.objects.none().values_list('pk', flat=True)
+
     def get_queryset(self):
         queryset = super().get_queryset().select_related('formateur', 'action', 'module') # Updated select_related
+
+        # Filtrer selon le rôle (filière / service)
+        allowed_action_ids = self.get_allowed_action_ids()
+        if allowed_action_ids is not None:
+            queryset = queryset.filter(action_id__in=allowed_action_ids)
         
         query = self.request.GET.get('q')
         formateur_id = self.request.GET.get('formateur') # Changed from stagiaire_id
