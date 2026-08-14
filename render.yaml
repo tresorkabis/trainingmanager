@@ -1,0 +1,21 @@
+# Render Blueprint for Training Manager
+services:
+  - type: web
+    name: training-manager-web
+    env: python
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn config.wsgi:application --bind 0.0.0.0:$PORT"
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: settings.prod
+      - key: PYTHON_VERSION
+        value: 3.9.0
+      - key: DJANGO_SECRET_KEY
+        sync: false
+      - key: ALLOWED_HOSTS
+        value: "your-app-name.onrender.com"
+
+  - type: database
+    name: training-manager-db
+    database: postgres
+    plan: free

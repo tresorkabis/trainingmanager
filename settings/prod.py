@@ -4,19 +4,18 @@ from .base import *
 DEBUG = False
 
 # SECURITY WARNING: replace this with your production host(s)!
-ALLOWED_HOSTS = ['tresorkabis.pythonanywhere.com']
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'tresorkabis.pythonanywhere.com').split(',')
 
 # SECURITY WARNING: La clé secrète doit être définie via une variable d'environnement en production.
-SECRET_KEY = os.environ['DJANGO_SECRET_KEY']
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-default-key')
 
 # Database
-# https://docs.djangoproject.com/en/5.1/ref/settings/#databases
-
+# Utilisation de dj-database-url pour récupérer la configuration depuis la variable DATABASE_URL de Render
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': dj_database_url.config(
+        default='sqlite:///db.sqlite3',
+        conn_max_age=600
+    )
 }
 
 # WhiteNoise with cache busting pour la production

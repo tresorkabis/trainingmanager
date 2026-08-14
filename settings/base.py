@@ -1,4 +1,5 @@
 import os
+import dj_database_url
 
 # Set homebrew library path for WeasyPrint PDF generation on macOS
 os.environ.setdefault('DYLD_LIBRARY_PATH', '/opt/homebrew/lib')
