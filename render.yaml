@@ -15,7 +15,6 @@ services:
       - key: ALLOWED_HOSTS
         value: "your-app-name.onrender.com"
 
-  - type: database
+  - type: postgres
     name: training-manager-db
-    database: postgres
     plan: free
