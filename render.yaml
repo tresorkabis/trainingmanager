@@ -18,3 +18,5 @@ services:
   - type: postgres
     name: training-manager-db
     plan: free
+    databaseName: trainingmanager_db
+    userName: trainingmanager_user
