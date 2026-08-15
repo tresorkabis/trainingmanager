@@ -1,7 +1,7 @@
 from .base import *
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 # SECURITY WARNING: replace this with your production host(s)!
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'tresorkabis.pythonanywhere.com').split(',')
