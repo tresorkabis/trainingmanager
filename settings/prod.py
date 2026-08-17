@@ -10,12 +10,15 @@ ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'tresorkabis.pythonanywhere.com'
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-default-key')
 
 # Database
-# Utilisation de dj-database-url pour récupérer la configuration depuis la variable DATABASE_URL de Render
 DATABASES = {
-    'default': dj_database_url.config(
-        default='sqlite:///db.sqlite3',
-        conn_max_age=600
-    )
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'esfor2842749',
+        'USER': 'esfor2842749',
+        'PASSWORD': 'Esfor2842749@',
+        'HOST': 'localhost', # Si LWS vous donne un hôte différent, remplacez 'localhost'
+        'PORT': '5432',
+    }
 }
 
 # WhiteNoise with cache busting pour la production
