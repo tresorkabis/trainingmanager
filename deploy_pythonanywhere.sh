@@ -16,6 +16,13 @@ pip install -r requirements.txt
 # 4. Collecter les fichiers statiques
 python manage.py collectstatic --noinput
 
+# NOTE : settings.prod exige les variables d'environnement suivantes
+# (définies dans le panneau PythonAnywhere > Web > Environment variables) :
+#   DJANGO_SECRET_KEY=<clé secrète forte>
+#   DATABASE_URL=<URL PostgreSQL, ex : chaîne Supabase ou base PythonAnywhere>
+# (optionnel, fichiers médias sur Supabase Storage)
+#   SUPABASE_PROJECT_REF / SUPABASE_S3_ACCESS_KEY / SUPABASE_S3_SECRET_KEY
+
 # 5. Appliquer les migrations
 python manage.py migrate
 

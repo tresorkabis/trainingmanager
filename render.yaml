@@ -12,8 +12,12 @@ services:
         value: 3.9.0
       - key: DJANGO_SECRET_KEY
         sync: false
+      - key: DATABASE_URL
+        sync: false
       - key: ALLOWED_HOSTS
         value: "your-app-name.onrender.com"
+      - key: CSRF_TRUSTED_ORIGINS
+        value: "https://your-app-name.onrender.com"
 
   - type: postgres
     name: training-manager-db

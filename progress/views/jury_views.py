@@ -7,10 +7,10 @@ from django.views import View
 from django.http import HttpResponse
 from django.template.loader import render_to_string
 
+import io
+
 from progress.models import Action, JuryPV, JuryNote, Stagiaire
 from progress.forms import JuryPVForm, JuryNoteFormSet
-
-WEASYPRINT_AVAILABLE = False
 
 
 @method_decorator(login_required, name="dispatch")
@@ -202,9 +202,9 @@ class JuryPVGeneratePDFView(View):
         jury_pv = get_object_or_404(JuryPV, action=action)
 
         try:
-            from weasyprint import HTML
+            from xhtml2pdf import pisa
         except ImportError:
-            messages.error(request, "WeasyPrint n'est pas installé. Impossible de générer le PDF.")
+            messages.error(request, "xhtml2pdf n'est pas installé. Impossible de générer le PDF.")
             return redirect(reverse_lazy("action", kwargs={"pk": action_pk}))
 
         stagiaires = Stagiaire.objects.filter(
@@ -226,8 +226,19 @@ class JuryPVGeneratePDFView(View):
             "pv": jury_pv,
             "stagiaires_notes": stagiaires_notes,
         })
-        pdf_file = HTML(string=html_string).write_pdf()
 
-        response = HttpResponse(pdf_file, content_type="application/pdf")
+        # Génération du PDF avec xhtml2pdf (pur-Python, compatible avec les
+        # environnements serverless comme Vercel — contrairement à WeasyPrint).
+        buffer = io.BytesIO()
+        pdf = pisa.CreatePDF(
+            src=io.BytesIO(html_string.encode("utf-8")),
+            dest=buffer,
+            encoding="utf-8",
+        )
+        if pdf.err:
+            messages.error(request, "Une erreur est survenue lors de la génération du PDF.")
+            return redirect(reverse_lazy("action", kwargs={"pk": action_pk}))
+
+        response = HttpResponse(buffer.getvalue(), content_type="application/pdf")
         response["Content-Disposition"] = 'inline; filename="PV_Jury_{}.pdf"'.format(action.pk)
         return response
