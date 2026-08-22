@@ -22,7 +22,7 @@ DATABASES = {
 }
 
 # WhiteNoise pour la production sur Vercel
-# On utilise le stockage standard pour éviter tout problème de post-processing sur Vercel
-STATICFILES_STORAGE = 'whitenoise.storage.StaticFilesStorage'
+# On retire STATICFILES_STORAGE pour éviter tout post-processing qui fait planter Vercel
+
 
 
