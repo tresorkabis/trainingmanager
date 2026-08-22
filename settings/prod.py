@@ -62,9 +62,19 @@ DATABASES = {
 }
 
 # WhiteNoise pour la production sur Vercel
-# On ne définit aucune compression (pas de post-processing) pour ne pas faire
-# planter le build Vercel : Django utilise alors le backend de fichiers
-# statiques par défaut, qui copie simplement les fichiers.
+# On définit EXPLICITEMENT le stockage des fichiers statiques SANS
+# post-processing (ni compression, ni manifest). Le backend par défaut de
+# Django/WhiteNoise appliquerait le CompressedManifestStaticFilesStorage,
+# ce qui fait échouer le build Vercel ("Post-processing ... failed") sur les
+# assets pré-minifiés comme bootstrap. On garde un simple copie des fichiers.
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+}
 
 # ---------------------------------------------------------------------------
 # Fichiers médias : Supabase Storage (API compatible S3)
@@ -98,10 +108,9 @@ if SUPABASE_S3_ACCESS_KEY and SUPABASE_S3_SECRET_KEY:
     AWS_DEFAULT_ACL = None  # Supabase n'utilise pas les ACL
     AWS_QUERYSTRING_AUTH = False  # bucket public : accès direct sans signature
 
-    STORAGES = {
-        "default": {"BACKEND": "storages.backends.s3.S3Storage"},
-        "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
-    }
+    # Seul le stockage des MÉDIAS passe sur Supabase ; les statiques restent
+    # sur le backend "copie simple" défini ci-dessus (pas de post-processing).
+    STORAGES["default"] = {"BACKEND": "storages.backends.s3.S3Storage"}
 
     # URL publique des fichiers du bucket (servis par la CDN Supabase).
     MEDIA_URL = (

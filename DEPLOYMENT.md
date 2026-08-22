@@ -122,7 +122,7 @@ python manage.py loaddata data.json
 | `DATABASE_URL` manquante            | Variable non définie                            | L'ajouter (chaîne Supabase) puis redéployer                   |
 | `OperationalError: connection refused` | Mauvais mode / port pooler                  | Utiliser l'URL *Transaction* (port 6543) |
 | `Permission denied` sur Upload média | Clés S3 erronées ou bucket absent               | Vérifier les clés *S3 Access Keys* et le bucket `media` public |
-| Le build échoue sur `collectstatic` | Post-processing WhiteNoise activé               | Vérifier que `STATICFILES_STORAGE = None` dans `settings/prod.py` |
+| Le build échoue sur `collectstatic` | Post-processing WhiteNoise activé (storage manifest) | Vérifier que `settings/prod.py` définit `STORAGES["staticfiles"]` avec `django.contrib.staticfiles.storage.StaticFilesStorage` (sans compression) |
 
 ---
 
