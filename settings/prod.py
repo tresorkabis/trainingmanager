@@ -4,7 +4,7 @@ from .base import *
 DEBUG = True
 
 # SECURITY WARNING: replace this with your production host(s)!
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'https://trainingmanager-seven.vercel.app').split(',')
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'trainingmanager-seven.vercel.app').split(',')
 
 # SECURITY WARNING: La clé secrète doit être définie via une variable d'environnement en production.
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-default-key')
