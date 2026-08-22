@@ -21,5 +21,7 @@ DATABASES = {
     }
 }
 
-# WhiteNoise with cache busting pour la production
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# WhiteNoise pour la production sur Vercel
+# On utilise le stockage simple pour éviter les erreurs de post-processing (CompressedManifest)
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+
