@@ -22,7 +22,9 @@ DATABASES = {
 }
 
 # WhiteNoise pour la production sur Vercel
-# On retire STATICFILES_STORAGE pour éviter tout post-processing qui fait planter Vercel
+# On désactive explicitement le stockage WhiteNoise pour éviter tout post-processing qui fait planter Vercel.
+# Django utilisera le stockage par défaut qui se contente de copier les fichiers.
+STATICFILES_STORAGE = None
 
 
 
