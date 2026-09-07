@@ -8,13 +8,14 @@ médias (photos, bordereaux, PV du jury).
 
 ## 1. Créer le projet Supabase
 
-1. Créez un projet sur <https://supabase.com> (notez le **Project Ref**, ex.
-   `abcdefghijklmnopqrst`).
+1. Créez un projet sur <https://supabase.com>.
+   Projet de ce repo : **Project Ref** `cwlhkqmmzawtvwutdpdc`
+   (URL : <https://cwlhkqmmzawtvwutdpdc.supabase.co>).
 2. **Base de données** : allez dans *Project Settings → Database → Connection
    string* et copiez la chaîne **Transaction mode pooler** (port `6543`,
    host `aws-<region>.pooler.supabase.com`). Elle ressemble à :
    ```
-   postgresql://postgres.f3ab8cd...:<MOT_DE_PASSE>@aws-0-eu-central-1.pooler.supabase.com:6543/postgres
+   postgresql://postgres.cwlhkqmmzawtvwutdpdc:<MOT_DE_PASSE>@aws-0-<region>.pooler.supabase.com:6543/postgres
    ```
    > Le mode *Transaction pooler* est celui recommandé par Supabase pour les
    > environnements serverless (comme Vercel) : connexions courtes et éphémères.
@@ -23,7 +24,11 @@ médias (photos, bordereaux, PV du jury).
    - Dans *Storage*, créez un bucket public nommé `media` (*Settings → Storage →
      Buckets → New bucket → public*).
    - Dans *Project Settings → Storage → S3 Access Keys*, générez une paire
-     **Access Key / Secret Key** et notez la **région** du projet.
+     **Access Key / Secret Key**, notez la **région** du projet, puis
+     configurez l'**Endpoint S3** (celui du dashboard, de la forme
+     `https://cwlhkqmmzawtvwutdpdc.supabase.co/storage/v1/s3`, ou l'hôte direct
+     plus performant `https://cwlhkqmmzawtvwutdpdc.storage.supabase.co/storage/v1/s3`).
+     Le répertoire `.env.example` fournit déjà l'endpoint pré-rempli.
 
 ## 2. Créer le projet Vercel
 
@@ -39,11 +44,12 @@ médias (photos, bordereaux, PV du jury).
 | `DJANGO_DEBUG`        | `False` |
 | `ALLOWED_HOSTS`       | `trainingmanager-seven.vercel.app,votre-domaine.com` |
 | `CSRF_TRUSTED_ORIGINS`| `https://trainingmanager-seven.vercel.app,https://votre-domaine.com` |
-| `DATABASE_URL`        | Chaîne **Transaction pooler** de Supabase |
-| `SUPABASE_PROJECT_REF`| `fabcdefghijklmnopqrst` |
+| `DATABASE_URL`        | Chaîne **Transaction pooler** de Supabase (port 6543) |
+| `SUPABASE_PROJECT_REF`| `cwlhkqmmzawtvwutdpdc` |
+| `SUPABASE_S3_ENDPOINT`| `https://cwlhkqmmzawtvwutdpdc.storage.supabase.co/storage/v1/s3` |
 | `SUPABASE_S3_ACCESS_KEY` | Clé S3 générée dans Supabase |
 | `SUPABASE_S3_SECRET_KEY` | Clé secrète S3 générée dans Supabase |
-| `SUPABASE_S3_REGION`  | Région du projet, ex. `eu-central-1` |
+| `SUPABASE_S3_REGION`  | Région du projet (voir dashboard), ex. `eu-central-1` |
 | `SUPABASE_S3_BUCKET`  | `media` |
 
 (Le fichier `.env.example` regroupe ces variables.)
@@ -56,7 +62,7 @@ chaîne **directe** (port `5432`) qui permet les migrations :
 ```bash
 export DJANGO_SETTINGS_MODULE=settings.prod
 export DJANGO_SECRET_KEY="votre-clé"
-export DATABASE_URL="postgresql://postgres.<ref>:<mdp>@db.<ref>.supabase.co:5432/postgres"
+export DATABASE_URL="postgresql://postgres.cwlhkqmmzawtvwutdpdc:<MOT_DE_PASSE>@db.cwlhkqmmzawtvwutdpdc.supabase.co:5432/postgres"
 python manage.py migrate
 ```
 
@@ -94,7 +100,7 @@ python manage.py dumpdata --natural-foreign --natural-primary -e contenttypes \
 # 2. Vers la base Supabase (même commande de migration que ci-dessus)
 export DJANGO_SETTINGS_MODULE=settings.prod
 export DJANGO_SECRET_KEY="..."
-export DATABASE_URL="postgresql://postgres.<ref>:<mdp>@db.<ref>.supabase.co:5432/postgres"
+export DATABASE_URL="postgresql://postgres.cwlhkqmmzawtvwutdpdc:<MOT_DE_PASSE>@db.cwlhkqmmzawtvwutdpdc.supabase.co:5432/postgres"
 python manage.py loaddata data.json
 ```
 
@@ -107,7 +113,7 @@ python manage.py loaddata data.json
   bibliothèques système Pango/Cairo absentes du runtime Vercel.
 - **Médias** : les fichiers uploadés sont stockés dans le bucket `media` de
   Supabase Storage (URL publique de la forme
-  `https://<ref>.supabase.co/storage/v1/object/public/media/...`).
+  `https://cwlhkqmmzawtvwutdpdc.supabase.co/storage/v1/object/public/media/...`).
 - **Migrations au déploiement** : il est préférable de ne **pas** exécuter
   `migrate` dans le build Vercel (plusieurs fonctions serverless peuvent
   s'exécuter en parallèle). Les migrations se font manuellement (section 3).
