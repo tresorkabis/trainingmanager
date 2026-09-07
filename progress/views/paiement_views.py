@@ -355,6 +355,7 @@ class PaiementReceiptPrintView(PaiementReceiptPrintPermissionMixin, DetailView):
         context['total_cout'] = self.object.get_total_cout()
         context['total_paye'] = self.object.get_total_paye()
         context['solde_restant'] = self.object.get_solde_restant()
+        context['caissier'] = self.request.user.get_full_name()
         return context
 
 

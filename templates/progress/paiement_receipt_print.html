@@ -227,7 +227,7 @@
             <p style="margin-top: 5px;">Training Manager &mdash; Document généré le {% now "d/m/Y H:i" %}</p>
             <div class="signature-line">
                 <div class="sign">
-                    <span class="line">Cachet et signature</span>
+                    <span class="line">Le Caissier : {{ caissier }}</span>
                 </div>
                 <div class="sign">
                     <span class="line">Signature du stagiaire</span>
@@ -240,9 +240,9 @@
         <button onclick="window.print()" style="padding: 10px 30px; font-size: 14px; cursor: pointer; border: 1px solid #000; background: #fff;">
             🖨️ Imprimer
         </button>
-        <button onclick="window.close()" style="padding: 10px 30px; font-size: 14px; cursor: pointer; border: 1px solid #000; background: #fff; margin-left: 10px;">
+        <a href="{% url 'paiement' paiement.pk %}" style="text-decoration: none; display: inline-block; padding: 10px 30px; font-size: 14px; cursor: pointer; border: 1px solid #000; background: #fff; margin-left: 10px; color: #000;">
             ✕ Fermer
-        </button>
+        </a>
     </div>
 
     <script>

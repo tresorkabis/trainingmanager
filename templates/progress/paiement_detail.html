@@ -10,6 +10,11 @@
 <style>
     .bordereau-preview {
         max-width: 100%;
+        max-height: 180px;
+        width: auto;
+        height: auto;
+        object-fit: contain;
+        background-color: #f8f9fa;
         border-radius: 1rem;
         box-shadow: 0 10px 25px rgba(0,0,0,0.1);
         transition: transform 0.3s ease;
@@ -22,6 +27,23 @@
         padding-bottom: 1.5rem;
         margin-bottom: 1.5rem;
     }
+    .receipt-card {
+        border: none;
+        border-left: 5px solid #198754;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    .stat-box {
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 1rem;
+        border: 1px solid #edf2f7;
+    }
+    .avatar-img-fixed {
+        width: 48px;
+        height: 48px;
+        object-fit: cover;
+        border-radius: 50%;
+    }
 </style>
 {% endblock style %}
 
@@ -32,47 +54,51 @@
     <section class="section">
         <div class="row g-4">
             <div class="col-12 col-lg-8">
-                <div class="card tm-detail-card h-100">
+                <div class="card receipt-card tm-detail-card h-100">
                     <div class="card-body p-4">
                         <div class="receipt-header d-flex justify-content-between align-items-start">
                             <div>
-                                <h4 class="fw-bold mb-1">REÇU DE PAIEMENT</h4>
-                                <span class="badge bg-light-primary text-primary">Référence: {{ paiement.reference }}</span>
+                                <h4 class="fw-bold mb-1 text-uppercase">Reçu de Transaction</h4>
+                                <span class="badge bg-primary-soft text-primary border border-primary">Référence: {{ paiement.reference }}</span>
                             </div>
                             <div class="text-end">
                                 <h3 class="text-success fw-bold mb-0">{{ paiement.montant|floatformat:0 }} USD</h3>
-                                <small class="text-muted">{{ paiement.date_paiement|date:"d F Y" }}</small>
+                                <small class="text-muted"><i class="bi bi-calendar3 me-1"></i>{{ paiement.date_paiement|date:"d F Y" }}</small>
                             </div>
                         </div>
 
                         <div class="row g-4">
                             <div class="col-md-6">
                                 <h6 class="text-muted small text-uppercase fw-bold mb-3">Émetteur (Stagiaire)</h6>
-                                <div class="d-flex align-items-center mb-3">
+                                <div class="d-flex align-items-center mb-3 p-2 rounded-3 bg-light">
                                     <div class="avatar avatar-xl me-3">
                                         {% if paiement.stagiaire.photo %}
-                                            <img src="{{ paiement.stagiaire.photo.url }}" alt="Photo">
+                                            <img src="{{ paiement.stagiaire.photo.url }}" alt="Photo" class="avatar-img-fixed">
                                         {% else %}
-                                            <div class="bg-light-primary text-primary d-flex align-items-center justify-content-center fw-bold" style="width: 48px; height: 48px; border-radius: 50%;">
+                                            <div class="bg-primary text-white d-flex align-items-center justify-content-center fw-bold" style="width: 48px; height: 48px; border-radius: 50%;">
                                                 {{ paiement.stagiaire.nom|slice:":1" }}{{ paiement.stagiaire.prenom|slice:":1" }}
                                             </div>
                                         {% endif %}
                                     </div>
-                                    <div>
-                                        <h5 class="mb-0">{{ paiement.stagiaire.get_full_name }}</h5>
+                                    <div class="flex-grow-1">
+                                        <h5 class="mb-0 fw-bold">{{ paiement.stagiaire.get_full_name }}</h5>
                                         <p class="text-muted small mb-0">{{ paiement.stagiaire.email|default:"Pas d'email" }}</p>
-                                        <a href="{% url 'stagiaire' paiement.stagiaire.pk %}" class="btn btn-link btn-sm p-0">Voir le profil</a>
+                                        <a href="{% url 'stagiaire' paiement.stagiaire.pk %}" class="btn btn-link btn-sm p-0 text-decoration-none">Voir le profil <i class="bi bi-arrow-right"></i></a>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <h6 class="text-muted small text-uppercase fw-bold mb-3">Détails de l'Action</h6>
                                 {% if paiement.action %}
-                                    <h5 class="mb-1">{{ paiement.action.description }}</h5>
-                                    <p class="text-muted small mb-0">{{ paiement.action.formation.nom }}</p>
-                                    <a href="{% url 'action' paiement.action.pk %}" class="btn btn-link btn-sm p-0">Voir l'action</a>
+                                    <div class="p-2 rounded-3 bg-light">
+                                        <h5 class="mb-1 fw-bold">{{ paiement.action.description }}</h5>
+                                        <p class="text-muted small mb-0">{{ paiement.action.formation.nom }}</p>
+                                        <a href="{% url 'action' paiement.action.pk %}" class="btn btn-link btn-sm p-0 text-decoration-none">Voir l'action <i class="bi bi-arrow-right"></i></a>
+                                    </div>
                                 {% else %}
-                                    <p class="text-muted">Paiement libre (non rattaché)</p>
+                                    <div class="p-2 rounded-3 bg-light-warning text-muted italic">
+                                        <p class="mb-0">Paiement libre (non rattaché)</p>
+                                    </div>
                                 {% endif %}
                             </div>
 
@@ -96,19 +122,24 @@
                             </div>
                         </div>
 
-                        <div class="mt-4 p-3 bg-light rounded-3">
+                        <div class="mt-4 p-3 bg-light rounded-3 border shadow-sm">
                             <div class="row text-center g-3">
                                 <div class="col-4 border-end">
-                                    <small class="text-muted d-block">Coût Total</small>
-                                    <span class="fw-bold">{{ total_cout|default:"0"|floatformat:0 }} USD</span>
+                                    <small class="text-muted d-block mb-1">Coût Total</small>
+                                    <span class="fw-bold h5 mb-0">{{ total_cout|default:"0"|floatformat:0 }} USD</span>
                                 </div>
                                 <div class="col-4 border-end">
-                                    <small class="text-muted d-block">Déjà payé</small>
-                                    <span class="fw-bold text-success">{{ total_paye|default:"0"|floatformat:0 }} USD</span>
+                                    <small class="text-muted d-block mb-1">Déjà payé</small>
+                                    <span class="fw-bold h5 mb-0 text-success">{{ total_paye|default:"0"|floatformat:0 }} USD</span>
                                 </div>
                                 <div class="col-4">
-                                    <small class="text-muted d-block">Solde restant</small>
-                                    <span class="fw-bold {% if solde_restant <= 0 %}text-success{% else %}text-danger{% endif %}">{{ solde_restant|default:"0"|floatformat:0 }} USD</span>
+                                    <small class="text-muted d-block mb-1">Solde restant</small>
+                                    <span class="fw-bold h5 mb-0 {% if solde_restant <= 0 %}text-success{% else %}text-danger{% endif %}">{{ solde_restant|default:"0"|floatformat:0 }} USD</span>
+                                    {% if solde_restant <= 0 %}
+                                        <div class="badge bg-success small mt-1">Soldé</div>
+                                    {% else %}
+                                        <div class="badge bg-warning text-dark small mt-1">Reste à payer</div>
+                                    {% endif %}
                                 </div>
                             </div>
                         </div>
@@ -131,11 +162,13 @@
                     <div class="card-header">
                         <h5 class="card-title">Justificatif</h5>
                     </div>
-                    <div class="card-body text-center">
+                    <div class="card-body text-center d-flex flex-column align-items-center justify-content-center">
                         {% if paiement.bordereau_photo %}
-                            <a href="{{ paiement.bordereau_photo.url }}" target="_blank">
-                                <img src="{{ paiement.bordereau_photo.url }}" alt="Bordereau" class="bordereau-preview mb-3">
-                            </a>
+                            <div class="mb-3 d-flex align-items-center justify-content-center" style="min-height: 180px;">
+                                <a href="{{ paiement.bordereau_photo.url }}" target="_blank">
+                                    <img src="{{ paiement.bordereau_photo.url }}" alt="Bordereau" class="bordereau-preview">
+                                </a>
+                            </div>
                             <p class="small text-muted">Cliquez sur l'image pour l'agrandir</p>
                             <a href="{{ paiement.bordereau_photo.url }}" download class="btn btn-sm btn-outline-secondary w-100">
                                 <i class="bi bi-download me-2"></i>Télécharger
