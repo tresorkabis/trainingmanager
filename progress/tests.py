@@ -9,7 +9,7 @@ from progress.models import Action, ActionSchedule, Formateur, ModuleProgress, M
 from progress.services import ActionWorkflowService
 from training.models import Filiere, Formation, Module, Service
 from intern.models import Categorie, Stagiaire
-from users.models import User
+from users.models import User, Profile
 
 
 class ActionModelTests(TestCase):
@@ -416,10 +416,12 @@ class ActionWorkflowServiceTests(TestCase):
 
 class DetailActionCreateViewTests(TestCase):
     def setUp(self):
+        self.profile = Profile.objects.create(name="Manager")
         self.user = User.objects.create_user(
             username="manager",
             email="manager@example.com",
             password="testpass123",
+            profile=self.profile,
         )
         self.client.force_login(self.user)
 

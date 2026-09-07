@@ -44,44 +44,63 @@ class StagiairePermissionMixin:
     def get_allowed_categories(self):
         return Categorie.objects.filter(titre__in=ALLOWED_CATEGORIE_TITRES).order_by("titre")
 
+    VIEW_STAGIAIRE_PROFILES = [
+        "Manager",
+        "Conseiller",
+        "Chef de filière",
+        "Chef de service",
+        "Inspecteur",
+        "Pédagogique",
+        "Formateur",
+        "Caisse",
+        "User",
+    ]
+    MANAGE_STAGIAIRE_PROFILES = ["Manager", "Conseiller"]
+
+    def enforce_manage_permission(self):
+        user = self.request.user
+        if not (user.is_superuser or (user.profile and user.profile.name in self.MANAGE_STAGIAIRE_PROFILES)):
+            raise PermissionDenied("Vous n'avez pas la permission de gérer les stagiaires.")
+
+    def enforce_view_permission(self):
+        """Permission de consultation des stagiaires."""
+        user = self.request.user
+        if user.is_superuser or user.is_staff:
+            return
+        if user.profile and user.profile.name in self.VIEW_STAGIAIRE_PROFILES:
+            return
+        raise PermissionDenied("Vous n'avez pas la permission de consulter les stagiaires.")
+
     def get_stagiaire_queryset(self):
         user = self.request.user
-        queryset = Stagiaire.objects.all()
+        queryset = Stagiaire.objects.all().order_by('nom', 'postnom')
 
-        if user.is_superuser or (user.profile and user.profile.name in ["Manager", "Conseiller"]):
+        if user.is_superuser or user.is_staff:
+            return queryset
+
+        if not user.profile:
+            return Stagiaire.objects.none()
+
+        profile_name = user.profile.name
+
+        if profile_name in ["Manager", "Conseiller", "Inspecteur", "Pédagogique", "Caisse", "Formateur", "User"]:
             return queryset
         
-        if user.profile and user.profile.name == "Chef de filière" and user.filiere:
+        if profile_name == "Chef de filière" and user.filiere:
             # Filtrer les stagiaires inscrits à des actions dont la formation est dans la filière de l'utilisateur
             detail_actions_in_filiere = DetailAction.objects.filter(
                 action__formation__filiere=user.filiere
             ).values_list('stagiaire__pk', flat=True)
             return queryset.filter(pk__in=detail_actions_in_filiere).distinct()
 
-        if user.profile and user.profile.name == "Chef de service" and user.service:
+        if profile_name == "Chef de service" and user.service:
             # Filtrer les stagiaires inscrits à des actions dont la formation est dans un service de l'utilisateur
             detail_actions_in_service = DetailAction.objects.filter(
                 action__formation__filiere__service=user.service
             ).values_list('stagiaire__pk', flat=True)
             return queryset.filter(pk__in=detail_actions_in_service).distinct()
         
-        return Stagiaire.objects.none()
-
-
-    def enforce_manage_permission(self):
-        user = self.request.user
-        allowed_profiles = ["Manager", "Conseiller"]
-        if not (user.is_superuser or (user.profile and user.profile.name in allowed_profiles)):
-            raise PermissionDenied("Vous n'avez pas la permission de gérer les stagiaires.")
-
-    def enforce_view_permission(self):
-        """Permission moins stricte : autorise aussi Chef de filière et Chef de service à voir la liste."""
-        user = self.request.user
-        if user.is_superuser:
-            return
-        if user.profile and user.profile.name in ["Manager", "Conseiller", "Chef de filière", "Chef de service"]:
-            return
-        raise PermissionDenied("Vous n'avez pas la permission de consulter les stagiaires.")
+        return queryset
 
 
 @method_decorator(login_required, name="dispatch")
@@ -155,13 +174,14 @@ class StagiaireListView(StagiairePermissionMixin, ListView):
 
 
 @method_decorator(login_required, name="dispatch")
-class StagiaireDetailView(StagiairePermissionMixin, DetailView): # Correction de la faute de frappe ici
+class StagiaireDetailView(StagiairePermissionMixin, DetailView):
     model = Stagiaire
     template_name = "intern/stagiaire.html"
 
     def get_queryset(self):
+        self.enforce_view_permission()
         return (
-            self.get_stagiaire_queryset()
+            Stagiaire.objects.all()
             .select_related("categorie", "entreprise")
             .prefetch_related("etudes", "autres_formations", "paiements")
         )
@@ -386,13 +406,18 @@ class StagiaireCreateUpdateView(StagiairePermissionMixin, View):
 
 
 @method_decorator(login_required, name="dispatch")
-class StagiaireDeleteView(DeleteView):
+class StagiaireDeleteView(StagiairePermissionMixin, DeleteView):
     model = Stagiaire
     template_name = "intern/stagiaire_confirm_delete.html"
     success_url = reverse_lazy("stagiaires")
 
+    def dispatch(self, request, *args, **kwargs):
+        self.enforce_manage_permission()
+        return super().dispatch(request, *args, **kwargs)
+
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
+        ctx["link"] = "stagiaires"
         ctx["titre"] = "Supprimer"
         return ctx
 

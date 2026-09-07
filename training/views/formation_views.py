@@ -30,7 +30,7 @@ class FormationPermissionMixin:
 
     def get_formation_queryset(self):
         user = self.request.user
-        queryset = Formation.objects.all()
+        queryset = Formation.objects.all().order_by('nom')
 
         if user.is_superuser or (user.profile and user.profile.name == "Manager"):
             return queryset
