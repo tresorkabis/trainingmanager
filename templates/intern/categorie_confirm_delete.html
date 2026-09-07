@@ -1,23 +1,54 @@
 {% extends "base.html" %}
 {% load static %}
+{% load tm_tags %}
 
-{% block title %}{{ titre }} une Catégorie{% endblock title %}
-{% block page_header %}{{ titre }} une Catégorie{% endblock page_header %}
+{% block title %}{{ titre }} - Training Manager{% endblock title %}
+{% block page_header %}{{ titre }}{% endblock page_header %}
+
+{% block style %}
+<link rel="stylesheet" href="{% static 'assets/css/training-manager.css' %}">
+{% endblock style %}
 
 {% block content %}
 <div class="page-heading">
+    {% tm_hero title=titre subtitle="Attention : la suppression d'une catégorie impacte la classification des stagiaires associés." icon="bi bi-trash" actions=hero_actions theme="danger" %}
+
     <section class="section">
-        <div class="card">
-            <div class="card-header">
-                <h4 class="card-title">Confirmation de suppression</h4>
+        <div class="card tm-listing-card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <div>
+                    <h4 class="card-title text-danger mb-0">
+                        <i class="bi bi-exclamation-octagon-fill me-2"></i>Confirmation de suppression
+                    </h4>
+                    <p class="text-muted small mb-0">Veuillez confirmer l'action ci-dessous.</p>
+                </div>
+                <a href="{% url 'categories' %}" class="btn btn-light-secondary btn-sm">
+                    <i class="bi bi-arrow-left me-1"></i>Retour
+                </a>
             </div>
             <div class="card-body">
-                <p>Êtes-vous sûr de vouloir supprimer la catégorie "{{ object.titre }}" ?</p>
-                <p class="text-danger">Cette action est irréversible et supprimera également tous les stagiaires liés à cette catégorie.</p>
-                <form method="post">
+                <div class="alert alert-light-danger border border-danger-subtle p-3 rounded-3 mb-4">
+                    <div class="d-flex align-items-start gap-3">
+                        <i class="bi bi-shield-fill-x text-danger fs-3"></i>
+                        <div>
+                            <h5 class="alert-heading text-danger mb-1">Êtes-vous absolument sûr ?</h5>
+                            <p class="mb-0">
+                                Vous êtes sur le point de supprimer définitivement la catégorie <strong>« {{ object.titre }} »</strong>.
+                                Cette action ne pourra pas être annulée.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <form method="post" class="d-flex justify-content-end align-items-center gap-2 pt-3 border-top">
                     {% csrf_token %}
-                    <button type="submit" class="btn btn-danger">Confirmer la suppression</button>
-                    <a href="{% url 'categories' %}" class="btn btn-light-secondary">Annuler</a>
+                    <a href="{% url 'categories' %}" class="btn btn-light-secondary px-4">
+                        Annuler
+                    </a>
+                    <button type="submit" class="btn btn-danger px-4 d-inline-flex align-items-center gap-2">
+                        <i class="bi bi-trash-fill"></i>
+                        <span>Confirmer la suppression</span>
+                    </button>
                 </form>
             </div>
         </div>

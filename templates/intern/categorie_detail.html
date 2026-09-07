@@ -2,21 +2,15 @@
 {% load static %}
 {% load tm_tags %}
 
-{% block title %}Détail Catégorie{% endblock title %}
-{% block page_header %}Détail de la Catégorie{% endblock page_header %}
+{% block title %}Détail de la catégorie : {{ categorie.titre }}{% endblock title %}
+{% block page_header %}Détail de la catégorie{% endblock page_header %}
 
 {% block style %}
 <link rel="stylesheet" href="{% static 'assets/css/training-manager.css' %}">
 <style>
-    .tm-categorie-detail-card {
-        border: 1px solid rgba(15, 23, 42, 0.07);
-        border-radius: 1rem;
-        box-shadow: 0 16px 32px rgba(15, 23, 42, 0.05);
-    }
-
     .tm-categorie-info-item {
-        padding: 0.75rem 0;
-        border-bottom: 1px dashed #e9ecef;
+        padding: 0.85rem 0;
+        border-bottom: 1px solid #f1f5f9;
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -28,89 +22,104 @@
 
     .tm-categorie-info-label {
         font-weight: 600;
-        color: #6c757d;
-        flex-basis: 40%;
+        color: #64748b;
+        font-size: 0.875rem;
     }
 
     .tm-categorie-info-value {
-        color: #344767;
-        flex-basis: 60%;
+        color: #1e293b;
+        font-weight: 700;
         text-align: right;
-    }
-
-    .tm-categorie-info-value .badge {
-        font-size: 0.85em;
-        padding: 0.4em 0.6em;
     }
 </style>
 {% endblock style %}
 
 {% block content %}
 <div class="page-heading">
-    {% tm_hero title=categorie.titre subtitle="Consultez les détails de la catégorie et les stagiaires associés." icon="bi bi-tags" actions=hero_actions stats=hero_stats theme="primary" %}
+    {% tm_hero title=categorie.titre subtitle="Consultez les informations de la catégorie et les stagiaires associés." icon="bi bi-tags" actions=hero_actions stats=hero_stats theme="primary" %}
 
-    <section class="section px-3 px-md-4">
-        <div class="row g-3">
-            <div class="col-12 col-lg-6">
-                <div class="card tm-categorie-detail-card mb-4">
-                    <div class="card-header">
+    <section class="section">
+        <div class="row g-4">
+            <div class="col-12 col-lg-5">
+                <div class="card tm-listing-card mb-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
                         <h4 class="card-title mb-0">Informations générales</h4>
+                        <a href="{% url 'categorie_update' categorie.pk %}" class="btn btn-sm btn-outline-primary" title="Modifier">
+                            <i class="bi bi-pencil me-1"></i>Modifier
+                        </a>
                     </div>
                     <div class="card-body">
                         <div class="tm-categorie-info-item">
-                            <span class="tm-categorie-info-label">Titre:</span>
+                            <span class="tm-categorie-info-label"><i class="bi bi-tag me-1 text-primary"></i> Titre :</span>
                             <span class="tm-categorie-info-value">{{ categorie.titre }}</span>
                         </div>
                         <div class="tm-categorie-info-item">
-                            <span class="tm-categorie-info-label">Statut:</span>
+                            <span class="tm-categorie-info-label"><i class="bi bi-activity me-1 text-primary"></i> Statut :</span>
                             <span class="tm-categorie-info-value">
                                 {% if categorie.active %}
-                                <span class="badge bg-success">Active</span>
+                                <span class="badge bg-light-success text-success rounded-pill px-3 py-2">Active</span>
                                 {% else %}
-                                <span class="badge bg-danger">Inactif</span>
+                                <span class="badge bg-light-danger text-danger rounded-pill px-3 py-2">Inactive</span>
                                 {% endif %}
                             </span>
                         </div>
                         <div class="tm-categorie-info-item">
-                            <span class="tm-categorie-info-label">Date de création:</span>
+                            <span class="tm-categorie-info-label"><i class="bi bi-people me-1 text-primary"></i> Stagiaires rattachés :</span>
+                            <span class="tm-categorie-info-value">{{ stagiaires_associes.count }}</span>
+                        </div>
+                        <div class="tm-categorie-info-item">
+                            <span class="tm-categorie-info-label"><i class="bi bi-calendar-check me-1 text-primary"></i> Date de création :</span>
                             <span class="tm-categorie-info-value">{{ categorie.created_at|date:"d/m/Y H:i" }}</span>
                         </div>
                         <div class="tm-categorie-info-item">
-                            <span class="tm-categorie-info-label">Dernière mise à jour:</span>
+                            <span class="tm-categorie-info-label"><i class="bi bi-clock-history me-1 text-primary"></i> Dernière mise à jour :</span>
                             <span class="tm-categorie-info-value">{{ categorie.updated_at|date:"d/m/Y H:i" }}</span>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="col-12 col-lg-6">
-                <div class="card tm-categorie-detail-card mb-4">
-                    <div class="card-header">
+
+            <div class="col-12 col-lg-7">
+                <div class="card tm-listing-card mb-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
                         <h4 class="card-title mb-0">Stagiaires associés</h4>
+                        <span class="badge bg-light-primary text-primary rounded-pill">{{ stagiaires_associes.count }} apprenant{{ stagiaires_associes.count|pluralize }}</span>
                     </div>
-                    <div class="card-body">
+                    <div class="card-body p-0">
                         {% if stagiaires_associes %}
                             <div class="table-responsive">
-                                <table class="table table-striped">
+                                <table class="table table-hover tm-table mb-0">
                                     <thead>
                                         <tr>
                                             <th>Nom complet</th>
-                                            <th>Email</th>
                                             <th>Téléphone</th>
+                                            <th class="text-end">Action</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {% for stagiaire in stagiaires_associes %}
                                         <tr>
-                                            <td><a href="{% url 'stagiaire' stagiaire.pk %}">{{ stagiaire.get_full_name }}</a></td>
-                                            <td>{{ stagiaire.email|default:"-" }}</td>
+                                            <td class="text-start">
+                                                <a href="{% url 'stagiaire' stagiaire.pk %}" class="tm-stagiaire-row__title fw-bold text-decoration-none">
+                                                    {{ stagiaire.get_full_name }}
+                                                </a>
+                                            </td>
                                             <td>{{ stagiaire.telephone|default:"-" }}</td>
+                                            <td class="text-end">
+                                                <a href="{% url 'stagiaire' stagiaire.pk %}" class="btn btn-sm btn-outline-primary" title="Consulter la fiche">
+                                                    <i class="bi bi-eye"></i>
+                                                </a>
+                                            </td>
                                         </tr>
                                         {% endfor %}
                                     </tbody>
                                 </table>
                             </div>
                         {% else %}
-                            <p class="text-muted">Aucun stagiaire associé à cette catégorie.</p>
+                            <div class="tm-empty-state p-4 text-center">
+                                <i class="bi bi-people text-muted fs-1 mb-2 d-block"></i>
+                                <p class="text-muted mb-0">Aucun stagiaire associé à cette catégorie pour le moment.</p>
+                            </div>
                         {% endif %}
                     </div>
                 </div>

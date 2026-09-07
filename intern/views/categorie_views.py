@@ -69,8 +69,9 @@ class CategorieDetailView(CategoriePermissionMixin, DetailView):
         ctx = super().get_context_data(**kwargs)
         categorie = ctx['categorie']
         
+        ctx['link'] = "categories"
         ctx['stagiaires_associes'] = categorie.stagiaire_set.all().order_by('nom', 'postnom')
-        ctx['titre'] = "Détail de la catégorie"
+        ctx['titre'] = f"Détail de la catégorie : {categorie.titre}"
         
         # Stats pour le Hero
         ctx["hero_stats"] = [
@@ -81,14 +82,31 @@ class CategorieDetailView(CategoriePermissionMixin, DetailView):
         ]
         
         ctx["hero_actions"] = [
-            {'label': 'Retour à la liste', 'url': reverse_lazy('categories'), 'icon': 'bi bi-arrow-left', 'class': 'btn-light-secondary'},
             {'label': 'Modifier', 'url': reverse_lazy('categorie_update', kwargs={'pk': categorie.pk}), 'icon': 'bi bi-pencil'},
+            {'label': 'Retour à la liste', 'url': reverse_lazy('categories'), 'icon': 'bi bi-arrow-left'},
         ]
         return ctx
 
 @method_decorator(login_required, name="dispatch")
 class CategorieCreateUpdateView(CategoriePermissionMixin, View): # Nouvelle vue pour créer/modifier
     template_name = "intern/categorie_form.html" # Nouveau template
+
+    def get_hero_actions(self, categorie=None):
+        actions = [
+            {'label': 'Retour aux catégories', 'url': reverse_lazy('categories'), 'icon': 'bi bi-arrow-left'},
+        ]
+        if categorie:
+            actions.insert(0, {'label': 'Consulter la fiche', 'url': reverse_lazy('categorie', kwargs={'pk': categorie.pk}), 'icon': 'bi bi-eye'})
+        return actions
+
+    def get_hero_stats(self, categorie=None):
+        if not categorie:
+            return None
+        return [
+            {'label': 'Stagiaires', 'value': categorie.stagiaire_set.count()},
+            {'label': 'Statut', 'value': "Active" if categorie.active else "Inactive"},
+            {'label': 'ID', 'value': f"#CAT-{categorie.pk}"},
+        ]
 
     def get(self, request, pk=None):
         self.enforce_manage_permission()
@@ -97,9 +115,12 @@ class CategorieCreateUpdateView(CategoriePermissionMixin, View): # Nouvelle vue 
             categorie = get_object_or_404(Categorie, pk=pk)
         
         ctx = {
-            "titre": "Modifier une catégorie" if pk else "Créer une catégorie",
+            "link": "categories",
+            "titre": "Modifier la catégorie" if pk else "Créer une catégorie",
             "mode": "edit" if pk else "new",
             "object": categorie,
+            "hero_actions": self.get_hero_actions(categorie),
+            "hero_stats": self.get_hero_stats(categorie),
             "submitted": {}, # Pour gérer les erreurs de formulaire
         }
         return render(request, self.template_name, ctx)
@@ -123,9 +144,12 @@ class CategorieCreateUpdateView(CategoriePermissionMixin, View): # Nouvelle vue 
 
         if errors:
             ctx = {
-                "titre": "Modifier une catégorie" if pk else "Créer une catégorie",
+                "link": "categories",
+                "titre": "Modifier la catégorie" if pk else "Créer une catégorie",
                 "mode": "edit" if pk else "new",
                 "object": categorie, # Si c'est une modification, l'objet existe
+                "hero_actions": self.get_hero_actions(categorie),
+                "hero_stats": self.get_hero_stats(categorie),
                 "submitted": request.POST, # Repopuler le formulaire avec les données soumises
                 "form_errors": errors,
             }
@@ -151,5 +175,9 @@ class CategorieDeleteView(CategoriePermissionMixin, DeleteView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        ctx["titre"] = "Supprimer"
+        ctx["link"] = "categories"
+        ctx["titre"] = "Supprimer la catégorie"
+        ctx["hero_actions"] = [
+            {'label': 'Retour aux catégories', 'url': reverse_lazy('categories'), 'icon': 'bi bi-arrow-left'},
+        ]
         return ctx

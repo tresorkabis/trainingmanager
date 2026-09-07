@@ -1,91 +1,120 @@
 {% extends "base.html" %}
 {% load static %}
+{% load tm_tags %}
 
-{% block title %}{{ titre }} une Catégorie{% endblock title %}
-{% block page_header %}{{ titre }} une Catégorie{% endblock page_header %}
+{% block title %}{{ titre }} - Training Manager{% endblock title %}
+{% block page_header %}{{ titre }}{% endblock page_header %}
+
 {% block style %}
+<link rel="stylesheet" href="{% static 'assets/css/training-manager.css' %}">
 <style>
-    .tm-categorie-form-hero {
-        background:
-            radial-gradient(circle at top right, rgba(67, 94, 190, 0.18), transparent 35%),
-            linear-gradient(135deg, #f7f8fc 0%, #eef3ff 100%);
-        border: 1px solid rgba(67, 94, 190, 0.12);
-        border-radius: 1.25rem;
+    .tm-form-switch-card {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: var(--tm-radius, 0.75rem);
+        padding: 1rem 1.25rem;
+        transition: all 0.2s ease;
     }
-
-    .tm-categorie-form-card {
-        border: 1px solid rgba(15, 23, 42, 0.07);
-        border-radius: 1rem;
-        box-shadow: 0 16px 32px rgba(15, 23, 42, 0.05);
+    .tm-form-switch-card:hover {
+        border-color: rgba(67, 94, 190, 0.25);
+        background: #ffffff;
+        box-shadow: 0 4px 12px rgba(67, 94, 190, 0.04);
     }
 </style>
 {% endblock style %}
 
 {% block content %}
 <div class="page-heading">
-    <section class="tm-categorie-form-hero p-4 p-lg-5 mb-4">
-        <div class="row g-4 align-items-center">
-            <div class="col-12 col-lg-8">
-                <div class="tm-section-titlebar">
-                    <span class="tm-section-titlebar__icon"><i class="bi bi-tags"></i></span>
-                    <div class="tm-section-titlebar__text">
-                        <h3>{{ titre }} une catégorie</h3>
-                        <p>Renseignez les informations de la catégorie.</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-12 col-lg-4 d-flex justify-content-lg-end">
-                <a href="{% url 'categories' %}" class="btn btn-light-secondary">
-                    <i class="bi bi-arrow-left me-2"></i>Retour aux catégories
-                </a>
-            </div>
-        </div>
-    </section>
+    {% tm_hero title=titre subtitle="Renseignez les informations de la catégorie pour classer les profils des apprenants." icon="bi bi-tags" actions=hero_actions stats=hero_stats theme="primary" %}
 
     <section class="section">
-        <div class="card tm-categorie-form-card">
-            <div class="card-header">
-                <h4 class="card-title mb-1">Informations de la catégorie</h4>
-                <p class="text-muted mb-0">Les champs ci-dessous permettent de gérer les détails de la catégorie.</p>
+        <div class="card tm-listing-card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <div>
+                    <h4 class="card-title mb-0">Informations de la catégorie</h4>
+                    <p class="text-muted small mb-0">Définissez le libellé et l'état de disponibilité de cette catégorie.</p>
+                </div>
+                <a href="{% url 'categories' %}" class="btn btn-light-secondary btn-sm">
+                    <i class="bi bi-arrow-left me-1"></i>Retour
+                </a>
             </div>
             <div class="card-body">
                 {% if form_errors %}
-                <div class="alert alert-danger">
-                    {% for error in form_errors %}
-                    <p>{{ error }}</p>
-                    {% endfor %}
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+                        <div>
+                            <strong>Erreur de saisie :</strong>
+                            <ul class="mb-0 mt-1 ps-3">
+                                {% for error in form_errors %}
+                                <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
                 {% endif %}
 
                 <form action="" method="post" class="form">
                     {% csrf_token %}
                     <div class="row g-4">
-                        <div class="col-12 col-lg-6">
-                            <div class="form-group">
-                                <label for="titre">Titre de la catégorie</label>
+                        <div class="col-12 col-lg-7">
+                            <div class="form-group mb-3">
+                                <label for="titre" class="form-label fw-bold">
+                                    <i class="bi bi-tag text-primary me-1"></i> Titre de la catégorie <span class="text-danger">*</span>
+                                </label>
                                 <input
                                     type="text"
                                     id="titre"
-                                    class="form-control"
+                                    class="form-control form-control-lg"
                                     name="titre"
                                     value="{% if submitted.titre %}{{ submitted.titre }}{% else %}{{ object.titre|default:'' }}{% endif %}"
-                                    placeholder="Ex: Dans l'emploi"
+                                    placeholder="Ex: Dans l'emploi, Sans emploi, En reconversion..."
                                     required
+                                    autofocus
                                 >
+                                <div class="form-text text-muted">
+                                    Donnez un nom clair qui sera affiché sur les fiches stagiaires et les attestations.
+                                </div>
                             </div>
                         </div>
-                        <div class="col-12 col-lg-6">
-                            <div class="form-group">
-                                <div class="form-check form-switch">
-                                    <input class="form-check-input" type="checkbox" id="active" name="active" {% if object.active or mode == 'new' %}checked{% endif %}>
-                                    <label class="form-check-label" for="active">Actif</label>
+
+                        <div class="col-12 col-lg-5">
+                            <label class="form-label fw-bold">
+                                <i class="bi bi-toggle-on text-primary me-1"></i> Disponibilité
+                            </label>
+                            <div class="tm-form-switch-card">
+                                <div class="form-check form-switch d-flex align-items-center justify-content-between p-0 m-0">
+                                    <div>
+                                        <label class="form-check-label fw-bold text-dark cursor-pointer d-block" for="active">
+                                            Catégorie active
+                                        </label>
+                                        <span class="small text-muted d-block mt-1">
+                                            Activez cette option pour la rendre sélectionnable lors de l'enregistrement des stagiaires.
+                                        </span>
+                                    </div>
+                                    <input
+                                        class="form-check-input ms-3 fs-4 cursor-pointer"
+                                        type="checkbox"
+                                        role="switch"
+                                        id="active"
+                                        name="active"
+                                        {% if object.active or mode == 'new' %}checked{% endif %}
+                                    >
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="d-flex justify-content-end gap-2 mt-4">
-                        <a href="{% url 'categories' %}" class="btn btn-light-secondary">Annuler</a>
-                        <button type="submit" class="btn btn-primary">{{ titre }}</button>
+
+                    <div class="d-flex justify-content-end align-items-center gap-2 mt-4 pt-3 border-top">
+                        <a href="{% url 'categories' %}" class="btn btn-light-secondary px-4">
+                            Annuler
+                        </a>
+                        <button type="submit" class="btn btn-primary px-4 d-inline-flex align-items-center gap-2">
+                            <i class="bi bi-check2-circle fs-6"></i>
+                            <span>{% if mode == "edit" %}Enregistrer les modifications{% else %}Créer la catégorie{% endif %}</span>
+                        </button>
                     </div>
                 </form>
             </div>
