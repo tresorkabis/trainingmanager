@@ -28,10 +28,12 @@ def tm_hero(title, subtitle, icon, actions=None, stats=None, theme='primary', ph
 def tm_test():
     return "TAG TEST FONCTIONNEL"
 
+import builtins
+
 @register.filter(name='abs')
-def abs(value):
+def tm_abs_filter(value):
     """Retourne la valeur absolue d'un nombre."""
     try:
-        return abs(float(value))
+        return builtins.abs(float(value))
     except (ValueError, TypeError):
         return value

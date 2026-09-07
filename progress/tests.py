@@ -5,7 +5,7 @@ from django.db.models import ProtectedError
 from django.urls import reverse
 from django.test import TestCase
 
-from progress.models import Action, ActionSchedule, Formateur, ModuleProgress, ModuleSubject, SessionProgress
+from progress.models import Action, ActionSchedule, Formateur, ModuleProgress, ModuleSubject, SessionProgress, Paiement
 from progress.services import ActionWorkflowService
 from training.models import Filiere, Formation, Module, Service
 from intern.models import Categorie, Stagiaire
@@ -477,3 +477,61 @@ class DetailActionCreateViewTests(TestCase):
 
         self.assertEqual(self.stagiaire.detailaction_set.count(), 1)
         self.assertEqual(response_repeat.status_code, 302)
+
+
+class PaiementListViewTests(TestCase):
+    def setUp(self):
+        self.profile = Profile.objects.create(name="Caisse")
+        self.user = User.objects.create_user(
+            username="caisse_test",
+            email="caisse_test@example.com",
+            password="testpass123",
+            profile=self.profile,
+        )
+        self.client.force_login(self.user)
+
+        self.service = Service.objects.create(nom="Service P")
+        self.filiere = Filiere.objects.create(nom="Filière P", service=self.service)
+        self.formation = Formation.objects.create(
+            nom="Formation P",
+            duree=10,
+            duree_heures=20,
+            filiere=self.filiere,
+            cout=100,
+        )
+        self.action = Action.objects.create(
+            description="Action P",
+            date_debut=date(2026, 6, 10),
+            date_fin=date(2026, 6, 12),
+            formation=self.formation,
+        )
+        self.categorie = Categorie.objects.create(titre="sans emploi")
+        self.stagiaire = Stagiaire.objects.create(
+            nom="Test",
+            postnom="Paiement",
+            prenom="",
+            adresse="Adresse",
+            sexe="M",
+            telephone="1234567890",
+            email="test.paiement@example.com",
+            categorie=self.categorie,
+        )
+        # Create a payment with surplus (exceeds formation cost to test |abs filter)
+        Paiement.objects.create(
+            stagiaire=self.stagiaire,
+            action=self.action,
+            montant=150,
+            date_paiement=date.today(),
+            mode_paiement="ESPECES",
+        )
+
+    def test_paiement_list_view_renders_successfully_including_negative_balances(self):
+        from progress.templatetags.tm_tags import tm_abs_filter
+        self.assertEqual(tm_abs_filter(-50), 50.0)
+        self.assertEqual(tm_abs_filter(50), 50.0)
+        self.assertEqual(tm_abs_filter("invalid"), "invalid")
+
+        response = self.client.get(reverse("paiements"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Paiements")
+

@@ -67,17 +67,20 @@
     }
 
     // -------------------------------------------------------
-    // Active menu highlighting
+    // Active menu highlighting (only if not already set by Django template)
     // -------------------------------------------------------
-    var currentPath = window.location.pathname;
-    var sidebarLinks = document.querySelectorAll(".sidebar-link");
+    var activeItem = document.querySelector(".sidebar-item.active");
+    if (!activeItem) {
+        var currentPath = window.location.pathname;
+        var sidebarLinks = document.querySelectorAll(".sidebar-link");
 
-    sidebarLinks.forEach(function (link) {
-        var href = link.getAttribute("href");
-        if (href && currentPath === href) {
-            link.closest(".sidebar-item").classList.add("active");
-        }
-    });
+        sidebarLinks.forEach(function (link) {
+            var href = link.getAttribute("href");
+            if (href && currentPath === href) {
+                link.closest(".sidebar-item").classList.add("active");
+            }
+        });
+    }
 
     // -------------------------------------------------------
     // Bootstrap tooltip & popover init (if Bootstrap is available)

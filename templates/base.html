@@ -50,7 +50,7 @@
                         {% if request.user.is_authenticated and request.user.profile and request.user.profile.name == "Conseiller" %}
 
                             <li class="sidebar-title">Raccourcis</li>
-                            <li class="sidebar-item">
+                            <li class="sidebar-item {% if link == 'stagiaire_create' %} active {% endif %}">
                                 <a href="{% url 'stagiaire_create' %}" class='sidebar-link'>
                                     <i class="bi bi-person-plus-fill"></i>
                                     <span>Nouveau Stagiaire</span>
@@ -89,7 +89,7 @@
                         {% elif request.user.profile and request.user.profile.name == "Caisse" %}
 
                             <li class="sidebar-title">Trésorerie</li>
-                            <li class="sidebar-item">
+                            <li class="sidebar-item {% if link == 'paiement_create' %} active {% endif %}">
                                 <a href="{% url 'paiement_create' %}" class='sidebar-link'>
                                     <i class="bi bi-plus-circle"></i>
                                     <span>Nouveau paiement</span>
@@ -264,6 +264,16 @@
             </section>
 
             <div class="page-content">
+                {% if messages %}
+                <div class="mb-3">
+                    {% for message in messages %}
+                    <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
                 {% block content %} {% endblock content %}
             </div>
 

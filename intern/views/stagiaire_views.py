@@ -257,6 +257,7 @@ class StagiaireCreateUpdateView(StagiairePermissionMixin, View):
             titre = "Saisie d'un stagiaire"
 
         ctx = {
+            "link": "stagiaire_create" if mode == "new" else "stagiaires",
             "form": form,
             "categories": self.get_allowed_categories(),
             "entreprises": Entreprise.objects.all(),
@@ -353,6 +354,7 @@ class StagiaireCreateUpdateView(StagiairePermissionMixin, View):
 
     def form_invalid(self, request, form, stagiaire, mode, titre):
         ctx = {
+            "link": "stagiaire_create" if mode == "new" else "stagiaires",
             "form": form,
             "categories": self.get_allowed_categories(),
             "entreprises": Entreprise.objects.all(),

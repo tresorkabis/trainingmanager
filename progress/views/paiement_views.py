@@ -1,3 +1,4 @@
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.urls import reverse_lazy
@@ -224,15 +225,23 @@ class PaiementCreateView(PaiementManagePermissionMixin, CreateView):
                 pass
         return initial
 
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        messages.success(
+            self.request,
+            f"Le paiement #{self.object.reference or self.object.pk} de {self.object.montant:,.0f} USD pour {self.object.stagiaire.get_full_name()} a été enregistré avec succès."
+        )
+        return response
+
     def get_success_url(self):
-        # Après création, rediriger vers la fiche du stagiaire si possible
-        if hasattr(self, 'object') and self.object and self.object.stagiaire:
-            return reverse_lazy('stagiaire', kwargs={'pk': self.object.stagiaire.pk})
+        next_url = self.request.POST.get('next') or self.request.GET.get('next')
+        if next_url:
+            return next_url
         return reverse_lazy('paiements')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['link'] = 'paiements'
+        context['link'] = 'paiement_create'
         context['titre'] = 'Enregistrer un paiement'
         # Pass information to template so we can render hidden inputs and display labels
         stagiaire_id = self.request.GET.get('stagiaire')
@@ -309,7 +318,18 @@ class PaiementUpdateView(PaiementManagePermissionMixin, UpdateView):
     form_class = PaiementForm
     template_name = 'progress/paiement_form.html'
 
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        messages.success(
+            self.request,
+            f"Le paiement #{self.object.reference or self.object.pk} a été mis à jour avec succès."
+        )
+        return response
+
     def get_success_url(self):
+        next_url = self.request.POST.get('next') or self.request.GET.get('next')
+        if next_url:
+            return next_url
         return reverse_lazy('paiements') # Rediriger vers la liste des paiements après modification
 
     def get_context_data(self, **kwargs):
