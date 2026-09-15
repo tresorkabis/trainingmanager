@@ -39,7 +39,7 @@ class StagiaireAdmin(admin.ModelAdmin):
             'fields': (
                 ('nom', 'postnom', 'prenom'),
                 ('sexe', 'telephone', 'email'),
-                ('date_naissance', 'lieu_naissance', 'nationalite'),
+                'nationalite',
                 ('type_piece', 'numero_piece'),
                 'niveau_etude',
                 'adresse',

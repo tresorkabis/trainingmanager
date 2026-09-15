@@ -1,5 +1,3 @@
-from datetime import date
-
 from django.core.exceptions import ValidationError
 from django.urls import reverse
 from django.test import TestCase, Client
@@ -88,13 +86,9 @@ class StagiaireModelTests(TestCase):
             sexe="M",
             telephone="+243800000002",
             email="tresor.kabise@example.com",
-            date_naissance=date(1990, 1, 1),
-            lieu_naissance="Kinshasa",
             nationalite="Congolaise",
             type_piece="CE",
             numero_piece="CE123456",
-            nom_pere="Pere",
-            nom_mere="Mere",
             niveau_etude="BAC+5",
             categorie=self.categorie_sans_emploi,
         )

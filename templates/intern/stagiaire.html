@@ -350,18 +350,7 @@
                     </div>
 
                     <div class="wizard-step d-none" data-step="3">
-                        <div class="row g-3">
-                            <div class="col-md-4">
-                                <label class="form-label" for="{{ form.date_naissance.id_for_label }}"><i class="bi bi-calendar-event"></i> {{ form.date_naissance.label }}</label>
-                                {{ form.date_naissance }}
-                                {{ form.date_naissance.errors }}
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label" for="{{ form.lieu_naissance.id_for_label }}"><i class="bi bi-map"></i> {{ form.lieu_naissance.label }}</label>
-                                {{ form.lieu_naissance }}
-                                {{ form.lieu_naissance.errors }}
-                            </div>
-                            <div class="col-md-4">
+                        <div class="col-md-4">
                                 <label class="form-label" for="{{ form.nationalite.id_for_label }}"><i class="bi bi-globe"></i> {{ form.nationalite.label }}</label>
                                 {{ form.nationalite }}
                                 {{ form.nationalite.errors }}
@@ -381,16 +370,6 @@
 
                     <div class="wizard-step d-none" data-step="4">
                         <div class="row g-3">
-                            <div class="col-md-4">
-                                <label class="form-label" for="{{ form.nom_pere.id_for_label }}"><i class="bi bi-person-fill"></i> {{ form.nom_pere.label }}</label>
-                                {{ form.nom_pere }}
-                                {{ form.nom_pere.errors }}
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label" for="{{ form.nom_mere.id_for_label }}"><i class="bi bi-person-fill"></i> {{ form.nom_mere.label }}</label>
-                                {{ form.nom_mere }}
-                                {{ form.nom_mere.errors }}
-                            </div>
                             <div class="col-md-4">
                                 <label class="form-label" for="{{ form.niveau_etude.id_for_label }}"><i class="bi bi-book"></i> {{ form.niveau_etude.label }}</label>
                                 {{ form.niveau_etude }}
@@ -574,12 +553,6 @@
                                 <div class="tm-detail-item"><span class="tm-detail-item__label"><i class="bi bi-gender-ambiguous"></i>Sexe</span><span class="tm-detail-item__value">{{ object.get_sexe_display }}</span></div>
                             </div>
                             <div class="col-md-4">
-                                <div class="tm-detail-item"><span class="tm-detail-item__label"><i class="bi bi-calendar-event"></i>Date de naissance</span><span class="tm-detail-item__value">{{ object.date_naissance|date:"d/m/Y"|default:"-" }}</span></div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="tm-detail-item"><span class="tm-detail-item__label"><i class="bi bi-geo-alt"></i>Lieu de naissance</span><span class="tm-detail-item__value">{{ object.lieu_naissance|default:"-" }}</span></div>
-                            </div>
-                            <div class="col-md-4">
                                 <div class="tm-detail-item"><span class="tm-detail-item__label"><i class="bi bi-globe"></i>Nationalité</span><span class="tm-detail-item__value">{{ object.nationalite|default:"-" }}</span></div>
                             </div>
                             <div class="col-md-8">
@@ -616,21 +589,7 @@
                             </div>
                         </div>
 
-                        {% if object.nom_pere or object.nom_mere %}
-                        <hr class="my-3" />
-                        <div class="row g-3">
-                            <div class="col-12">
-                                <div class="tm-subsection-title"><i class="bi bi-people"></i>Informations familiales</div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="tm-detail-item"><span class="tm-detail-item__label"><i class="bi bi-person"></i>Nom du père</span><span class="tm-detail-item__value">{{ object.nom_pere|default:"-" }}</span></div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="tm-detail-item"><span class="tm-detail-item__label"><i class="bi bi-person"></i>Nom de la mère</span><span class="tm-detail-item__value">{{ object.nom_mere|default:"-" }}</span></div>
-                            </div>
                         </div>
-                        {% endif %}
-                    </div>
 
                     {% if object.categorie and object.categorie.titre == "dans l'emploi" %}
                     <div class="tab-pane fade" id="employment">

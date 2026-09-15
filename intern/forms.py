@@ -16,18 +16,13 @@ class StagiaireForm(forms.ModelForm):
         required=False,
         widget=ModelSelect2TagWidget(model=Entreprise, search_fields=["nom__icontains"], attrs={'data-width': '100%', 'class': 'form-select', 'data-tags': 'true', 'data-minimum-input-length': '0'})
     )
-    date_naissance = forms.DateField(
-        widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
-        label="Date de naissance",
-        required=False
-    )
 
     class Meta:
         model = Stagiaire
         fields = [
             'nom', 'postnom', 'prenom', 'adresse', 'sexe', 'telephone', 'email',
-            'date_naissance', 'lieu_naissance', 'nationalite', 'type_piece', 'numero_piece',
-            'nom_pere', 'nom_mere', 'niveau_etude', 'photo', 'categorie',
+            'nationalite', 'type_piece', 'numero_piece',
+            'niveau_etude', 'photo', 'categorie',
             'entreprise', 'fonction', 'anciennete_emploi', 'anciennete_entreprise'
         ]
         widgets = {
@@ -38,12 +33,9 @@ class StagiaireForm(forms.ModelForm):
             'sexe': forms.Select(attrs={'class': 'form-select'}),
             'telephone': forms.TextInput(attrs={'class': 'form-control'}),
             'email': forms.EmailInput(attrs={'class': 'form-control'}),
-            'lieu_naissance': forms.TextInput(attrs={'class': 'form-control'}),
             'nationalite': forms.TextInput(attrs={'class': 'form-control'}),
             'type_piece': forms.Select(attrs={'class': 'form-select'}),
             'numero_piece': forms.TextInput(attrs={'class': 'form-control'}),
-            'nom_pere': forms.TextInput(attrs={'class': 'form-control'}),
-            'nom_mere': forms.TextInput(attrs={'class': 'form-control'}),
             'niveau_etude': forms.TextInput(attrs={'class': 'form-control'}),
             'photo': forms.FileInput(attrs={'class': 'form-control'}),
             'fonction': forms.TextInput(attrs={'class': 'form-control'}),

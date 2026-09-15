@@ -44,13 +44,9 @@ class Stagiaire(models.Model):
     sexe = models.CharField(max_length=2, choices=SEXE_CHOISES)
     telephone = models.CharField(max_length=15)
     email = models.EmailField(blank=True, null=True, unique=True)
-    date_naissance = models.DateField(blank=True, null=True)
-    lieu_naissance = models.CharField(max_length=100, blank=True, null=True)
     nationalite = models.CharField(max_length=100, blank=True, null=True)
     type_piece = models.CharField(max_length=2, choices=TYPE_PIECE_CHOICES, blank=True, null=True, verbose_name="Type de pièce") # New field
     numero_piece = models.CharField(max_length=50, blank=True, null=True, unique=True)
-    nom_pere = models.CharField(max_length=100, blank=True, null=True)
-    nom_mere = models.CharField(max_length=100, blank=True, null=True)
     niveau_etude = models.CharField(max_length=100, blank=True, null=True)
     photo = models.ImageField(upload_to='stagiaires/', blank=True, null=True)
     categorie = models.ForeignKey(Categorie, on_delete=models.CASCADE)

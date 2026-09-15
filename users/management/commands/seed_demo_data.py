@@ -417,10 +417,6 @@ class Command(BaseCommand):
                 "nationalite": "Congolaise",
                 "type_piece": "CE",
                 "numero_piece": "DEM-ST-001",
-                "date_naissance": date(2001, 4, 12),
-                "lieu_naissance": "Kinshasa",
-                "nom_pere": "Jean Mukendi",
-                "nom_mere": "Claire Kasongo",
                 "etudes": [
                     {
                         "intitule": "Electricite generale",
@@ -458,10 +454,6 @@ class Command(BaseCommand):
                 "nationalite": "Congolaise",
                 "type_piece": "PS",
                 "numero_piece": "DEM-ST-002",
-                "date_naissance": date(1999, 9, 5),
-                "lieu_naissance": "Matadi",
-                "nom_pere": "Pierre Tshibangu",
-                "nom_mere": "Jeanne Mbuyi",
                 "etudes": [
                     {
                         "intitule": "Informatique de gestion",
@@ -496,10 +488,6 @@ class Command(BaseCommand):
                 "nationalite": "Congolaise",
                 "type_piece": "PC",
                 "numero_piece": "DEM-ST-003",
-                "date_naissance": date(1998, 1, 20),
-                "lieu_naissance": "Lubumbashi",
-                "nom_pere": "Andre Ilunga",
-                "nom_mere": "Solange Banza",
                 "etudes": [
                     {
                         "intitule": "Sciences commerciales",
@@ -526,10 +514,6 @@ class Command(BaseCommand):
                 "nationalite": "Congolaise",
                 "type_piece": "CE",
                 "numero_piece": "DEM-ST-004",
-                "date_naissance": date(1995, 7, 1),
-                "lieu_naissance": "Kolwezi",
-                "nom_pere": "Pierre Kabongo",
-                "nom_mere": "Marie Mwepu",
                 "etudes": [
                     {
                         "intitule": "Maintenance Industrielle",
@@ -560,10 +544,6 @@ class Command(BaseCommand):
                 "nationalite": "Congolaise",
                 "type_piece": "PS",
                 "numero_piece": "DEM-ST-005",
-                "date_naissance": date(2000, 11, 25),
-                "lieu_naissance": "Boma",
-                "nom_pere": "Paul Nzuzi",
-                "nom_mere": "Sophie Lunda",
                 "etudes": [
                     {
                         "intitule": "Secrétariat Bureautique",
@@ -590,10 +570,6 @@ class Command(BaseCommand):
                 "nationalite": "Congolaise",
                 "type_piece": "PC",
                 "numero_piece": "DEM-ST-006",
-                "date_naissance": date(1997, 3, 8),
-                "lieu_naissance": "Mbuji-Mayi",
-                "nom_pere": "Jean Mbuyi",
-                "nom_mere": "Marthe Kalala",
                 "etudes": [
                     {
                         "intitule": "Gestion des Ressources Humaines",
@@ -620,10 +596,6 @@ class Command(BaseCommand):
                 "nationalite": "Congolaise",
                 "type_piece": "PS",
                 "numero_piece": "DEM-ST-007",
-                "date_naissance": date(1999, 1, 15),
-                "lieu_naissance": "Kisangani",
-                "nom_pere": "Joseph Lufuma",
-                "nom_mere": "Christine Nkumu",
                 "etudes": [
                     {
                         "intitule": "Informatique Appliquée",
@@ -653,13 +625,9 @@ class Command(BaseCommand):
                 "sexe": spec["sexe"],
                 "telephone": spec["telephone"],
                 "categorie": categories[spec["categorie"]],
-                "date_naissance": spec["date_naissance"],
-                "lieu_naissance": spec["lieu_naissance"],
                 "nationalite": spec["nationalite"],
                 "type_piece": spec["type_piece"],
                 "numero_piece": spec["numero_piece"],
-                "nom_pere": spec["nom_pere"],
-                "nom_mere": spec["nom_mere"],
                 "niveau_etude": spec["niveau_etude"],
                 "photo": spec["photo"],
                 # "filiere": filieres[spec["filiere_nom"]], # Supprimé car le stagiaire n'est plus directement lié à une filière
