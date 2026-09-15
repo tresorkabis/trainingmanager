@@ -42,6 +42,7 @@
                         <thead>
                             <tr>
                                 <th>Matricule</th>
+                                <th>Type</th>
                                 <th>Nom complet</th>
                                 <th>Contact</th>
                                 <th>Modules / Actions</th>
@@ -54,6 +55,13 @@
                             {% for item in object_list %}
                             <tr>
                                 <td><code class="text-primary fw-bold">{{ item.matricule }}</code></td>
+                                <td>
+                                    {% if item.type_formateur == 'INPP' %}
+                                    <span class="badge bg-light-primary text-primary">INPP</span>
+                                    {% else %}
+                                    <span class="badge bg-light-info text-info">Prestataire</span>
+                                    {% endif %}
+                                </td>
                                 <td>
                                     <a href="{% url 'formateur' item.pk %}" class="tm-formateur-row__title d-block">{{ item.nom }} {{ item.postnom }} {{ item.prenom }}</a>
                                     <span class="tm-formateur-row__meta">{{ item.specialite|default:"Pas de spécialité" }}</span>

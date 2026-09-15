@@ -24,6 +24,11 @@ class TypeAction(models.Model):
         return self.code + " (" + self.libelle + ")"
 
 class Formateur(models.Model):
+    TYPE_CHOICES = [
+        ('INPP', 'INPP'),
+        ('PRESTATAIRE', 'Prestataire'),
+    ]
+    type_formateur = models.CharField(max_length=20, choices=TYPE_CHOICES, default='INPP')
     matricule = models.CharField(max_length=10)
     nom = models.CharField(max_length=50)
     postnom = models.CharField(max_length=50)

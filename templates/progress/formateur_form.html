@@ -3,47 +3,13 @@
 
 {% block title %}{{ titre }} un Formateur{% endblock title %}
 {% block page_header %}{{ titre }} un Formateur{% endblock page_header %}
-{% block style %}
-<style>
-    .tm-formateur-form-hero {
-        background:
-            radial-gradient(circle at top right, rgba(67, 94, 190, 0.18), transparent 35%),
-            linear-gradient(135deg, #f7f8fc 0%, #eef3ff 100%);
-        border: 1px solid rgba(67, 94, 190, 0.12);
-        border-radius: 1.25rem;
-    }
-
-    .tm-formateur-form-card {
-        border: 1px solid rgba(15, 23, 42, 0.07);
-        border-radius: 1rem;
-        box-shadow: 0 16px 32px rgba(15, 23, 42, 0.05);
-    }
-</style>
-{% endblock style %}
 
 {% block content %}
 <div class="page-heading">
-    <section class="tm-formateur-form-hero p-4 p-lg-5 mb-4">
-        <div class="row g-4 align-items-center">
-            <div class="col-12 col-lg-8">
-                <div class="tm-section-titlebar">
-                    <span class="tm-section-titlebar__icon"><i class="bi bi-person-badge"></i></span>
-                    <div class="tm-section-titlebar__text">
-                        <h3>{{ titre }} un formateur</h3>
-                        <p>Renseignez les informations du formateur.</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-12 col-lg-4 d-flex justify-content-lg-end">
-                <a href="{% url 'formateurs' %}" class="btn btn-light-secondary">
-                    <i class="bi bi-arrow-left me-2"></i>Retour aux formateurs
-                </a>
-            </div>
-        </div>
-    </section>
+    {% include "progress/tm_hero.html" with title=hero.title subtitle=hero.subtitle icon=hero.icon theme=hero.theme actions=hero.actions %}
 
     <section class="section">
-        <div class="card tm-formateur-form-card">
+        <div class="card">
             <div class="card-header">
                 <h4 class="card-title mb-1">Informations du formateur</h4>
                 <p class="text-muted mb-0">Les champs ci-dessous permettent de gérer les détails du formateur.</p>
@@ -153,6 +119,13 @@
                                     value="{% if submitted.specialite %}{{ submitted.specialite }}{% else %}{{ object.specialite|default:'' }}{% endif %}"
                                     placeholder="Ex: Électricité, Informatique"
                                 >
+                            </div>
+                            <div class="form-group">
+                                <label for="type_formateur">Type de formateur</label>
+                                <select class="form-select" id="type_formateur" name="type_formateur">
+                                    <option value="INPP" {% if submitted.type_formateur == 'INPP' or object.type_formateur == 'INPP' and not submitted.type_formateur %}selected{% endif %}>INPP</option>
+                                    <option value="PRESTATAIRE" {% if submitted.type_formateur == 'PRESTATAIRE' or object.type_formateur == 'PRESTATAIRE' and not submitted.type_formateur %}selected{% endif %}>Prestataire</option>
+                                </select>
                             </div>
                             <div class="form-group">
                                 <div class="form-check form-switch">

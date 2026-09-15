@@ -239,13 +239,13 @@ class Command(BaseCommand):
 
         formateurs = {}
         formateur_specs_data = [
-            ("FM001", "Kabasele", "Mwamba", "Jean", "Kinshasa / Kintambo", "0817000001", "kabasele.demo@training.local", "Electricité"),
-            ("FM002", "Ngoy", "Kabeya", "Marie", "Kinshasa / Limete", "0817000002", "ngoy.demo@training.local", "Informatique"),
-            ("FM003", "Lwamba", "Kalala", "Pierre", "Lubumbashi / Kamalondo", "0971000003", "lwamba.demo@training.local", "Mécanique"),
-            ("FM004", "Mufwankolo", "Nzuzi", "Sophie", "Kinshasa / Ngaliema", "0817000004", "mufwankolo.demo@training.local", "Gestion"),
-            ("FM005", "Kazadi", "Mutombo", "Paul", "Kinshasa / Limete", "0817000005", "kazadi.demo@training.local", "Automatisme"),
+            ("F-001", "Kabasele", "Mwamba", "Jean", "Kinshasa / Kintambo", "0817000001", "kabasele.demo@training.local", "Electricité", "INPP"),
+            ("F-002", "Ngoy", "Kabeya", "Marie", "Kinshasa / Limete", "0817000002", "ngoy.demo@training.local", "Informatique", "INPP"),
+            ("P-001", "Lwamba", "Kalala", "Pierre", "Lubumbashi / Kamalondo", "0971000003", "lwamba.demo@training.local", "Mécanique", "PRESTATAIRE"),
+            ("P-002", "Mufwankolo", "Nzuzi", "Sophie", "Kinshasa / Ngaliema", "0817000004", "mufwankolo.demo@training.local", "Gestion", "PRESTATAIRE"),
+            ("F-003", "Kazadi", "Mutombo", "Paul", "Kinshasa / Limete", "0817000005", "kazadi.demo@training.local", "Automatisme", "INPP"),
         ]
-        for matricule, nom, postnom, prenom, adresse, telephone, email, specialite in formateur_specs_data:
+        for matricule, nom, postnom, prenom, adresse, telephone, email, specialite, type_formateur in formateur_specs_data:
             formateur, _ = Formateur.objects.get_or_create(
                 matricule=matricule,
                 defaults={
@@ -256,6 +256,7 @@ class Command(BaseCommand):
                     "telephone": telephone,
                     "email": email,
                     "specialite": specialite,
+                    "type_formateur": type_formateur,
                 },
             )
             changed = False
@@ -267,6 +268,7 @@ class Command(BaseCommand):
                 "telephone": telephone,
                 "email": email,
                 "specialite": specialite,
+                "type_formateur": type_formateur,
             }.items():
                 if getattr(formateur, field) != value:
                     setattr(formateur, field, value)
@@ -278,8 +280,8 @@ class Command(BaseCommand):
         formateurs_list = list(formateurs.values())
         if not formateurs_list:
             self.stdout.write(self.style.WARNING("Aucun formateur trouvé après création. Création de formateurs par défaut."))
-            formateur1, _ = Formateur.objects.get_or_create(matricule="FM001", defaults={"nom": "Kabasele", "postnom": "Mwamba", "prenom": "Jean", "adresse": "Kinshasa / Kintambo", "telephone": "0817000001", "email": "kabasele.demo@training.local", "specialite": "Electricité"})
-            formateur2, _ = Formateur.objects.get_or_create(matricule="FM002", defaults={"nom": "Ngoy", "postnom": "Kabeya", "prenom": "Marie", "adresse": "Kinshasa / Limete", "telephone": "0817000002", "email": "ngoy.demo@training.local", "specialite": "Informatique"})
+            formateur1, _ = Formateur.objects.get_or_create(matricule="F-001", defaults={"nom": "Kabasele", "postnom": "Mwamba", "prenom": "Jean", "adresse": "Kinshasa / Kintambo", "telephone": "0817000001", "email": "kabasele.demo@training.local", "specialite": "Electricité", "type_formateur": "INPP"})
+            formateur2, _ = Formateur.objects.get_or_create(matricule="F-002", defaults={"nom": "Ngoy", "postnom": "Kabeya", "prenom": "Marie", "adresse": "Kinshasa / Limete", "telephone": "0817000002", "email": "ngoy.demo@training.local", "specialite": "Informatique", "type_formateur": "INPP"})
             formateurs_list = [formateur1, formateur2]
 
         formateur_index = 0
@@ -783,10 +785,10 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS("Generation des paiements de demonstration..."))
         paiement_specs = [
             {"stagiaire_email": "aline.mukendi.demo@training.local", "action_key": "electricite", "montant": 500.00, "date_paiement": date(2026, 5, 15), "motif": "Acompte formation", "mode_paiement": "ESPECES"},
-            {"stagiaire_email": "aline.mukendi.demo@training.local", "action_key": "electricite", "montant": 1000.00, "date_paiement": date(2026, 6, 10), "motif": "Solde formation", "mode_paiement": "VIREMENT"},
+            {"stagiaire_email": "aline.mukendi.demo@training.local", "action_key": "electricite", "montant": 1000.00, "date_paiement": date(2026, 6, 10), "motif": "Solde formation", "mode_paiement": "ESPECES"},
             {"stagiaire_email": "patrick.tshibangu.demo@training.local", "action_key": "pack_office", "montant": 800.00, "date_paiement": date(2026, 5, 10), "motif": "Paiement complet", "mode_paiement": "ESPECES"},
             {"stagiaire_email": "merveille.ilunga.demo@training.local", "action_key": "pack_office", "montant": 400.00, "date_paiement": date(2026, 5, 12), "motif": "Acompte", "mode_paiement": "ESPECES"},
-            {"stagiaire_email": "david.kabongo.demo@training.local", "action_key": "electricite", "montant": 750.00, "date_paiement": date(2026, 5, 20), "motif": "Paiement partiel", "mode_paiement": "VIREMENT"},
+            {"stagiaire_email": "david.kabongo.demo@training.local", "action_key": "electricite", "montant": 750.00, "date_paiement": date(2026, 5, 20), "motif": "Paiement partiel", "mode_paiement": "ESPECES"},
             {"stagiaire_email": "esther.lufuma.demo@training.local", "action_key": "maintenance", "montant": 600.00, "date_paiement": date(2026, 6, 5), "motif": "Acompte", "mode_paiement": "ESPECES"},
             {"stagiaire_email": "christian.mbuyi.demo@training.local", "action_key": "secretaire", "montant": 1300.00, "date_paiement": date(2026, 8, 20), "motif": "Paiement complet", "mode_paiement": "ESPECES"},
         ]

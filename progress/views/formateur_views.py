@@ -101,6 +101,15 @@ class FormateurCreateUpdateView(FormateurPermissionMixin, View):
             "mode": "edit" if pk else "new",
             "object": formateur,
             "submitted": {}, # Pour gérer les erreurs de formulaire
+            "hero": {
+                "title": f"{'Modification' if pk else 'Création'} d'un formateur",
+                "subtitle": "Renseignez les informations du formateur ci-dessous.",
+                "icon": "bi bi-person-badge",
+                "theme": "primary",
+                "actions": [
+                    {'label': 'Retour', 'url': reverse_lazy('formateurs'), 'icon': 'bi bi-arrow-left'},
+                ],
+            },
         }
         return render(request, self.template_name, ctx)
     
@@ -119,9 +128,10 @@ class FormateurCreateUpdateView(FormateurPermissionMixin, View):
         email = request.POST.get('email', '').strip()
         active = request.POST.get('active') == 'on' # Gérer le champ active
         specialite = request.POST.get('specialite', '').strip() # Récupérer la spécialité
+        type_formateur = request.POST.get('type_formateur', 'INPP')
 
         errors = []
-        if not matricule:
+        if errors:
             errors.append("Le matricule est requis.")
         if not nom:
             errors.append("Le nom est requis.")
@@ -129,6 +139,13 @@ class FormateurCreateUpdateView(FormateurPermissionMixin, View):
             errors.append("Le postnom est requis.")
         if not email:
             errors.append("L'email est requis.")
+        
+        # Validation du format du matricule selon le type
+        if matricule:
+            if type_formateur == 'INPP' and not matricule.startswith('F-'):
+                errors.append("Le matricule des formateurs INPP doit commencer par 'F-'.")
+            elif type_formateur == 'PRESTATAIRE' and not matricule.startswith('P-'):
+                errors.append("Le matricule des prestataires doit commencer par 'P-'.")
         
         # Validation d'unicité du matricule
         if Formateur.objects.filter(matricule=matricule).exclude(pk=pk).exists():
@@ -148,6 +165,7 @@ class FormateurCreateUpdateView(FormateurPermissionMixin, View):
             return render(request, self.template_name, ctx, status=400)
 
         if formateur: # Mode édition
+            formateur.type_formateur = type_formateur
             formateur.matricule = matricule
             formateur.nom = nom
             formateur.prenom = prenom # Assigner le prénom
