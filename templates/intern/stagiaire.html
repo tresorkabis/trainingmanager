@@ -545,6 +545,7 @@
                         steps.forEach(function(s){ s.classList.add('d-none'); });
                         var el = root.querySelector('.wizard-step[data-step="'+n+'"]');
                         if (el) el.classList.remove('d-none');
+                        if (btnSubmit) btnSubmit.disabled = false; // réactive le bouton si un envoi a été interrompu
                         if (n<=1) btnPrev.classList.add('d-none'); else btnPrev.classList.remove('d-none');
                         if (n>=total) { btnNext.classList.add('d-none'); btnSubmit.classList.remove('d-none'); } else { btnNext.classList.remove('d-none'); btnSubmit.classList.add('d-none'); }
 
@@ -602,13 +603,26 @@
                             step = step + 1;
                             show(step);
                         } else if (btnSubmit && !btnSubmit.disabled){
-                            btnSubmit.disabled = true;
                             root.submit();
                         }
                     });
 
-                    // Éviter la double soumission au clic
-                    btnSubmit && btnSubmit.addEventListener('click', function(){ btnSubmit.disabled = true; });
+                    // Avant l'envoi : valider toutes les étapes (au cas où un champ requis
+                    // aurait été vidé en revenant en arrière) et revenir à la 1re étape en erreur.
+                    btnSubmit && btnSubmit.addEventListener('click', function(e){
+                        for (var s = 1; s <= total; s++){
+                            if (!validateStep(s)){
+                                e.preventDefault();
+                                step = s;
+                                show(s);
+                                return;
+                            }
+                        }
+                        // Le formulaire part réellement : le handler 'submit' désactive le bouton.
+                    });
+
+                    // Désactiver le bouton UNIQUEMENT quand le formulaire part réellement
+                    // (après validation HTML5 réussie) pour éviter un bouton grisé sans envoi.
                     root.addEventListener('submit', function(){
                         if (btnSubmit) btnSubmit.disabled = true;
                     });
