@@ -372,6 +372,7 @@
                         <li class="tm-wizard-nav__item" data-wstep="3" title="Étape 3 — Pièce d'identité"><span class="tm-wizard-dot">3</span><span>Pièce d'identité</span></li>
                         <li class="tm-wizard-nav__item" data-wstep="4" title="Étape 4 — Profil"><span class="tm-wizard-dot">4</span><span>Profil</span></li>
                         <li class="tm-wizard-nav__item" data-wstep="5" title="Étape 5 — Contact & Photo"><span class="tm-wizard-dot">5</span><span>Contact & Photo</span></li>
+                        <li class="tm-wizard-nav__item" data-wstep="6" title="Étape 6 — Cursus"><span class="tm-wizard-dot">6</span><span>Cursus</span></li>
                     </ol>
                     <div class="wizard-step" data-step="1">
                         <div class="row g-3">
@@ -481,6 +482,95 @@
                                 {{ form.photo.errors }}
                             </div>
                         </div>
+                    </div>
+
+                    <div class="wizard-step d-none" data-step="6">
+                        <div class="row g-3 mb-1">
+                            <div class="col-12">
+                                <h6 class="fw-bold mb-2"><i class="bi bi-journal-bookmark me-2 text-primary"></i>Études & diplômes</h6>
+                            </div>
+                        </div>
+                        <div class="table-responsive mb-2">
+                            <table class="table table-sm align-middle" id="tbl-etudes">
+                                <thead>
+                                    <tr>
+                                        <th style="width:19%">Intitulé</th>
+                                        <th style="width:19%">Établissement</th>
+                                        <th style="width:14%">Niveau</th>
+                                        <th style="width:11%">Début</th>
+                                        <th style="width:11%">Fin</th>
+                                        <th style="width:21%">Diplôme obtenu</th>
+                                        <th style="width:5%"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for etude in existing_studies %}
+                                    <tr class="etude-row">
+                                        <td><input type="text" class="form-control form-control-sm" name="etude_intitule[]" value="{{ etude.intitule }}"></td>
+                                        <td><input type="text" class="form-control form-control-sm" name="etude_etablissement[]" value="{{ etude.etablissement }}"></td>
+                                        <td><input type="text" class="form-control form-control-sm" name="etude_niveau[]" value="{{ etude.niveau }}"></td>
+                                        <td><input type="text" inputmode="numeric" pattern="[0-9]{4}" class="form-control form-control-sm" name="etude_annee_debut[]" value="{{ etude.annee_debut }}"></td>
+                                        <td><input type="text" inputmode="numeric" pattern="[0-9]{4}" class="form-control form-control-sm" name="etude_annee_fin[]" value="{{ etude.annee_fin }}"></td>
+                                        <td><input type="text" class="form-control form-control-sm" name="etude_diplome[]" value="{{ etude.diplome_obtenu }}"></td>
+                                        <td class="text-center"><button type="button" class="btn btn-sm btn-outline-secondary row-remove" title="Retirer cette ligne"><i class="bi bi-x"></i></button></td>
+                                    </tr>
+                                    {% empty %}
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <button type="button" class="btn btn-outline-secondary btn-sm" id="btn-add-etude"><i class="bi bi-plus-lg me-1"></i>Ajouter une étude</button>
+
+                        <div class="row g-3 mt-3 mb-1">
+                            <div class="col-12">
+                                <h6 class="fw-bold mb-2"><i class="bi bi-mortarboard me-2 text-primary"></i>Autres formations</h6>
+                            </div>
+                        </div>
+                        <div class="table-responsive mb-2">
+                            <table class="table table-sm align-middle" id="tbl-autres-formations">
+                                <thead>
+                                    <tr>
+                                        <th style="width:35%">Intitulé</th>
+                                        <th style="width:35%">Établissement</th>
+                                        <th style="width:25%">Année de fin</th>
+                                        <th style="width:5%"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for formation in existing_other_trainings %}
+                                    <tr class="formation-row">
+                                        <td><input type="text" class="form-control form-control-sm" name="autre_formation_intitule[]" value="{{ formation.intitule }}"></td>
+                                        <td><input type="text" class="form-control form-control-sm" name="autre_formation_etablissement[]" value="{{ formation.etablissement }}"></td>
+                                        <td><input type="text" inputmode="numeric" pattern="[0-9]{4}" class="form-control form-control-sm" name="autre_formation_annee_fin[]" value="{{ formation.annee_fin }}"></td>
+                                        <td class="text-center"><button type="button" class="btn btn-sm btn-outline-secondary row-remove" title="Retirer cette ligne"><i class="bi bi-x"></i></button></td>
+                                    </tr>
+                                    {% empty %}
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <button type="button" class="btn btn-outline-secondary btn-sm" id="btn-add-formation"><i class="bi bi-plus-lg me-1"></i>Ajouter une formation</button>
+
+                        <!-- Modèles de lignes (permettent l'ajout même quand le tableau est vide) -->
+                        <template id="tmpl-etude-row">
+                            <tr class="etude-row">
+                                <td><input type="text" class="form-control form-control-sm" name="etude_intitule[]"></td>
+                                <td><input type="text" class="form-control form-control-sm" name="etude_etablissement[]"></td>
+                                <td><input type="text" class="form-control form-control-sm" name="etude_niveau[]"></td>
+                                <td><input type="text" inputmode="numeric" pattern="[0-9]{4}" class="form-control form-control-sm" name="etude_annee_debut[]"></td>
+                                <td><input type="text" inputmode="numeric" pattern="[0-9]{4}" class="form-control form-control-sm" name="etude_annee_fin[]"></td>
+                                <td><input type="text" class="form-control form-control-sm" name="etude_diplome[]"></td>
+                                <td class="text-center"><button type="button" class="btn btn-sm btn-outline-secondary row-remove" title="Retirer cette ligne"><i class="bi bi-x"></i></button></td>
+                            </tr>
+                        </template>
+                        <template id="tmpl-formation-row">
+                            <tr class="formation-row">
+                                <td><input type="text" class="form-control form-control-sm" name="autre_formation_intitule[]"></td>
+                                <td><input type="text" class="form-control form-control-sm" name="autre_formation_etablissement[]"></td>
+                                <td><input type="text" inputmode="numeric" pattern="[0-9]{4}" class="form-control form-control-sm" name="autre_formation_annee_fin[]"></td>
+                                <td class="text-center"><button type="button" class="btn btn-sm btn-outline-secondary row-remove" title="Retirer cette ligne"><i class="bi bi-x"></i></button></td>
+                            </tr>
+                        </template>
                     </div>
 
                     <div class="d-flex justify-content-end gap-2 mt-4">
@@ -629,6 +719,61 @@
 
                     if (catEl) catEl.addEventListener('change', updateEmploymentFields);
 
+                    // ===== Lignes dynamiques du cursus (études & autres formations) =====
+                    function bindRemoveRow(tr, containerId, rowClass){
+                        var btn = tr.querySelector('.row-remove');
+                        if (!btn) return;
+                        btn.addEventListener('click', function(){
+                            var tbody = tr.closest('#' + containerId + ' tbody');
+                            var rows = tbody ? Array.from(tbody.querySelectorAll('tr.' + rowClass)) : [];
+                            if (rows.length <= 1){
+                                // Toujours garder au moins une ligne : on la vide plutôt que de la retirer
+                                Array.from(tr.querySelectorAll('input, select, textarea')).forEach(function(i){ i.value = ''; });
+                                return;
+                            }
+                            tr.remove();
+                        });
+                    }
+
+                    function cloneRow(containerId, rowClass, templateId){
+                        var tbody = root.querySelector('#' + containerId + ' tbody');
+                        if (!tbody) return;
+                        var rows = Array.from(tbody.querySelectorAll('tr.' + rowClass));
+                        var base = rows[rows.length - 1] || null;
+                        var newRow = null;
+                        if (base){
+                            newRow = base.cloneNode(true);
+                            Array.from(newRow.querySelectorAll('input, select, textarea')).forEach(function(i){ i.value = ''; });
+                        } else if (templateId){
+                            var tmpl = document.getElementById(templateId);
+                            if (tmpl && tmpl.content) {
+                                var clone = tmpl.content.cloneNode(true);
+                                newRow = clone.querySelector && clone.querySelector('tr');
+                            }
+                        }
+                        if (!newRow) return;
+                        bindRemoveRow(newRow, containerId, rowClass);
+                        tbody.appendChild(newRow);
+                    }
+
+                    function ensureMinRow(containerId, rowClass, templateId){
+                        var tbody = root.querySelector('#' + containerId + ' tbody');
+                        if (!tbody) return;
+                        if (!tbody.querySelector('tr.' + rowClass)) cloneRow(containerId, rowClass, templateId);
+                    }
+
+                    var btnAddEtude = document.getElementById('btn-add-etude');
+                    var btnAddFormation = document.getElementById('btn-add-formation');
+                    btnAddEtude && btnAddEtude.addEventListener('click', function(){ cloneRow('tbl-etudes', 'etude-row', 'tmpl-etude-row'); });
+                    btnAddFormation && btnAddFormation.addEventListener('click', function(){ cloneRow('tbl-autres-formations', 'formation-row', 'tmpl-formation-row'); });
+
+                    function initCursus(){
+                        Array.from(root.querySelectorAll('#tbl-etudes tbody tr.etude-row')).forEach(function(tr){ bindRemoveRow(tr, 'tbl-etudes', 'etude-row'); });
+                        Array.from(root.querySelectorAll('#tbl-autres-formations tbody tr.formation-row')).forEach(function(tr){ bindRemoveRow(tr, 'tbl-autres-formations', 'formation-row'); });
+                        ensureMinRow('tbl-etudes', 'etude-row', 'tmpl-etude-row');
+                        ensureMinRow('tbl-autres-formations', 'formation-row', 'tmpl-formation-row');
+                    }
+
                     // Première étape contenant une erreur Django (après un POST invalide)
                     function firstStepWithError(){
                         for (var s = 1; s <= total; s++){
@@ -641,6 +786,7 @@
                     // initialize
                     document.addEventListener('DOMContentLoaded', function(){
                         updateEmploymentFields();
+                        initCursus();
                         // Feedback visuel sur les champs invalides renvoyés par le serveur
                         Array.from(root.querySelectorAll('.errorlist')).forEach(function(er){
                             var control = er.previousElementSibling;

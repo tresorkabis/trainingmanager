@@ -272,6 +272,32 @@ class StagiaireCreateUpdateView(StagiairePermissionMixin, View):
         }
         # Fournir l'URL de la photo si elle existe (utile pour l'aperçu dans le formulaire)
         ctx['photo_url'] = stagiaire.photo.url if stagiaire and getattr(stagiaire, 'photo', None) else None
+
+        # Cursus existant (études & autres formations) pour pré-remplir le formulaire
+        if stagiaire:
+            ctx["existing_studies"] = [
+                {
+                    "intitule": etude.intitule,
+                    "etablissement": etude.etablissement or "",
+                    "niveau": etude.niveau or "",
+                    "annee_debut": etude.annee_debut if etude.annee_debut is not None else "",
+                    "annee_fin": etude.annee_fin if etude.annee_fin is not None else "",
+                    "diplome_obtenu": etude.diplome_obtenu or "",
+                }
+                for etude in stagiaire.etudes.all()
+            ]
+            ctx["existing_other_trainings"] = [
+                {
+                    "intitule": af.intitule,
+                    "etablissement": af.etablissement or "",
+                    "annee_fin": af.annee_fin if af.annee_fin is not None else "",
+                }
+                for af in stagiaire.autres_formations.all()
+            ]
+        else:
+            ctx["existing_studies"] = []
+            ctx["existing_other_trainings"] = []
+
         # Si création (mode new), demander l'ouverture automatique de l'assistant
         if mode == "new":
             ctx['auto_open_assistant'] = True
