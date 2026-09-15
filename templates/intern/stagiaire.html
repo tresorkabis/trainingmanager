@@ -255,6 +255,67 @@
         margin-top: 0.25rem;
     }
 
+/* === Wizard stepper (création / modification stagiaire) === */
+    .tm-wizard-nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: .5rem;
+        align-items: center;
+        padding: .5rem .9rem;
+        margin-bottom: 0;
+        list-style: none;
+        background: #f5f7fb;
+        border: 1px solid #dee2e6;
+        border-radius: .6rem;
+    }
+    .tm-wizard-nav__item {
+        display: inline-flex;
+        align-items: center;
+        gap: .45rem;
+        padding: .35rem .8rem;
+        border-radius: 2rem;
+        font-size: .8rem;
+        font-weight: 600;
+        color: #64748b;
+        background: transparent;
+        cursor: pointer;
+        user-select: none;
+        border: 1px solid transparent;
+        transition: all .15s ease;
+    }
+    .tm-wizard-nav__item .tm-wizard-dot {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 1.5rem;
+        height: 1.5rem;
+        border-radius: 50%;
+        background: #cbd5e1;
+        color: #fff;
+        font-size: .75rem;
+        font-weight: 700;
+        line-height: 1;
+    }
+    .tm-wizard-nav__item.is-active {
+        background: #435ebe;
+        color: #fff;
+        border-color: #435ebe;
+    }
+    .tm-wizard-nav__item.is-active .tm-wizard-dot {
+        background: #fff;
+        color: #435ebe;
+    }
+    .tm-wizard-nav__item.is-done {
+        color: #1c7f3c;
+        border-color: rgba(28, 127, 60, .35);
+    }
+    .tm-wizard-nav__item.is-done .tm-wizard-dot {
+        background: #27a844;
+    }
+    .tm-wizard-nav__item.is-disabled {
+        cursor: not-allowed;
+        opacity: .85;
+    }
 </style>
 {% endblock style %}
 
@@ -304,6 +365,14 @@
 
                                 <form id="createStagiaireWizardForm" method="post" enctype="multipart/form-data">
                     {% csrf_token %}
+
+                    <ol class="tm-wizard-nav" aria-label="Étapes de saisie">
+                        <li class="tm-wizard-nav__item is-active" data-wstep="1" aria-current="step" title="Étape 1 — Identité"><span class="tm-wizard-dot">1</span><span>Identité</span></li>
+                        <li class="tm-wizard-nav__item" data-wstep="2" title="Étape 2 — Coordonnées"><span class="tm-wizard-dot">2</span><span>Coordonnées</span></li>
+                        <li class="tm-wizard-nav__item" data-wstep="3" title="Étape 3 — Pièce d'identité"><span class="tm-wizard-dot">3</span><span>Pièce d'identité</span></li>
+                        <li class="tm-wizard-nav__item" data-wstep="4" title="Étape 4 — Profil"><span class="tm-wizard-dot">4</span><span>Profil</span></li>
+                        <li class="tm-wizard-nav__item" data-wstep="5" title="Étape 5 — Contact & Photo"><span class="tm-wizard-dot">5</span><span>Contact & Photo</span></li>
+                    </ol>
                     <div class="wizard-step" data-step="1">
                         <div class="row g-3">
                             <div class="col-md-4">
@@ -321,36 +390,32 @@
                                 {{ form.prenom }}
                                 {{ form.prenom.errors }}
                             </div>
-                        </div>
-                    </div>
-
-                    <div class="wizard-step d-none" data-step="2">
-                        <div class="row g-3">
-                            <div class="col-md-8">
-                                <label class="form-label" for="{{ form.adresse.id_for_label }}"><i class="bi bi-geo-alt"></i> {{ form.adresse.label }}</label>
-                                {{ form.adresse }}
-                                {{ form.adresse.errors }}
-                            </div>
                             <div class="col-md-4">
                                 <label class="form-label" for="{{ form.sexe.id_for_label }}"><i class="bi bi-gender-ambiguous"></i> {{ form.sexe.label }}</label>
                                 {{ form.sexe }}
                                 {{ form.sexe.errors }}
                             </div>
                             <div class="col-md-4">
-                                <label class="form-label" for="{{ form.telephone.id_for_label }}"><i class="bi bi-telephone"></i> {{ form.telephone.label }}</label>
-                                {{ form.telephone }}
-                                {{ form.telephone.errors }}
+                                <label class="form-label" for="{{ form.niveau_etude.id_for_label }}"><i class="bi bi-book"></i> {{ form.niveau_etude.label }}</label>
+                                {{ form.niveau_etude }}
+                                {{ form.niveau_etude.errors }}
                             </div>
-                            <div class="col-md-4">
-                                <label class="form-label" for="{{ form.email.id_for_label }}"><i class="bi bi-envelope"></i> {{ form.email.label }}</label>
-                                {{ form.email }}
-                                {{ form.email.errors }}
+                        </div>
+                    </div>
+
+                    <div class="wizard-step d-none" data-step="2">
+                        <div class="row g-3">
+                            <div class="col-md-12">
+                                <label class="form-label" for="{{ form.adresse.id_for_label }}"><i class="bi bi-geo-alt"></i> {{ form.adresse.label }}</label>
+                                {{ form.adresse }}
+                                {{ form.adresse.errors }}
                             </div>
                         </div>
                     </div>
 
                     <div class="wizard-step d-none" data-step="3">
-                        <div class="col-md-4">
+                        <div class="row g-3">
+                            <div class="col-md-4">
                                 <label class="form-label" for="{{ form.nationalite.id_for_label }}"><i class="bi bi-globe"></i> {{ form.nationalite.label }}</label>
                                 {{ form.nationalite }}
                                 {{ form.nationalite.errors }}
@@ -370,11 +435,6 @@
 
                     <div class="wizard-step d-none" data-step="4">
                         <div class="row g-3">
-                            <div class="col-md-4">
-                                <label class="form-label" for="{{ form.niveau_etude.id_for_label }}"><i class="bi bi-book"></i> {{ form.niveau_etude.label }}</label>
-                                {{ form.niveau_etude }}
-                                {{ form.niveau_etude.errors }}
-                            </div>
                             <div class="col-md-4">
                                 <label class="form-label" for="{{ form.categorie.id_for_label }}"><i class="bi bi-tags"></i> {{ form.categorie.label }}</label>
                                 {{ form.categorie }}
@@ -406,6 +466,16 @@
                                 {{ form.anciennete_entreprise.errors }}
                             </div>
                             <div class="col-md-4">
+                                <label class="form-label" for="{{ form.telephone.id_for_label }}"><i class="bi bi-telephone"></i> {{ form.telephone.label }}</label>
+                                {{ form.telephone }}
+                                {{ form.telephone.errors }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label" for="{{ form.email.id_for_label }}"><i class="bi bi-envelope"></i> {{ form.email.label }}</label>
+                                {{ form.email }}
+                                {{ form.email.errors }}
+                            </div>
+                            <div class="col-md-4">
                                 <label class="form-label" for="{{ form.photo.id_for_label }}"><i class="bi bi-image"></i> {{ form.photo.label }}</label>
                                 {{ form.photo }}
                                 {{ form.photo.errors }}
@@ -427,7 +497,8 @@
                     var root = document.getElementById('createStagiaireWizardForm');
                     if (!root) return;
                     var steps = Array.from(root.querySelectorAll('.wizard-step'));
-                    var step = 1, total = steps.length;
+                    var pills = Array.from(root.querySelectorAll('.tm-wizard-nav__item'));
+                    var step = 1, total = steps.length, visited = 1;
                     var btnNext = document.getElementById('wizard-next');
                     var btnPrev = document.getElementById('wizard-prev');
                     var btnSubmit = document.getElementById('wizard-submit');
@@ -453,19 +524,38 @@
                         });
                     }
 
+                    function renderPills(){
+                        pills.forEach(function(p){
+                            var target = parseInt(p.getAttribute('data-wstep'), 10) || 1;
+                            var dot = p.querySelector('.tm-wizard-dot');
+                            p.classList.remove('is-active', 'is-done');
+                            p.classList.toggle('is-disabled', target > visited);
+                            p.removeAttribute('aria-current');
+                            if (target === step){
+                                p.classList.add('is-active');
+                                p.setAttribute('aria-current', 'step');
+                            } else if (target < step){
+                                p.classList.add('is-done');
+                            }
+                            if (dot) dot.textContent = (target < step) ? '\u2713' : String(target);
+                        });
+                    }
+
                     function show(n){
                         steps.forEach(function(s){ s.classList.add('d-none'); });
                         var el = root.querySelector('.wizard-step[data-step="'+n+'"]');
                         if (el) el.classList.remove('d-none');
                         if (n<=1) btnPrev.classList.add('d-none'); else btnPrev.classList.remove('d-none');
                         if (n>=total) { btnNext.classList.add('d-none'); btnSubmit.classList.remove('d-none'); } else { btnNext.classList.remove('d-none'); btnSubmit.classList.add('d-none'); }
-                        
+
                         // Mise à jour du compteur d'étapes (ex: 1 / 5)
                         var currEl = document.getElementById('wizard-current-step');
                         var totalEl = document.getElementById('wizard-total-steps');
                         if (currEl) currEl.textContent = n;
                         if (totalEl) totalEl.textContent = total;
 
+                        if (n > visited) visited = n;
+                        renderPills();
                         // ensure employment fields visibility follows category
                         updateEmploymentFields();
                         // scroll into view for small screens
@@ -487,10 +577,66 @@
                     btnNext && btnNext.addEventListener('click', function(){ if(!validateStep(step)) return; step = Math.min(total, step+1); show(step); });
                     btnPrev && btnPrev.addEventListener('click', function(){ step = Math.max(1, step-1); show(step); });
 
+                    // Les étapes déjà visitées sont cliquables pour revenir en arrière
+                    pills.forEach(function(p){
+                        p.addEventListener('click', function(){
+                            var target = parseInt(p.getAttribute('data-wstep'), 10) || 1;
+                            if (target > visited || target === step) return;
+                            step = target;
+                            show(step);
+                        });
+                    });
+
+                    // Touche Entrée = passer à l'étape suivante (ou soumettre à la fin)
+                    root.addEventListener('keydown', function(e){
+                        if (e.key !== 'Enter' || e.isComposing) return;
+                        var t = e.target;
+                        if (!t) return;
+                        var tag = t.tagName ? t.tagName.toUpperCase() : '';
+                        if (tag === 'TEXTAREA' || tag === 'BUTTON') return;
+                        // Ne pas interférer avec les widgets Select2 (recherche/tags)
+                        if (t.closest && t.closest('.select2-container, .select2-dropdown, .select2-search')) return;
+                        e.preventDefault();
+                        if (step < total){
+                            if (!validateStep(step)) return;
+                            step = step + 1;
+                            show(step);
+                        } else if (btnSubmit && !btnSubmit.disabled){
+                            btnSubmit.disabled = true;
+                            root.submit();
+                        }
+                    });
+
+                    // Éviter la double soumission au clic
+                    btnSubmit && btnSubmit.addEventListener('click', function(){ btnSubmit.disabled = true; });
+                    root.addEventListener('submit', function(){
+                        if (btnSubmit) btnSubmit.disabled = true;
+                    });
+
                     if (catEl) catEl.addEventListener('change', updateEmploymentFields);
 
+                    // Première étape contenant une erreur Django (après un POST invalide)
+                    function firstStepWithError(){
+                        for (var s = 1; s <= total; s++){
+                            var er = root.querySelector('.wizard-step[data-step="'+s+'"] .errorlist');
+                            if (er) return s;
+                        }
+                        return null;
+                    }
+
                     // initialize
-                    document.addEventListener('DOMContentLoaded', function(){ updateEmploymentFields(); show(1); });
+                    document.addEventListener('DOMContentLoaded', function(){
+                        updateEmploymentFields();
+                        // Feedback visuel sur les champs invalides renvoyés par le serveur
+                        Array.from(root.querySelectorAll('.errorlist')).forEach(function(er){
+                            var control = er.previousElementSibling;
+                            if (control) control.classList.add('is-invalid');
+                        });
+                        var start = firstStepWithError() || 1;
+                        step = start;
+                        visited = start;
+                        show(start);
+                    });
                 })();
                 </script>
 

@@ -36,7 +36,7 @@ class StagiaireForm(forms.ModelForm):
             'nationalite': forms.TextInput(attrs={'class': 'form-control'}),
             'type_piece': forms.Select(attrs={'class': 'form-select'}),
             'numero_piece': forms.TextInput(attrs={'class': 'form-control'}),
-            'niveau_etude': forms.TextInput(attrs={'class': 'form-control'}),
+            'niveau_etude': forms.Select(attrs={'class': 'form-select'}),
             'photo': forms.FileInput(attrs={'class': 'form-control'}),
             'fonction': forms.TextInput(attrs={'class': 'form-control'}),
             'anciennete_emploi': forms.NumberInput(attrs={'class': 'form-control'}),

@@ -36,6 +36,14 @@ class Stagiaire(models.Model):
         ('PS', "Passeport"),
         ('PC', "Permis de conduire"),
     )
+    NIVEAU_ETUDE_CHOICES = (
+        ('PP4', 'PP4'),
+        ('D6', 'D6'),
+        ('BAC+3', 'BAC+3'),
+        ('BAC+5', 'BAC+5'),
+        ('Master', 'Master'),
+        ('Doctorat', 'Doctorat'),
+    )
 
     nom = models.CharField(max_length=50)
     postnom = models.CharField(max_length=50)
@@ -47,7 +55,7 @@ class Stagiaire(models.Model):
     nationalite = models.CharField(max_length=100, blank=True, null=True)
     type_piece = models.CharField(max_length=2, choices=TYPE_PIECE_CHOICES, blank=True, null=True, verbose_name="Type de pièce") # New field
     numero_piece = models.CharField(max_length=50, blank=True, null=True, unique=True)
-    niveau_etude = models.CharField(max_length=100, blank=True, null=True)
+    niveau_etude = models.CharField(max_length=100, choices=NIVEAU_ETUDE_CHOICES, blank=True, null=True, verbose_name="Niveau d'étude")
     photo = models.ImageField(upload_to='stagiaires/', blank=True, null=True)
     categorie = models.ForeignKey(Categorie, on_delete=models.CASCADE)
     
