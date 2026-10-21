@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Liste des profils{% endblock title %}
+{% block page_header %}Liste des profils{% endblock page_header %}
+
+{% block content %}
+<div class="page-heading">
+    <section class="section">
+        <div class="card tm-listing-card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="card-title mb-0">Liste des profils</h4>
+                <a href="{% url 'settings' %}" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-arrow-left me-2"></i>Retour aux réglages
+                </a>
+            </div>
+            <div class="card-body">
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <div class="bg-light p-3 rounded">
+                            <h6 class="mb-2">Total profils</h6>
+                            <p class="fw-bold mb-0">{{ total_profiles }}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="bg-light p-3 rounded">
+                            <h6 class="mb-2">Profils utilisés</h6>
+                            <p class="fw-bold mb-0">{{ profiles_in_use }}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="bg-light p-3 rounded">
+                            <h6 class="mb-2">Profils inutilisés</h6>
+                            <p class="fw-bold mb-0">{{ profiles_unused }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                {% if profile_list %}
+                <div class="table-responsive">
+                    <table class="table table-hover tm-table" id="table1">
+                        <thead>
+                            <tr>
+                                <th>Nom du profil</th>
+                                <th>Utilisateurs associés</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for profile in profile_list %}
+                            <tr>
+                                <td><strong>{{ profile.name }}</strong></td>
+                                <td>{{ profile.user_set.count }}</td>
+                                <td class="text-end">
+                                    <div class="d-flex gap-2 justify-content-end">
+                                        <a href="{% url 'users' %}?profile={{ profile.pk }}" class="btn btn-sm btn-outline-primary" title="Voir les utilisateurs">
+                                            <i class="bi bi-people"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center p-5 text-muted">Aucun profil enregistré pour le moment.</div>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock content %}

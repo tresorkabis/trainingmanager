@@ -222,6 +222,16 @@
 
                         {% endif %}
 
+                        {% if request.user.is_superuser %}
+                            <li class="sidebar-title">Réglages</li>
+                            <li class="sidebar-item {% if request.resolver_match.url_name == 'settings' %} active {% endif %}">
+                                <a href="{% url 'settings' %}" class='sidebar-link'>
+                                    <i class="bi bi-gear"></i>
+                                    <span>Réglages</span>
+                                </a>
+                            </li>
+                        {% endif %}
+
                     </ul>
                 </div>
                 <button class="sidebar-toggler btn x"><i data-feather="x"></i></button>
@@ -280,8 +290,7 @@
             <footer>
                 <div class="footer">
                     <span>2026 &copy; Training Manager</span>
-                    <span>Crafted with <span class="text-danger"><i class="bi bi-heart-fill"></i></span>
-                        by <a href="https://github.com/tresorkabis">Trésor Kabis</a></span>
+                    <span>Crafted with <span class="text-danger"><i class="bi bi-heart-fill"></i></span></span>
                 </div>
             </footer>
         </div>

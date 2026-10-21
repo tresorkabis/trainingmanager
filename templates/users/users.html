@@ -56,6 +56,12 @@
                                         <a href="{% url 'user_delete' user_object.pk %}" class="btn btn-sm btn-outline-danger" title="Supprimer">
                                             <i class="bi bi-trash"></i>
                                         </a>
+                                        <form method="post" action="{% url 'user_reset_profile' user_object.pk %}" style="display:inline" onsubmit="return confirm('Réinitialiser le profil de cet utilisateur ?');">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-sm btn-outline-warning" title="Réinitialiser le profil">
+                                                <i class="bi bi-arrow-repeat"></i>
+                                            </button>
+                                        </form>
                                     </div>
                                 </td>
                             </tr>

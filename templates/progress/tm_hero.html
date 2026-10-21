@@ -4,6 +4,19 @@
         .tm-hero__stats-grid{display:flex !important;flex-wrap:wrap !important;gap:0.625rem;justify-content:flex-end;align-items:center}
         .tm-stat-card{flex:0 0 auto !important;min-width:120px}
         .tm-hero__right{display:flex;align-items:center}
+        /* Valeurs des stat cards : lisibles sur petit écran (filière, profil, service…) */
+        .tm-stat-card__value{
+            font-size: 1.15rem !important;
+            font-weight: 700 !important;
+            line-height: 1.25 !important;
+            white-space: normal !important;
+            overflow-wrap: break-word !important;
+            display: block !important;
+        }
+        /* Limiter la largeur des stat cards sur mobile pour éviter le débordement */
+        @media (max-width: 575.98px){
+            .tm-stat-card{min-width:auto !important;flex:1 1 45% !important;}
+        }
     </style>
     <div class="tm-hero__layout">
         <div class="tm-hero__left">

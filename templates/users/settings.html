@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Réglages{% endblock title %}
+{% block page_header %}Réglages{% endblock page_header %}
+
+{% block content %}
+<div class="page-heading">
+    <section class="section">
+        <div class="card tm-listing-card">
+            <div class="card-header">
+                <h4 class="card-title mb-0">Réglages</h4>
+            </div>
+            <div class="card-body">
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <div class="bg-light p-3 rounded d-flex flex-column justify-content-between">
+                            <div>
+                                <h6 class="mb-2">Utilisateurs</h6>
+                                <p class="fw-bold mb-0">{{ total_users }}</p>
+                                <small class="text-muted">{{ users_with_profile }} avec profil · {{ users_without_profile }} sans</small>
+                            </div>
+                            <a href="{% url 'profiles' %}" class="btn btn-sm btn-outline-primary mt-3">
+                                <i class="bi bi-card-list me-2"></i>Voir tous les profils
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="bg-light p-3 rounded">
+                            <h6 class="mb-2">Catégories</h6>
+                            <p class="fw-bold mb-0">{{ total_categories }}</p>
+                            <small class="text-muted">{{ active_categories }} actives · {{ inactive_categories }} inactives</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="bg-light p-3 rounded">
+                            <h6 class="mb-2">Stagiaires</h6>
+                            <p class="fw-bold mb-0">{{ total_stagiaires }}</p>
+                            <small class="text-muted">{{ stagiaires_with_categorie }} avec catégorie</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-body d-flex flex-column">
+                                <div class="mb-3">
+                                    <i class="bi bi-person-slash fs-1 text-primary"></i>
+                                </div>
+                                <h5 class="card-title">Réinitialiser les profils</h5>
+                                <p class="card-text text-muted flex-grow-1">
+                                    Dissocie le profil de <strong>tous</strong> les utilisateurs
+                                    (met le champ <code>profile</code> à vide).
+                                    Cette action concerne {{ users_with_profile }} utilisateur(s).
+                                </p>
+                                <form method="post" action="{% url 'user_reset_all_profiles' %}"
+                                      onsubmit="return confirm('Voulez-vous vraiment réinitialiser le profil de tous les utilisateurs ? Cette action est irréversible.');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-outline-warning mt-auto">
+                                        <i class="bi bi-arrow-repeat me-2"></i>Réinitialiser tous les profils
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-body d-flex flex-column">
+                                <div class="mb-3">
+                                    <i class="bi bi-tag-slash fs-1 text-primary"></i>
+                                </div>
+                                <h5 class="card-title">Réinitialiser les catégories</h5>
+                                <p class="card-text text-muted flex-grow-1">
+                                    Désactive <strong>toutes</strong> les catégories.
+                                    Cette action concerne {{ active_categories }} catégorie(s) active(s).
+                                    Les stagiaires garderont leur lien vers la catégorie, mais celle-ci sera marquée inactive.
+                                </p>
+                                <form method="post" action="{% url 'category_reset' %}"
+                                      onsubmit="return confirm('Voulez-vous vraiment désactiver toutes les catégories ?');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-outline-warning mt-auto">
+                                        <i class="bi bi-arrow-repeat me-2"></i>Réinitialiser les catégories
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock content %}
