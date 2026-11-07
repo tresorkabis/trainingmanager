@@ -21,6 +21,8 @@ class ModuleProgressListView(LoginRequiredMixin, ListView):
         user = self.request.user
         if user.is_superuser or (user.profile and user.profile.name == "Manager"):
             return None  # Accès à toutes les actions
+        if user.profile and user.profile.name == "Pédagogique":
+            return None  # Accès à toutes les actions
         if user.profile and user.profile.name == "Chef de filière" and user.filiere:
             return Action.objects.filter(
                 formation__filiere=user.filiere
