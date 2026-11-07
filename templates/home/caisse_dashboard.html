@@ -1,130 +1,132 @@
 {% extends "base.html" %}
 {% load static %}
 {% load humanize %}
+{% load tm_tags %}
 
 {% block title %}Tableau de bord Caisse{% endblock title %}
+{% block page_header %}Tableau de bord Caisse{% endblock page_header %}
 
 {% block style %}
+<link rel="stylesheet" href="{% static 'assets/css/training-manager.css' %}">
 <style>
-/* Dashboard Caisse - Trésorerie */
-.caisse-card { border-radius: 0.9rem; box-shadow: 0 8px 24px rgba(15,23,42,0.06); overflow: hidden; border:1px solid #eef2f7; }
-.caisse-card .card-header { background: linear-gradient(90deg,#f8faff 0%,#ffffff 100%); padding:0.75rem 1rem; font-weight:700; display:flex; justify-content:space-between; align-items:center; }
-.caisse-card .list-group-item { padding:0.6rem 1rem; }
-.caisse-card .card-footer { background:#fbfbfc; padding:0.5rem 0.8rem; text-align:right; }
-.montant { font-weight:800; color:#0f172a; }
-.small-muted { font-size:0.82rem; color:#6b7280; }
-@media (max-width:767px){ .caisse-card .card-header h5{font-size:0.95rem;} }
+.tm-caisse-card {
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    border-radius: 1rem;
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.03);
+    background: #ffffff;
+    height: 100%;
+}
+.tm-caisse-card .card-header {
+    background: transparent;
+    border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+    padding: 1.1rem 1.35rem;
+}
+.tm-caisse-card .card-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0;
+}
+.montant { font-weight: 800; color: #0f172a; }
+.small-muted { font-size: 0.8rem; color: #64748b; }
 </style>
 {% endblock style %}
 
 {% block content %}
+<div class="page-heading">
+    {% tm_hero title="Tableau de bord Caisse" subtitle="Suivi des encaissements, des reçus et de la situation de la trésorerie." icon="bi bi-wallet2" actions=hero_actions stats=hero_stats theme="success" %}
 
-{# HERO SECTION #}
-<div class="tm-hero tm-hero--primary mb-4">
-    <div class="tm-hero__layout">
-        <div class="tm-hero__left">
-            <div class="tm-section-titlebar">
-                <div class="tm-section-titlebar__icon">
-                    <i class="bi bi-cash-stack"></i>
-                </div>
-                <div class="tm-section-titlebar__text">
-                    <h3>Bienvenue, {{ user.get_full_name|default:user.username }} !</h3>
-                    <p>Votre tableau de bord des encaissements (trésorerie).</p>
+    {# TRESORERIE SUMMARY #}
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card tm-caisse-card">
+                <div class="card-body text-center d-flex flex-column justify-content-center p-4">
+                    <div class="text-uppercase small-muted fw-bold mb-1">Nombre d'encaissements</div>
+                    <div class="display-5 fw-bold text-success">{{ nb_paiements }}</div>
+                    <small class="text-muted mt-1">transactions enregistrées</small>
                 </div>
             </div>
-            <div class="tm-hero__actions">
-                <a href="{% url 'paiement_create' %}" class="tm-btn-soft">
-                    <i class="bi bi-plus-circle me-2"></i> Nouveau paiement
-                </a>
-                <a href="{% url 'paiements' %}" class="tm-btn-soft">
-                    <i class="bi bi-receipt me-2"></i> Tous les paiements
-                </a>
-            </div>
         </div>
-        <div class="tm-hero__right">
-            <div class="tm-hero__stats-grid">
-                {% for stat in hero_stats %}
-                <div class="tm-stat-card">
-                    <span class="tm-stat-card__label">{{ stat.label }}</span>
-                    <span class="tm-stat-card__value">{{ stat.value }}</span>
+        <div class="col-md-8">
+            <div class="card tm-caisse-card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title">
+                        <i class="bi bi-cash-stack text-success me-2"></i>Récapitulatif de la trésorerie
+                    </h5>
+                    <span class="badge bg-light-success text-success rounded-pill px-3 py-1.5">En direct</span>
                 </div>
-                {% endfor %}
-            </div>
-        </div>
-    </div>
-</div>
-
-{# TRESORERIE SUMMARY #}
-<div class="row g-3 mb-4">
-    <div class="col-md-4">
-        <div class="card caisse-card">
-            <div class="card-body text-center">
-                <div class="text-uppercase small-muted mb-1">Nombre de paiements</div>
-                <div class="display-6 fw-bold text-primary">{{ nb_paiements }}</div>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-8">
-        <div class="card caisse-card">
-            <div class="card-header"><h5 class="mb-0">Encaissements cumulés</h5></div>
-            <div class="card-body">
-                <div class="row text-center g-2">
-                    {% for stat in hero_stats %}
-                    <div class="col-6 col-md-3">
-                        <div class="text-uppercase small-muted">{{ stat.label }}</div>
-                        <div class="fw-bold text-dark fs-5">{{ stat.value }}</div>
+                <div class="card-body p-4">
+                    <div class="row text-center g-3">
+                        {% for stat in hero_stats %}
+                        <div class="col-6 col-md-3">
+                            <div class="text-uppercase small-muted fw-semibold mb-1">{{ stat.label }}</div>
+                            <div class="fw-bold text-dark fs-5">{{ stat.value }}</div>
+                        </div>
+                        {% endfor %}
                     </div>
-                    {% endfor %}
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-{# RECENT PAYMENTS #}
-<div class="card caisse-card">
-    <div class="card-header">
-        <h5 class="mb-0">Derniers paiements enregistrés</h5>
-        <a href="{% url 'paiements' %}" class="small text-decoration-none">Voir plus &raquo;</a>
-    </div>
-    <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
-            <thead class="table-light">
-                <tr>
-                    <th>Stagiaire</th>
-                    <th>Action / Formation</th>
-                    <th>Mode</th>
-                    <th>Date</th>
-                    <th class="text-end">Montant</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for p in recent_paiements %}
-                <tr>
-                    <td class="fw-bold">{{ p.stagiaire.get_full_name }}</td>
-                    <td>
-                        <div>{{ p.action.description }}</div>
-                        <small class="small-muted">{{ p.action.formation.nom }}</small>
-                    </td>
-                    <td>
-                        <span class="badge {% if p.mode_paiement == 'ESPECES' %}bg-light-success text-success{% else %}bg-light-info text-info{% endif %}">
-                            {{ p.get_mode_paiement_display }}
-                        </span>
-                    </td>
-                    <td>{{ p.date_paiement|date:"d/m/Y" }}</td>
-                    <td class="text-end montant">{{ p.montant|floatformat:2 }} USD</td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="5" class="text-center text-muted p-4">Aucun paiement enregistré pour le moment.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-    <div class="card-footer">
-        <a href="{% url 'paiement_create' %}" class="text-decoration-none">Enregistrer un paiement &raquo;</a>
+    {# RECENT PAYMENTS #}
+    <div class="card tm-caisse-card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="card-title">
+                <i class="bi bi-clock-history text-primary me-2"></i>Derniers paiements enregistrés
+            </h5>
+            <a href="{% url 'paiements' %}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                Voir tous les paiements <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Stagiaire</th>
+                        <th>Action & Formation</th>
+                        <th>Mode</th>
+                        <th>Date</th>
+                        <th class="text-end pe-4">Montant</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in recent_paiements %}
+                    <tr>
+                        <td class="ps-4">
+                            <a href="{% url 'paiement' p.pk %}" class="fw-bold text-dark text-decoration-none">
+                                {{ p.stagiaire.get_full_name }}
+                            </a>
+                            <small class="text-muted d-block">{{ p.reference }}</small>
+                        </td>
+                        <td>
+                            <div>{{ p.action.description }}</div>
+                            <small class="small-muted">{{ p.action.formation.nom }}</small>
+                        </td>
+                        <td>
+                            <span class="badge {% if p.mode_paiement == 'ESPECES' %}bg-light-success text-success{% else %}bg-light-info text-info{% endif %}">
+                                {{ p.get_mode_paiement_display }}
+                            </span>
+                        </td>
+                        <td>{{ p.date_paiement|date:"d/m/Y" }}</td>
+                        <td class="text-end pe-4 montant">{{ p.montant|floatformat:2 }} USD</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center text-muted p-4">
+                            <i class="bi bi-inbox fs-3 d-block mb-1 text-secondary"></i>
+                            Aucun paiement enregistré pour le moment.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="card-footer bg-transparent border-top py-3 text-end">
+            <a href="{% url 'paiement_create' %}" class="btn btn-sm btn-success rounded-pill px-3">
+                <i class="bi bi-plus-circle me-1"></i> Nouveau paiement
+            </a>
+        </div>
     </div>
 </div>
-
 {% endblock content %}

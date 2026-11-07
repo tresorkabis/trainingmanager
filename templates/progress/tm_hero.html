@@ -1,26 +1,177 @@
-<section class="tm-hero tm-hero--{{ theme }} mb-4">
+<section class="tm-hero tm-hero--{{ theme|default:'primary' }} mb-4">
     <style>
-        /* Forcer la disposition horizontale des stats (fallback si un CSS surcharge) */
-        .tm-hero__stats-grid{display:flex !important;flex-wrap:wrap !important;gap:0.625rem;justify-content:flex-end;align-items:center}
-        .tm-stat-card{flex:0 0 auto !important;min-width:120px}
-        .tm-hero__right{display:flex;align-items:center}
-        /* Valeurs des stat cards : lisibles sur petit écran (filière, profil, service…) */
-        .tm-stat-card__value{
-            font-size: 1.15rem !important;
-            font-weight: 700 !important;
+        /* Isolation stricte du composant tm_hero pour garantir une harmonie totale dans toute l'application */
+        .tm-hero {
+            border-radius: 1.25rem !important;
+            padding: 2rem 2.25rem !important;
+            color: #ffffff !important;
+            position: relative !important;
+            overflow: hidden !important;
+            box-shadow: 0 10px 25px -5px rgba(67, 94, 190, 0.3), 0 8px 10px -6px rgba(67, 94, 190, 0.2) !important;
+        }
+        .tm-hero--primary { background: linear-gradient(135deg, #435ebe 0%, #2a3f8f 100%) !important; }
+        .tm-hero--success { background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important; }
+        .tm-hero--danger  { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important; }
+        .tm-hero--warning { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important; }
+        .tm-hero--info    { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; }
+
+        .tm-hero__layout {
+            display: flex !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+            gap: 2rem !important;
+            position: relative !important;
+            z-index: 1 !important;
+        }
+        .tm-hero__left { flex: 1 1 auto !important; min-width: 0 !important; }
+        .tm-hero__right { flex: 0 0 auto !important; display: flex !important; align-items: center !important; }
+
+        .tm-hero .tm-section-titlebar {
+            display: flex !important;
+            align-items: center !important;
+            gap: 1.25rem !important;
+            margin-bottom: 1.25rem !important;
+        }
+        .tm-hero .tm-section-titlebar__icon {
+            width: 58px !important;
+            height: 58px !important;
+            min-width: 58px !important;
+            max-width: 58px !important;
+            background: rgba(255, 255, 255, 0.16) !important;
+            border: 1px solid rgba(255, 255, 255, 0.25) !important;
+            border-radius: 0.85rem !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            font-size: 1.75rem !important;
+            color: #ffffff !important;
+            flex-shrink: 0 !important;
+            backdrop-filter: blur(10px) !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+        }
+        .tm-hero .tm-section-titlebar__icon i {
+            color: #ffffff !important;
+            line-height: 1 !important;
+        }
+        .tm-hero .tm-section-titlebar__text h3 {
+            font-size: 1.55rem !important;
+            font-weight: 800 !important;
+            color: #ffffff !important;
+            margin-bottom: 0.25rem !important;
+            letter-spacing: -0.02em !important;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.12) !important;
             line-height: 1.25 !important;
+        }
+        .tm-hero .tm-section-titlebar__text p {
+            font-size: 0.925rem !important;
+            color: rgba(255, 255, 255, 0.8) !important;
+            margin-bottom: 0 !important;
+            line-height: 1.45 !important;
+        }
+
+        .tm-hero__actions {
+            display: flex !important;
+            flex-wrap: wrap !important;
+            gap: 0.65rem !important;
+            align-items: center !important;
+            margin-top: 0.75rem !important;
+        }
+        .tm-hero .tm-btn-soft {
+            display: inline-flex !important;
+            align-items: center !important;
+            padding: 0.55rem 1.25rem !important;
+            background: rgba(255, 255, 255, 0.14) !important;
+            color: #ffffff !important;
+            border: 1px solid rgba(255, 255, 255, 0.22) !important;
+            border-radius: 0.75rem !important;
+            font-weight: 600 !important;
+            font-size: 0.85rem !important;
+            text-decoration: none !important;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+            backdrop-filter: blur(10px) !important;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06) !important;
+        }
+        .tm-hero .tm-btn-soft:hover {
+            background: rgba(255, 255, 255, 0.24) !important;
+            color: #ffffff !important;
+            transform: translateY(-2px) !important;
+            border-color: rgba(255, 255, 255, 0.35) !important;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12) !important;
+            text-decoration: none !important;
+        }
+
+        /* Stats Grid */
+        .tm-hero__stats-grid {
+            display: flex !important;
+            flex-wrap: wrap !important;
+            gap: 0.625rem !important;
+            justify-content: flex-end !important;
+            align-items: center !important;
+        }
+        .tm-hero .tm-stat-card {
+            flex: 0 0 auto !important;
+            min-width: 115px !important;
+            background: rgba(255, 255, 255, 0.14) !important;
+            border: 1px solid rgba(255, 255, 255, 0.2) !important;
+            border-radius: 0.85rem !important;
+            padding: 0.75rem 1.1rem !important;
+            text-align: center !important;
+            backdrop-filter: blur(10px) !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06) !important;
+            color: #ffffff !important;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+            position: relative !important;
+            overflow: hidden !important;
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: center !important;
+        }
+        .tm-hero .tm-stat-card::before,
+        .tm-hero .tm-stat-card::after {
+            display: none !important;
+        }
+        .tm-hero a.tm-stat-card:hover {
+            background: rgba(255, 255, 255, 0.22) !important;
+            transform: translateY(-2px) !important;
+            border-color: rgba(255, 255, 255, 0.35) !important;
+            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12) !important;
+            color: #ffffff !important;
+            text-decoration: none !important;
+        }
+        .tm-hero .tm-stat-card__label {
+            display: block !important;
+            font-size: 0.6875rem !important;
+            font-weight: 700 !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.08em !important;
+            color: rgba(255, 255, 255, 0.75) !important;
+            margin-bottom: 0.3rem !important;
+            white-space: nowrap !important;
+        }
+        .tm-hero .tm-stat-card__value {
+            font-size: 1.4rem !important;
+            font-weight: 800 !important;
+            line-height: 1.2 !important;
             white-space: normal !important;
             overflow-wrap: break-word !important;
             display: block !important;
+            color: #ffffff !important;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.15) !important;
         }
-        /* Limiter la largeur des stat cards sur mobile pour éviter le débordement */
-        @media (max-width: 575.98px){
-            .tm-stat-card{min-width:auto !important;flex:1 1 45% !important;}
+
+        @media (max-width: 991.98px) {
+            .tm-hero__layout { flex-direction: column !important; align-items: flex-start !important; gap: 1.5rem !important; }
+            .tm-hero__right { width: 100% !important; justify-content: flex-start !important; }
+            .tm-hero__stats-grid { width: 100% !important; justify-content: flex-start !important; }
+        }
+        @media (max-width: 575.98px) {
+            .tm-hero { padding: 1.25rem 1.25rem !important; }
+            .tm-hero .tm-stat-card { min-width: auto !important; flex: 1 1 45% !important; }
         }
     </style>
     <div class="tm-hero__layout">
         <div class="tm-hero__left">
-            <div class="tm-section-titlebar mb-4">
+            <div class="tm-section-titlebar">
                 {% if photo_url %}
                 <img src="{{ photo_url }}" alt="{{ title }}" class="tm-hero__photo">
                 {% else %}
@@ -47,10 +198,17 @@
         <div class="tm-hero__right">
             <div class="tm-hero__stats-grid">
                 {% for stat in stats %}
+                {% if stat.url %}
+                <a href="{{ stat.url }}" class="tm-stat-card" title="Voir {{ stat.label }}">
+                    <span class="tm-stat-card__label">{{ stat.label }}</span>
+                    <span class="tm-stat-card__value">{{ stat.value }}</span>
+                </a>
+                {% else %}
                 <div class="tm-stat-card">
                     <span class="tm-stat-card__label">{{ stat.label }}</span>
                     <span class="tm-stat-card__value">{{ stat.value }}</span>
                 </div>
+                {% endif %}
                 {% endfor %}
             </div>
         </div>

@@ -107,3 +107,27 @@
     color: #7b8190;
     font-size: 0.85rem;
 }
+
+/* Guardrail: Sidebar brand icon constraint */
+.sidebar-brand-icon {
+    width: 38px !important;
+    height: 38px !important;
+    max-width: 38px !important;
+    max-height: 38px !important;
+    min-width: 38px !important;
+    min-height: 38px !important;
+    overflow: hidden !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-shrink: 0 !important;
+}
+
+.sidebar-brand-icon img {
+    width: 30px !important;
+    height: 30px !important;
+    max-width: 30px !important;
+    max-height: 30px !important;
+    object-fit: contain !important;
+    display: block !important;
+}

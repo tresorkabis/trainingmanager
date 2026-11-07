@@ -11,14 +11,13 @@
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'assets/css/bootstrap.min.css' %}">
-    {% block style %}{% endblock style %}
-
     <link rel="stylesheet" href="{% static 'assets/vendors/perfect-scrollbar/perfect-scrollbar.css' %}">
     <link rel="stylesheet" href="{% static 'assets/vendors/bootstrap-icons/bootstrap-icons.css' %}">
     <link rel="stylesheet" href="{% static 'assets/css/app.css' %}">
     <link rel="stylesheet" href="{% static 'assets/css/training-manager.css' %}">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <link rel="shortcut icon" href="{% static 'assets/images/favicon.svg' %}" type="image/x-icon">
+    {% block style %}{% endblock style %}
 </head>
 
 <body>
@@ -28,8 +27,8 @@
 
                 <div class="sidebar-header">
                     <a href="{% url 'home' %}" class="sidebar-brand">
-                        <div class="sidebar-brand-icon">
-                            <img src="{% static 'assets/images/logo.png' %}" alt="Logo">
+                        <div class="sidebar-brand-icon" style="width: 38px; height: 38px; min-width: 38px; max-width: 38px; min-height: 38px; max-height: 38px; overflow: hidden; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                            <img src="{% static 'assets/images/logo.png' %}" alt="Logo" width="30" height="30" style="width: 30px; height: 30px; max-width: 30px; max-height: 30px; object-fit: contain; display: block;">
                         </div>
                         <div class="sidebar-brand-text">
                             <span class="sidebar-brand-name">Training Manager</span>

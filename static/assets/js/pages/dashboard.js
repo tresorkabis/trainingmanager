@@ -147,6 +147,8 @@
                 ...apexTheme,
             });
             profileChart.render();
+        } else {
+            showNoData(chartProfileVisit);
         }
     }
 
@@ -159,7 +161,7 @@
             var statusChart = new ApexCharts(chartActionsStatus, {
                 chart: {
                     type: "donut",
-                    height: 450,
+                    height: 400,
                     toolbar: { show: false },
                 },
                 plotOptions: {
@@ -205,6 +207,8 @@
                 ...apexTheme,
             });
             statusChart.render();
+        } else {
+            showNoData(chartActionsStatus);
         }
     }
 
@@ -250,6 +254,8 @@
                 ...apexTheme,
             });
             paiementsChart.render();
+        } else {
+            showNoData(chartPaiements);
         }
     }
 
@@ -308,6 +314,8 @@
                 ...apexTheme,
             });
             sessionsChart.render();
+        } else {
+            showNoData(chartSessions);
         }
     }
 })();

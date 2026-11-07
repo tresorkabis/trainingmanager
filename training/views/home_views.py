@@ -1,6 +1,7 @@
 from datetime import date, timedelta
 
 from django.shortcuts import render
+from django.urls import reverse
 from django.views.generic import View
 from django.db.models import Count, Sum
 from django.db.models.functions import TruncMonth, TruncWeek
@@ -75,10 +76,15 @@ class HomeView(View):
                 {"label": "Espèces", "value": f"{total_especes:,.0f} USD"},
                 {"label": "Virements", "value": f"{total_virement:,.0f} USD"},
             ]
+            hero_actions = [
+                {"label": "Nouveau paiement", "url": reverse("paiement_create"), "icon": "bi bi-plus-circle"},
+                {"label": "Tous les paiements", "url": reverse("paiements"), "icon": "bi bi-receipt"},
+            ]
             ctx = {
                 "link": "home",
                 "user": user,
                 "hero_stats": hero_stats,
+                "hero_actions": hero_actions,
                 "nb_paiements": nb_paiements,
                 "recent_paiements": recent_paiements,
                 "is_caisse": True,
@@ -252,10 +258,15 @@ class HomeView(View):
                 .only('id','montant','date_paiement','stagiaire_id','action_id')\
                 .order_by('-date_paiement')[:6]
 
+            hero_actions = [
+                {"label": "Nouveau Stagiaire", "url": reverse("stagiaire_create"), "icon": "bi bi-person-plus-fill"},
+            ]
+
             ctx = {
                 "link": "home",
                 "user": user,
                 "hero_stats": hero_stats,
+                "hero_actions": hero_actions,
                 "nbmetiers": nbmetiers,
                 "nbfilieres": nbfilieres,
                 "nbstagiaires": nbstagiaires,
@@ -271,11 +282,40 @@ class HomeView(View):
 
             return render(request, "home/conseiller_dashboard.html", ctx)
 
+        hero_actions = []
+        if user.is_superuser or (user.profile and user.profile.name == "Manager"):
+            hero_actions.extend([
+                {"label": "Nouveau Stagiaire", "url": reverse("stagiaire_create"), "icon": "bi bi-person-plus"},
+                {"label": "Nouvelle Action", "url": reverse("action_create"), "icon": "bi bi-clipboard-plus"},
+                {"label": "Nouvelle Formation", "url": reverse("formation_create"), "icon": "bi bi-journal-plus"},
+            ])
+        elif user.profile and user.profile.name in ["Chef de filière", "Chef de service"]:
+            hero_actions.extend([
+                {"label": "Nouveau Stagiaire", "url": reverse("stagiaire_create"), "icon": "bi bi-person-plus"},
+                {"label": "Nouvelle Action", "url": reverse("action_create"), "icon": "bi bi-clipboard-plus"},
+            ])
+        elif user.profile and user.profile.name == "Formateur":
+            hero_actions.extend([
+                {"label": "Mes actions", "url": reverse("actions"), "icon": "bi bi-clipboard-check"},
+                {"label": "Progressions", "url": reverse("module_progressions"), "icon": "bi bi-journal-check"},
+            ])
+
+        recent_actions = list(
+            actions_queryset.select_related("formation", "type_action")
+            .order_by("-id")[:5]
+        )
+        recent_stagiaires = list(
+            stagiaires_queryset.order_by("-id")[:5]
+        )
+
         # Par défaut: tableau de bord complet
         ctx = {
             "link": "home",
             "user": user,
             "hero_stats": hero_stats,
+            "hero_actions": hero_actions,
+            "recent_actions": recent_actions,
+            "recent_stagiaires": recent_stagiaires,
             "nbmetiers": nbmetiers,
             "nbfilieres": nbfilieres,
             "nbstagiaires": nbstagiaires,

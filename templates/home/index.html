@@ -1,595 +1,554 @@
 {% extends "base.html" %}
 {% load static %}
-{% block title %} Dashboard {% endblock title %}
+{% load tm_tags %}
+
+{% block title %}Tableau de bord{% endblock title %}
 {% block page_header %}Tableau de bord opérationnel{% endblock page_header %}
 
 {% block style %}
+<link rel="stylesheet" href="{% static 'assets/css/training-manager.css' %}">
 <style>
-/* ==========================================
-   HERO SECTION
-   ========================================== */
-.tm-dash-hero {
-    background: linear-gradient(135deg, #435ebe 0%, #6778e0 100%);
+/* ========================================================
+   DASHBOARD KPI CARDS
+   ======================================================== */
+.tm-kpi-card {
+    background: #ffffff;
+    border: 1px solid rgba(15, 23, 42, 0.08);
     border-radius: 1rem;
-    padding: 1.1rem 1.4rem;
-    margin-bottom: 0.75rem;
+    padding: 1.15rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    text-decoration: none;
+    color: #1e293b;
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.03);
+    transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
     position: relative;
     overflow: hidden;
-    box-shadow: 0 6px 16px rgba(67, 94, 190, 0.18);
+    height: 100%;
 }
 
-.tm-dash-hero::before {
+.tm-kpi-card::before {
     content: '';
     position: absolute;
-    inset: 0;
-    background:
-        radial-gradient(circle at 20% 120%, rgba(255,255,255,0.15) 0%, transparent 60%),
-        radial-gradient(circle at 80% 0%, rgba(255,255,255,0.08) 0%, transparent 50%);
-    pointer-events: none;
-}
-
-.tm-dash-hero__content { position: relative; z-index: 1; }
-
-.tm-dash-hero__eyebrow {
-    color: rgba(255,255,255,0.9);
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    font-weight: 700;
-    margin-bottom: 0.75rem;
-    display: block;
-}
-
-.tm-dash-hero__content h1 {
-    color: #fff;
-    font-size: 1.6rem;
-    font-weight: 800;
-    line-height: 1.3;
-    margin-bottom: 0.5rem;
-}
-
-.tm-dash-hero__content p {
-    color: rgba(255,255,255,0.85);
-    font-size: 0.9rem;
-    max-width: 600px;
-    margin-bottom: 0;
-}
-
-.tm-dash-hero__actions {
-    display: flex;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-    align-items: flex-end;
-    margin-top: 0.45rem;
-}
-
-.tm-dash-hero__actions .btn {
-    background: rgba(255,255,255,0.15);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255,255,255,0.25);
-    color: #fff;
-    border-radius: 0.7rem;
-    padding: 0.5rem 1.1rem;
-    font-weight: 600;
-    font-size: 0.85rem;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    text-decoration: none;
-    transition: all 0.2s ease;
-}
-
-.tm-dash-hero__actions .btn:hover {
-    background: rgba(255,255,255,0.25);
-    border-color: rgba(255,255,255,0.4);
-    transform: translateY(-1px);
-    color: #fff;
-}
-
-.tm-dash-hero__metrics {
-    display: flex;
-    gap: 0.6rem;
-    flex-wrap: wrap;
-    margin-left: auto;
-}
-
-.tm-dash-hero__metric {
-    background: rgba(255,255,255,0.1);
-    border: 1px solid rgba(255,255,255,0.15);
-    border-radius: 0.7rem;
-    padding: 0.6rem 0.9rem;
-    text-decoration: none;
-    color: #fff;
-    min-width: 130px;
-    text-align: center;
-    backdrop-filter: blur(5px);
-    transition: all 0.2s ease;
-}
-
-.tm-dash-hero__metric:hover {
-    background: rgba(255,255,255,0.18);
-    transform: translateY(-2px);
-}
-
-.metric-icon { font-size: 1.2rem; margin-bottom: 0.2rem; }
-.metric-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.8; margin-bottom: 0.15rem; }
-.metric-value { font-size: 1.25rem; font-weight: 800; }
-.metric-text { font-size: 0.58rem; opacity: 0.6; }
-
-/* ==========================================
-   STAT CARDS
-   ========================================== */
-.tm-dash-stats { margin-bottom: 2.5rem; }
-.tm-dash-stats__grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.6rem; }
-
-.tm-dash-stat-card {
-    background: #fff;
-    border: 1px solid #eef2f7;
-    border-radius: 0.8rem;
-    padding: 0.6rem 0.8rem;
-    text-decoration: none;
-    color: #1e293b;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.03);
-    transition: all 0.15s ease;
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
+    top: 0;
+    left: 0;
+    width: 4px;
     height: 100%;
+    background: transparent;
+    transition: background 0.2s ease;
 }
 
-.tm-dash-stat-card:hover {
+.tm-kpi-card:hover {
     transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.07);
+    box-shadow: 0 12px 24px rgba(67, 94, 190, 0.1);
     border-color: rgba(67, 94, 190, 0.25);
+    color: #1e293b;
 }
 
-.tm-dash-stat-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 0.6rem;
+.tm-kpi-card--primary:hover::before { background: #435ebe; }
+.tm-kpi-card--info:hover::before { background: #0dcaf0; }
+.tm-kpi-card--success:hover::before { background: #198754; }
+.tm-kpi-card--warning:hover::before { background: #ffc107; }
+
+.tm-kpi-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 0.85rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.05rem;
+    font-size: 1.35rem;
     flex-shrink: 0;
+    transition: transform 0.2s ease;
 }
 
-.tm-dash-stat-icon.purple { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; }
-.tm-dash-stat-icon.blue { background: linear-gradient(135deg, #435ebe 0%, #6778e0 100%); color: #fff; }
-.tm-dash-stat-icon.green { background: linear-gradient(135deg, #10b981 0%, #34d399 100%); color: #fff; }
-.tm-dash-stat-icon.red { background: linear-gradient(135deg, #ef4444 0%, #fb923c 100%); color: #fff; }
+.tm-kpi-card:hover .tm-kpi-icon {
+    transform: scale(1.08);
+}
 
-.tm-dash-stat-info { display: flex; flex-direction: column; min-width: 0; }
-.tm-dash-stat-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; color: #94a3b8; font-weight: 700; margin-bottom: 0.1rem; }
-.tm-dash-stat-value { font-size: 1.6rem; font-weight: 800; color: #0f172a; line-height: 1.2; }
-.tm-dash-stat-meta { font-size: 0.68rem; color: #94a3b8; font-weight: 500; }
+.tm-kpi-icon--primary { background: rgba(67, 94, 190, 0.12); color: #435ebe; }
+.tm-kpi-icon--info { background: rgba(13, 202, 240, 0.15); color: #0891b2; }
+.tm-kpi-icon--success { background: rgba(25, 135, 84, 0.12); color: #198754; }
+.tm-kpi-icon--warning { background: rgba(255, 193, 7, 0.18); color: #b45309; }
 
-/* ==========================================
-   CHARTS
-   ========================================== */
-.tm-dash-charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+.tm-kpi-info {
+    flex: 1;
+    min-width: 0;
+}
 
-.tm-dash-chart {
+.tm-kpi-label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #64748b;
+    font-weight: 700;
+    margin-bottom: 0.2rem;
+}
+
+.tm-kpi-value {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: #0f172a;
+    line-height: 1.1;
+    margin-bottom: 0.15rem;
+}
+
+.tm-kpi-desc {
+    font-size: 0.78rem;
+    color: #94a3b8;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.tm-kpi-arrow {
+    color: #cbd5e1;
+    font-size: 1.1rem;
+    transition: all 0.2s ease;
+    opacity: 0;
+    transform: translateX(-4px);
+}
+
+.tm-kpi-card:hover .tm-kpi-arrow {
+    opacity: 1;
+    transform: translateX(0);
+    color: #435ebe;
+}
+
+/* ========================================================
+   CHART & CONTENT CARDS
+   ======================================================== */
+.tm-dash-card {
+    border: 1px solid rgba(15, 23, 42, 0.08);
     border-radius: 1rem;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-    border: 1px solid #eef2f7;
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.03);
+    background: #ffffff;
     height: 100%;
-    background: #fff;
+    transition: border-color 0.2s ease;
 }
 
-.tm-dash-chart .card-header {
-    border-bottom: 1px solid #f1f5f9;
-    padding: 0.6rem 0.8rem;
+.tm-dash-card .card-header {
     background: transparent;
+    border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+    padding: 1.1rem 1.35rem;
 }
 
-.tm-dash-chart .card-header h4 { font-size: 0.9rem; font-weight: 700; color: #0f172a; margin: 0; }
-.tm-dash-chart .card-header p { font-size: 0.75rem; color: #94a3b8; margin: 0.15rem 0 0; }
-.tm-dash-chart .card-body { padding: 0.6rem; }
-
-/* ==========================================
-   QUICK ACCESS
-   ========================================== */
-.tm-dash-quick {
-    border-radius: 1rem;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-    border: 1px solid #eef2f7;
-    background: #fff;
-}
-
-.tm-dash-quick .card-header {
-    border-bottom: 1px solid #f1f5f9;
-    padding: 1rem 1.25rem;
-    background: transparent;
-}
-
-.tm-dash-quick .card-header h4 { font-size: 0.9rem; font-weight: 700; color: #0f172a; margin: 0; }
-
-.tm-dash-quick-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; }
-
-.tm-dash-quick-link {
+.tm-dash-card .card-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #0f172a;
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    padding: 0.9rem 1rem;
+}
+
+.tm-dash-card .card-body {
+    padding: 1.25rem;
+}
+
+/* ========================================================
+   QUICK ACCESS TILES
+   ======================================================== */
+.tm-quick-tile {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    padding: 0.85rem 1rem;
     background: #f8fafc;
     border: 1px solid #eef2f7;
-    border-radius: 0.75rem;
+    border-radius: 0.8rem;
     text-decoration: none;
     color: #1e293b;
     transition: all 0.2s ease;
+    height: 100%;
 }
 
-.tm-dash-quick-link:hover {
+.tm-quick-tile:hover {
+    background: #ffffff;
+    border-color: rgba(67, 94, 190, 0.3);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
-    border-color: rgba(67, 94, 190, 0.25);
-    background: #fff;
+    box-shadow: 0 6px 16px rgba(67, 94, 190, 0.08);
+    color: #435ebe;
 }
 
-.tm-dash-quick-link__icon {
-    width: 38px;
-    height: 38px;
-    border-radius: 0.65rem;
-    background: linear-gradient(135deg, rgba(67, 94, 190, 0.12) 0%, rgba(67, 94, 190, 0.06) 100%);
+.tm-quick-tile__icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 0.7rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.1rem;
-    color: #435ebe;
+    font-size: 1.15rem;
     flex-shrink: 0;
+    transition: transform 0.2s ease;
 }
 
-.tm-dash-quick-link__title { font-size: 0.82rem; font-weight: 700; color: #0f172a; display: block; }
-.tm-dash-quick-link__text { font-size: 0.68rem; color: #94a3b8; display: block; margin-top: 0.1rem; }
-
-/* ==========================================
-   RESPONSIVE
-   ========================================== */
-@media (max-width: 991.98px) {
-    .tm-dash-stats__grid { grid-template-columns: repeat(2, 1fr); }
-    .tm-dash-charts-row { grid-template-columns: 1fr; }
+.tm-quick-tile:hover .tm-quick-tile__icon {
+    transform: scale(1.08);
 }
 
-@media (max-width: 767.98px) {
-    .tm-dash-hero { padding: 1.25rem; }
-    .tm-dash-hero__content h1 { font-size: 1.3rem; }
-    .tm-dash-hero__actions { flex-direction: column; align-items: stretch; }
-    .tm-dash-hero__metrics { margin-left: 0; }
-    .tm-dash-stats__grid { grid-template-columns: 1fr 1fr; }
-    .tm-dash-stat-card { padding: 0.75rem 1rem; gap: 0.75rem; }
-    .tm-dash-stat-icon { width: 42px; height: 42px; font-size: 1.1rem; }
-    .tm-dash-stat-value { font-size: 1.3rem; }
-    .tm-dash-quick-grid { grid-template-columns: 1fr; }
+.tm-quick-tile__title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #0f172a;
+    display: block;
+    line-height: 1.2;
 }
 
-/* Compact overrides for denser display (applied to all users on the homepage)
-   Reduce paddings, gaps, avatar sizes and font sizes for a compact Conseiller view */
-
-.compact-dashboard .tm-dash-hero {
-    padding: 0.6rem 0.8rem !important;
-    margin-bottom: 0.5rem !important;
-    border-radius: 0.6rem !important;
+.tm-quick-tile__sub {
+    font-size: 0.72rem;
+    color: #94a3b8;
+    display: block;
+    margin-top: 0.15rem;
 }
-.compact-dashboard .tm-dash-hero__content h1 { font-size: 1.1rem !important; }
-.compact-dashboard .tm-dash-hero__actions { margin-top: 0.35rem !important; }
 
-.compact-dashboard .tm-dash-stats__grid { grid-template-columns: repeat(2, 1fr) !important; gap: 0.4rem !important; }
-.compact-dashboard .tm-dash-stat-card { padding: 0.35rem 0.5rem !important; gap: 0.4rem !important; border-radius: 0.5rem !important; }
-.compact-dashboard .tm-dash-stat-icon { width: 32px !important; height: 32px !important; font-size: 0.95rem !important; }
-.compact-dashboard .tm-dash-stat-value { font-size: 1.15rem !important; }
+/* ========================================================
+   RECENT ACTIVITY TABLE
+   ======================================================== */
+.tm-recent-table th {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #64748b;
+    font-weight: 700;
+    background: #f8fafc;
+    border-bottom: 1px solid #eef2f7;
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+}
 
-.compact-dashboard .tm-dash-charts-row { gap: 0.6rem !important; margin-bottom: 0.6rem !important; }
-.compact-dashboard .tm-dash-chart .card-header { padding: 0.4rem 0.6rem !important; }
-.compact-dashboard .tm-dash-chart .card-body { padding: 0.4rem !important; }
+.tm-recent-table td {
+    padding: 0.85rem 0.75rem;
+    vertical-align: middle;
+    border-bottom: 1px solid #f1f5f9;
+}
 
-.compact-dashboard .list-group-item { padding: 0.35rem 0.5rem !important; font-size: 0.9rem; }
-.compact-dashboard .list-group-item img { width: 32px !important; height: 32px !important; border-radius: 4px !important; }
-
-.compact-dashboard .tm-dash-quick-grid { gap: 0.4rem !important; }
-.compact-dashboard .tm-dash-quick-link { padding: 0.6rem 0.7rem !important; }
-
-/* Apply compact mode to body.homepage for safer scoping */
-body.homepage .page-content { padding-top: 0.25rem; }
-
+.tm-recent-table tr:last-child td {
+    border-bottom: none;
+}
 </style>
 {% endblock style %}
 
 {% block content %}
-<!-- Hero Section -->
-<section class="tm-dash-hero">
-    <div class="tm-dash-hero__content">
-        <span class="tm-dash-hero__eyebrow">
-            <i class="bi bi-building"></i> Vision globale
-        </span>
-        <h1>Piloter les processus et les actions de formation depuis un espace unifié.</h1>
-        <p>Cette interface centralise les principaux indicateurs du centre et donne un accès rapide aux opérations essentielles de suivi.</p>
+<div class="page-heading">
+    {% tm_hero title="Tableau de bord" subtitle="Vue d'ensemble et pilotage opérationnel des activités de formation du centre." icon="bi bi-speedometer2" actions=hero_actions stats=hero_stats theme="primary" %}
 
-        <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 0.5rem; flex-wrap: wrap;">
-            <div class="tm-dash-hero__actions">
-                <a href="{% url 'stagiaires' %}" class="btn">
-                    <i class="bi bi-people"></i> Stagiaires
+    <!-- 1. KPI Navigation Cards -->
+    <section class="section mb-4">
+        <div class="row g-3">
+            <div class="col-12 col-sm-6 col-xl-3">
+                <a href="{% url 'formations' %}" class="tm-kpi-card tm-kpi-card--primary">
+                    <div class="tm-kpi-icon tm-kpi-icon--primary">
+                        <i class="bi bi-journal-text"></i>
+                    </div>
+                    <div class="tm-kpi-info">
+                        <div class="tm-kpi-label">Formations</div>
+                        <div class="tm-kpi-value">{{ nbmetiers }}</div>
+                        <div class="tm-kpi-desc">Programmes au catalogue</div>
+                    </div>
+                    <div class="tm-kpi-arrow"><i class="bi bi-chevron-right"></i></div>
                 </a>
-            <a href="{% url 'stagiaire_create' %}" class="btn btn-light">
-                <i class="bi bi-person-plus"></i> Nouveau stagiaire
-                </a>
-            <a href="{% url 'formations' %}" class="btn">
-                <i class="bi bi-journal-text"></i> Formations
-            </a>
-            {% if request.user.is_superuser or request.user.profile and request.user.profile.name == "Manager" %}
-            <a href="{% url 'admin:index' %}" class="btn">
-                <i class="bi bi-shield-check"></i> Administration
-            </a>
-            {% endif %}
             </div>
 
-            <div class="tm-dash-hero__metrics">
-                <a href="{% url 'metiers' %}" class="tm-dash-hero__metric">
-                    <div class="metric-icon"><i class="bi bi-book"></i></div>
-                    <div class="metric-label">Catalogue</div>
-                    <div class="metric-value">{{ nbmetiers }}</div>
-                    <div class="metric-text">formations actives</div>
+            <div class="col-12 col-sm-6 col-xl-3">
+                <a href="{% url 'filieres' %}" class="tm-kpi-card tm-kpi-card--info">
+                    <div class="tm-kpi-icon tm-kpi-icon--info">
+                        <i class="bi bi-signpost-2"></i>
+                    </div>
+                    <div class="tm-kpi-info">
+                        <div class="tm-kpi-label">Filières</div>
+                        <div class="tm-kpi-value">{{ nbfilieres }}</div>
+                        <div class="tm-kpi-desc">Parcours & départements</div>
+                    </div>
+                    <div class="tm-kpi-arrow"><i class="bi bi-chevron-right"></i></div>
                 </a>
-                <a href="{% url 'stagiaires' %}" class="tm-dash-hero__metric">
-                    <div class="metric-icon"><i class="bi bi-people"></i></div>
-                    <div class="metric-label">Population</div>
-                    <div class="metric-value">{{ nbstagiaires }}</div>
-                    <div class="metric-text">stagiaires suivis</div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-xl-3">
+                <a href="{% url 'stagiaires' %}" class="tm-kpi-card tm-kpi-card--success">
+                    <div class="tm-kpi-icon tm-kpi-icon--success">
+                        <i class="bi bi-people"></i>
+                    </div>
+                    <div class="tm-kpi-info">
+                        <div class="tm-kpi-label">Stagiaires</div>
+                        <div class="tm-kpi-value">{{ nbstagiaires }}</div>
+                        <div class="tm-kpi-desc">Apprenants enregistrés</div>
+                    </div>
+                    <div class="tm-kpi-arrow"><i class="bi bi-chevron-right"></i></div>
+                </a>
+            </div>
+
+            <div class="col-12 col-sm-6 col-xl-3">
+                <a href="{% url 'actions' %}" class="tm-kpi-card tm-kpi-card--warning">
+                    <div class="tm-kpi-icon tm-kpi-icon--warning">
+                        <i class="bi bi-clipboard-check"></i>
+                    </div>
+                    <div class="tm-kpi-info">
+                        <div class="tm-kpi-label">Actions</div>
+                        <div class="tm-kpi-value">{{ nbactions }}</div>
+                        <div class="tm-kpi-desc">Sessions & promotions</div>
+                    </div>
+                    <div class="tm-kpi-arrow"><i class="bi bi-chevron-right"></i></div>
                 </a>
             </div>
         </div>
-    </div>
-</section>
+    </section>
 
-<!-- Stat Cards -->
-<section class="tm-dash-stats">
-    <div class="tm-dash-stats__grid">
-        <a href="{% url 'metiers' %}" class="tm-dash-stat-card">
-            <div class="tm-dash-stat-icon purple"><i class="bi bi-journal-bookmark"></i></div>
-            <div class="tm-dash-stat-info">
-                <div class="tm-dash-stat-label">Métiers</div>
-                <div class="tm-dash-stat-value">{{ nbmetiers }}</div>
-                <div class="tm-dash-stat-meta">Formations actives</div>
-            </div>
-        </a>
-        <a href="{% url 'filieres' %}" class="tm-dash-stat-card">
-            <div class="tm-dash-stat-icon blue"><i class="bi bi-signpost-split"></i></div>
-            <div class="tm-dash-stat-info">
-                <div class="tm-dash-stat-label">Filières</div>
-                <div class="tm-dash-stat-value">{{ nbfilieres }}</div>
-                <div class="tm-dash-stat-meta">Parcours catalogués</div>
-            </div>
-        </a>
-        <a href="{% url 'stagiaires' %}" class="tm-dash-stat-card">
-            <div class="tm-dash-stat-icon green"><i class="bi bi-people-fill"></i></div>
-            <div class="tm-dash-stat-info">
-                <div class="tm-dash-stat-label">Stagiaires</div>
-                <div class="tm-dash-stat-value">{{ nbstagiaires }}</div>
-                <div class="tm-dash-stat-meta">Apprenants suivis</div>
-            </div>
-        </a>
-        <a href="{% url 'actions' %}" class="tm-dash-stat-card">
-            <div class="tm-dash-stat-icon red"><i class="bi bi-clipboard-check"></i></div>
-            <div class="tm-dash-stat-info">
-                <div class="tm-dash-stat-label">Actions</div>
-                <div class="tm-dash-stat-value">{{ nbactions }}</div>
-                <div class="tm-dash-stat-meta">Sessions planifiées</div>
-            </div>
-        </a>
-    </div>
-</section>
-
-{# Vue allégée pour Conseiller: listes récentes et actions rapides #}
-{% if is_conseiller %}
-<section class="tm-dash-charts-row">
-    <div class="tm-dash-chart-col">
-        <div class="card tm-dash-chart mb-3">
-            <div class="card-header">
-            <h4>Stagiaires récents</h4>
-            <p>Derniers stagiaires créés / modifiés</p>
-            </div>
-            <div class="card-body">
-            <div class="list-group">
-                {% for s in recent_stagiaires %}
-                    <a href="{% url 'stagiaire' s.pk %}" class="list-group-item list-group-item-action d-flex align-items-center gap-3">
-                        {% if s.photo %}
-                            <img src="{{ s.photo.url }}" alt="" style="width:44px;height:44px;object-fit:cover;border-radius:6px;">
-                        {% else %}
-                            <img src="{% static 'assets/images/avatar.png' %}" alt="" style="width:44px;height:44px;object-fit:cover;border-radius:6px;">
-                        {% endif %}
+    <!-- 2. Charts Section -->
+    <section class="section mb-4">
+        <!-- Row 1: Activité par filière & Statut des actions -->
+        <div class="row g-4 mb-4">
+            <div class="col-12 col-xl-6">
+                <div class="card tm-dash-card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
                         <div>
-                            <div class="fw-bold">{{ s.get_full_name }}</div>
-                            <div class="small text-muted">Mis à jour {{ s.updated_at|date:"d/m/Y" }}</div>
+                            <h5 class="card-title mb-0">
+                                <i class="bi bi-bar-chart-line-fill text-primary me-2"></i>Répartition par filière
+                            </h5>
+                            <small class="text-muted">Stagiaires et actions actives par département</small>
                         </div>
-                    </a>
-                {% empty %}
-                    <div class="text-muted p-3">Aucun stagiaire récent.</div>
-                {% endfor %}
+                        <span class="badge bg-light-primary text-primary px-2.5 py-1.5 rounded-pill">
+                            <i class="bi bi-graph-up me-1"></i>Volumes
+                        </span>
+                    </div>
+                    <div class="card-body">
+                        <div id="chart-profile-visit" style="min-height: 360px;"></div>
+                    </div>
+                </div>
             </div>
-            </div>
-        </div>
 
-        <div class="card tm-dash-chart mb-3">
-            <div class="card-header">
-            <h4>Inscriptions récentes</h4>
-            <p>Dernières inscriptions réalisées</p>
-            </div>
-            <div class="card-body">
-            <div class="d-flex justify-content-between align-items-center mb-2">
-                <div class="small text-muted">Dernières inscriptions</div>
-                <a href="{% url 'detailactions' %}" class="small">Voir tout</a>
-            </div>
-            <div class="list-group">
-                {% for ins in recent_inscriptions %}
-                    <div class="list-group-item d-flex justify-content-between align-items-start">
+            <div class="col-12 col-xl-6">
+                <div class="card tm-dash-card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
                         <div>
-                            <div class="fw-bold">{{ ins.stagiaire.get_full_name }}</div>
-                            <div class="small text-muted">{{ ins.action.description }} — {{ ins.action.formation.nom }}</div>
+                            <h5 class="card-title mb-0">
+                                <i class="bi bi-pie-chart-fill text-info me-2"></i>Statut des actions
+                            </h5>
+                            <small class="text-muted">Répartition opérationnelle des sessions</small>
                         </div>
-                        <div class="small text-muted">Réf. #{{ ins.pk }}</div>
+                        <span class="badge bg-light-info text-info px-2.5 py-1.5 rounded-pill">
+                            <i class="bi bi-funnel me-1"></i>États
+                        </span>
                     </div>
-                {% empty %}
-                    <div class="text-muted p-3">Aucune inscription récente.</div>
-                {% endfor %}
-            </div>
+                    <div class="card-body">
+                        <div id="chart-actions-status" style="min-height: 360px;"></div>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
 
-    <div class="tm-dash-chart-col">
-        <div class="card tm-dash-chart mb-3">
-            <div class="card-header">
-            <h4>Paiements récents</h4>
-            <p>Vérifier encaissements</p>
-            </div>
-            <div class="card-body">
-            <div class="d-flex justify-content-between align-items-center mb-2">
-                <div class="small text-muted">Encaissements récents</div>
-                <a href="{% url 'paiements' %}" class="small">Voir tout</a>
-            </div>
-            <div class="list-group">
-                {% for p in recent_paiements %}
-                    <div class="list-group-item d-flex justify-content-between align-items-center">
+        <!-- Row 2: Encaissements mensuels & Séances par semaine -->
+        <div class="row g-4">
+            <div class="col-12 col-xl-6">
+                <div class="card tm-dash-card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
                         <div>
-                            <div class="fw-bold">{{ p.stagiaire.get_full_name }}</div>
-                            <div class="small text-muted">{{ p.reference }} — {{ p.date_paiement|date:"d/m/Y" }}</div>
+                            <h5 class="card-title mb-0">
+                                <i class="bi bi-currency-dollar text-success me-2"></i>Encaissements mensuels
+                            </h5>
+                            <small class="text-muted">Volume financier en USD (6 derniers mois)</small>
                         </div>
-                        <div class="fw-bold">{{ p.montant|floatformat:0 }} USD</div>
+                        <span class="badge bg-light-success text-success px-2.5 py-1.5 rounded-pill">
+                            <i class="bi bi-calendar-range me-1"></i>6 mois
+                        </span>
                     </div>
-                {% empty %}
-                    <div class="text-muted p-3">Aucun paiement récent.</div>
-                {% endfor %}
-            </div>
-            </div>
-        </div>
-
-        <div class="card tm-dash-chart">
-            <div class="card-header">
-            <h4>Raccourcis</h4>
-            <p>Actions rapides</p>
-            </div>
-            <div class="card-body">
-            <div class="tm-dash-quick-grid">
-                <a href="{% url 'stagiaire_create' %}" class="tm-dash-quick-link">
-                    <span class="tm-dash-quick-link__icon"><i class="bi bi-person-plus"></i></span>
-                    <div>
-                        <span class="tm-dash-quick-link__title">Nouvel apprenant</span>
-                        <span class="tm-dash-quick-link__text">Créer un dossier stagiaire</span>
+                    <div class="card-body">
+                        <div id="chart-paiements" style="min-height: 360px;"></div>
                     </div>
-                </a>
-                <a href="{% url 'detailactions' %}" class="tm-dash-quick-link">
-                    <span class="tm-dash-quick-link__icon"><i class="bi bi-people"></i></span>
-                    <div>
-                        <span class="tm-dash-quick-link__title">Inscriptions</span>
-                        <span class="tm-dash-quick-link__text">Gérer les inscriptions</span>
+                </div>
+            </div>
+
+            <div class="col-12 col-xl-6">
+                <div class="card tm-dash-card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="card-title mb-0">
+                                <i class="bi bi-calendar2-week-fill text-warning me-2"></i>Séances pédagogiques
+                            </h5>
+                            <small class="text-muted">Séances prévues vs réalisées (6 dernières semaines)</small>
+                        </div>
+                        <span class="badge bg-light-warning text-warning px-2.5 py-1.5 rounded-pill">
+                            <i class="bi bi-clock-history me-1"></i>Hebdomadaire
+                        </span>
                     </div>
-                </a>
-            </div>
+                    <div class="card-body">
+                        <div id="chart-sessions" style="min-height: 360px;"></div>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-</section>
+    </section>
 
-{% else %}
+    <!-- 3. Activités récentes & Raccourcis rapides -->
+    <section class="section">
+        <div class="row g-4">
+            <!-- Dernières actions -->
+            <div class="col-12 col-xl-7">
+                <div class="card tm-dash-card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="card-title mb-0">
+                                <i class="bi bi-clock-history text-primary me-2"></i>Dernières actions de formation
+                            </h5>
+                            <small class="text-muted">Promotions et sessions récemment planifiées</small>
+                        </div>
+                        <a href="{% url 'actions' %}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                            Voir tout <i class="bi bi-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle tm-recent-table mb-0">
+                                <thead>
+                                    <tr>
+                                        <th class="ps-4">Action & Formation</th>
+                                        <th>Période</th>
+                                        <th>Statut</th>
+                                        <th class="text-end pe-4">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for a in recent_actions %}
+                                    <tr>
+                                        <td class="ps-4">
+                                            <a href="{% url 'action' a.pk %}" class="fw-bold text-dark text-decoration-none d-block">
+                                                {{ a.description }}
+                                            </a>
+                                            <small class="text-muted">{{ a.formation.nom }}</small>
+                                        </td>
+                                        <td>
+                                            <small class="text-dark d-block fw-semibold">{{ a.date_debut|date:"d/m/Y" }}</small>
+                                            <small class="text-muted">au {{ a.date_fin|date:"d/m/Y" }}</small>
+                                        </td>
+                                        <td>
+                                            {% if a.statut == 'PLANIFIEE' %}
+                                                <span class="badge bg-light-warning text-warning fw-semibold">Planifiée</span>
+                                            {% elif a.statut == 'EN_COURS' %}
+                                                <span class="badge bg-light-info text-info fw-semibold">En cours</span>
+                                            {% elif a.statut == 'TERMINEE' %}
+                                                <span class="badge bg-light-success text-success fw-semibold">Terminée</span>
+                                            {% elif a.statut == 'ANNULEE' %}
+                                                <span class="badge bg-light-danger text-danger fw-semibold">Annulée</span>
+                                            {% else %}
+                                                <span class="badge bg-light-secondary text-secondary fw-semibold">{{ a.statut }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-end pe-4">
+                                            <a href="{% url 'action' a.pk %}" class="btn btn-sm btn-light-primary rounded-circle" title="Voir l'action" style="width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center;">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="4" class="text-center py-4 text-muted">
+                                            <i class="bi bi-inbox fs-3 d-block mb-1 text-secondary"></i>
+                                            Aucune action enregistrée pour le moment.
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-<!-- Charts Row 1 -->
-<section class="tm-dash-charts-row">
-    <div class="tm-dash-chart-col">
-        <div class="card tm-dash-chart">
-            <div class="card-header">
-                <h4>Aperçu activité</h4>
-                <p>Comparaison stagiaires suivis et actions par filière</p>
-            </div>
-            <div class="card-body" style="overflow: visible;">
-                <div id="chart-profile-visit" style="min-height: 380px;"></div>
-            </div>
-        </div>
-    </div>
-    <div class="tm-dash-chart-col">
-        <div class="card tm-dash-chart">
-            <div class="card-header">
-                <h4>Statut des actions</h4>
-                <p>Répartition par état</p>
-            </div>
-            <div class="card-body">
-                <div id="chart-actions-status" style="min-height: 380px;"></div>
-            </div>
-        </div>
-    </div>
-</section>
+            <!-- Raccourcis rapides -->
+            <div class="col-12 col-xl-5">
+                <div class="card tm-dash-card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="card-title mb-0">
+                                <i class="bi bi-lightning-charge-fill text-warning me-2"></i>Accès rapide
+                            </h5>
+                            <small class="text-muted">Opérations fréquentes</small>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <a href="{% url 'stagiaire_create' %}" class="tm-quick-tile">
+                                    <div class="tm-quick-tile__icon bg-light-primary text-primary">
+                                        <i class="bi bi-person-plus-fill"></i>
+                                    </div>
+                                    <div>
+                                        <span class="tm-quick-tile__title">Nouveau stagiaire</span>
+                                        <span class="tm-quick-tile__sub">Créer une fiche</span>
+                                    </div>
+                                </a>
+                            </div>
 
-<!-- Charts Row 2 -->
-<section class="tm-dash-charts-row">
-    <div class="tm-dash-chart-col">
-        <div class="card tm-dash-chart">
-            <div class="card-header">
-                <h4>Encaissements mensuels</h4>
-                <p>USD — 6 derniers mois</p>
-            </div>
-            <div class="card-body">
-                <div id="chart-paiements" style="min-height: 380px;"></div>
-            </div>
-        </div>
-    </div>
-    <div class="tm-dash-chart-col">
-        <div class="card tm-dash-chart">
-            <div class="card-header">
-                <h4>Séances par semaine</h4>
-                <p>Prévues vs Réalisées</p>
-            </div>
-            <div class="card-body">
-                <div id="chart-sessions" style="min-height: 380px;"></div>
-            </div>
-        </div>
-    </div>
-</section>
+                            <div class="col-6">
+                                <a href="{% url 'action_create' %}" class="tm-quick-tile">
+                                    <div class="tm-quick-tile__icon bg-light-info text-info">
+                                        <i class="bi bi-clipboard-plus-fill"></i>
+                                    </div>
+                                    <div>
+                                        <span class="tm-quick-tile__title">Nouvelle action</span>
+                                        <span class="tm-quick-tile__sub">Lancer une session</span>
+                                    </div>
+                                </a>
+                            </div>
 
-{% endif %}
+                            {% if request.user.is_superuser or request.user.profile and request.user.profile.name == "Manager" or request.user.profile and request.user.profile.name == "Caisse" %}
+                            <div class="col-6">
+                                <a href="{% url 'paiement_create' %}" class="tm-quick-tile">
+                                    <div class="tm-quick-tile__icon bg-light-success text-success">
+                                        <i class="bi bi-cash-stack"></i>
+                                    </div>
+                                    <div>
+                                        <span class="tm-quick-tile__title">Nouveau paiement</span>
+                                        <span class="tm-quick-tile__sub">Enregistrer un versement</span>
+                                    </div>
+                                </a>
+                            </div>
+                            {% endif %}
 
-<!-- Quick Access -->
-<section>
-    <div class="card tm-dash-quick">
-        <div class="card-header">
-            <h4>Accès rapide</h4>
-        </div>
-        <div class="card-body">
-            <div class="tm-dash-quick-grid">
-                <a href="{% url 'stagiaire_create' %}" class="tm-dash-quick-link">
-                    <span class="tm-dash-quick-link__icon"><i class="bi bi-person-plus"></i></span>
-                    <span>
-                        <span class="tm-dash-quick-link__title">Nouveau stagiaire</span>
-                        <span class="tm-dash-quick-link__text">Créer une fiche apprenant</span>
-                    </span>
-                </a>
-                {% if request.user.is_superuser or request.user.profile and request.user.profile.name == "Caisse" %}
-                <a href="{% url 'paiement_create' %}" class="tm-dash-quick-link">
-                    <span class="tm-dash-quick-link__icon"><i class="bi bi-cash-stack"></i></span>
-                    <span>
-                        <span class="tm-dash-quick-link__title">Nouveau paiement</span>
-                        <span class="tm-dash-quick-link__text">Enregistrer un encaissement</span>
-                    </span>
-                </a>
-                {% endif %}
-                {% if request.user.is_superuser or request.user.profile and request.user.profile.name == "Manager" %}
-                <a href="{% url 'formation_create' %}" class="tm-dash-quick-link">
-                    <span class="tm-dash-quick-link__icon"><i class="bi bi-folder-plus"></i></span>
-                    <span>
-                        <span class="tm-dash-quick-link__title">Nouvelle formation</span>
-                        <span class="tm-dash-quick-link__text">Ajouter au catalogue</span>
-                    </span>
-                </a>
-                <a href="{% url 'services' %}" class="tm-dash-quick-link">
-                    <span class="tm-dash-quick-link__icon"><i class="bi bi-building"></i></span>
-                    <span>
-                        <span class="tm-dash-quick-link__title">Services</span>
-                        <span class="tm-dash-quick-link__text">Structure du centre</span>
-                    </span>
-                </a>
-                {% endif %}
+                            {% if request.user.is_superuser or request.user.profile and request.user.profile.name == "Manager" %}
+                            <div class="col-6">
+                                <a href="{% url 'formation_create' %}" class="tm-quick-tile">
+                                    <div class="tm-quick-tile__icon bg-light-secondary text-secondary">
+                                        <i class="bi bi-journal-plus"></i>
+                                    </div>
+                                    <div>
+                                        <span class="tm-quick-tile__title">Nouvelle formation</span>
+                                        <span class="tm-quick-tile__sub">Ajouter au catalogue</span>
+                                    </div>
+                                </a>
+                            </div>
+
+                            <div class="col-6">
+                                <a href="{% url 'filieres' %}" class="tm-quick-tile">
+                                    <div class="tm-quick-tile__icon bg-light-warning text-warning">
+                                        <i class="bi bi-signpost-split"></i>
+                                    </div>
+                                    <div>
+                                        <span class="tm-quick-tile__title">Filières</span>
+                                        <span class="tm-quick-tile__sub">Gérer les filières</span>
+                                    </div>
+                                </a>
+                            </div>
+
+                            <div class="col-6">
+                                <a href="{% url 'services' %}" class="tm-quick-tile">
+                                    <div class="tm-quick-tile__icon bg-light-dark text-dark">
+                                        <i class="bi bi-building"></i>
+                                    </div>
+                                    <div>
+                                        <span class="tm-quick-tile__title">Services</span>
+                                        <span class="tm-quick-tile__sub">Structure du centre</span>
+                                    </div>
+                                </a>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-</section>
+    </section>
+</div>
 {% endblock content %}
 
 {% block script %}

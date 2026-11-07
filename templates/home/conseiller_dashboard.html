@@ -1,171 +1,155 @@
 {% extends "base.html" %}
 {% load static %}
 {% load humanize %}
+{% load tm_tags %}
 
 {% block title %}Tableau de bord Conseiller{% endblock title %}
+{% block page_header %}Tableau de bord Conseiller{% endblock page_header %}
 
 {% block style %}
+<link rel="stylesheet" href="{% static 'assets/css/training-manager.css' %}">
 <style>
-/* Conseiller dashboard custom styles */
-.conseiller-hero .tm-hero__left h3 { font-size: 1.4rem; }
-.conseiller-card { border-radius: 0.9rem; box-shadow: 0 8px 24px rgba(15,23,42,0.06); overflow: hidden; border:1px solid #eef2f7; }
-.conseiller-card .card-header { background: linear-gradient(90deg,#f8faff 0%,#ffffff 100%); padding:0.75rem 1rem; font-weight:700; display:flex; justify-content:space-between; align-items:center; }
-.conseiller-card .list-group-item { padding:0.6rem 1rem; }
-.conseiller-avatar { width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid #fff;box-shadow:0 3px 8px rgba(15,23,42,0.06); }
-.conseiller-card .card-footer { background:#fbfbfc; padding:0.5rem 0.8rem; text-align:right; }
-.conseiller-card .fw-600 { font-weight:700; }
-.montant { font-weight:800; color:#0f172a; }
-.badge-action { font-size:0.72rem; background:#eef2ff; color:#435ebe; padding:0.22rem 0.5rem; border-radius:0.4rem; }
-.small-muted { font-size:0.82rem; color: #6b7280; }
-@media (max-width:767px){ .tm-hero__stats-grid .col-md-3{width:50%;} .conseiller-card .card-header h5{font-size:0.95rem;} }
+.tm-conseiller-card {
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    border-radius: 1rem;
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.03);
+    background: #ffffff;
+    height: 100%;
+}
+.tm-conseiller-card .card-header {
+    background: transparent;
+    border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+    padding: 1.1rem 1.35rem;
+}
+.tm-conseiller-card .card-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0;
+}
+.conseiller-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    object-fit: cover;
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08);
+}
+.montant { font-weight: 800; color: #0f172a; }
+.small-muted { font-size: 0.8rem; color: #64748b; }
 </style>
 {% endblock style %}
 
 {% block content %}
+<div class="page-heading">
+    {% tm_hero title="Tableau de bord Conseiller" subtitle="Gestion des inscriptions, orientation des stagiaires et suivi des parcours." icon="bi bi-person-check-fill" actions=hero_actions stats=hero_stats theme="primary" %}
 
-{# HERO SECTION #}
-<div class="tm-hero tm-hero--primary">
-    <div class="tm-hero__layout">
-        <div class="tm-hero__left">
-            <div class="tm-section-titlebar">
-                <div class="tm-section-titlebar__icon">
-                    <i class="bi bi-person-check-fill"></i>
+    <div class="row g-4 mt-1">
+        <!-- Stagiaires récents -->
+        <div class="col-12 col-lg-4">
+            <div class="card tm-conseiller-card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title">
+                        <i class="bi bi-people text-primary me-2"></i>Stagiaires récents
+                    </h5>
+                    <a href="{% url 'stagiaires' %}" class="btn btn-sm btn-outline-primary rounded-pill px-2.5 py-0.5">Voir tout</a>
                 </div>
-                <div class="tm-section-titlebar__text">
-                    <h3>Bienvenue, {{ user.get_full_name|default:user.username }} !</h3>
-                    <p>Votre tableau de bord pour la gestion des inscriptions.</p>
-                </div>
-            </div>
-            <div class="tm-hero__actions">
-                <a href="{% url 'stagiaire_create' %}" class="tm-btn-soft">
-                    <i class="bi bi-person-plus-fill me-2"></i> Nouveau Stagiaire
-                </a>
-            </div>
-        </div>
-                <div class="tm-hero__right">
-            <div class="tm-hero__stats-grid">
-                <div class="col-md-3">
-                    <a href="{% url 'formations' %}" class="text-decoration-none border-0 shadow-sm bg-primary text-white h-100 py-4 tm-stat-card-wrap">
-                        <div class="tm-stat-card">
-                            <span class="tm-stat-card__label">Formations</span>
-                            <span class="tm-stat-card__value">{{ nbmetiers }}</span>
-                        </div>
-                    </a>
-                </div>
-                <div class="col-md-3">
-                    <a href="{% url 'filieres' %}" class="text-decoration-none border-0 shadow-sm bg-primary text-white h-100 py-4 tm-stat-card-wrap">
-                        <div class="tm-stat-card">
-                            <span class="tm-stat-card__label">Filières</span>
-                            <span class="tm-stat-card__value">{{ nbfilieres }}</span>
-                        </div>
-                    </a>
-                </div>
-                <div class="col-md-3">
-                    <a href="{% url 'stagiaires' %}" class="text-decoration-none border-0 shadow-sm bg-primary text-white h-100 py-4 tm-stat-card-wrap">
-                        <div class="tm-stat-card">
-                            <span class="tm-stat-card__label">Stagiaires</span>
-                            <span class="tm-stat-card__value">{{ nbstagiaires }}</span>
-                        </div>
-                    </a>
-                </div>
-                <div class="col-md-3">
-                    <a href="{% url 'actions' %}" class="text-decoration-none border-0 shadow-sm bg-primary text-white h-100 py-4 tm-stat-card-wrap">
-                        <div class="tm-stat-card">
-                            <span class="tm-stat-card__label">Actions</span>
-                            <span class="tm-stat-card__value">{{ nbactions }}</span>
-                        </div>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-
-<div class="container mt-3">
-    <div class="row gy-3">
-        <div class="col-md-4">
-            <div class="card conseiller-card">
-                <div class="card-header">
-                    <h5 class="mb-0">Stagiaires récents</h5>
-                </div>
-                <ul class="list-group list-group-flush">
-                    {% for s in recent_stagiaires %}
-                        <li class="list-group-item d-flex align-items-center">
-                            {% if s.photo %}
-                                <img src="{{ s.photo.url }}" alt="{{ s.get_full_name }}" class="conseiller-avatar me-2">
-                            {% else %}
-                                <div class="conseiller-avatar bg-secondary text-white d-inline-flex align-items-center justify-content-center me-2">{{ s.nom|slice:":1" }}</div>
-                            {% endif %}
-                            <div class="flex-grow-1">
-                                <div class="fw-600">{{ s.get_full_name }}</div>
-                                <small class="small-muted">Mis à jour: {{ s.updated_at|naturaltime }}</small>
-                            </div>
-                            <a href="{% url 'stagiaire' s.pk %}" class="ms-2 text-decoration-none" title="Voir le stagiaire"><i class="bi bi-arrow-right-circle"></i></a>
-                        </li>
-                    {% empty %}
-                        <li class="list-group-item text-muted">Aucun stagiaire récent</li>
-                    {% endfor %}
-                </ul>
-                <div class="card-footer">
-                    <a href="{% url 'stagiaires' %}" class="text-decoration-none">Voir plus &raquo;</a>
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush">
+                        {% for s in recent_stagiaires %}
+                            <li class="list-group-item d-flex align-items-center p-3 border-bottom">
+                                {% if s.photo %}
+                                    <img src="{{ s.photo.url }}" alt="{{ s.get_full_name }}" class="conseiller-avatar me-3">
+                                {% else %}
+                                    <div class="conseiller-avatar bg-light-primary text-primary d-inline-flex align-items-center justify-content-center me-3 fw-bold">
+                                        {{ s.nom|slice:":1" }}
+                                    </div>
+                                {% endif %}
+                                <div class="flex-grow-1 min-width-0">
+                                    <a href="{% url 'stagiaire' s.pk %}" class="fw-bold text-dark text-decoration-none d-block text-truncate">
+                                        {{ s.get_full_name }}
+                                    </a>
+                                    <small class="small-muted">Mis à jour {{ s.updated_at|naturaltime }}</small>
+                                </div>
+                                <a href="{% url 'stagiaire' s.pk %}" class="btn btn-sm btn-light-primary rounded-circle ms-2" style="width: 30px; height: 30px; padding: 0; display: inline-flex; align-items: center; justify-content: center;">
+                                    <i class="bi bi-chevron-right"></i>
+                                </a>
+                            </li>
+                        {% empty %}
+                            <li class="list-group-item text-muted text-center py-4">
+                                <i class="bi bi-inbox fs-3 d-block mb-1 text-secondary"></i>
+                                Aucun stagiaire récent.
+                            </li>
+                        {% endfor %}
+                    </ul>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-4">
-            <div class="card conseiller-card">
-                <div class="card-header">
-                    <h5 class="mb-0">Inscriptions récentes</h5>
+        <!-- Inscriptions récentes -->
+        <div class="col-12 col-lg-4">
+            <div class="card tm-conseiller-card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title">
+                        <i class="bi bi-journal-check text-info me-2"></i>Inscriptions récentes
+                    </h5>
+                    <a href="{% url 'actions' %}" class="btn btn-sm btn-outline-info rounded-pill px-2.5 py-0.5">Voir tout</a>
                 </div>
-                <ul class="list-group list-group-flush">
-                    {% for ins in recent_inscriptions %}
-                        <li class="list-group-item d-flex justify-content-between align-items-start">
-                            <div>
-                                <strong>{{ ins.stagiaire.get_full_name }}</strong><br>
-                                <small class="small-muted">Formation: {{ ins.action.formation.nom }}</small>
-                            </div>
-                            <div class="text-end">
-                                <small class="small-muted">{{ ins.date_inscription|date:"d/m/Y" }}</small>
-                            </div>
-                        </li>
-                    {% empty %}
-                        <li class="list-group-item text-muted">Aucune inscription récente</li>
-                    {% endfor %}
-                </ul>
-                <div class="card-footer">
-                    <a href="{% url 'actions' %}" class="text-decoration-none">Voir plus &raquo;</a>
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush">
+                        {% for ins in recent_inscriptions %}
+                            <li class="list-group-item p-3 border-bottom">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <span class="fw-bold text-dark d-block">{{ ins.stagiaire.get_full_name }}</span>
+                                        <small class="text-muted d-block">{{ ins.action.formation.nom }}</small>
+                                    </div>
+                                    <span class="badge bg-light-info text-info rounded-pill">Inscrit</span>
+                                </div>
+                            </li>
+                        {% empty %}
+                            <li class="list-group-item text-muted text-center py-4">
+                                <i class="bi bi-inbox fs-3 d-block mb-1 text-secondary"></i>
+                                Aucune inscription récente.
+                            </li>
+                        {% endfor %}
+                    </ul>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-4">
-            <div class="card conseiller-card">
-                <div class="card-header">
-                    <h5 class="mb-0">Paiements récents</h5>
+        <!-- Paiements récents -->
+        <div class="col-12 col-lg-4">
+            <div class="card tm-conseiller-card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title">
+                        <i class="bi bi-receipt text-success me-2"></i>Paiements récents
+                    </h5>
+                    <a href="{% url 'paiements' %}" class="btn btn-sm btn-outline-success rounded-pill px-2.5 py-0.5">Voir tout</a>
                 </div>
-                <ul class="list-group list-group-flush">
-                    {% for p in recent_paiements %}
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <div>
-                                <strong>{{ p.stagiaire.get_full_name }}</strong><br>
-                                <small class="small-muted">Action: {{ p.action.description }}</small>
-                            </div>
-                            <div class="text-end">
-                                <div class="montant">{{ p.montant|floatformat:2 }} $</div>
-                                <small class="small-muted">{{ p.date_paiement|date:"d/m/Y" }}</small>
-                            </div>
-                        </li>
-                    {% empty %}
-                        <li class="list-group-item text-muted">Aucun paiement récent</li>
-                    {% endfor %}
-                </ul>
-                <div class="card-footer">
-                    <a href="{% url 'paiements' %}" class="text-decoration-none">Voir plus &raquo;</a>
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush">
+                        {% for p in recent_paiements %}
+                            <li class="list-group-item p-3 border-bottom">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <span class="fw-bold text-dark d-block">{{ p.stagiaire.get_full_name }}</span>
+                                        <small class="small-muted">{{ p.date_paiement|date:"d/m/Y" }}</small>
+                                    </div>
+                                    <div class="text-end">
+                                        <span class="montant text-success fs-6">{{ p.montant|floatformat:0 }} USD</span>
+                                    </div>
+                                </div>
+                            </li>
+                        {% empty %}
+                            <li class="list-group-item text-muted text-center py-4">
+                                <i class="bi bi-inbox fs-3 d-block mb-1 text-secondary"></i>
+                                Aucun paiement récent.
+                            </li>
+                        {% endfor %}
+                    </ul>
                 </div>
             </div>
         </div>
     </div>
 </div>
-
 {% endblock content %}
