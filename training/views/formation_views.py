@@ -62,6 +62,29 @@ class FormationListView(FormationPermissionMixin, ListView):
         # Allow viewing for users; management actions are enforced on create/update/delete views
         queryset = self.get_formation_queryset().select_related("filiere", "filiere__service")
 
+        # --- Filtres et recherche ---
+        q = self.request.GET.get('q', '').strip()
+        if q:
+            queryset = queryset.filter(
+                Q(nom__icontains=q) |
+                Q(description__icontains=q) |
+                Q(filiere__nom__icontains=q)
+            )
+
+        type_f = self.request.GET.get('type_formation', '').strip()
+        if type_f:
+            queryset = queryset.filter(type_formation=type_f)
+
+        filiere_id = self.request.GET.get('filiere', '').strip()
+        if filiere_id:
+            queryset = queryset.filter(filiere_id=filiere_id)
+
+        active = self.request.GET.get('active', '').strip()
+        if active == 'active':
+            queryset = queryset.filter(active=True)
+        elif active == 'inactive':
+            queryset = queryset.filter(active=False)
+
         queryset = queryset.annotate(
             modules_count=Count('modules', distinct=True),
             actions_count=Count('actions', distinct=True)

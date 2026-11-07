@@ -35,10 +35,58 @@
             {% endif %}
             </div>
             <div class="card-body">
-                {# Custom Search Input #}
-                <div class="custom-search-container mb-3">
-                    <input type="text" id="searchInput" class="custom-search-input form-control" placeholder="Recherche par nom, filière ou type...">
-                </div>
+                {# Search and Filter Form #}
+                <form method="GET" class="mb-3" id="searchForm">
+                    <div class="row g-3">
+                        <!-- Recherche -->
+                        <div class="col-md-5">
+                            <div class="input-group">
+                                <span class="input-group-text bg-secondary text-white"><i class="bi bi-search"></i></span>
+                                <input type="text" name="q" class="form-control custom-search-input" placeholder="Recherche par nom, filière ou type..." value="{{ request.GET.q }}">
+                            </div>
+                        </div>
+
+                        <!-- Type de formation -->
+                        <div class="col-md-2">
+                            <select name="type_formation" class="form-select">
+                                <option value="">Tous les types</option>
+                                <option value="qualifiante" {% if request.GET.type_formation == 'qualifiante' %}selected{% endif %}>Qualifiante</option>
+                                <option value="continue" {% if request.GET.type_formation == 'continue' %}selected{% endif %}>Continue</option>
+                            </select>
+                        </div>
+
+                        <!-- Filière -->
+                        <div class="col-md-3">
+                            <select name="filiere" class="form-select">
+                                <option value="">Toutes les filières</option>
+                                {% for filiere in filieres %}
+                                <option value="{{ filiere.pk }}" {% if request.GET.filiere == filiere.pk|stringformat:"s" %}selected{% endif %}>{{ filiere.nom }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Statut -->
+                        <div class="col-md-2">
+                            <select name="active" class="form-select">
+                                <option value="">Tous les statuts</option>
+                                <option value="active" {% if request.GET.active == 'active' %}selected{% endif %}>Actif</option>
+                                <option value="inactive" {% if request.GET.active == 'inactive' %}selected{% endif %}>Inactif</option>
+                            </select>
+                        </div>
+
+                        <!-- Boutons d'action -->
+                        <div class="col-md-2">
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-search"></i> Filtrer
+                                </button>
+                                <a href="?page=1" class="btn btn-outline-secondary">
+                                    <i class="bi bi-x-circle"></i> Effacer
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </form>
 
                 <div class="table-responsive">
                     <table class="table table-hover" id="formationTable">
