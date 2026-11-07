@@ -155,6 +155,15 @@
                                 </li>
                             {% endif %}
 
+                            {% if request.user.is_superuser or request.user.profile.name == "Manager" or request.user.profile.name == "Chef de filière" or request.user.profile.name == "Chef de service" or request.user.profile.name == "Conseiller" or request.user.profile.name == "Inspecteur" or request.user.profile.name == "Pédagogique" %}
+                                <li class="sidebar-item {% if link == 'modules' %} active {% endif %}">
+                                    <a href="{% url 'modules' %}" class='sidebar-link'>
+                                        <i class="bi bi-journal-code"></i>
+                                        <span>Gestion des modules</span>
+                                    </a>
+                                </li>
+                            {% endif %}
+
                             {% if request.user.is_superuser or request.user.profile.name == "Manager" or request.user.profile.name == "Chef de filière" or request.user.profile.name == "Chef de service" %}
                                 <li class="sidebar-item {% if link == 'filieres' %} active {% endif %}">
                                     <a href="{% url 'filieres' %}" class='sidebar-link'>

@@ -354,4 +354,29 @@ class ModuleFormateursView(FormationPermissionMixin, View):
 
         messages.success(request, f"Les formateurs du module '{module.titre}' ont été mis à jour avec succès.")
         return redirect("formation", pk=module.formation.pk)
-#         return HttpResponseRedirect(reverse_lazy("formation", kwargs={'pk': module.formation.pk}))
+
+
+@method_decorator(login_required, name="dispatch")
+class ModuleListView(FormationPermissionMixin, ListView):
+    """Liste de tous les modules avec leurs formateurs, pour gestion globale."""
+    model = Module
+    template_name = "training/module_list.html"
+    context_object_name = "modules"
+    paginate_by = 20
+
+    def get_queryset(self):
+        queryset = Module.objects.all().select_related("formation", "formation__filiere").prefetch_related("formateurs").order_by("formation__nom", "ordre")
+        user = self.request.user
+        if user.is_superuser or (user.profile and user.profile.name == "Manager"):
+            return queryset
+        if user.profile and user.profile.name == "Chef de filière" and user.filiere:
+            return queryset.filter(formation__filiere=user.filiere)
+        if user.profile and user.profile.name == "Chef de service" and user.service:
+            return queryset.filter(formation__filiere__service=user.service)
+        return Module.objects.none()
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["titre"] = "Gestion des modules"
+        ctx["link"] = "modules"
+        return ctx
