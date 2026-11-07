@@ -34,8 +34,8 @@ class FormationPermissionMixin:
 
         if user.is_superuser or (user.profile and user.profile.name == "Manager"):
             return queryset
-        # Allow Conseiller to view formations (read-only)
-        if user.profile and user.profile.name == "Conseiller":
+        # Allow Conseiller and Pédagogique to view formations (read-only)
+        if user.profile and user.profile.name in ["Conseiller", "Pédagogique"]:
             return queryset
         if user.profile and user.profile.name == "Chef de filière" and user.filiere:
             return queryset.filter(filiere=user.filiere)

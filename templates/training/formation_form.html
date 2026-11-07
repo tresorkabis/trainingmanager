@@ -154,16 +154,31 @@
             var totalForms = $('#id_form-TOTAL_FORMS');
             $('#add-module-button').click(function() {
                 var currentForms = parseInt(totalForms.val());
-                var newForm = $('.module-formset-row:first').clone(true);
+                // Cloner sans événements/données jQuery (clone(false))
+                var newForm = $('.module-formset-row:first').clone(false);
                 newForm.find(':input').each(function() {
-                    var name = $(this).attr('name').replace('-0-', '-' + currentForms + '-');
+                    var $el = $(this);
+                    var name = $el.attr('name').replace('-0-', '-' + currentForms + '-');
                     var id = 'id_' + name;
-                    $(this).attr({'name': name, 'id': id}).val('');
+                    $el.attr({'name': name, 'id': id}).val('');
                 });
+                // Nettoyer les résidus Select2 sur les éléments clonés
                 newForm.find('.select2-container').remove();
+                newForm.find('.select2-enabled').each(function() {
+                    var $el = $(this);
+                    if ($el.hasClass('select2-hidden-accessible')) {
+                        try { $el.select2('destroy'); } catch(e) {}
+                    }
+                    $el.removeClass('select2-hidden-accessible select2-hidden-accessible')
+                         .removeAttr('data-select2-id tabindex style')
+                         .show();
+                });
                 $('#module-formset-container').append(newForm);
                 totalForms.val(currentForms + 1);
-                initializeSelect2(newForm.find('.select2-enabled'));
+                // Réinitialiser Select2 sur les nouveaux éléments
+                newForm.find('.select2-enabled').each(function() {
+                    initializeSelect2(this);
+                });
             });
         });
     </script>
