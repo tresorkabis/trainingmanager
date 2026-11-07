@@ -97,6 +97,12 @@
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group mb-3">
+                                        <label for="{{ form.type_formation.id_for_label }}" class="form-label fw-bold">{{ form.type_formation.label }}</label>
+                                        {{ form.type_formation|add_class:"form-select" }}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
                                         <label for="{{ form.cout.id_for_label }}" class="form-label fw-bold">{{ form.cout.label }}</label>
                                         {{ form.cout|add_class:"form-control" }}
                                     </div>
