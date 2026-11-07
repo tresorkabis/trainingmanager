@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% load static %}
+{% load tm_tags %}
+
+{% block title %}{{ titre }}{% endblock title %}
+{% block page_header %}{{ titre }}{% endblock page_header %}
+
+{% block content %}
+<div class="page-heading">
+    {% tm_hero title=titre subtitle="Sélectionnez les formateurs autorisés pour ce module." icon="bi bi-people" actions=[] theme="primary" %}
+
+    <section class="section">
+        <div class="card tm-detail-card">
+            <div class="card-header border-bottom">
+                <h5 class="card-title mb-0">Module : {{ module.titre }}</h5>
+                <a href="{% url 'formation' module.formation.pk %}" class="btn btn-light-secondary btn-sm">Retour à la formation</a>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label fw-bold">Formateurs disponibles</label>
+                            <select name="formateurs" multiple class="form-select select2-enabled" size="10" style="width: 100%;">
+                                {% for f in formateurs_disponibles %}
+                                    <option value="{{ f.pk }}" {% if f in formateurs_selectionnes %}selected{% endif %}>
+                                        {{ f.get_full_name }}
+                                    </option>
+                                {% empty %}
+                                    <option disabled>Aucun formateur disponible</option>
+                                {% endfor %}
+                            </select>
+                            <div class="form-text">Maintenez Ctrl (ou Cmd) pour sélectionner plusieurs formateurs.</div>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+                        <a href="{% url 'formation' module.formation.pk %}" class="btn btn-light-secondary">Annuler</a>
+                        <button type="submit" class="btn btn-primary">Enregistrer</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock content %}
+
+{% block script %}
+    <script>
+        $(document).ready(function() {
+            $('select[multiple]').select2({ width: '100%' });
+        });
+    </script>
+{% endblock script %}

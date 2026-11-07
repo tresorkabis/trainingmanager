@@ -9,6 +9,8 @@ from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.generic import DetailView, ListView, DeleteView
+from django.forms import modelformset_factory
+from django.shortcuts import render, redirect
 
 from training.models import Filiere, Formation, Module
 from progress.models import Formateur, Action, ModuleSubject # Import ModuleSubject
@@ -313,4 +315,43 @@ class FormationDeleteView(FormationPermissionMixin, DeleteView):
         
 #         messages.success(request, f"Les formateurs du module '{module.titre}' ont été mis à jour avec succès.")
         
+
+@method_decorator(login_required, name="dispatch")
+class ModuleFormateursView(FormationPermissionMixin, View):
+    """Gérer les formateurs d'un module spécifique."""
+    template_name = "training/module_formateurs.html"
+
+    def get(self, request, pk):
+        self.enforce_manage_permission()
+        module = get_object_or_404(Module, pk=pk)
+
+        allowed_formations = self.get_formation_queryset()
+        if not allowed_formations.filter(pk=module.formation.pk).exists():
+            raise PermissionDenied("Vous n'avez pas la permission de gérer ce module.")
+
+        formateurs_disponibles = Formateur.objects.all().order_by('nom', 'postnom')
+        formateurs_selectionnes = module.formateurs.all()
+
+        ctx = {
+            "module": module,
+            "formation": module.formation,
+            "formateurs_disponibles": formateurs_disponibles,
+            "formateurs_selectionnes": formateurs_selectionnes,
+            "titre": f"Formateurs du module : {module.titre}",
+        }
+        return render(request, self.template_name, ctx)
+
+    def post(self, request, pk):
+        self.enforce_manage_permission()
+        module = get_object_or_404(Module, pk=pk)
+
+        allowed_formations = self.get_formation_queryset()
+        if not allowed_formations.filter(pk=module.formation.pk).exists():
+            raise PermissionDenied("Vous n'avez pas la permission de gérer ce module.")
+
+        formateur_ids = request.POST.getlist("formateurs")
+        module.formateurs.set(formateur_ids)
+
+        messages.success(request, f"Les formateurs du module '{module.titre}' ont été mis à jour avec succès.")
+        return redirect("formation", pk=module.formation.pk)
 #         return HttpResponseRedirect(reverse_lazy("formation", kwargs={'pk': module.formation.pk}))

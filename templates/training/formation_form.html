@@ -153,7 +153,7 @@
                                                     {{ module_form.titre|add_class:"form-control form-control-sm" }}
                                                 </div>
                                             </div>
-                                            <div class="col-md-4">
+                                            <div class="col-md-3">
                                                 <div class="form-group mb-2">
                                                     <label class="form-label small fw-bold">Heures</label>
                                                     {{ module_form.duree_heures|add_class:"form-control form-control-sm" }}
@@ -165,11 +165,10 @@
                                                     {{ module_form.ordre|add_class:"form-control form-control-sm" }}
                                                 </div>
                                             </div>
-                                            <div class="col-12">
-                                                <div class="form-group">
-                                                    <label class="form-label small fw-bold">Formateurs</label>
-                                                    {{ module_form.formateurs|add_class:"form-select select2-enabled" }}
-                                                </div>
+                                            <div class="col-md-1 d-flex align-items-end">
+                                                <button type="button" class="btn btn-sm btn-outline-danger w-100 remove-module-btn" title="Supprimer ce module">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
                                             </div>
                                             {% if module_form.instance.pk %}
                                             <div class="col-12 mt-2">
@@ -183,9 +182,28 @@
                                     </div>
                                 {% endfor %}
                             </div>
-                            <button type="button" id="add-module-button" class="btn btn-outline-info btn-sm w-100 mt-2">
-                                <i class="bi bi-plus-circle me-2"></i>Ajouter un module
+
+                            <!-- Bouton d'ajout simple -->
+                            <button type="button" id="add-module-button" class="btn btn-success w-100 mb-3">
+                                <i class="bi bi-plus-lg me-2"></i>Ajouter un module
                             </button>
+
+                            <hr class="my-4">
+
+                            <!-- Saisie rapide multi-modules -->
+                            <div class="card bg-light border-0">
+                                <div class="card-body">
+                                    <h6 class="card-title mb-3">
+                                        <i class="bi bi-lightning-charge me-2 text-warning"></i>Saisie rapide de plusieurs modules
+                                    </h6>
+                                    <p class="small text-muted mb-3">Saisissez un module par ligne au format : <code>Titre du module | Heures | Ordre</code><br>
+                                    Exemple : <code>Introduction à la comptabilité | 20 | 1</code></p>
+                                    <textarea id="quick-modules-input" class="form-control form-control-sm" rows="4" placeholder="Module 1 | 10 | 1&#10;Module 2 | 15 | 2&#10;Module 3 | 20 | 3"></textarea>
+                                    <button type="button" id="import-quick-modules" class="btn btn-outline-primary btn-sm mt-3 w-100">
+                                        <i class="bi bi-download me-2"></i>Importer depuis la saisie rapide
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -206,27 +224,52 @@
             $('.select2-enabled').each(function() { initializeSelect2(this); });
 
             var totalForms = $('#id_form-TOTAL_FORMS');
+
+            // Calculer le prochain ordre disponible
+            function getNextOrdre() {
+                var max = 0;
+                $('.module-formset-row').each(function() {
+                    var val = parseInt($(this).find('input[name$="-ordre"]').val()) || 0;
+                    if (val > max) max = val;
+                });
+                return max + 1;
+            }
+
+            // Avant l'envoi du formulaire, s'assurer que les Select2 multiples
+            // envoient bien une liste vide quand rien n'est sélectionné
+            $('#formation_form').on('submit', function() {
+                $('.select2-enabled[multiple]').each(function() {
+                    var $el = $(this);
+                    if ($el.val() === null || $el.val().length === 0) {
+                        $el.val([]);
+                    }
+                });
+            });
+
+            // Bouton "Ajouter un module"
             $('#add-module-button').click(function() {
                 var currentForms = parseInt(totalForms.val());
-                // Cloner sans événements/données jQuery (clone(false))
+                var nextOrdre = getNextOrdre();
                 var newForm = $('.module-formset-row:first').clone(false);
                 newForm.find(':input').each(function() {
                     var $el = $(this);
                     var name = $el.attr('name');
-                    if (!name) return; // ignorer les éléments sans name
+                    if (!name) return;
                     name = name.replace('-0-', '-' + currentForms + '-');
                     var id = 'id_' + name;
                     $el.attr({'name': name, 'id': id});
-                    // Ne pas vider les champs numériques obligatoires : mettre 0 par défaut
                     if ($el.is('input[type="number"]')) {
-                        $el.val('0');
+                        if ($el.attr('name').indexOf('-ordre-') !== -1) {
+                            $el.val(nextOrdre);
+                        } else {
+                            $el.val('0');
+                        }
                     } else if ($el.is('select, textarea, input[type="text"], input[type="email"]')) {
                         $el.val('');
                     } else {
                         $el.val('');
                     }
                 });
-                // Nettoyer les résidus Select2 sur les éléments clonés
                 newForm.find('.select2-container').remove();
                 newForm.find('.select2-enabled').each(function() {
                     var $el = $(this);
@@ -239,10 +282,74 @@
                 });
                 $('#module-formset-container').append(newForm);
                 totalForms.val(currentForms + 1);
-                // Réinitialiser Select2 sur les nouveaux éléments
                 newForm.find('.select2-enabled').each(function() {
                     initializeSelect2(this);
                 });
+            });
+
+            // Bouton "Supprimer" sur chaque module
+            $(document).on('click', '.remove-module-btn', function() {
+                $(this).closest('.module-formset-row').remove();
+            });
+
+            // Importer depuis la saisie rapide
+            $('#import-quick-modules').click(function() {
+                var textarea = $('#quick-modules-input');
+                var lines = textarea.val().trim().split('\n').filter(function(l) { return l.trim() !== ''; });
+                if (lines.length === 0) return;
+
+                var currentForms = parseInt(totalForms.val());
+                var imported = 0;
+
+                lines.forEach(function(line) {
+                    var parts = line.split('|').map(function(p) { return p.trim(); });
+                    if (parts.length < 1 || parts[0] === '') return;
+
+                    var titre = parts[0];
+                    var heures = parts[1] ? parseInt(parts[1]) || 0 : 0;
+                    var ordre = parts[2] ? parseInt(parts[2]) || 0 : getNextOrdre();
+
+                    var newForm = $('.module-formset-row:first').clone(false);
+                    newForm.find(':input').each(function() {
+                        var $el = $(this);
+                        var name = $el.attr('name');
+                        if (!name) return;
+                        name = name.replace('-0-', '-' + currentForms + '-');
+                        var id = 'id_' + name;
+                        $el.attr({'name': name, 'id': id});
+
+                        if ($el.is('input[type="number"]')) {
+                            if ($el.attr('name').indexOf('-ordre-') !== -1) {
+                                $el.val(ordre);
+                            } else if ($el.attr('name').indexOf('-duree_heures-') !== -1) {
+                                $el.val(heures);
+                            } else {
+                                $el.val('0');
+                            }
+                        } else if ($el.is('input[type="text"]')) {
+                            $el.val(titre);
+                        } else {
+                            $el.val('');
+                        }
+                    });
+                    newForm.find('.select2-container').remove();
+                    newForm.find('.select2-enabled').each(function() {
+                        var $el = $(this);
+                        if ($el.hasClass('select2-hidden-accessible')) {
+                            try { $el.select2('destroy'); } catch(e) {}
+                        }
+                        $el.removeClass('select2-hidden-accessible select2-hidden-accessible')
+                             .removeAttr('data-select2-id tabindex style')
+                             .show();
+                    });
+                    $('#module-formset-container').append(newForm);
+                    totalForms.val(currentForms + 1);
+                    currentForms++;
+                    imported++;
+                });
+
+                textarea.val('');
+                alert(imported + ' module(s) importé(s) avec succès.');
             });
         });
     </script>

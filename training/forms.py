@@ -34,17 +34,17 @@ class FormationForm(forms.ModelForm):
                 else:
                     field.widget.attrs.update({'class': 'form-control'})
 
-class ModuleForm(forms.ModelForm):
-    formateurs = forms.ModelMultipleChoiceField(
-        queryset=Formateur.objects.all().order_by('nom', 'postnom'),
-        label="Formateur(s)",
-        required=False,
-        widget=Select2Widget(attrs={'data-width': '100%', 'class': 'form-select'})
-    )
+class SafeModelMultipleChoiceField(forms.ModelMultipleChoiceField):
+    """ModelMultipleChoiceField qui accepte les valeurs vides (None, '', []) sans lever d'erreur."""
+    def to_python(self, value):
+        if not value:
+            return []
+        return super().to_python(value)
 
+class ModuleForm(forms.ModelForm):
     class Meta:
         model = Module
-        fields = ["titre", "description", "duree_heures", "formateurs", "ordre"]
+        fields = ["titre", "description", "duree_heures", "ordre"]
         widgets = {
             'titre': forms.TextInput(attrs={'class': 'form-control'}),
             'description': forms.Textarea(attrs={'rows': 2, 'class': 'form-control'}),
@@ -55,11 +55,10 @@ class ModuleForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for field_name, field in self.fields.items():
-            if not isinstance(field.widget, Select2Widget):
-                if isinstance(field.widget, forms.Select):
-                    field.widget.attrs.update({'class': 'form-select'})
-                else:
-                    field.widget.attrs.update({'class': 'form-control'})
+            if isinstance(field.widget, forms.Select):
+                field.widget.attrs.update({'class': 'form-select'})
+            else:
+                field.widget.attrs.update({'class': 'form-control'})
 
 ModuleFormSet = inlineformset_factory(
     Formation,
@@ -67,7 +66,7 @@ ModuleFormSet = inlineformset_factory(
     form=ModuleForm,
     extra=1,
     can_delete=True,
-    fields=["titre", "description", "duree_heures", "formateurs", "ordre"]
+    fields=["titre", "description", "duree_heures", "ordre"]
 )
 
 class ModuleSubjectForm(forms.ModelForm):
