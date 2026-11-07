@@ -39,6 +39,36 @@
     <section class="section">
         <form method="post" id="formation_form">
             {% csrf_token %}
+            {% if formset_errors %}
+                <div class="alert alert-danger alert-dismissible fade show mb-4">
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
+                    <h6 class="alert-heading">Erreurs dans les modules :</h6>
+                    <ul class="mb-0 small">
+                        {% for form_errors in formset_errors %}
+                            {% if form_errors %}
+                                {% for field, errors in form_errors.items %}
+                                    {% for error in errors %}
+                                        <li>{{ field }}: {{ error }}</li>
+                                    {% endfor %}
+                                {% endfor %}
+                            {% endif %}
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+            {% if form_errors %}
+                <div class="alert alert-danger alert-dismissible fade show mb-4">
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
+                    <h6 class="alert-heading">Erreurs dans le formulaire :</h6>
+                    <ul class="mb-0 small">
+                        {% for field, errors in form_errors.items %}
+                            {% for error in errors %}
+                                <li>{{ field }}: {{ error }}</li>
+                            {% endfor %}
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
             <div class="row g-4">
                 <div class="col-12 col-lg-6">
                     <div class="card tm-detail-card">
@@ -111,6 +141,12 @@
                                                     {{ module_form.duree_heures|add_class:"form-control form-control-sm" }}
                                                 </div>
                                             </div>
+                                            <div class="col-md-2">
+                                                <div class="form-group mb-2">
+                                                    <label class="form-label small fw-bold">Ordre</label>
+                                                    {{ module_form.ordre|add_class:"form-control form-control-sm" }}
+                                                </div>
+                                            </div>
                                             <div class="col-12">
                                                 <div class="form-group">
                                                     <label class="form-label small fw-bold">Formateurs</label>
@@ -158,9 +194,19 @@
                 var newForm = $('.module-formset-row:first').clone(false);
                 newForm.find(':input').each(function() {
                     var $el = $(this);
-                    var name = $el.attr('name').replace('-0-', '-' + currentForms + '-');
+                    var name = $el.attr('name');
+                    if (!name) return; // ignorer les éléments sans name
+                    name = name.replace('-0-', '-' + currentForms + '-');
                     var id = 'id_' + name;
-                    $el.attr({'name': name, 'id': id}).val('');
+                    $el.attr({'name': name, 'id': id});
+                    // Ne pas vider les champs numériques obligatoires : mettre 0 par défaut
+                    if ($el.is('input[type="number"]')) {
+                        $el.val('0');
+                    } else if ($el.is('select, textarea, input[type="text"], input[type="email"]')) {
+                        $el.val('');
+                    } else {
+                        $el.val('');
+                    }
                 });
                 // Nettoyer les résidus Select2 sur les éléments clonés
                 newForm.find('.select2-container').remove();
