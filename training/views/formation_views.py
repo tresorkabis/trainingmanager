@@ -319,8 +319,55 @@ class FormationDeleteView(FormationPermissionMixin, DeleteView):
         ctx["titre"] = "Supprimer"
         return ctx
 
-# La vue ModuleFormateursUpdateView n'est plus nécessaire car la gestion des formateurs
-# se fait via le formset dans FormationCreateUpdateView.
+@method_decorator(login_required, name="dispatch")
+class ModuleCreateView(FormationPermissionMixin, View):
+    """Vue pour créer un module pour une formation spécifique."""
+    template_name = "training/module_form.html"
+
+    def get(self, request, formation_pk):
+        self.enforce_manage_permission()
+        formation = get_object_or_404(Formation, pk=formation_pk)
+        allowed_formations = self.get_formation_queryset()
+        if not allowed_formations.filter(pk=formation.pk).exists():
+            raise PermissionDenied("Vous n'avez pas la permission de gérer cette formation.")
+
+        form = ModuleForm()
+        ctx = {
+            "form": form,
+            "formation": formation,
+            "titre": f"Nouveau module pour {formation.nom}",
+            "mode": "new",
+            "link": "modules",
+        }
+        return render(request, self.template_name, ctx)
+
+    def post(self, request, formation_pk):
+        self.enforce_manage_permission()
+        formation = get_object_or_404(Formation, pk=formation_pk)
+        allowed_formations = self.get_formation_queryset()
+        if not allowed_formations.filter(pk=formation.pk).exists():
+            raise PermissionDenied("Vous n'avez pas la permission de gérer cette formation.")
+
+        form = ModuleForm(request.POST)
+        if form.is_valid():
+            module = form.save(commit=False)
+            module.formation = formation
+            # Si l'ordre n'est pas spécifié, utiliser le prochain ordre disponible
+            if not module.ordre:
+                max_ordre = Module.objects.filter(formation=formation).aggregate(models.Max('ordre'))['ordre__max'] or 0
+                module.ordre = max_ordre + 1
+            module.save()
+            messages.success(request, f"Module '{module.titre}' créé avec succès.")
+            return redirect("formation", pk=formation.pk)
+        else:
+            ctx = {
+                "form": form,
+                "formation": formation,
+                "titre": f"Nouveau module pour {formation.nom}",
+                "mode": "new",
+                "link": "modules",
+            }
+            return render(request, self.template_name, ctx)
 # @method_decorator(login_required, name="dispatch")
 # class ModuleFormateursUpdateView(FormationPermissionMixin, View):
 #     """Vue pour mettre à jour uniquement les formateurs d'un module spécifique."""
