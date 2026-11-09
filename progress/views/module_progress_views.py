@@ -4,7 +4,7 @@ from django.urls import reverse_lazy
 from django.db.models import Q
 from progress.models import ModuleProgress, SessionProgress, Module, Formateur, Action # Removed DetailAction
 from progress.forms import ModuleProgressForm, SessionProgressForm
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, render, redirect
 from django.http import HttpResponseRedirect
 from django.views import View
 from django.contrib import messages
@@ -79,7 +79,11 @@ class ModuleProgressListView(LoginRequiredMixin, ListView):
         all_progs = self.get_queryset()
         
         context['formateurs'] = Formateur.objects.all().order_by('nom')
-        context['actions'] = Action.objects.all().order_by('description')
+        allowed_action_ids = self.get_allowed_action_ids()
+        actions = Action.objects.all().order_by('description')
+        if allowed_action_ids is not None:
+            actions = actions.filter(pk__in=allowed_action_ids)
+        context['actions'] = actions
         context['modules'] = Module.objects.all().order_by('titre')
         context['statut_choices'] = ModuleProgress.STATUT_CHOICES
         context['link'] = 'module_progressions'
@@ -141,6 +145,44 @@ class ModuleProgressDetailView(LoginRequiredMixin, DetailView):
         context['sessions'] = self.object.sessions_progress.all()
         context['next_session_defaults'] = ActionWorkflowService.build_session_initial(self.object)
         context['subject_planning'] = self.object.get_subject_planning()
+        subjects = list(self.object.module.subjects.all().order_by('ordre', 'id'))
+        subject_labels = []
+        subject_indexes = {}
+        progression_chart_data = {'subjects': subject_labels, 'planned': [], 'actual': []}
+
+        def get_subject_index(topic_text, fallback_index):
+            topic_text = (topic_text or '').strip().casefold()
+            subject = next(
+                (
+                    item for item in subjects
+                    if topic_text and (
+                        item.titre.casefold() in topic_text
+                        or (item.description and item.description.strip().casefold() in topic_text)
+                    )
+                ),
+                None,
+            )
+            if subject is None and subjects:
+                subject = subjects[min(fallback_index, len(subjects) - 1)]
+
+            label = subject.titre if subject else (topic_text or self.object.module.titre)
+            if label not in subject_indexes:
+                subject_indexes[label] = len(subject_labels)
+                subject_labels.append(label)
+            return subject_indexes[label]
+
+        for session_index, session in enumerate(context['sessions']):
+            if session.planned_date:
+                progression_chart_data['planned'].append({
+                    'x': session.planned_date.isoformat(),
+                    'y': get_subject_index(session.planned_topics, session_index),
+                })
+            if session.actual_date:
+                progression_chart_data['actual'].append({
+                    'x': session.actual_date.isoformat(),
+                    'y': get_subject_index(session.topics_covered, session_index),
+                })
+        context['progression_chart_data'] = progression_chart_data
         context['hero_actions'] = [
             {'label': 'Retour à la liste', 'url': reverse_lazy('module_progressions'), 'icon': 'bi bi-arrow-left', 'class': 'btn-light-secondary'},
             {'label': 'Modifier', 'url': reverse_lazy('module_progress_update', kwargs={'pk': self.object.pk}), 'icon': 'bi bi-pencil'},
@@ -174,16 +216,71 @@ class ModuleProgressDetailView(LoginRequiredMixin, DetailView):
 
         return context
 
-class ModuleProgressCreateView(LoginRequiredMixin, CreateView):
-    model = ModuleProgress
-    form_class = ModuleProgressForm
+class ModuleProgressCreateView(LoginRequiredMixin, View):
     template_name = 'progress/module_progress_form.html'
-    success_url = reverse_lazy('module_progressions')
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['title'] = "Nouvelle Progression de Module"
-        return context
+    def get_wizard_actions(self):
+        actions = Action.objects.select_related('formation').prefetch_related(
+            'formation__modules', 'module_progressions__module', 'module_progressions__formateur'
+        ).order_by('-date_debut', 'description')
+        payload = []
+
+        for action in actions:
+            progressions_by_module = {}
+            for progression in action.module_progressions.all():
+                progressions_by_module.setdefault(progression.module_id, []).append({
+                    'formateur_id': progression.formateur_id,
+                    'formateur_label': progression.formateur.get_full_name(),
+                })
+
+            payload.append({
+                'id': action.pk,
+                'label': f"{action.description} - {action.formation.nom}",
+                'modules': [
+                    {
+                        'id': module.pk,
+                        'label': f"{module.ordre}. {module.titre}",
+                        'progressions': progressions_by_module.get(module.pk, []),
+                    }
+                    for module in action.formation.modules.all().order_by('ordre', 'id')
+                ],
+            })
+
+        return payload
+
+    def get_context_data(self, form):
+        return {
+            'form': form,
+            'title': "Saisir la progression d'un module",
+            'wizard_actions': self.get_wizard_actions(),
+        }
+
+    def get(self, request, *args, **kwargs):
+        return render(request, self.template_name, self.get_context_data(ModuleProgressForm()))
+
+    def post(self, request, *args, **kwargs):
+        action_id = request.POST.get('action', '')
+        module_id = request.POST.get('module', '')
+        formateur_id = request.POST.get('formateur', '')
+        progression = None
+
+        if all(value.isdigit() for value in (action_id, module_id, formateur_id)):
+            progression = ModuleProgress.objects.filter(
+                action_id=action_id,
+                module_id=module_id,
+                formateur_id=formateur_id,
+            ).first()
+
+        form = ModuleProgressForm(request.POST, instance=progression)
+        if form.is_valid():
+            if progression is None:
+                form.add_error(None, "Aucune affectation de ce formateur à ce module n'existe pour cette action.")
+            else:
+                form.save()
+                messages.success(request, "La progression du module a été mise à jour.")
+                return redirect('module_progressions')
+
+        return render(request, self.template_name, self.get_context_data(form))
 
 class ModuleProgressUpdateView(LoginRequiredMixin, UpdateView):
     model = ModuleProgress

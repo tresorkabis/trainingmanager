@@ -563,7 +563,7 @@ class ModuleUpdateView(FormationPermissionMixin, View):
             messages.success(request, f"Module '{module.titre}' mis à jour avec succès.")
             if request.POST.get("return_to") == "formation_update":
                 return redirect("formation_update", pk=module.formation.pk)
-            return redirect("formation", pk=module.formation.pk)
+            return redirect("modules")
         ctx = {
             "form": form,
             "formation": module.formation,

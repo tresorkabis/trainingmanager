@@ -119,17 +119,33 @@ class ModuleProgressForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Filtrer dynamiquement les modules basés sur la formation de l'action sélectionnée
-        if 'action' in self.data:
-            from .models import Action
+        from .models import Action
+
+        action_value = self.data.get('action') or self.initial.get('action')
+        if self.instance.pk and not action_value:
+            action_value = self.instance.action_id
+        action_id = getattr(action_value, 'pk', action_value)
+        if action_id:
             try:
-                action_id = int(self.data.get('action'))
                 action_obj = Action.objects.get(pk=action_id)
                 self.fields['module'].queryset = Module.objects.filter(
                     formation=action_obj.formation
                 ).order_by('ordre')
             except (ValueError, TypeError, Action.DoesNotExist):
-                pass # Fallback to default queryset if selection is invalid
+                pass
+
+        module_value = self.data.get('module') or self.initial.get('module')
+        if self.instance.pk and not module_value:
+            module_value = self.instance.module_id
+        module_id = getattr(module_value, 'pk', module_value)
+        if module_id:
+            try:
+                selected_module = Module.objects.get(pk=module_id)
+                self.fields['formateur'].queryset = selected_module.formateurs.filter(
+                    active=True
+                ).order_by('nom', 'postnom')
+            except (ValueError, TypeError, Module.DoesNotExist):
+                pass
 
 class SessionProgressForm(forms.ModelForm):
     planned_date = forms.DateField(

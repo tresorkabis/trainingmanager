@@ -142,6 +142,266 @@ class ModuleProgressModelTests(TestCase):
         with self.assertRaises(ProtectedError):
             self.formateur.delete()
 
+    def test_updating_planned_session_to_realized_moves_action_to_in_progress(self):
+        second_module = Module.objects.create(
+            formation=self.formation_a,
+            titre="Module A2",
+            duree_heures=5,
+            ordre=2,
+        )
+        progression = ModuleProgress.objects.create(
+            formateur=self.formateur,
+            action=self.action,
+            module=self.module_a,
+        )
+        ModuleProgress.objects.create(
+            formateur=self.formateur,
+            action=self.action,
+            module=second_module,
+        )
+
+        session = SessionProgress.objects.create(
+            module_progress=progression,
+            planned_date=date(2026, 6, 10),
+            planned_start_time=time(8, 0),
+            planned_end_time=time(13, 0),
+        )
+        self.action.refresh_from_db()
+        self.assertEqual(self.action.statut, "PLANIFIEE")
+
+        session.actual_date = date(2026, 6, 10)
+        session.actual_start_time = time(8, 0)
+        session.actual_end_time = time(13, 0)
+        session.statut = "REALISEE"
+        session.save()
+
+        progression.refresh_from_db()
+        self.action.refresh_from_db()
+        self.assertEqual(progression.statut_module, "TE")
+        self.assertEqual(self.action.statut, "EN_COURS")
+
+    def test_realized_session_without_actual_times_starts_module(self):
+        progression = ModuleProgress.objects.create(
+            formateur=self.formateur,
+            action=self.action,
+            module=self.module_a,
+        )
+
+        SessionProgress.objects.create(
+            module_progress=progression,
+            planned_date=date(2026, 6, 10),
+            planned_start_time=time(8, 0),
+            planned_end_time=time(13, 0),
+            actual_date=date(2026, 6, 10),
+            statut="REALISEE",
+        )
+
+        progression.refresh_from_db()
+        self.action.refresh_from_db()
+        self.assertEqual(progression.statut_module, "EC")
+        self.assertEqual(self.action.statut, "EN_COURS")
+
+
+class ModuleProgressCreateViewTests(TestCase):
+    def setUp(self):
+        profile = Profile.objects.create(name="Manager")
+        user = User.objects.create_user(
+            username="progress_manager",
+            email="progress_manager@example.com",
+            password="testpass123",
+            profile=profile,
+        )
+        self.client.force_login(user)
+
+        service = Service.objects.create(nom="Service Progression")
+        filiere = Filiere.objects.create(nom="Filière Progression", service=service)
+        formation = Formation.objects.create(
+            nom="Formation Progression",
+            duree=10,
+            duree_heures=20,
+            filiere=filiere,
+        )
+        self.action = Action.objects.create(
+            description="Session de progression",
+            date_debut=date(2026, 6, 10),
+            date_fin=date(2026, 6, 12),
+            formation=formation,
+        )
+        self.module = Module.objects.create(
+            formation=formation,
+            titre="Module de progression",
+            duree_heures=5,
+        )
+        self.formateur = Formateur.objects.create(
+            matricule="FP001",
+            nom="Formateur",
+            postnom="Autorisé",
+            adresse="Adresse",
+            telephone="0000000100",
+            email="formateur.progression@example.com",
+        )
+        self.module.formateurs.add(self.formateur)
+        self.progression = ModuleProgress.objects.create(
+            action=self.action,
+            module=self.module,
+            formateur=self.formateur,
+        )
+
+    def test_create_assistant_uses_assigned_formateur_and_updates_progression(self):
+        url = reverse("module_progress_create")
+        get_response = self.client.get(url)
+        self.assertEqual(get_response.status_code, 200)
+        self.assertContains(get_response, "module-progress-wizard-data")
+        self.assertContains(get_response, "Choisir le module et son formateur")
+
+        post_response = self.client.post(url, {
+            "action": self.action.pk,
+            "module": self.module.pk,
+            "formateur": self.formateur.pk,
+            "statut_module": "NC",
+            "date_debut_reelle": "",
+            "date_fin_reelle": "",
+            "note": "15",
+            "commentaires": "Saisie de progression",
+        })
+
+        self.assertRedirects(post_response, reverse("module_progressions"), fetch_redirect_response=False)
+        self.assertEqual(ModuleProgress.objects.count(), 1)
+        self.progression.refresh_from_db()
+        self.assertEqual(self.progression.note, 15)
+        self.assertEqual(self.progression.commentaires, "Saisie de progression")
+
+    def test_create_assistant_rejects_formateur_not_assigned_to_module(self):
+        unauthorized_formateur = Formateur.objects.create(
+            matricule="FP002",
+            nom="Formateur",
+            postnom="Non autorisé",
+            adresse="Adresse",
+            telephone="0000000101",
+            email="formateur.nonautorise@example.com",
+        )
+
+        response = self.client.post(reverse("module_progress_create"), {
+            "action": self.action.pk,
+            "module": self.module.pk,
+            "formateur": unauthorized_formateur.pk,
+            "statut_module": "NC",
+        })
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(ModuleProgress.objects.count(), 1)
+        self.assertIn("formateur", response.context["form"].errors)
+
+    def test_module_progress_list_filters_by_action(self):
+        other_action = Action.objects.create(
+            description="Autre session",
+            date_debut=date(2026, 7, 10),
+            date_fin=date(2026, 7, 12),
+            formation=self.action.formation,
+        )
+        other_progression = ModuleProgress.objects.create(
+            action=other_action,
+            module=self.module,
+            formateur=self.formateur,
+        )
+
+        response = self.client.get(
+            reverse("module_progressions"),
+            {"action": self.action.pk},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            [progress.pk for progress in response.context["module_progressions"]],
+            [self.progression.pk],
+        )
+        self.assertContains(response, "Toutes les actions")
+
+
+class ActionDetailSessionDateTests(TestCase):
+    def setUp(self):
+        profile = Profile.objects.create(name="Manager")
+        user = User.objects.create_user(
+            username="action_detail_manager",
+            email="action_detail_manager@example.com",
+            password="testpass123",
+            profile=profile,
+        )
+        self.client.force_login(user)
+
+        service = Service.objects.create(nom="Service Action Detail")
+        filiere = Filiere.objects.create(nom="Filière Action Detail", service=service)
+        formation = Formation.objects.create(
+            nom="Formation Action Detail",
+            duree=10,
+            duree_heures=20,
+            filiere=filiere,
+        )
+        module = Module.objects.create(
+            formation=formation,
+            titre="Module Dates",
+            duree_heures=4,
+        )
+        subject = ModuleSubject.objects.create(module=module, titre="Introduction", ordre=1)
+        formateur = Formateur.objects.create(
+            matricule="AD001",
+            nom="Formatrice",
+            postnom="Test",
+            adresse="Adresse",
+            telephone="0000000200",
+            email="formatrice.action.detail@example.com",
+        )
+        action = Action.objects.create(
+            description="Action avec dates",
+            date_debut=date(2026, 6, 1),
+            date_fin=date(2026, 6, 30),
+            formation=formation,
+        )
+        progression = ModuleProgress.objects.create(
+            formateur=formateur,
+            action=action,
+            module=module,
+        )
+        self.progression = progression
+        SessionProgress.objects.create(
+            module_progress=progression,
+            planned_date=date(2026, 6, 10),
+            planned_start_time=time(9, 0),
+            planned_end_time=time(11, 0),
+            planned_topics=subject.titre,
+            actual_date=date(2026, 6, 11),
+            actual_start_time=time(10, 0),
+            actual_end_time=time(12, 0),
+            topics_covered=subject.titre,
+            statut="REALISEE",
+        )
+        self.action = action
+
+    def test_action_modules_tab_shows_planned_and_actual_dates(self):
+        response = self.client.get(reverse("action", kwargs={"pk": self.action.pk}))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, "module-schedule-chart")
+        self.assertEqual(response.context["evolution_chart"]["categories"], ["10/06/2026", "11/06/2026"])
+
+    def test_module_progress_detail_button_opens_subject_chart(self):
+        action_response = self.client.get(reverse("action", kwargs={"pk": self.action.pk}))
+        detail_response = self.client.get(
+            reverse("module_progress_detail", kwargs={"pk": self.progression.pk})
+        )
+
+        self.assertContains(action_response, "Voir la progression")
+        self.assertEqual(detail_response.status_code, 200)
+        self.assertContains(detail_response, "progression-subject-chart")
+        self.assertEqual(
+            detail_response.context["progression_chart_data"]["planned"],
+            [{"x": "2026-06-10", "y": 0}],
+        )
+        self.assertEqual(
+            detail_response.context["progression_chart_data"]["actual"],
+            [{"x": "2026-06-11", "y": 0}],
+        )
+
 
 class SessionProgressModelTests(TestCase):
     def setUp(self):

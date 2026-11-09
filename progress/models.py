@@ -110,9 +110,9 @@ class Action(models.Model):
                 self.save(update_fields=['statut', 'updated_at'])
             return True
 
-        # Si au moins un module est en cours → EN_COURS
+        # Une action a commencé dès qu'un module est en cours, terminé ou validé.
         in_progress_count = sum(1 for s in module_statuses.values() if s == 'EC')
-        if in_progress_count > 0:
+        if in_progress_count > 0 or completed_count > 0:
             if self.statut != 'EN_COURS':
                 self.statut = 'EN_COURS'
                 self.save(update_fields=['statut', 'updated_at'])
@@ -276,9 +276,10 @@ class ModuleProgress(models.Model):
 
     def update_statut_module(self):
         hours_done = self.calculate_hours_done()
-        if hours_done >= self.module.duree_heures:
+        has_realized_sessions = self.sessions_progress.filter(statut='REALISEE').exists()
+        if self.module.duree_heures == 0 or (hours_done > 0 and hours_done >= self.module.duree_heures):
             new_statut = 'TE'
-        elif hours_done > 0:
+        elif hours_done > 0 or has_realized_sessions:
             new_statut = 'EC'
         else:
             new_statut = 'NC'

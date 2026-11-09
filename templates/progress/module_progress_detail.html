@@ -97,6 +97,19 @@
 
     <div class="card mt-4">
         <div class="card-header">
+            <h4 class="card-title mb-0">Progression par sujet</h4>
+        </div>
+        <div class="card-body">
+            {% if progression_chart_data.planned or progression_chart_data.actual %}
+                <div id="progression-subject-chart" aria-label="Dates prévues et réelles par sujet"></div>
+            {% else %}
+                <p class="text-muted small mb-0">Aucune date de séance n’est encore enregistrée pour cette progression.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card mt-4">
+        <div class="card-header">
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
                 <div>
                     <h4 class="card-title mb-1">Séances du Module</h4>
@@ -141,7 +154,7 @@
                         </div>
                     </div>
                     <a href="{% url 'session_progress_create' module_progress_pk=module_progress.pk %}" class="btn btn-primary">
-                        Ouvrir le formulaire prérempli
+                        Créer une séance
                     </a>
                 </div>
             {% endif %}
@@ -220,10 +233,67 @@
 {% endblock content %}
 
 {% block script %}
+<script src="https://cdn.jsdelivr.net/npm/apexcharts@3.41.0/dist/apexcharts.min.js"></script>
 <script src="{% static 'assets/vendors/simple-datatables/simple-datatables.js' %}"></script>
+{{ progression_chart_data|json_script:"progression-chart-data" }}
 <script>
-    // Simple Datatable for sessions
-    let table2 = document.querySelector('#table2');
-    let dataTable2 = new simpleDatatables.DataTable(table2);
+    document.addEventListener('DOMContentLoaded', function() {
+        const table = document.querySelector('#table2');
+        try {
+            if (table && window.simpleDatatables) new simpleDatatables.DataTable(table);
+        } catch (error) {
+            console.error('Erreur lors du chargement du tableau des séances:', error);
+        }
+
+        const chartElement = document.querySelector('#progression-subject-chart');
+        if (!chartElement || typeof ApexCharts === 'undefined') return;
+
+        const data = JSON.parse(document.getElementById('progression-chart-data').textContent);
+        const dates = Array.from(new Set([
+            ...data.planned.map(point => point.x),
+            ...data.actual.map(point => point.x),
+        ])).sort();
+        const dateLabel = value => {
+            const parts = String(value).split('-');
+            return parts.length === 3 ? parts[2] + '/' + parts[1] + '/' + parts[0] : value;
+        };
+        const singleSubject = data.subjects.length === 1;
+        const valuesForDates = points => dates.map(date => {
+            const pointsForDate = points.filter(point => point.x === date);
+            return pointsForDate.length ? pointsForDate[pointsForDate.length - 1].y : null;
+        });
+
+        new ApexCharts(chartElement, {
+            series: [
+                { name: 'Prévu', data: valuesForDates(data.planned) },
+                { name: 'Réel', data: valuesForDates(data.actual) },
+            ],
+            chart: { type: 'line', height: 320, toolbar: { show: false } },
+            colors: ['#435ebe', '#198754'],
+            stroke: { curve: 'straight', width: 3 },
+            markers: { size: 6, hover: { size: 8 } },
+            xaxis: {
+                type: 'category',
+                categories: dates,
+                title: { text: 'Dates des séances' },
+                labels: { formatter: dateLabel, rotate: -35, hideOverlappingLabels: true },
+            },
+            yaxis: {
+                min: singleSubject ? -0.5 : 0,
+                max: singleSubject ? 0.5 : data.subjects.length - 1,
+                tickAmount: Math.max(data.subjects.length - 1, 1),
+                title: { text: 'Sujets' },
+                labels: {
+                    formatter: value => data.subjects[Math.round(value)] || '',
+                    minWidth: 120,
+                    maxWidth: 240,
+                },
+            },
+            legend: { position: 'top' },
+            dataLabels: { enabled: false },
+            tooltip: { x: { formatter: dateLabel }, shared: false },
+            noData: { text: 'Aucun sujet planifié ou réalisé' },
+        }).render();
+    });
 </script>
 {% endblock script %}

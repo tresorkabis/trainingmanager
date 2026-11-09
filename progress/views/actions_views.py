@@ -260,7 +260,7 @@ class ActionDetailViews(ActionPermissionMixin, DetailView):
                 "formation__modules__subjects",
                 "formation__modules__seances__formateur",
                 "formation__modules__seances__evaluateur",
-                "module_progressions",
+                "module_progressions__sessions_progress__formateur",
                 "jury_pv",
             )
         )
@@ -274,7 +274,11 @@ class ActionDetailViews(ActionPermissionMixin, DetailView):
         # On récupère la liste des modules une seule fois
         modules_list = list(action.formation.modules.all().order_by("ordre"))
         # On récupère toutes les progressions de cette action pour filtrer en mémoire (plus performant)
-        all_progressions = list(action.module_progressions.all().select_related('formateur'))
+        all_progressions = list(
+            action.module_progressions.all()
+            .select_related('formateur')
+            .prefetch_related('sessions_progress__formateur')
+        )
 
         for module in modules_list:
             module.sessions = list(
@@ -390,7 +394,7 @@ class ActionDetailViews(ActionPermissionMixin, DetailView):
                 else:
                     evolution_data['actual'].append(None) # null en JS = arrêt de la ligne
 
-                evolution_data['categories'].append(d.strftime('%d/%m'))
+                evolution_data['categories'].append(d.strftime('%d/%m/%Y'))
 
         if not evolution_data['categories']:
             ctx["evolution_chart"] = {'categories': None}

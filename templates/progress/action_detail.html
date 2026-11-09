@@ -259,8 +259,8 @@
                                                 </span>
                                             </td>
                                             <td class="text-end">
-                                                <a href="{% url 'module_progress_detail' mp.pk %}" class="btn btn-primary btn-sm rounded-circle shadow-sm" style="width: 28px; height: 28px; padding: 0; display: inline-flex; align-items: center; justify-content: center;">
-                                                    <i class="bi bi-arrow-right-short fs-5"></i>
+                                                <a href="{% url 'module_progress_detail' mp.pk %}" class="btn btn-outline-primary btn-sm">
+                                                    <i class="bi bi-graph-up me-1"></i>Voir la progression
                                                 </a>
                                             </td>
                                         </tr>
@@ -347,6 +347,7 @@
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 {{ evolution_chart|json_script:"evolution-chart-data" }}
 {{ finance_chart|json_script:"finance-chart-data" }}
+{{ module_progress_chart_data|json_script:"module-progress-chart-data" }}
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
