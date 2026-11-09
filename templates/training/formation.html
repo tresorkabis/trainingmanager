@@ -33,7 +33,7 @@
 
 {% block content %}
 <div class="page-heading">
-    {% tm_hero title=object.nom subtitle="Détails du programme pédagogique, modules et sessions planifiées." icon="bi bi-journal-text" actions=hero_actions stats=hero_stats theme="primary" %}
+    {% tm_hero title=object.nom subtitle="Détails de la formation, de ses modules et des sessions planifiées." icon="bi bi-journal-text" actions=hero_actions stats=hero_stats theme="primary" %}
 
     <section class="section">
         <div class="card tm-detail-card">
@@ -143,7 +143,7 @@
                                     {% endif %}
                                     {% empty %}
                                     <tr><td colspan="4" class="text-center text-muted p-4">
-                                        <i class="bi bi-info-circle me-2"></i>Aucun module configuré pour ce programme. Veuillez contacter le Manager ou le Chef de Filière.
+                                        <i class="bi bi-info-circle me-2"></i>Aucun module configuré pour cette formation. Veuillez contacter le Manager ou le Chef de Filière.
                                     </td></tr>
                                     {% endfor %}
                                 </tbody>
@@ -175,7 +175,7 @@
                                     </tr>
                                     {% empty %}
                                     <tr><td colspan="5" class="text-center text-muted p-4">
-                                        <i class="bi bi-calendar-x me-2"></i>Aucune session n'a encore été planifiée pour ce programme.
+                                        <i class="bi bi-calendar-x me-2"></i>Aucune session n'a encore été planifiée pour cette formation.
                                     </td></tr>
                                     {% endfor %}
                                 </tbody>

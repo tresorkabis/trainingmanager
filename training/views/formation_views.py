@@ -2,6 +2,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
+from django.db.models.deletion import ProtectedError
 from django.db.models import Count, Sum
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
@@ -55,7 +56,7 @@ class FormationPermissionMixin:
 class FormationListView(FormationPermissionMixin, ListView):
     # Expose as 'formation_list' for templates that expect that name
     context_object_name = "formation_list"
-    paginate_by = 4
+    paginate_by = 10
     template_name = "training/formations.html"
 
     def get_queryset(self):
@@ -230,7 +231,9 @@ class FormationCreateUpdateView(FormationPermissionMixin, View): # Vue unifiée 
                     formation.save(update_fields=['duree_heures'])
 
             messages.success(request, f"La formation '{formation.nom}' a été {'mise à jour' if pk else 'créée'} avec succès.")
-            return HttpResponseRedirect(reverse_lazy("formation", kwargs={'pk': formation.pk}))
+            if pk is None:
+                return HttpResponseRedirect(reverse_lazy("formation_update", kwargs={"pk": formation.pk}))
+            return HttpResponseRedirect(reverse_lazy("formation", kwargs={"pk": formation.pk}))
         else:
             return self.form_invalid(request, form, formset, formation, mode, titre)
 
@@ -317,7 +320,25 @@ class FormationDeleteView(FormationPermissionMixin, DeleteView):
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx["titre"] = "Supprimer"
+        ctx["has_actions"] = self.object.actions.exists()
         return ctx
+
+    def form_valid(self, form):
+        if self.object.actions.exists():
+            messages.error(
+                self.request,
+                "Cette formation ne peut pas être supprimée car elle est liée à une ou plusieurs actions de formation.",
+            )
+            return HttpResponseRedirect(reverse_lazy("formation", kwargs={"pk": self.object.pk}))
+
+        try:
+            return super().form_valid(form)
+        except ProtectedError:
+            messages.error(
+                self.request,
+                "Cette formation ne peut pas être supprimée car elle est encore utilisée par d'autres éléments.",
+            )
+            return HttpResponseRedirect(reverse_lazy("formation", kwargs={"pk": self.object.pk}))
 
 @method_decorator(login_required, name="dispatch")
 class ModuleCreateView(FormationPermissionMixin, View):
@@ -369,8 +390,13 @@ class ModuleCreateView(FormationPermissionMixin, View):
                 module.ordre = max_ordre + 1
             module.save()
             messages.success(request, f"Module '{module.titre}' créé avec succès.")
+            if request.POST.get("modal_submit") == "1":
+                return redirect("formation_update", pk=module.formation.pk)
             return redirect("formation", pk=module.formation.pk)
         else:
+            if request.POST.get("modal_submit") == "1":
+                messages.error(request, "Le module n'a pas été enregistré. Vérifiez les champs saisis.")
+                return redirect("formation_update", pk=formation.pk)
             ctx = {
                 "form": form,
                 "formation": formation,
@@ -434,7 +460,7 @@ class ModuleFormateursView(FormationPermissionMixin, View):
         module.formateurs.set(formateur_ids)
 
         messages.success(request, f"Les formateurs du module '{module.titre}' ont été mis à jour avec succès.")
-        return redirect("formation", pk=module.formation.pk)
+        return redirect("modules")
 
 
 @method_decorator(login_required, name="dispatch")
@@ -520,6 +546,7 @@ class ModuleUpdateView(FormationPermissionMixin, View):
             "mode": "edit",
             "module": module,
             "link": "modules",
+            "return_to": request.GET.get("return_to"),
         }
         return render(request, self.template_name, ctx)
 
@@ -534,6 +561,8 @@ class ModuleUpdateView(FormationPermissionMixin, View):
         if form.is_valid():
             module = form.save()
             messages.success(request, f"Module '{module.titre}' mis à jour avec succès.")
+            if request.POST.get("return_to") == "formation_update":
+                return redirect("formation_update", pk=module.formation.pk)
             return redirect("formation", pk=module.formation.pk)
         ctx = {
             "form": form,
@@ -542,6 +571,7 @@ class ModuleUpdateView(FormationPermissionMixin, View):
             "mode": "edit",
             "module": module,
             "link": "modules",
+            "return_to": request.POST.get("return_to"),
         }
         return render(request, self.template_name, ctx)
 
@@ -566,4 +596,6 @@ class ModuleDeleteView(FormationPermissionMixin, DeleteView):
 
     def get_success_url(self):
         messages.success(self.request, "Module supprimé avec succès.")
+        if self.request.POST.get("return_to") == "formation_update":
+            return reverse_lazy("formation_update", kwargs={"pk": self.object.formation_id})
         return self.success_url

@@ -7,7 +7,7 @@
 
 {% block content %}
 <div class="page-heading">
-    {% tm_hero title="Supprimer le module" subtitle="Êtes-vous sûr de vouloir supprimer le module " ~ module.titre ~ " ?" icon="bi bi-exclamation-triangle" theme="danger" %}
+    {% tm_hero title="Supprimer le module" subtitle="Êtes-vous sûr de vouloir supprimer ce module ?" icon="bi bi-exclamation-triangle" theme="danger" %}
 
     <section class="section">
         <div class="card tm-detail-card">
@@ -17,11 +17,14 @@
                 <p class="text-muted small">Cette action ne peut pas être annulée.</p>
                 <form method="post" class="mt-4">
                     {% csrf_token %}
+                    {% if request.GET.return_to == "formation_update" %}
+                    <input type="hidden" name="return_to" value="formation_update">
+                    {% endif %}
                     <div class="d-flex gap-2">
                         <button type="submit" class="btn btn-danger">
                             <i class="bi bi-trash me-2"></i>Supprimer
                         </button>
-                        <a href="{% url 'modules' %}" class="btn btn-secondary">Annuler</a>
+                        <a href="{% if request.GET.return_to == 'formation_update' %}{% url 'formation_update' module.formation_id %}{% else %}{% url 'modules' %}{% endif %}" class="btn btn-secondary">Annuler</a>
                     </div>
                 </form>
             </div>

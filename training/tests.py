@@ -1,9 +1,11 @@
+from datetime import date
+
 from django.core.exceptions import ValidationError
 from django.urls import reverse
 from django.test import TestCase, Client
 
 from training.models import Service, Filiere, Formation, Module
-from progress.models import Formateur
+from progress.models import Action, Formateur
 from users.models import User, Profile
 
 
@@ -274,6 +276,22 @@ class FormationViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Django Pro")
 
+    def test_formation_list_paginates_ten_per_page(self):
+        self.client.force_login(self.user)
+        for index in range(10):
+            Formation.objects.create(
+                nom=f"Formation {index}",
+                duree=10,
+                filiere=self.filiere,
+            )
+
+        first_page = self.client.get(reverse("formations"))
+        self.assertEqual(len(first_page.context["formation_list"]), 10)
+        self.assertEqual(first_page.context["paginator"].num_pages, 2)
+
+        second_page = self.client.get(reverse("formations") + "?page=2")
+        self.assertEqual(len(second_page.context["formation_list"]), 1)
+
     def test_formation_create_as_admin(self):
         self.client.force_login(self.user)
                 # The view uses both FormationForm and ModuleFormSet - provide empty formset data
@@ -293,13 +311,113 @@ class FormationViewTests(TestCase):
             "modules-MAX_NUM_FORMS": "1000",
         })
         self.assertEqual(response.status_code, 302)
-        self.assertTrue(Formation.objects.filter(nom="Python Avancé").exists())
+        formation = Formation.objects.get(nom="Python Avancé")
+        self.assertEqual(response.url, reverse("formation_update", kwargs={"pk": formation.pk}))
+
+    def test_formation_create_then_add_module_independently(self):
+        self.client.force_login(self.user)
+        create_page = self.client.get(reverse("formation_create"))
+        self.assertNotContains(create_page, 'id="addModuleModal"')
+
+        response = self.client.post(reverse("formation_create"), {
+            "nom": "Comptabilité",
+            "duree": 12,
+            "type_formation": "qualifiante",
+            "filiere": self.filiere.pk,
+            "cout": 1000,
+            "frais_participation": 500,
+            "frais_jury": 200,
+            "frais_materiels": 300,
+            "modules-TOTAL_FORMS": "0",
+            "modules-INITIAL_FORMS": "0",
+            "modules-MIN_NUM_FORMS": "0",
+            "modules-MAX_NUM_FORMS": "1000",
+        })
+
+        self.assertEqual(response.status_code, 302)
+        formation = Formation.objects.get(nom="Comptabilité")
+        update_url = reverse("formation_update", kwargs={"pk": formation.pk})
+        self.assertEqual(response.url, update_url)
+        self.assertFalse(formation.modules.exists())
+        update_page = self.client.get(update_url)
+        self.assertContains(update_page, 'id="addModuleModal"')
+        self.assertContains(update_page, reverse("module_create", kwargs={"formation_pk": formation.pk}))
+
+        module_response = self.client.post(
+            reverse("module_create", kwargs={"formation_pk": formation.pk}),
+            {
+                "modal_submit": "1",
+                "titre": "Introduction",
+                "description": "",
+                "duree_heures": "6",
+                "ordre": "1",
+            },
+        )
+
+        self.assertEqual(module_response.status_code, 302)
+        self.assertEqual(module_response.url, update_url)
+        formation.refresh_from_db()
+        self.assertTrue(formation.modules.filter(titre="Introduction").exists())
+
+        update_page = self.client.get(update_url)
+        module = formation.modules.get(titre="Introduction")
+        self.assertContains(update_page, "Introduction")
+        self.assertContains(
+            update_page,
+            reverse("module_update", kwargs={"pk": module.pk}) + "?return_to=formation_update",
+        )
+        self.assertContains(
+            update_page,
+            reverse("module_delete", kwargs={"pk": module.pk}) + "?return_to=formation_update",
+        )
+
+        module_update_url = reverse("module_update", kwargs={"pk": module.pk}) + "?return_to=formation_update"
+        module_update_response = self.client.post(module_update_url, {
+            "return_to": "formation_update",
+            "formation": formation.pk,
+            "titre": "Introduction modifiée",
+            "description": "",
+            "duree_heures": "6",
+            "ordre": "1",
+        })
+        self.assertEqual(module_update_response.status_code, 302)
+        self.assertEqual(module_update_response.url, update_url)
+        module.refresh_from_db()
+        self.assertEqual(module.titre, "Introduction modifiée")
+
+        module_delete_url = reverse("module_delete", kwargs={"pk": module.pk}) + "?return_to=formation_update"
+        delete_page = self.client.get(module_delete_url)
+        self.assertContains(delete_page, update_url)
+        delete_response = self.client.post(module_delete_url, {"return_to": "formation_update"})
+        self.assertEqual(delete_response.status_code, 302)
+        self.assertEqual(delete_response.url, update_url)
+        self.assertFalse(Module.objects.filter(pk=module.pk).exists())
 
     def test_formation_detail_as_admin(self):
         self.client.force_login(self.user)
         response = self.client.get(reverse("formation", kwargs={"pk": self.formation.pk}))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Django Pro")
+
+    def test_module_formateurs_redirects_to_module_list(self):
+        self.client.force_login(self.user)
+        module = Module.objects.create(formation=self.formation, titre="Introduction")
+        formateur = Formateur.objects.create(
+            matricule="F002",
+            nom="Doe",
+            postnom="Jane",
+            adresse="Adresse",
+            telephone="+243800000201",
+            email="jane@example.com",
+        )
+
+        response = self.client.post(
+            reverse("module_formateurs", kwargs={"pk": module.pk}),
+            {"formateurs": [formateur.pk]},
+        )
+
+        self.assertRedirects(response, reverse("modules"), fetch_redirect_response=False)
+        self.assertQuerySetEqual(module.formateurs.all(), [formateur], transform=lambda item: item)
 
     def test_formation_update_as_admin(self):
         self.client.force_login(self.user)
@@ -331,6 +449,24 @@ class FormationViewTests(TestCase):
         response = self.client.post(reverse("formation_delete", kwargs={"pk": f.pk}))
         self.assertEqual(response.status_code, 302)
         self.assertFalse(Formation.objects.filter(pk=f.pk).exists())
+
+    def test_formation_delete_is_blocked_when_actions_exist(self):
+        self.client.force_login(self.user)
+        Action.objects.create(
+            description="Session liée",
+            date_debut=date(2026, 1, 1),
+            date_fin=date(2026, 1, 2),
+            formation=self.formation,
+        )
+
+        delete_url = reverse("formation_delete", kwargs={"pk": self.formation.pk})
+        get_response = self.client.get(delete_url)
+        self.assertContains(get_response, "ne peut pas être supprimée")
+
+        post_response = self.client.post(delete_url)
+        self.assertEqual(post_response.status_code, 302)
+        self.assertEqual(post_response.url, reverse("formation", kwargs={"pk": self.formation.pk}))
+        self.assertTrue(Formation.objects.filter(pk=self.formation.pk).exists())
 
     def test_formation_list_uses_legacy_name(self):
         """L'ancien nom 'metiers' doit rediriger vers la même vue."""

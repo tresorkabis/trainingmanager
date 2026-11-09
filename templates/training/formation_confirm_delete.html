@@ -13,12 +13,17 @@
             </div>
             <div class="card-body">
                 <p>Êtes-vous sûr de vouloir supprimer la formation "{{ object.nom }}" (ID: {{ object.pk }}) ?</p>
-                <p class="text-danger">Cette action est irréversible et supprimera également tous les modules et actions de formation liés à cette formation.</p>
+                {% if has_actions %}
+                <p class="text-danger">Cette formation ne peut pas être supprimée car elle est liée à une ou plusieurs actions de formation. Réaffectez ou supprimez d'abord ces actions.</p>
+                <a href="{% url 'formation' object.pk %}" class="btn btn-light-secondary">Retour à la formation</a>
+                {% else %}
+                <p class="text-danger">Cette action est irréversible et supprimera également les modules liés à cette formation.</p>
                 <form method="post">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-danger">Confirmer la suppression</button>
                     <a href="{% url 'formations' %}" class="btn btn-light-secondary">Annuler</a>
                 </form>
+                {% endif %}
             </div>
         </div>
     </section>

@@ -70,7 +70,7 @@ ModuleFormSet = inlineformset_factory(
     Formation,
     Module,
     form=ModuleForm,
-    extra=1,
+    extra=0,
     can_delete=True,
     fields=["titre", "description", "duree_heures", "ordre"]
 )

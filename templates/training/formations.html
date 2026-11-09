@@ -22,15 +22,15 @@
 
 {% block content %}
 <div class="page-heading">
-    {% tm_hero title="Formations" subtitle="Gérez le catalogue des programmes pédagogiques et leurs modules d'enseignement." icon="bi bi-journal-text" actions=hero_actions stats=hero_stats theme="primary" %}
+    {% tm_hero title="Formations" subtitle="Gérez le catalogue des formations et leurs modules d'enseignement." icon="bi bi-journal-text" actions=hero_actions stats=hero_stats theme="primary" %}
 
     <section class="section">
         <div class="card tm-listing-card">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <h4 class="card-title mb-0">Programmes disponibles</h4>
+                <h4 class="card-title mb-0">Formations disponibles</h4>
             {% if request.user.is_superuser or request.user.profile and request.user.profile.name == "Manager" or request.user.profile and request.user.profile.name == "Chef de filière" or request.user.profile and request.user.profile.name == "Chef de service" %}
             <a href="{% url 'formation_create' %}" class="btn btn-primary btn-sm">
-                <i class="bi bi-plus-circle me-2"></i>Nouveau programme
+                <i class="bi bi-plus-circle me-2"></i>Nouvelle formation
             </a>
             {% endif %}
             </div>
@@ -143,7 +143,7 @@
                             {% endfor %}
                             {% else %}
                             <tr id="noResultsRow">
-                                <td colspan="6" class="text-center p-5 text-muted">Aucun programme enregistré.</td>
+                                <td colspan="6" class="text-center p-5 text-muted">Aucune formation enregistrée.</td>
                             </tr>
                             {% endif %}
                         </tbody>

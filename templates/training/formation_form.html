@@ -9,26 +9,7 @@
 {% block style %}
 <link rel="stylesheet" href="{% static 'assets/css/training-manager.css' %}">
 <style>
-    /* Styles spécifiques aux formsets */
-    .module-formset-row {
-        background-color: #f8f9fa;
-        border: 1px solid #e9ecef;
-        border-radius: 0.5rem;
-        padding: 1rem;
-        margin-bottom: 1rem;
-        position: relative;
-    }
-    .delete-row-button {
-        cursor: pointer;
-        color: #dc3545;
-        font-size: 1.2rem;
-        position: absolute;
-        top: 0.5rem;
-        right: 0.5rem;
-        background: none;
-        border: none;
-    }
-    .input-sm-width { max-width: 150px; }
+    .module-actions { white-space: nowrap; }
 </style>
 {% endblock style %}
 
@@ -39,6 +20,7 @@
     <section class="section">
         <form method="post" id="formation_form">
             {% csrf_token %}
+            {% if mode != "edit" %}{{ formset.management_form }}{% endif %}
             {% if formset_errors %}
                 <div class="alert alert-danger alert-dismissible fade show mb-4">
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
@@ -70,7 +52,7 @@
                 </div>
             {% endif %}
             <div class="row g-4">
-                <div class="col-12 col-lg-6">
+                <div class="col-12 {% if mode == 'edit' %}col-lg-6{% endif %}">
                     <div class="card tm-detail-card">
                         <div class="card-header border-bottom mb-3">
                             <h4 class="card-title mb-0">Informations générales</h4>
@@ -135,6 +117,7 @@
                     </div>
                 </div>
 
+                {% if mode == "edit" %}
                 <div class="col-12 col-lg-6">
                     <div class="card tm-detail-card">
                         <div class="card-header border-bottom mb-3">
@@ -144,105 +127,100 @@
                             <div id="module-formset-container">
                                 {{ formset.management_form }}
                                 {% for module_form in formset %}
-                                    <div class="module-formset-row existing-module">
-                                        {% for hidden_field in module_form.hidden_fields %}{{ hidden_field }}{% endfor %}
-                                        <div class="row g-2">
-                                            <div class="col-md-8">
-                                                <div class="form-group mb-2">
-                                                    <label class="form-label small fw-bold">Titre du module</label>
-                                                    {{ module_form.titre|add_class:"form-control form-control-sm" }}
-                                                </div>
-                                            </div>
-                                            <div class="col-md-3">
-                                                <div class="form-group mb-2">
-                                                    <label class="form-label small fw-bold">Heures</label>
-                                                    {{ module_form.duree_heures|add_class:"form-control form-control-sm" }}
-                                                </div>
-                                            </div>
-                                            <div class="col-md-2">
-                                                <div class="form-group mb-2">
-                                                    <label class="form-label small fw-bold">Ordre</label>
-                                                    {{ module_form.ordre|add_class:"form-control form-control-sm" }}
-                                                </div>
-                                            </div>
-                                            <div class="col-md-1 d-flex align-items-end">
-                                                <button type="button" class="btn btn-sm btn-outline-danger w-100 remove-module-btn" title="Supprimer ce module">
-                                                    <i class="bi bi-trash"></i>
-                                                </button>
-                                            </div>
-                                            {% if module_form.instance.pk %}
-                                            <div class="col-12 mt-2">
-                                                <div class="form-check">
-                                                    {{ module_form.DELETE|add_class:"form-check-input" }}
-                                                    <label class="form-check-label small text-danger">Supprimer ce module</label>
-                                                </div>
-                                            </div>
-                                            {% endif %}
-                                        </div>
-                                    </div>
+                                    {% for hidden_field in module_form.hidden_fields %}{{ hidden_field }}{% endfor %}
+                                    {{ module_form.titre.as_hidden }}
+                                    {{ module_form.description.as_hidden }}
+                                    {{ module_form.duree_heures.as_hidden }}
+                                    {{ module_form.ordre.as_hidden }}
                                 {% endfor %}
                             </div>
 
-                            <!-- Bouton d'ajout simple -->
-                            <button type="button" id="add-module-button" class="btn btn-success w-100 mb-3">
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle mb-3">
+                                    <thead>
+                                        <tr>
+                                            <th>Module</th>
+                                            <th>Durée</th>
+                                            <th>Ordre</th>
+                                            <th class="text-end">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for module_form in formset %}
+                                        <tr>
+                                            <td>{{ module_form.instance.titre }}</td>
+                                            <td>{{ module_form.instance.duree_heures }} h</td>
+                                            <td>{{ module_form.instance.ordre }}</td>
+                                            <td class="text-end module-actions">
+                                                <a href="{% url 'module_update' module_form.instance.pk %}?return_to=formation_update" class="btn btn-sm btn-outline-primary" title="Modifier le module" aria-label="Modifier {{ module_form.instance.titre }}">
+                                                    <i class="bi bi-pencil-square"></i>
+                                                </a>
+                                                <a href="{% url 'module_delete' module_form.instance.pk %}?return_to=formation_update" class="btn btn-sm btn-outline-danger" title="Supprimer le module" aria-label="Supprimer {{ module_form.instance.titre }}">
+                                                    <i class="bi bi-trash"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        {% empty %}
+                                        <tr>
+                                            <td colspan="4" class="text-center text-muted py-4">Aucun module pour cette formation.</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <button type="button" class="btn btn-success w-100" data-bs-toggle="modal" data-bs-target="#addModuleModal">
                                 <i class="bi bi-plus-lg me-2"></i>Ajouter un module
                             </button>
-
-                            <hr class="my-4">
-
-                            <!-- Saisie rapide multi-modules -->
-                            <div class="card bg-light border-0">
-                                <div class="card-body">
-                                    <h6 class="card-title mb-3">
-                                        <i class="bi bi-lightning-charge me-2 text-warning"></i>Saisie rapide de plusieurs modules
-                                    </h6>
-                                    <p class="small text-muted mb-3">Saisissez un module par ligne au format : <code>Titre du module | Heures | Ordre</code><br>
-                                    Exemple : <code>Introduction à la comptabilité | 20 | 1</code></p>
-                                    <textarea id="quick-modules-input" class="form-control form-control-sm" rows="4" placeholder="Module 1 | 10 | 1&#10;Module 2 | 15 | 2&#10;Module 3 | 20 | 3"></textarea>
-                                    <button type="button" id="import-quick-modules" class="btn btn-outline-primary btn-sm mt-3 w-100">
-                                        <i class="bi bi-download me-2"></i>Importer depuis la saisie rapide
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- Template caché pour les nouveaux modules (évite les conflits avec les rows existants) -->
-                            <div id="module-template-row" style="display: none;">
-                                <div class="module-formset-row">
-                                    <input type="hidden" name="form-__INDEX__-id" id="id_form-__INDEX__-id">
-                                    <input type="hidden" name="form-__INDEX__-formation" id="id_form-__INDEX__-formation">
-                                    <input type="hidden" name="form-__INDEX__-DELETE" id="id_form-__INDEX__-DELETE">
-                                    <div class="row g-2">
-                                        <div class="col-md-8">
-                                            <div class="form-group mb-2">
-                                                <label class="form-label small fw-bold">Titre du module</label>
-                                                <input type="text" name="form-__INDEX__-titre" id="id_form-__INDEX__-titre" class="form-control form-control-sm" required>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-3">
-                                            <div class="form-group mb-2">
-                                                <label class="form-label small fw-bold">Heures</label>
-                                                <input type="number" name="form-__INDEX__-duree_heures" id="id_form-__INDEX__-duree_heures" class="form-control form-control-sm" value="0" min="0" required>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-2">
-                                            <div class="form-group mb-2">
-                                                <label class="form-label small fw-bold">Ordre</label>
-                                                <input type="number" name="form-__INDEX__-ordre" id="id_form-__INDEX__-ordre" class="form-control form-control-sm" value="1" min="1" required>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-1 d-flex align-items-end">
-                                            <button type="button" class="btn btn-sm btn-outline-danger w-100 remove-module-btn" title="Supprimer ce module">
-                                                <i class="bi bi-trash"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
+                {% endif %}
             </div>
         </form>
+
+        {% if mode == "edit" %}
+        <div class="modal fade" id="addModuleModal" tabindex="-1" aria-labelledby="addModuleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <form method="post" action="{% url 'module_create' object.pk %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="modal_submit" value="1">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="addModuleModalLabel">Ajouter un module</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label for="module-title" class="form-label">Titre *</label>
+                                <input type="text" class="form-control" id="module-title" name="titre" maxlength="200" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="module-description" class="form-label">Description</label>
+                                <textarea class="form-control" id="module-description" name="description" rows="3"></textarea>
+                            </div>
+                            <div class="row g-3">
+                                <div class="col-sm-6">
+                                    <label for="module-duration" class="form-label">Durée (heures) *</label>
+                                    <input type="number" class="form-control" id="module-duration" name="duree_heures" min="0" value="0" required>
+                                </div>
+                                <div class="col-sm-6">
+                                    <label for="module-order" class="form-label">Ordre *</label>
+                                    <input type="number" class="form-control" id="module-order" name="ordre" min="1" value="{{ object.modules.count|add:1 }}" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-light-secondary" data-bs-dismiss="modal">Annuler</button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-lg me-2"></i>Enregistrer le module
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endif %}
     </section>
 </div>
 {% endblock content %}
@@ -257,18 +235,6 @@
             }
             $('.select2-enabled').each(function() { initializeSelect2(this); });
 
-            var totalForms = $('#id_form-TOTAL_FORMS');
-
-            // Calculer le prochain ordre disponible
-            function getNextOrdre() {
-                var max = 0;
-                $('.module-formset-row').each(function() {
-                    var val = parseInt($(this).find('input[name$="-ordre"]').val()) || 0;
-                    if (val > max) max = val;
-                });
-                return max + 1;
-            }
-
             // Avant l'envoi du formulaire, s'assurer que les Select2 multiples
             // envoient bien une liste vide quand rien n'est sélectionné
             $('#formation_form').on('submit', function() {
@@ -280,85 +246,11 @@
                 });
             });
 
-            // Fonction helper : créer une nouvelle ligne de module à partir du template caché
-            function createModuleRow(index, titre, heures, ordre) {
-                var $tpl = $('#module-template-row').children().first().clone();
-                var prefix = 'form-' + index + '-';
-                var idPrefix = 'id_form-' + index + '-';
-
-                // Remplacer __INDEX__ dans les noms et ids
-                $tpl.find(':input').each(function() {
-                    var $el = $(this);
-                    var name = $el.attr('name');
-                    if (name) {
-                        name = name.replace('__INDEX__', index);
-                        $el.attr('name', name);
-                    }
-                    var id = $el.attr('id');
-                    if (id) {
-                        id = id.replace('__INDEX__', index);
-                        $el.attr('id', id);
-                    }
-
-                    // Remplir les valeurs
-                    if ($el.is('input[type="text"]') && name.indexOf('-titre') !== -1) {
-                        $el.val(titre || '');
-                    } else if ($el.is('input[type="number"]') && name.indexOf('-duree_heures') !== -1) {
-                        $el.val(heures || 0);
-                    } else if ($el.is('input[type="number"]') && name.indexOf('-ordre') !== -1) {
-                        $el.val(ordre || index + 1);
-                    } else if ($el.is('input[type="hidden"]') && name.indexOf('-DELETE') !== -1) {
-                        $el.val('false');
-                    } else if ($el.is('input[type="hidden"]') && name.indexOf('-id') !== -1) {
-                        $el.val(''); // pas d'ID pour les nouveaux modules
-                    } else if ($el.is('input[type="hidden"]') && name.indexOf('-formation') !== -1) {
-                        $el.val(''); // sera rempli par Django si nécessaire
-                    }
-                });
-
-                return $tpl;
-            }
-
-            // Bouton "Ajouter un module"
-            $('#add-module-button').click(function() {
-                var currentForms = parseInt(totalForms.val());
-                var nextOrdre = getNextOrdre();
-                var $newRow = createModuleRow(currentForms, '', 0, nextOrdre);
-                $('#module-formset-container').append($newRow);
-                totalForms.val(currentForms + 1);
-            });
-
-            // Bouton "Supprimer" sur chaque module
+            // Marquer les modules existants pour suppression sans retirer leurs champs du formset.
             $(document).on('click', '.remove-module-btn', function() {
-                $(this).closest('.module-formset-row').remove();
-            });
-
-            // Importer depuis la saisie rapide
-            $('#import-quick-modules').click(function() {
-                var textarea = $('#quick-modules-input');
-                var lines = textarea.val().trim().split('\n').filter(function(l) { return l.trim() !== ''; });
-                if (lines.length === 0) return;
-
-                var currentForms = parseInt(totalForms.val());
-                var imported = 0;
-
-                lines.forEach(function(line) {
-                    var parts = line.split('|').map(function(p) { return p.trim(); });
-                    if (parts.length < 1 || parts[0] === '') return;
-
-                    var titre = parts[0];
-                    var heures = parts[1] ? parseInt(parts[1]) || 0 : 0;
-                    var ordre = parts[2] ? parseInt(parts[2]) || 0 : getNextOrdre();
-
-                    var $newRow = createModuleRow(currentForms, titre, heures, ordre);
-                    $('#module-formset-container').append($newRow);
-                    totalForms.val(currentForms + 1);
-                    currentForms++;
-                    imported++;
-                });
-
-                textarea.val('');
-                alert(imported + ' module(s) importé(s) avec succès.');
+                var row = $(this).closest('.module-formset-row');
+                row.find('input[name$="-DELETE"]').prop('checked', true);
+                row.addClass('d-none');
             });
         });
     </script>

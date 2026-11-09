@@ -37,6 +37,9 @@
             <div class="card-body">
                 <form method="post">
                     {% csrf_token %}
+                    {% if return_to == "formation_update" %}
+                    <input type="hidden" name="return_to" value="formation_update">
+                    {% endif %}
 
                     <div class="row g-3">
                         {% if mode == "edit" or mode == "select" %}
@@ -91,7 +94,7 @@
 
                         <div class="col-12 mt-4">
                             <div class="d-flex justify-content-between">
-                                <a href="{% if formation %}{% url 'formation' formation.pk %}{% else %}{% url 'modules' %}{% endif %}" class="btn btn-light-secondary">
+                                <a href="{% if return_to == 'formation_update' %}{% url 'formation_update' formation.pk %}{% elif formation %}{% url 'formation' formation.pk %}{% else %}{% url 'modules' %}{% endif %}" class="btn btn-light-secondary">
                                     <i class="bi bi-arrow-left me-2"></i>Retour
                                 </a>
                                 <button type="submit" class="btn btn-primary">
