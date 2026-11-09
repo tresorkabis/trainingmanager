@@ -316,6 +316,19 @@ class ModuleProgressCreateViewTests(TestCase):
             [self.progression.pk],
         )
         self.assertContains(response, "Toutes les actions")
+        self.assertContains(response, reverse("module_progress_delete", args=[self.progression.pk]))
+
+    def test_module_progress_can_be_deleted_from_list(self):
+        delete_url = reverse("module_progress_delete", args=[self.progression.pk])
+
+        confirmation_response = self.client.get(delete_url)
+        self.assertEqual(confirmation_response.status_code, 200)
+        self.assertContains(confirmation_response, "Confirmer la suppression")
+
+        response = self.client.post(delete_url)
+
+        self.assertRedirects(response, reverse("module_progressions"), fetch_redirect_response=False)
+        self.assertFalse(ModuleProgress.objects.filter(pk=self.progression.pk).exists())
 
 
 class ActionDetailSessionDateTests(TestCase):
@@ -401,6 +414,17 @@ class ActionDetailSessionDateTests(TestCase):
             detail_response.context["progression_chart_data"]["actual"],
             [{"x": "2026-06-11", "y": 0}],
         )
+
+    def test_action_delete_with_module_progressions_shows_warning(self):
+        response = self.client.post(
+            reverse("action_delete", kwargs={"pk": self.action.pk}),
+            follow=True,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "liée à des progressions de module")
+        self.assertTrue(Action.objects.filter(pk=self.action.pk).exists())
+        self.assertTrue(ModuleProgress.objects.filter(pk=self.progression.pk).exists())
 
 
 class SessionProgressModelTests(TestCase):

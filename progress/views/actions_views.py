@@ -5,6 +5,7 @@ from datetime import date
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.contrib import messages
+from django.db.models.deletion import ProtectedError
 from django.db.models import Count, Min, Max
 from django.db import transaction
 from django.http import HttpResponseRedirect
@@ -575,6 +576,17 @@ class ActionDeleteView(ActionPermissionMixin, DeleteView):
     model = Action
     template_name = "progress/action_confirm_delete.html"
     success_url = reverse_lazy("actions")
+
+    def form_valid(self, form):
+        try:
+            return super().form_valid(form)
+        except ProtectedError:
+            messages.warning(
+                self.request,
+                "Cette action ne peut pas être supprimée car elle est liée à des progressions de module. "
+                "Supprimez d'abord les séances et progressions associées, puis réessayez.",
+            )
+            return HttpResponseRedirect(self.success_url)
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
