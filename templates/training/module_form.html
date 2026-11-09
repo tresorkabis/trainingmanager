@@ -39,6 +39,18 @@
                     {% csrf_token %}
 
                     <div class="row g-3">
+                        {% if mode == "edit" or mode == "select" %}
+                        <div class="col-12">
+                            <div class="form-group mb-3">
+                                <label for="{{ form.formation.id_for_label }}" class="form-label fw-bold">Formation *</label>
+                                {{ form.formation|add_class:"form-select form-select-lg" }}
+                                {% if form.formation.errors %}
+                                <div class="invalid-feedback d-block">{{ form.formation.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endif %}
+
                         <div class="col-12">
                             <div class="form-group mb-3">
                                 <label for="{{ form.titre.id_for_label }}" class="form-label fw-bold">Titre du module *</label>
@@ -79,7 +91,7 @@
 
                         <div class="col-12 mt-4">
                             <div class="d-flex justify-content-between">
-                                <a href="{% url 'formation' formation.pk %}" class="btn btn-light-secondary">
+                                <a href="{% if formation %}{% url 'formation' formation.pk %}{% else %}{% url 'modules' %}{% endif %}" class="btn btn-light-secondary">
                                     <i class="bi bi-arrow-left me-2"></i>Retour
                                 </a>
                                 <button type="submit" class="btn btn-primary">

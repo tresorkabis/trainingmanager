@@ -14,7 +14,7 @@ from django.shortcuts import render, redirect
 
 from training.models import Filiere, Formation, Module
 from progress.models import Formateur, Action, ModuleSubject # Import ModuleSubject
-from training.forms import FormationForm, ModuleFormSet, ModuleSubjectFormSet # Import ModuleSubjectFormSet
+from training.forms import FormationForm, ModuleForm, ModuleFormSet, ModuleSubjectFormSet # Import ModuleSubjectFormSet
 
 
 class FormationPermissionMixin:
@@ -324,47 +324,58 @@ class ModuleCreateView(FormationPermissionMixin, View):
     """Vue pour créer un module pour une formation spécifique."""
     template_name = "training/module_form.html"
 
-    def get(self, request, formation_pk):
+    def get(self, request, formation_pk=None):
         self.enforce_manage_permission()
-        formation = get_object_or_404(Formation, pk=formation_pk)
         allowed_formations = self.get_formation_queryset()
-        if not allowed_formations.filter(pk=formation.pk).exists():
-            raise PermissionDenied("Vous n'avez pas la permission de gérer cette formation.")
-
+        formation = None
+        if formation_pk is not None:
+            formation = get_object_or_404(Formation, pk=formation_pk)
+            if not allowed_formations.filter(pk=formation.pk).exists():
+                raise PermissionDenied("Vous n'avez pas la permission de gérer cette formation.")
         form = ModuleForm()
+        if formation is None:
+            form.fields["formation"].queryset = allowed_formations
+        else:
+            form.fields.pop("formation")
         ctx = {
             "form": form,
             "formation": formation,
-            "titre": f"Nouveau module pour {formation.nom}",
-            "mode": "new",
+            "titre": f"Nouveau module pour {formation.nom}" if formation else "Nouveau module",
+            "mode": "new" if formation else "select",
             "link": "modules",
         }
         return render(request, self.template_name, ctx)
 
-    def post(self, request, formation_pk):
+    def post(self, request, formation_pk=None):
         self.enforce_manage_permission()
-        formation = get_object_or_404(Formation, pk=formation_pk)
         allowed_formations = self.get_formation_queryset()
-        if not allowed_formations.filter(pk=formation.pk).exists():
-            raise PermissionDenied("Vous n'avez pas la permission de gérer cette formation.")
-
+        formation = None
+        if formation_pk is not None:
+            formation = get_object_or_404(Formation, pk=formation_pk)
+            if not allowed_formations.filter(pk=formation.pk).exists():
+                raise PermissionDenied("Vous n'avez pas la permission de gérer cette formation.")
         form = ModuleForm(request.POST)
+        if formation is None:
+            form.fields["formation"].queryset = allowed_formations
+        else:
+            form.fields.pop("formation")
         if form.is_valid():
             module = form.save(commit=False)
-            module.formation = formation
+            if formation is not None:
+                module.formation = formation
             # Si l'ordre n'est pas spécifié, utiliser le prochain ordre disponible
             if not module.ordre:
-                max_ordre = Module.objects.filter(formation=formation).aggregate(models.Max('ordre'))['ordre__max'] or 0
+                max_ordre = Module.objects.filter(formation=module.formation).aggregate(models.Max('ordre'))['ordre__max'] or 0
                 module.ordre = max_ordre + 1
             module.save()
             messages.success(request, f"Module '{module.titre}' créé avec succès.")
-            return redirect("formation", pk=formation.pk)
+            return redirect("formation", pk=module.formation.pk)
         else:
             ctx = {
                 "form": form,
                 "formation": formation,
-                "titre": f"Nouveau module pour {formation.nom}",
-                "mode": "new",
+                "titre": f"Nouveau module pour {formation.nom}" if formation else "Nouveau module",
+                "mode": "new" if formation else "select",
                 "link": "modules",
             }
             return render(request, self.template_name, ctx)
@@ -438,15 +449,121 @@ class ModuleListView(FormationPermissionMixin, ListView):
         queryset = Module.objects.all().select_related("formation", "formation__filiere").prefetch_related("formateurs").order_by("formation__nom", "ordre")
         user = self.request.user
         if user.is_superuser or (user.profile and user.profile.name == "Manager"):
-            return queryset
-        if user.profile and user.profile.name == "Chef de filière" and user.filiere:
-            return queryset.filter(formation__filiere=user.filiere)
-        if user.profile and user.profile.name == "Chef de service" and user.service:
-            return queryset.filter(formation__filiere__service=user.service)
-        return Module.objects.none()
+            pass  # will apply filters below
+        elif user.profile and user.profile.name == "Chef de filière" and user.filiere:
+            queryset = queryset.filter(formation__filiere=user.filiere)
+        elif user.profile and user.profile.name == "Chef de service" and user.service:
+            queryset = queryset.filter(formation__filiere__service=user.service)
+        else:
+            return Module.objects.none()
+
+        # --- Filtres et recherche ---
+        q = self.request.GET.get('q', '').strip()
+        if q:
+            queryset = queryset.filter(
+                Q(nom__icontains=q) |
+                Q(description__icontains=q) |
+                Q(formation__nom__icontains=q) |
+                Q(formation__filiere__nom__icontains=q)
+            )
+
+        type_f = self.request.GET.get('type_formation', '').strip()
+        if type_f:
+            # Note: Module doesn't have type_formation, filtering by formation type
+            queryset = queryset.filter(formation__type_formation=type_f)
+
+        filiere_id = self.request.GET.get('filiere', '').strip()
+        if filiere_id:
+            queryset = queryset.filter(formation__filiere_id=filiere_id)
+
+        return queryset
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx["titre"] = "Gestion des modules"
         ctx["link"] = "modules"
+        # Filtres de recherche
+        ctx["query"] = self.request.GET.get('q', '')
+        ctx["type_f"] = self.request.GET.get('type_formation', '')
+        ctx["filiere_id"] = self.request.GET.get('filiere', '')
+        # Ajout des filières pour le filtre
+        ctx["filieres"] = Filiere.objects.all()
+        user = self.request.user
+        can_manage = user.is_superuser or (
+            user.profile and user.profile.name in ["Manager", "Chef de filière", "Chef de service"]
+        )
+        ctx["hero_actions"] = [
+            {
+                "label": "Ajouter un module",
+                "url": reverse_lazy("module_create_select"),
+                "icon": "bi bi-plus-lg",
+            }
+        ] if can_manage else []
         return ctx
+
+@method_decorator(login_required, name="dispatch")
+class ModuleUpdateView(FormationPermissionMixin, View):
+    template_name = "training/module_form.html"
+
+    def get(self, request, pk):
+        self.enforce_manage_permission()
+        module = get_object_or_404(Module, pk=pk)
+        allowed_formations = self.get_formation_queryset()
+        if not allowed_formations.filter(pk=module.formation.pk).exists():
+            raise PermissionDenied("Vous n'avez pas la permission de modifier ce module.")
+        form = ModuleForm(instance=module)
+        form.fields["formation"].queryset = allowed_formations
+        ctx = {
+            "form": form,
+            "formation": module.formation,
+            "titre": f"Modifier le module : {module.titre}",
+            "mode": "edit",
+            "module": module,
+            "link": "modules",
+        }
+        return render(request, self.template_name, ctx)
+
+    def post(self, request, pk):
+        self.enforce_manage_permission()
+        module = get_object_or_404(Module, pk=pk)
+        allowed_formations = self.get_formation_queryset()
+        if not allowed_formations.filter(pk=module.formation.pk).exists():
+            raise PermissionDenied("Vous n'avez pas la permission de modifier ce module.")
+        form = ModuleForm(request.POST, instance=module)
+        form.fields["formation"].queryset = allowed_formations
+        if form.is_valid():
+            module = form.save()
+            messages.success(request, f"Module '{module.titre}' mis à jour avec succès.")
+            return redirect("formation", pk=module.formation.pk)
+        ctx = {
+            "form": form,
+            "formation": module.formation,
+            "titre": f"Modifier le module : {module.titre}",
+            "mode": "edit",
+            "module": module,
+            "link": "modules",
+        }
+        return render(request, self.template_name, ctx)
+
+@method_decorator(login_required, name="dispatch")
+class ModuleDeleteView(FormationPermissionMixin, DeleteView):
+    """Vue pour supprimer un module."""
+    model = Module
+    template_name = "training/module_confirm_delete.html"
+    context_object_name = "module"
+    success_url = reverse_lazy("modules")
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        user = self.request.user
+        if user.is_superuser or (user.profile and user.profile.name == "Manager"):
+            return queryset
+        if user.profile and user.profile.name == "Chef de filière" and user.filiere:
+            return queryset.filter(formation__filiere=user.filiere)
+        if user.profile and user.profile.name == "Chef de service" and user.service:
+            return queryset.filter(formation__filiere__service=user.service)
+        return queryset.none()
+
+    def get_success_url(self):
+        messages.success(self.request, "Module supprimé avec succès.")
+        return self.success_url

@@ -42,9 +42,15 @@ class SafeModelMultipleChoiceField(forms.ModelMultipleChoiceField):
         return super().to_python(value)
 
 class ModuleForm(forms.ModelForm):
+    formation = forms.ModelChoiceField(
+        queryset=Formation.objects.none(),
+        label="Formation",
+        widget=Select2Widget(attrs={'data-width': '100%', 'class': 'form-select'}),
+    )
+
     class Meta:
         model = Module
-        fields = ["titre", "description", "duree_heures", "ordre"]
+        fields = ["formation", "titre", "description", "duree_heures", "ordre"]
         widgets = {
             'titre': forms.TextInput(attrs={'class': 'form-control'}),
             'description': forms.Textarea(attrs={'rows': 2, 'class': 'form-control'}),
