@@ -157,7 +157,10 @@
     // -------------------------------------------------------
     if (chartActionsStatus) {
         var statusData = getJsonData("actions-status-chart-data");
-        if (statusData && !isEmptyData(statusData)) {
+        var hasStatusData = statusData && statusData.series && statusData.series.some(function (value) {
+            return value > 0;
+        });
+        if (hasStatusData) {
             var statusChart = new ApexCharts(chartActionsStatus, {
                 chart: {
                     type: "donut",
