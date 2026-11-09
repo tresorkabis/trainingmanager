@@ -419,6 +419,28 @@ class FormationViewTests(TestCase):
         self.assertRedirects(response, reverse("modules"), fetch_redirect_response=False)
         self.assertQuerySetEqual(module.formateurs.all(), [formateur], transform=lambda item: item)
 
+    def test_module_subjects_redirects_to_module_list_after_save(self):
+        self.client.force_login(self.user)
+        module = Module.objects.create(formation=self.formation, titre="Introduction")
+
+        response = self.client.post(
+            reverse("module_subjects_manage", kwargs={"pk": module.pk}),
+            {
+                "subjects-TOTAL_FORMS": "1",
+                "subjects-INITIAL_FORMS": "0",
+                "subjects-MIN_NUM_FORMS": "0",
+                "subjects-MAX_NUM_FORMS": "1000",
+                "subjects-0-titre": "Bases",
+                "subjects-0-nombre_seances": "2",
+                "subjects-0-ordre": "1",
+                "subjects-0-description": "Notions fondamentales",
+                "hours-per-session": "2",
+            },
+        )
+
+        self.assertRedirects(response, reverse("modules"), fetch_redirect_response=False)
+        self.assertTrue(module.subjects.filter(titre="Bases").exists())
+
     def test_module_update_redirects_to_module_list(self):
         self.client.force_login(self.user)
         module = Module.objects.create(formation=self.formation, titre="À modifier")

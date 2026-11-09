@@ -249,34 +249,25 @@
         if (!chartElement || typeof ApexCharts === 'undefined') return;
 
         const data = JSON.parse(document.getElementById('progression-chart-data').textContent);
-        const dates = Array.from(new Set([
-            ...data.planned.map(point => point.x),
-            ...data.actual.map(point => point.x),
-        ])).sort();
-        const dateLabel = value => {
-            const parts = String(value).split('-');
-            return parts.length === 3 ? parts[2] + '/' + parts[1] + '/' + parts[0] : value;
-        };
+        const toDatePoints = points => points.map(point => ({
+            x: Date.parse(point.x + 'T12:00:00Z'),
+            y: point.y,
+        }));
         const singleSubject = data.subjects.length === 1;
-        const valuesForDates = points => dates.map(date => {
-            const pointsForDate = points.filter(point => point.x === date);
-            return pointsForDate.length ? pointsForDate[pointsForDate.length - 1].y : null;
-        });
 
         new ApexCharts(chartElement, {
             series: [
-                { name: 'Prévu', data: valuesForDates(data.planned) },
-                { name: 'Réel', data: valuesForDates(data.actual) },
+                { name: 'Prévu', data: toDatePoints(data.planned) },
+                { name: 'Réel', data: toDatePoints(data.actual) },
             ],
             chart: { type: 'line', height: 320, toolbar: { show: false } },
             colors: ['#435ebe', '#198754'],
             stroke: { curve: 'straight', width: 3 },
             markers: { size: 6, hover: { size: 8 } },
             xaxis: {
-                type: 'category',
-                categories: dates,
+                type: 'datetime',
                 title: { text: 'Dates des séances' },
-                labels: { formatter: dateLabel, rotate: -35, hideOverlappingLabels: true },
+                labels: { datetimeUTC: true, format: 'dd/MM/yyyy', rotate: -35, hideOverlappingLabels: true },
             },
             yaxis: {
                 min: singleSubject ? -0.5 : 0,
@@ -291,7 +282,7 @@
             },
             legend: { position: 'top' },
             dataLabels: { enabled: false },
-            tooltip: { x: { formatter: dateLabel }, shared: false },
+            tooltip: { x: { format: 'dd/MM/yyyy' }, shared: false },
             noData: { text: 'Aucun sujet planifié ou réalisé' },
         }).render();
     });

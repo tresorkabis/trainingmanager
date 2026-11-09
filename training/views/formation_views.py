@@ -294,7 +294,7 @@ class ModuleSubjectManageView(FormationPermissionMixin, View):
                     formation.save(update_fields=['duree_heures'])
                 
             messages.success(request, f"Les sujets du module '{module.titre}' ont été mis à jour (Durée : {module.duree_heures}h).")
-            return HttpResponseRedirect(reverse_lazy("formation", kwargs={'pk': module.formation.pk}))
+            return HttpResponseRedirect(reverse_lazy("modules"))
         
         ctx = {
             "module": module,
