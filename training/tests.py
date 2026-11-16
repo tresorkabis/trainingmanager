@@ -438,7 +438,7 @@ class FormationViewTests(TestCase):
             },
         )
 
-        self.assertRedirects(response, reverse("module_update", kwargs={"pk": module.pk}), fetch_redirect_response=False)
+        self.assertRedirects(response, reverse("module", kwargs={"pk": module.pk}), fetch_redirect_response=False)
         self.assertTrue(module.subjects.filter(titre="Bases").exists())
 
     def test_module_update_redirects_to_module_list(self):
