@@ -91,18 +91,40 @@ class ServiceDetailView(ServicePermissionMixin, DetailView):
 class ServiceCreateUpdateView(ServicePermissionMixin, View): # Nouvelle vue pour créer/modifier
     template_name = "training/service_form.html" # Nouveau template
 
+    def _get_hero_context(self, service=None):
+        if service:
+            hero_actions = [
+                {'label': 'Retour à la liste', 'url': reverse_lazy('services'), 'icon': 'bi bi-arrow-left', 'class': 'btn-light-secondary'},
+                {'label': 'Voir le détail', 'url': reverse_lazy('service', kwargs={'pk': service.pk}), 'icon': 'bi bi-eye'},
+            ]
+            hero_stats = [
+                {'label': 'Filières', 'value': service.filieres.count()},
+                {'label': 'Statut', 'value': "Actif" if service.active else "Inactif"},
+                {'label': 'ID', 'value': f"#SRV-{service.pk}"},
+            ]
+        else:
+            hero_actions = [
+                {'label': 'Retour à la liste', 'url': reverse_lazy('services'), 'icon': 'bi bi-arrow-left', 'class': 'btn-light-secondary'},
+            ]
+            hero_stats = None
+        return {
+            "hero_actions": hero_actions,
+            "hero_stats": hero_stats,
+        }
+
     def get(self, request, pk=None):
         self.enforce_manage_permission()
         service = None
         if pk:
             service = get_object_or_404(Service, pk=pk)
-        
+
         ctx = {
             "titre": "Modifier un service" if pk else "Créer un service",
             "mode": "edit" if pk else "new",
             "object": service,
-            "submitted": {}, # Pour gérer les erreurs de formulaire
+            "submitted": {},
         }
+        ctx.update(self._get_hero_context(service))
         return render(request, self.template_name, ctx)
     
     def post(self, request, pk=None):
@@ -126,10 +148,11 @@ class ServiceCreateUpdateView(ServicePermissionMixin, View): # Nouvelle vue pour
             ctx = {
                 "titre": "Modifier un service" if pk else "Créer un service",
                 "mode": "edit" if pk else "new",
-                "object": service, # Si c'est une modification, l'objet existe
-                "submitted": request.POST, # Repopuler le formulaire avec les données soumises
+                "object": service,
+                "submitted": request.POST,
                 "form_errors": errors,
             }
+            ctx.update(self._get_hero_context(service))
             return render(request, self.template_name, ctx, status=400)
 
         if service: # Mode édition
