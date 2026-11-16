@@ -236,6 +236,24 @@ class SessionProgressForm(forms.ModelForm):
 
 
 
+def clean(self):
+        cleaned_data = super().clean()
+        statut = cleaned_data.get('statut')
+        topics_covered = cleaned_data.get('topics_covered')
+        planned_topics = cleaned_data.get('planned_topics')
+
+        # Règle métier : si le statut est 'PLANIFIEE', le champ 'topics_covered' doit être vide
+        if statut == 'PLANIFIEE' and topics_covered:
+            self.add_error('topics_covered', 'Les sujets couverts doivent être vides pour une séance planifiée.')
+            cleaned_data['topics_covered'] = ''
+
+        # Si le statut est 'REALISEE', vérifier que les sujets couverts ne sont pas vides si des sujets prévus existent
+        if statut == 'REALISEE' and not topics_covered and planned_topics:
+            self.add_error('topics_covered', 'Les sujets prévus sont présents mais aucun sujet couvert n\'a été renseigné.')
+
+        return cleaned_data
+
+
 class JuryPVForm(forms.ModelForm):
     fichier = forms.FileField(
         label="PV du jury (PDF)",
