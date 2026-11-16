@@ -68,7 +68,6 @@ class FormationListView(FormationPermissionMixin, ListView):
         if q:
             queryset = queryset.filter(
                 Q(nom__icontains=q) |
-                Q(description__icontains=q) |
                 Q(filiere__nom__icontains=q)
             )
 
