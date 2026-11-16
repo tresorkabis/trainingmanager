@@ -34,7 +34,7 @@
                                     id="matricule"
                                     class="form-control"
                                     name="matricule"
-                                    value="{% if submitted.matricule %}{{ submitted.matricule }}{% else %}{{ object.matricule|default:'' }}{% endif %}"
+                                    value="{% if submitted.matricule %}{{ submitted.matricule }}{% elif mode == 'new' and matricule_auto %}{{ matricule_auto }}{% else %}{{ object.matricule|default:'' }}{% endif %}"
                                     placeholder="Ex: FM001"
                                     required
                                 >

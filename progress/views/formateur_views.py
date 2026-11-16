@@ -95,7 +95,20 @@ class FormateurCreateUpdateView(FormateurPermissionMixin, View):
         formateur = None
         if pk:
             formateur = get_object_or_404(Formateur, pk=pk)
-        
+            matricule_auto = None
+        else:
+            # Génération automatique du matricule pour la création
+            last_formateur = Formateur.objects.filter(type_formateur='INPP').order_by('-matricule').first()
+            if last_formateur and last_formateur.matricule.startswith('F-'):
+                try:
+                    last_num = int(last_formateur.matricule[2:])
+                    next_num = last_num + 1
+                except (ValueError, IndexError):
+                    next_num = 1
+            else:
+                next_num = 1
+            matricule_auto = f"F-{next_num:03d}"
+
         ctx = {
             "titre": "Modifier" if pk else "Créer",
             "mode": "edit" if pk else "new",
@@ -110,6 +123,7 @@ class FormateurCreateUpdateView(FormateurPermissionMixin, View):
                     {'label': 'Retour', 'url': reverse_lazy('formateurs'), 'icon': 'bi bi-arrow-left'},
                 ],
             },
+            "matricule_auto": matricule_auto,
         }
         return render(request, self.template_name, ctx)
     
