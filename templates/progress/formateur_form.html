@@ -154,23 +154,34 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (!typeSelect || !matriculeInput) return;
 
+    // Matricules automatiques générés côté serveur (prochain disponible par type)
+    const matriculeAutoInpp = "{{ matricule_auto }}";
+    const matriculeAutoPrestataire = "{{ matricule_auto_prestataire }}";
+
     function getPrefix(type) {
         return type === 'PRESTATAIRE' ? 'P-' : 'F-';
+    }
+
+    function getAutoMatricule(type) {
+        return type === 'PRESTATAIRE' ? matriculeAutoPrestataire : matriculeAutoInpp;
     }
 
     function updateMatriculePrefix() {
         const type = typeSelect.value;
         const prefix = getPrefix(type);
+        const autoValue = getAutoMatricule(type);
+        const autoNum = autoValue.replace(prefix, '');
         let value = matriculeInput.value.trim();
 
         if (!value) {
-            matriculeInput.value = prefix;
+            matriculeInput.value = autoValue;
             return;
         }
 
-        // Remplacer le préfixe existant s'il correspond à F- ou P-
+        // Si la valeur actuelle est un matricule généré (préfixe + numéro),
+        // on replace le numéro par celui du type actuel
         if (value.startsWith('F-') || value.startsWith('P-')) {
-            value = prefix + value.substring(2);
+            value = prefix + autoNum;
         } else {
             value = prefix + value;
         }

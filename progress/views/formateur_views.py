@@ -96,24 +96,28 @@ class FormateurCreateUpdateView(FormateurPermissionMixin, View):
         if pk:
             formateur = get_object_or_404(Formateur, pk=pk)
             matricule_auto = None
+            matricule_auto_prestataire = None
         else:
-            # Génération automatique du matricule pour la création
-            last_formateur = Formateur.objects.filter(type_formateur='INPP').order_by('-matricule').first()
-            if last_formateur and last_formateur.matricule.startswith('F-'):
-                try:
-                    last_num = int(last_formateur.matricule[2:])
-                    next_num = last_num + 1
-                except (ValueError, IndexError):
-                    next_num = 1
-            else:
-                next_num = 1
-            matricule_auto = f"F-{next_num:03d}"
+            # Génération automatique du matricule pour chaque type de formateur
+            def _next_matricule(prefix):
+                last = Formateur.objects.filter(matricule__startswith=prefix).order_by('-matricule').first()
+                if last:
+                    try:
+                        return int(last.matricule[len(prefix):]) + 1
+                    except (ValueError, IndexError):
+                        return 1
+                return 1
+
+            next_inpp = _next_matricule('F-')
+            next_prestataire = _next_matricule('P-')
+            matricule_auto = f"F-{next_inpp:03d}"
+            matricule_auto_prestataire = f"P-{next_prestataire:03d}"
 
         ctx = {
             "titre": "Modifier" if pk else "Créer",
             "mode": "edit" if pk else "new",
             "object": formateur,
-            "submitted": {}, # Pour gérer les erreurs de formulaire
+            "submitted": {},
             "hero": {
                 "title": f"{'Modification' if pk else 'Création'} d'un formateur",
                 "subtitle": "Renseignez les informations du formateur ci-dessous.",
@@ -124,6 +128,7 @@ class FormateurCreateUpdateView(FormateurPermissionMixin, View):
                 ],
             },
             "matricule_auto": matricule_auto,
+            "matricule_auto_prestataire": matricule_auto_prestataire,
         }
         return render(request, self.template_name, ctx)
     
