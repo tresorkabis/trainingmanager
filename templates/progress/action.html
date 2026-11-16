@@ -147,6 +147,15 @@
                                     <button type="button" class="btn btn-outline-primary btn-sm" id="add-course-schedule">
                                         <i class="bi bi-plus-circle me-1"></i> Ajouter un créneau
                                     </button>
+                                    <button type="button" class="btn btn-outline-success btn-sm" id="generate-course-schedules">
+                                        <i class="bi bi-calendar-check me-1"></i> Générer les créneaux (jours pairs 9h-12h)
+                                    </button>
+                                    <button type="button" class="btn btn-outline-success btn-sm" id="generate-course-schedules-impairs-matin">
+                                        <i class="bi bi-calendar-check me-1"></i> Générer les créneaux (jours impaires 9h-12h)
+                                    </button>
+                                    <button type="button" class="btn btn-outline-success btn-sm" id="generate-course-schedules-impairs-apres-midi">
+                                        <i class="bi bi-calendar-check me-1"></i> Générer les créneaux (jours impaires 15h-18h)
+                                    </button>
                                 </div>
                                 <div id="course-schedules-container">
                                     {% with schedules=submitted_schedules|default:action_schedules %}
@@ -293,6 +302,9 @@
         }
         const courseSchedulesContainer = document.getElementById('course-schedules-container');
         const addCourseScheduleButton = document.getElementById('add-course-schedule');
+        const generateCourseSchedulesButton = document.getElementById('generate-course-schedules');
+        const generateCourseSchedulesImpairsMatinButton = document.getElementById('generate-course-schedules-impairs-matin');
+        const generateCourseSchedulesImpairsApresMidiButton = document.getElementById('generate-course-schedules-impairs-apres-midi');
         const courseScheduleTemplate = `
             <div class="row g-2 align-items-end mb-3 course-schedule-row">
                 <div class="col-md-4">
@@ -393,6 +405,66 @@
                 const newRow = tempDiv.firstChild;
                 courseSchedulesContainer.appendChild(newRow);
                 bindCourseScheduleRemoval(newRow);
+            });
+        }
+
+        // Génération automatique des créneaux pour les jours pairs (Mardi, Jeudi, Samedi) de 9h à 12h
+        if (generateCourseSchedulesButton) {
+            generateCourseSchedulesButton.addEventListener('click', function() {
+                const pairDays = [1, 3, 5]; // Mardi, Jeudi, Samedi (Dimanche exclu)
+                pairDays.forEach(function(day) {
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = courseScheduleTemplate.trim();
+                    const newRow = tempDiv.firstChild;
+                    const daySelect = newRow.querySelector('select[name="course_schedule_day"]');
+                    const startInput = newRow.querySelector('input[name="course_schedule_start"]');
+                    const endInput = newRow.querySelector('input[name="course_schedule_end"]');
+                    daySelect.value = String(day);
+                    startInput.value = '09:00';
+                    endInput.value = '12:00';
+                    courseSchedulesContainer.appendChild(newRow);
+                    bindCourseScheduleRemoval(newRow);
+                });
+            });
+        }
+
+        // Génération automatique des créneaux pour les jours impaires (Lundi, Mercredi, Vendredi) de 9h à 12h
+        if (generateCourseSchedulesImpairsMatinButton) {
+            generateCourseSchedulesImpairsMatinButton.addEventListener('click', function() {
+                const impairDays = [0, 2, 4]; // Lundi, Mercredi, Vendredi (Dimanche exclu)
+                impairDays.forEach(function(day) {
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = courseScheduleTemplate.trim();
+                    const newRow = tempDiv.firstChild;
+                    const daySelect = newRow.querySelector('select[name="course_schedule_day"]');
+                    const startInput = newRow.querySelector('input[name="course_schedule_start"]');
+                    const endInput = newRow.querySelector('input[name="course_schedule_end"]');
+                    daySelect.value = String(day);
+                    startInput.value = '09:00';
+                    endInput.value = '12:00';
+                    courseSchedulesContainer.appendChild(newRow);
+                    bindCourseScheduleRemoval(newRow);
+                });
+            });
+        }
+
+        // Génération automatique des créneaux pour les jours impaires (Lundi, Mercredi, Vendredi) de 15h à 18h
+        if (generateCourseSchedulesImpairsApresMidiButton) {
+            generateCourseSchedulesImpairsApresMidiButton.addEventListener('click', function() {
+                const impairDays = [0, 2, 4]; // Lundi, Mercredi, Vendredi (Dimanche exclu)
+                impairDays.forEach(function(day) {
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = courseScheduleTemplate.trim();
+                    const newRow = tempDiv.firstChild;
+                    const daySelect = newRow.querySelector('select[name="course_schedule_day"]');
+                    const startInput = newRow.querySelector('input[name="course_schedule_start"]');
+                    const endInput = newRow.querySelector('input[name="course_schedule_end"]');
+                    daySelect.value = String(day);
+                    startInput.value = '15:00';
+                    endInput.value = '18:00';
+                    courseSchedulesContainer.appendChild(newRow);
+                    bindCourseScheduleRemoval(newRow);
+                });
             });
         }
 
