@@ -528,6 +528,52 @@ class ModuleListView(FormationPermissionMixin, ListView):
         return ctx
 
 @method_decorator(login_required, name="dispatch")
+class ModuleDetailView(FormationPermissionMixin, DetailView):
+    """Vue de détail d'un module (lecture seule)."""
+    model = Module
+    template_name = "training/module_detail.html"
+    context_object_name = "module"
+
+    def get_queryset(self):
+        return super().get_queryset().select_related("formation", "formation__filiere").prefetch_related("formateurs", "subjects")
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        module = ctx["module"]
+
+        ctx["titre"] = f"Détail du module : {module.titre}"
+        ctx["can_manage"] = self.request.user.is_superuser or (
+            self.request.user.profile and self.request.user.profile.name in ["Manager", "Chef de filière", "Chef de service"]
+        )
+
+        # Stats pour le Hero
+        formateurs_count = module.formateurs.count()
+        subjects_count = module.subjects.count()
+        ctx["hero_stats"] = [
+            {"label": "Durée", "value": f"{module.duree_heures} h"},
+            {"label": "Formateurs", "value": formateurs_count},
+            {"label": "Sujets", "value": subjects_count},
+            {"label": "Statut", "value": "Actif" if module.active else "Inactif"},
+            {"label": "ID", "value": f"#MOD-{module.pk}"},
+        ]
+
+        ctx["hero_actions"] = [
+            {"label": "Retour à la liste", "url": reverse_lazy("modules"), "icon": "bi bi-arrow-left", "class": "btn-light-secondary"},
+        ]
+        if ctx["can_manage"]:
+            ctx["hero_actions"].append(
+                {"label": "Modifier", "url": reverse_lazy("module_update", kwargs={"pk": module.pk}), "icon": "bi bi-pencil"}
+            )
+            ctx["hero_actions"].append(
+                {"label": "Gérer les sujets", "url": reverse_lazy("module_subjects_manage", kwargs={"pk": module.pk}), "icon": "bi bi-list-check"}
+            )
+            ctx["hero_actions"].append(
+                {"label": "Gérer les formateurs", "url": reverse_lazy("module_formateurs", kwargs={"pk": module.pk}), "icon": "bi bi-people"}
+            )
+        return ctx
+
+
+@method_decorator(login_required, name="dispatch")
 class ModuleUpdateView(FormationPermissionMixin, View):
     template_name = "training/module_form.html"
 

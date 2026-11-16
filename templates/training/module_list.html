@@ -64,7 +64,7 @@
                                     <span class="badge bg-light-info text-info">{{ module.formation.filiere.nom|default:"-" }}</span>
                                 </td>
                                 <td>
-                                    <strong>{{ module.titre }}</strong>
+                                    <a href="{% url 'module' module.pk %}" class="text-decoration-none fw-bold">{{ module.titre }}</a>
                                     <div class="small text-muted">{{ module.description|default:""|truncatewords:8 }}</div>
                                 </td>
                                 <td>{{ module.ordre }}</td>
