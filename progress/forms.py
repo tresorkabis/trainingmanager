@@ -220,6 +220,22 @@ class SessionProgressForm(forms.ModelForm):
                 field.widget.attrs.update({'class': 'form-control'})
 
 
+    def clean(self):
+        cleaned_data = super().clean()
+        statut = cleaned_data.get('statut')
+        topics_covered = cleaned_data.get('topics_covered')
+
+        # Si le statut est 'REALISEE' et que des sujets ont été prévus,
+        # vérifier que des sujets couverts ont bien été renseignés
+        if statut == 'REALISEE' and not topics_covered and planned_topics:
+            # On ajoute une erreur pour inviter à compléter les sujets couverts
+            self.add_error('topics_covered', 'Les sujets prévus sont présents mais aucun sujet couvert n\'a été renseigné.')
+
+        return cleaned_data
+
+
+
+
 class JuryPVForm(forms.ModelForm):
     fichier = forms.FileField(
         label="PV du jury (PDF)",
