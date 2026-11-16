@@ -125,19 +125,41 @@ class FiliereDetailView(FilierePermissionMixin, DetailView):
 class FiliereCreateUpdateView(FilierePermissionMixin, View): # Nouvelle vue pour créer/modifier
     template_name = "training/filiere_form.html" # Nouveau template
 
+    def _get_hero_context(self, filiere=None):
+        if filiere:
+            hero_actions = [
+                {'label': 'Retour à la liste', 'url': reverse_lazy('filieres'), 'icon': 'bi bi-arrow-left', 'class': 'btn-light-secondary'},
+                {'label': 'Voir le détail', 'url': reverse_lazy('filiere', kwargs={'pk': filiere.pk}), 'icon': 'bi bi-eye'},
+            ]
+            hero_stats = [
+                {'label': 'Service', 'value': filiere.service.nom if filiere.service else '—'},
+                {'label': 'Statut', 'value': "Active" if filiere.active else "Inactive"},
+                {'label': 'ID', 'value': f"#FLR-{filiere.pk}"},
+            ]
+        else:
+            hero_actions = [
+                {'label': 'Retour à la liste', 'url': reverse_lazy('filieres'), 'icon': 'bi bi-arrow-left', 'class': 'btn-light-secondary'},
+            ]
+            hero_stats = None
+        return {
+            "hero_actions": hero_actions,
+            "hero_stats": hero_stats,
+        }
+
     def get(self, request, pk=None):
         self.enforce_manage_permission()
         filiere = None
         if pk:
             filiere = get_object_or_404(Filiere, pk=pk)
-        
+
         ctx = {
             "services": self.get_allowed_services(),
             "titre": "Modifier une filière" if pk else "Créer une filière",
             "mode": "edit" if pk else "new",
             "object": filiere,
-            "submitted": {}, # Pour gérer les erreurs de formulaire
+            "submitted": {},
         }
+        ctx.update(self._get_hero_context(filiere))
         return render(request, self.template_name, ctx)
     
     def post(self, request, pk=None):
@@ -169,10 +191,11 @@ class FiliereCreateUpdateView(FilierePermissionMixin, View): # Nouvelle vue pour
                 "services": self.get_allowed_services(),
                 "titre": "Modifier une filière" if pk else "Créer une filière",
                 "mode": "edit" if pk else "new",
-                "object": filiere, # Si c'est une modification, l'objet existe
-                "submitted": request.POST, # Repopuler le formulaire avec les données soumises
+                "object": filiere,
+                "submitted": request.POST,
                 "form_errors": errors,
             }
+            ctx.update(self._get_hero_context(filiere))
             return render(request, self.template_name, ctx, status=400)
 
         if filiere: # Mode édition

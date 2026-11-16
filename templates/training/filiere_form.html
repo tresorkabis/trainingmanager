@@ -1,18 +1,11 @@
 {% extends "base.html" %}
 {% load static %}
+{% load tm_tags %}
 
-{% block title %}{{ titre }} une Filière{% endblock title %}
-{% block page_header %}{{ titre }} une Filière{% endblock page_header %}
+{% block title %}{{ titre }}{% endblock title %}
+{% block page_header %}{{ titre }}{% endblock page_header %}
 {% block style %}
 <style>
-    .tm-filiere-form-hero {
-        background:
-            radial-gradient(circle at top right, rgba(67, 94, 190, 0.18), transparent 35%),
-            linear-gradient(135deg, #f7f8fc 0%, #eef3ff 100%);
-        border: 1px solid rgba(67, 94, 190, 0.12);
-        border-radius: 1.25rem;
-    }
-
     .tm-filiere-form-card {
         border: 1px solid rgba(15, 23, 42, 0.07);
         border-radius: 1rem;
@@ -23,24 +16,7 @@
 
 {% block content %}
 <div class="page-heading">
-    <section class="tm-filiere-form-hero p-4 p-lg-5 mb-4">
-        <div class="row g-4 align-items-center">
-            <div class="col-12 col-lg-8">
-                <div class="tm-section-titlebar">
-                    <span class="tm-section-titlebar__icon"><i class="bi bi-diagram-3"></i></span>
-                    <div class="tm-section-titlebar__text">
-                        <h3>{{ titre }} une filière</h3>
-                        <p>Renseignez les informations de la filière.</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-12 col-lg-4 d-flex justify-content-lg-end">
-                <a href="{% url 'filieres' %}" class="btn btn-light-secondary">
-                    <i class="bi bi-arrow-left me-2"></i>Retour aux filières
-                </a>
-            </div>
-        </div>
-    </section>
+    {% tm_hero title=titre subtitle="Renseignez les informations de la filière pour gérer le référentiel." icon="bi bi-diagram-3" actions=hero_actions stats=hero_stats theme="primary" %}
 
     <section class="section">
         <div class="card tm-filiere-form-card">
