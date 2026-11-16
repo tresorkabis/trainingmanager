@@ -145,3 +145,45 @@
     </section>
 </div>
 {% endblock content %}
+
+{% block script %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const typeSelect = document.getElementById('type_formateur');
+    const matriculeInput = document.getElementById('matricule');
+
+    if (!typeSelect || !matriculeInput) return;
+
+    function getPrefix(type) {
+        return type === 'PRESTATAIRE' ? 'P-' : 'F-';
+    }
+
+    function updateMatriculePrefix() {
+        const type = typeSelect.value;
+        const prefix = getPrefix(type);
+        let value = matriculeInput.value.trim();
+
+        if (!value) {
+            matriculeInput.value = prefix;
+            return;
+        }
+
+        // Remplacer le préfixe existant s'il correspond à F- ou P-
+        if (value.startsWith('F-') || value.startsWith('P-')) {
+            value = prefix + value.substring(2);
+        } else {
+            value = prefix + value;
+        }
+
+        matriculeInput.value = value;
+    }
+
+    typeSelect.addEventListener('change', updateMatriculePrefix);
+
+    // Initialiser le préfixe au chargement si c'est une création
+    {% if mode == 'new' and matricule_auto %}
+    updateMatriculePrefix();
+    {% endif %}
+});
+</script>
+{% endblock script %}
