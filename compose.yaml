@@ -1,0 +1,43 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-trainingmanager}
+      POSTGRES_USER: ${POSTGRES_USER:-trainingmanager}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  web:
+    build: .
+    restart: unless-stopped
+    environment:
+      DJANGO_SETTINGS_MODULE: settings.prod
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:?Set DJANGO_SECRET_KEY in .env}
+      DATABASE_URL: postgres://${POSTGRES_USER:-trainingmanager}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-trainingmanager}
+      DJANGO_DEBUG: ${DJANGO_DEBUG:-False}
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS:-localhost,127.0.0.1}
+      CSRF_TRUSTED_ORIGINS: ${CSRF_TRUSTED_ORIGINS:-}
+      SUPABASE_PROJECT_REF: ${SUPABASE_PROJECT_REF:-}
+      SUPABASE_S3_ENDPOINT: ${SUPABASE_S3_ENDPOINT:-}
+      SUPABASE_S3_ACCESS_KEY: ${SUPABASE_S3_ACCESS_KEY:-}
+      SUPABASE_S3_SECRET_KEY: ${SUPABASE_S3_SECRET_KEY:-}
+      SUPABASE_S3_REGION: ${SUPABASE_S3_REGION:-eu-central-1}
+      SUPABASE_S3_BUCKET: ${SUPABASE_S3_BUCKET:-media}
+    ports:
+      - "${APP_PORT:-8000}:8000"
+    volumes:
+      - media_data:/app/mediafiles
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  media_data:

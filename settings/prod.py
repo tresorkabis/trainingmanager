@@ -41,11 +41,8 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 
 # ---------------------------------------------------------------------------
-# Base de données : Supabase (PostgreSQL)
+# Base de données : PostgreSQL via DATABASE_URL (Compose ou service externe)
 # ---------------------------------------------------------------------------
-# En production serverless (Vercel), utiliser l'URL de connexion Supabase en
-# "Transaction mode pooler" (port 6543, host aws-<region>.pooler.supabase.com),
-# recommandé officiellement pour les fonctions serverless / courtes connexions.
 DATABASE_URL = os.environ.get("DATABASE_URL")
 if not DATABASE_URL:
     raise ImproperlyConfigured(
@@ -56,17 +53,12 @@ if not DATABASE_URL:
 DATABASES = {
     "default": dj_database_url.parse(
         DATABASE_URL,
-        conn_max_age=0,  # pas de connexion réutilisée entre les appels serverless
+        conn_max_age=int(os.environ.get("DB_CONN_MAX_AGE", "60")),
         conn_health_checks=True,
     )
 }
 
-# WhiteNoise pour la production sur Vercel
-# On définit EXPLICITEMENT le stockage des fichiers statiques SANS
-# post-processing (ni compression, ni manifest). Le backend par défaut de
-# Django/WhiteNoise appliquerait le CompressedManifestStaticFilesStorage,
-# ce qui fait échouer le build Vercel ("Post-processing ... failed") sur les
-# assets pré-minifiés comme bootstrap. On garde un simple copie des fichiers.
+# WhiteNoise sert les fichiers statiques collectés dans l'image/conteneur.
 STORAGES = {
     "default": {
         "BACKEND": "django.core.files.storage.FileSystemStorage",
@@ -79,8 +71,7 @@ STORAGES = {
 # ---------------------------------------------------------------------------
 # Fichiers médias : Supabase Storage (API compatible S3)
 # ---------------------------------------------------------------------------
-# Sur Vercel le filesystem est éphémère : les fichiers uploadés (photos,
-# bordereaux, PV) doivent être stockés dans Supabase Storage.
+# Les médias peuvent être stockés dans Supabase Storage ou sur le volume Docker.
 SUPABASE_S3_ACCESS_KEY = os.environ.get("SUPABASE_S3_ACCESS_KEY", "")
 SUPABASE_S3_SECRET_KEY = os.environ.get("SUPABASE_S3_SECRET_KEY", "")
 
@@ -118,14 +109,8 @@ if SUPABASE_S3_ACCESS_KEY and SUPABASE_S3_SECRET_KEY:
         f"{AWS_STORAGE_BUCKET_NAME}/"
     )
 else:
-    # Sans les variables S3 (ex : test local ou autre environnement), on reste
-    # sur le filesystem local — à utiliser uniquement en développement.
-    import warnings
-    warnings.warn(
-        "Supabase Storage non configuré (SUPABASE_S3_ACCESS_KEY / "
-        "SUPABASE_S3_SECRET_KEY absents) : les fichiers médias seront stockés "
-        "dans le filesystem local, non persisté sur Vercel."
-    )
+    # En Docker Compose, ce chemin est monté sur le volume persistant media_data.
+    pass
 
 
 
