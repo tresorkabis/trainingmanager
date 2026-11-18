@@ -241,6 +241,7 @@ class ActionStagiairesPrintView(ActionPermissionMixin, DetailView): # Changed fr
             {
                 "stage": "depart",
                 "title": "Effectif de départ",
+                "subtitle": "Tous les stagiaires inscrits à cette action.",
                 "people": context['stagiaires_depart'],
                 "total": len(context['stagiaires_depart']),
                 "category_stats": context['category_stats_depart'],
@@ -248,6 +249,7 @@ class ActionStagiairesPrintView(ActionPermissionMixin, DetailView): # Changed fr
             {
                 "stage": "cloture",
                 "title": "Effectif de clôture",
+                "subtitle": "Stagiaires marqués comme ayant passé le jury.",
                 "people": context['stagiaires_cloture'],
                 "total": len(context['stagiaires_cloture']),
                 "category_stats": context['category_stats_cloture'],

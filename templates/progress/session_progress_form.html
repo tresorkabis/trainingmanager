@@ -271,13 +271,15 @@
         if (actualDateInput) {
             actualDateInput.addEventListener('change', checkActualDate);
 
-            // Logique intelligente pour la modification : pré-remplissage si vide
+            // En modification, préremplir les informations réelles si elles sont encore vides.
+            {% if not is_create %}
             if (!actualDateInput.value && dateSelect && dateSelect.value) {
                 actualDateInput.value = dateSelect.value;
                 if (startTimeInput && !startTimeInput.value) startTimeInput.value = startTimeInput.value || (schedules.length > 0 ? schedules[0].start : '');
                 if (endTimeInput && !endTimeInput.value) endTimeInput.value = endTimeInput.value || (schedules.length > 0 ? schedules[0].end : '');
                 if (topicsInput && !coveredInput.value) coveredInput.value = topicsInput.value;
             }
+            {% endif %}
 
             checkActualDate();
         }

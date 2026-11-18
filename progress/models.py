@@ -293,16 +293,24 @@ class ModuleProgress(models.Model):
 
     def update_statut_module(self):
         hours_done = self.calculate_hours_done()
-        has_realized_sessions = self.sessions_progress.filter(statut='REALISEE').exists()
+        realized_sessions = self.sessions_progress.filter(statut='REALISEE')
+        has_realized_sessions = realized_sessions.exists()
+        first_realized_date = realized_sessions.order_by("actual_date").values_list("actual_date", flat=True).first()
         if self.module.duree_heures == 0 or (hours_done > 0 and hours_done >= self.module.duree_heures):
             new_statut = 'TE'
         elif hours_done > 0 or has_realized_sessions:
             new_statut = 'EC'
         else:
             new_statut = 'NC'
+        fields_to_update = []
         if self.statut_module != new_statut:
             self.statut_module = new_statut
-            self.save(update_fields=['statut_module', 'updated_at'])
+            fields_to_update.append('statut_module')
+        if first_realized_date and self.date_debut_reelle != first_realized_date:
+            self.date_debut_reelle = first_realized_date
+            fields_to_update.append('date_debut_reelle')
+        if fields_to_update:
+            self.save(update_fields=[*fields_to_update, 'updated_at'])
 
     def calculate_hours_done(self):
         import datetime as dt

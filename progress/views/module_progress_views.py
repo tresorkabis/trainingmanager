@@ -325,6 +325,7 @@ class SessionProgressCreateView(LoginRequiredMixin, CreateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = "Ajouter une Séance"
+        context['is_create'] = True
         module_progress = get_object_or_404(ModuleProgress, pk=self.kwargs.get('module_progress_pk'))
         context['module_progress'] = module_progress
         context['next_session_defaults'] = ActionWorkflowService.build_session_initial(module_progress)
