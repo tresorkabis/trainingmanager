@@ -1,21 +1,23 @@
 from users.models import Profile
 
 
+DEFAULT_PROFILE_NAMES = (
+    "Manager",
+    "User",
+    "Chef de filière",
+    "Chef de service",
+    "Formateur",
+    "Caisse",
+    "Conseiller",
+    "Inspecteur",
+    "Pédagogique",
+)
+
+
 def createprofile():
-    profiles = [
-        "Manager",
-        "User",
-        "Chef de filière",
-        "Chef de service",
-        "Formateur", # Ajout du profil Formateur
-        "Caisse",       # Nouveau
-        "Conseiller",   # Nouveau
-        "Inspecteur",   # Nouveau
-        "Pédagogique",  # Nouveau
-    ]
-    for profileName in profiles:
-        temp = Profile.objects.filter(name=profileName).first()
-        if temp is None:
-            profile = Profile()
-            profile.name = profileName
-            profile.save()
+    """Crée les profils standards absents et retourne leur nombre."""
+    created = 0
+    for name in DEFAULT_PROFILE_NAMES:
+        _, was_created = Profile.objects.get_or_create(name=name)
+        created += int(was_created)
+    return created

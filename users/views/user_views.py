@@ -6,10 +6,13 @@ from django.views.generic import ListView, CreateView, DetailView, UpdateView, D
 from django.shortcuts import get_object_or_404, redirect
 from django.contrib import messages
 from django.db.models import Count
+from django.db import transaction
 
 from users.models import User, Profile
+from users.utils import createprofile
 from users.forms import CustomUserCreationForm, CustomUserChangeForm
 from intern.models import Categorie, Stagiaire
+from intern.views.stagiaire_views import ALLOWED_CATEGORIE_TITRES
 
 @method_decorator(login_required, name='dispatch')
 class UserListView(ListView):
@@ -180,6 +183,10 @@ class SettingsView(UserPassesTestMixin, TemplateView):
         context['total_users'] = User.objects.count()
         context['users_with_profile'] = User.objects.exclude(profile__isnull=True).count()
         context['users_without_profile'] = User.objects.filter(profile__isnull=True).count()
+        context['profiles'] = (
+            Profile.objects.annotate(user_count=Count('user'))
+            .order_by('name')
+        )
         # Catégories
         context['total_categories'] = Categorie.objects.count()
         context['active_categories'] = Categorie.objects.filter(active=True).count()
@@ -223,10 +230,13 @@ class UserResetAllProfilesView(UserPassesTestMixin, View):
         return self.request.user.is_superuser
 
     def post(self, request, *args, **kwargs):
-        count = User.objects.exclude(profile__isnull=True).update(profile=None)
+        with transaction.atomic():
+            count = User.objects.exclude(profile__isnull=True).update(profile=None)
+            profiles_created = createprofile()
         messages.success(
             request,
-            f'{count} profil(s) ont été réinitialisé(s).'
+            f'{count} association(s) de profil réinitialisée(s) et '
+            f'{profiles_created} profil(s) manquant(s) créé(s).'
         )
         return redirect('settings')
 
@@ -241,9 +251,18 @@ class CategoryResetView(UserPassesTestMixin, View):
         return self.request.user.is_superuser
 
     def post(self, request, *args, **kwargs):
-        count = Categorie.objects.filter(active=True).update(active=False)
+        with transaction.atomic():
+            count = Categorie.objects.filter(active=True).update(active=False)
+            categories_created = 0
+            for titre in ALLOWED_CATEGORIE_TITRES:
+                _, was_created = Categorie.objects.get_or_create(
+                    titre=titre,
+                    defaults={"active": True},
+                )
+                categories_created += int(was_created)
         messages.success(
             request,
-            f'{count} catégorie(s) ont été désactivée(s).'
+            f'{count} catégorie(s) désactivée(s) et '
+            f'{categories_created} catégorie(s) prédéfinie(s) manquante(s) créée(s).'
         )
         return redirect('settings')
