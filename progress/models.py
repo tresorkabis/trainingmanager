@@ -238,6 +238,22 @@ class ActionSchedule(models.Model):
         return after_date + timedelta(days=days_ahead)
 
 
+class SchedulePreset(models.Model):
+    """Reusable set of weekly course slots that can be copied to an action."""
+    name = models.CharField(max_length=100, unique=True)
+    schedules = models.JSONField(default=list)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["name"]
+        verbose_name = "Configuration de créneaux"
+        verbose_name_plural = "Configurations de créneaux"
+
+    def __str__(self):
+        return self.name
+
+
 class ModuleProgress(models.Model):
     STATUT_CHOICES = (
         ('NC', 'Non commencé'),

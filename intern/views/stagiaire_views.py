@@ -113,6 +113,10 @@ class StagiaireListView(StagiairePermissionMixin, ListView):
         self.enforce_view_permission()
         queryset = self.get_stagiaire_queryset().select_related("categorie", "entreprise")
 
+        category_id = self.request.GET.get("categorie", "").strip()
+        if category_id.isdigit():
+            queryset = queryset.filter(categorie_id=int(category_id))
+
         from django.utils import timezone
         from django.db.models.functions import Coalesce
 
@@ -164,6 +168,10 @@ class StagiaireListView(StagiairePermissionMixin, ListView):
             {'label': 'Féminin', 'value': feminin},
             {'label': 'Masculin', 'value': masculin},
         ]
+        ctx["categories_filter"] = Categorie.objects.filter(
+            titre__in=ALLOWED_CATEGORIE_TITRES
+        ).order_by("titre")
+        ctx["selected_category"] = self.request.GET.get("categorie", "")
 
         ctx["hero_actions"] = [
             {'label': 'Nouveau stagiaire', 'url': reverse_lazy('stagiaire_create'), 'icon': 'bi bi-person-plus'},
@@ -206,6 +214,12 @@ class StagiaireDetailView(StagiairePermissionMixin, DetailView):
             .order_by("action__date_debut")
         )
         action_ids_inscrits = [da.action_id for da in actions_suivies]
+        actions_actives = Action.objects.filter(active=True)
+        actions_disponibles = (
+            actions_actives.select_related("formation", "formation__filiere")
+            .exclude(pk__in=action_ids_inscrits)
+            .order_by("-date_debut", "description")
+        )
         for detail_action in actions_suivies:
             detail_action.status_meta = self.get_action_status(detail_action.action)
 
@@ -231,7 +245,9 @@ class StagiaireDetailView(StagiairePermissionMixin, DetailView):
         ctx["entreprises"] = Entreprise.objects.all()
         ctx["filieres"] = self.get_allowed_filieres() # Conserver pour la permission mixin si nécessaire
         ctx["actions_suivies"] = actions_suivies
-        ctx["actions_disponibles"] = Action.objects.filter(active=True).select_related("formation", "formation__filiere").exclude(pk__in=action_ids_inscrits).order_by("-date_debut", "description")
+        ctx["actions_disponibles"] = actions_disponibles
+        ctx["actions_actives_count"] = actions_actives.count()
+        ctx["actions_deja_suivies_count"] = actions_actives.filter(pk__in=action_ids_inscrits).count()
         ctx["autres_formations"] = AutreFormation.objects.filter(stagiaire=current_stagiaire)
         ctx["paiements"] = Paiement.objects.filter(stagiaire=current_stagiaire).order_by('-date_paiement')
         ctx["titre"] = "Voir"

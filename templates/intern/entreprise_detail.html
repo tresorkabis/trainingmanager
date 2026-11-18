@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% load static %}
+{% load tm_tags %}
+
+{% block title %}{{ entreprise.nom }}{% endblock title %}
+{% block page_header %}Détail de l’entreprise{% endblock page_header %}
+
+{% block style %}
+<link rel="stylesheet" href="{% static 'assets/css/training-manager.css' %}">
+{% endblock style %}
+
+{% block content %}
+<div class="page-heading">
+    {% tm_hero title=entreprise.nom subtitle="Informations de l’entreprise et stagiaires associés." icon="bi bi-building" actions=hero_actions stats=hero_stats theme="primary" %}
+
+    <section class="section">
+        <div class="card tm-listing-card mb-4">
+            <div class="card-header"><h4 class="card-title mb-0">Coordonnées</h4></div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-6"><strong>Adresse :</strong> {{ entreprise.adresse|default:"—" }}</div>
+                    <div class="col-md-3"><strong>Téléphone :</strong> {{ entreprise.telephone|default:"—" }}</div>
+                    <div class="col-md-3"><strong>Email :</strong> {{ entreprise.email|default:"—" }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card tm-listing-card">
+            <div class="card-header"><h4 class="card-title mb-0">Stagiaires associés</h4></div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead><tr><th>Nom</th><th>Catégorie</th><th>Téléphone</th><th>Email</th><th>Fonction</th><th></th></tr></thead>
+                        <tbody>
+                            {% for stagiaire in stagiaires %}
+                            <tr>
+                                <td>{{ stagiaire.get_full_name }}</td>
+                                <td>{{ stagiaire.categorie.titre }}</td>
+                                <td>{{ stagiaire.telephone|default:"—" }}</td>
+                                <td>{{ stagiaire.email|default:"—" }}</td>
+                                <td>{{ stagiaire.fonction|default:"—" }}</td>
+                                <td><a class="btn btn-sm btn-outline-primary" href="{% url 'stagiaire' stagiaire.pk %}" title="Voir le dossier"><i class="bi bi-eye"></i></a></td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="6" class="text-center text-muted py-4">Aucun stagiaire associé à cette entreprise.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock content %}

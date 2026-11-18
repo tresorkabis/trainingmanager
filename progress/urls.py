@@ -10,8 +10,12 @@ from progress.views.module_progress_views import (
     SessionProgressCreateView, SessionProgressUpdateView, SessionProgressDeleteView,
 )
 from progress.views.jury_views import JuryPVCustomView, JuryPVDeleteView, JuryPVGeneratePDFView, JuryPVCoterView
+from progress.views.schedule_preset_views import SchedulePresetListView, SchedulePresetCreateView, SchedulePresetDeleteView
 
 urlpatterns = [
+    path("schedule-presets/", SchedulePresetListView.as_view(), name="schedule_presets"),
+    path("schedule-presets/create/", SchedulePresetCreateView.as_view(), name="schedule_preset_create"),
+    path("schedule-presets/<int:pk>/delete/", SchedulePresetDeleteView.as_view(), name="schedule_preset_delete"),
     # Actions
     path("actions/", ActionListViews.as_view(), name="actions"),
     path("actions/create/", ActionCreateView.as_view(), name="action_create"),

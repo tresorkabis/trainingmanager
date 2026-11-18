@@ -191,6 +191,15 @@
                                 </li>
                             {% endif %}
 
+                            {% if request.user.is_superuser or request.user.profile.name == "Manager" %}
+                                <li class="sidebar-item {% if link == 'entreprises' %} active {% endif %}">
+                                    <a href="{% url 'entreprises' %}" class='sidebar-link'>
+                                        <i class="bi bi-building-check"></i>
+                                        <span>Entreprises</span>
+                                    </a>
+                                </li>
+                            {% endif %}
+
                             <li class="sidebar-title">Suivi des Activités</li>
                             {% if request.user.is_superuser or request.user.profile.name == "Manager" or request.user.profile.name == "Chef de filière" or request.user.profile.name == "Chef de service" or request.user.profile.name == "Caisse" or request.user.profile.name == "Conseiller" or request.user.profile.name == "Inspecteur" or request.user.profile.name == "Pédagogique" or request.user.profile.name == "Formateur" %}
                                 <li class="sidebar-item {% if link == 'actions' %} active {% endif %}">
@@ -206,6 +215,15 @@
                                     <a href="{% url 'typeactions' %}" class='sidebar-link'>
                                         <i class="bi bi-tag"></i>
                                         <span>Types d'actions</span>
+                                    </a>
+                                </li>
+                            {% endif %}
+
+                            {% if request.user.is_superuser or request.user.profile.name == "Manager" or request.user.profile.name == "Chef de filière" or request.user.profile.name == "Chef de service" %}
+                                <li class="sidebar-item {% if link == 'schedule_presets' %} active {% endif %}">
+                                    <a href="{% url 'schedule_presets' %}" class='sidebar-link'>
+                                        <i class="bi bi-calendar-week"></i>
+                                        <span>Configurations des créneaux</span>
                                     </a>
                                 </li>
                             {% endif %}

@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% load static %}
+{% load tm_tags %}
+
+{% block title %}Configurations des créneaux{% endblock title %}
+{% block page_header %}Configurations des créneaux{% endblock page_header %}
+
+{% block style %}<link rel="stylesheet" href="{% static 'assets/css/training-manager.css' %}">{% endblock style %}
+
+{% block content %}
+<div class="page-heading">
+    {% tm_hero title="Configurations des créneaux" subtitle="Enregistrez des horaires hebdomadaires réutilisables lors de la création d'une action." icon="bi bi-calendar-week" actions=hero_actions stats=hero_stats theme="primary" %}
+
+    <section class="section">
+        <div class="card tm-detail-card mb-4">
+            <div class="card-header"><h4 class="card-title mb-0">Nouvelle configuration</h4></div>
+            <div class="card-body">
+                <form method="post" action="{% url 'schedule_preset_create' %}" id="schedule-preset-form">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="preset-name" class="form-label fw-bold">Nom de la configuration</label>
+                        <input type="text" class="form-control" id="preset-name" name="name" maxlength="100" required placeholder="Ex. Mardi et jeudi, matin">
+                    </div>
+                    <div id="preset-schedules">
+                        <div class="row g-2 align-items-end mb-3 preset-schedule-row">
+                            <div class="col-md-4">
+                                <label class="form-label">Jour</label>
+                                <select class="form-select" name="course_schedule_day" required>
+                                    <option value="">Sélectionnez</option>
+                                    {% for value, label in days %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3"><label class="form-label">Début</label><input type="time" class="form-control" name="course_schedule_start" required></div>
+                            <div class="col-md-3"><label class="form-label">Fin</label><input type="time" class="form-control" name="course_schedule_end" required></div>
+                            <div class="col-md-2 d-grid"><button type="button" class="btn btn-outline-danger remove-preset-row" aria-label="Retirer le créneau"><i class="bi bi-trash"></i></button></div>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <button type="button" class="btn btn-outline-primary" id="add-preset-row"><i class="bi bi-plus-circle me-1"></i>Ajouter un créneau</button>
+                        <button type="submit" class="btn btn-primary"><i class="bi bi-save me-1"></i>Enregistrer</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card tm-listing-card">
+            <div class="card-header"><h4 class="card-title mb-0">Configurations enregistrées</h4></div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead><tr><th>Nom</th><th>Créneaux</th><th></th></tr></thead>
+                        <tbody>
+                        {% for preset in presets %}
+                            <tr>
+                                <td class="fw-bold">{{ preset.name }}</td>
+                                <td>
+                                    {% for slot in preset.schedules %}
+                                        {% for value, label in days %}{% if value|stringformat:"s" == slot.jour_semaine|stringformat:"s" %}{{ label }}{% endif %}{% endfor %}
+                                        {{ slot.heure_debut }}–{{ slot.heure_fin }}{% if not forloop.last %}<br>{% endif %}
+                                    {% endfor %}
+                                </td>
+                                <td class="text-end">
+                                    <form method="post" action="{% url 'schedule_preset_delete' preset.pk %}" onsubmit="return confirm('Supprimer cette configuration ?')">
+                                        {% csrf_token %}<button class="btn btn-sm btn-outline-danger" type="submit" aria-label="Supprimer {{ preset.name }}"><i class="bi bi-trash"></i></button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr><td colspan="3" class="text-center text-muted py-4">Aucune configuration enregistrée.</td></tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock content %}
+
+{% block script %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const container = document.getElementById('preset-schedules');
+    const addButton = document.getElementById('add-preset-row');
+    const rowTemplate = container.querySelector('.preset-schedule-row').outerHTML;
+    addButton.addEventListener('click', function () {
+        container.insertAdjacentHTML('beforeend', rowTemplate);
+    });
+    container.addEventListener('click', function (event) {
+        const button = event.target.closest('.remove-preset-row');
+        if (!button) return;
+        const rows = container.querySelectorAll('.preset-schedule-row');
+        if (rows.length > 1) button.closest('.preset-schedule-row').remove();
+    });
+});
+</script>
+{% endblock script %}

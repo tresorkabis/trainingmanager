@@ -1,7 +1,8 @@
 from django.conf import settings
 from django.conf.urls.static import static
+from django.views.static import serve
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, re_path
 
 from training.views.home_views import HomeView
 from users.views.auth_views import LoginPageView, LogoutPageView
@@ -26,3 +27,11 @@ urlpatterns = [
 #urlpatterns += i18n_patterns(path("admin/", admin.site.urls))
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
+# User-uploaded photos and documents are stored on the persistent Docker media
+# volume. Django's static() helper only adds media routes when DEBUG=True, while
+# the production container runs with DEBUG=False.
+if not settings.DEBUG:
+    urlpatterns += [
+        re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
+    ]

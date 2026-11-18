@@ -15,7 +15,7 @@ from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.generic import DeleteView, DetailView, ListView, UpdateView
 
-from progress.models import Action, Formateur, ModuleProgress, TypeAction, SessionProgress
+from progress.models import Action, Formateur, ModuleProgress, TypeAction, SessionProgress, SchedulePreset
 from progress.services import ActionWorkflowService
 from intern.models import Stagiaire
 from training.models import Formation, Module
@@ -95,6 +95,10 @@ class ActionPermissionMixin:
             "type_actions": all_type_actions,
             "formations_json": formations_data,
             "formateurs_json": list(all_formateurs.values("id", "nom", "postnom", "prenom")),
+            "schedule_presets_json": [
+                {"id": preset.pk, "name": preset.name, "schedules": preset.schedules}
+                for preset in SchedulePreset.objects.all()
+            ],
             "today": date.today(),
             "selected_formateur_ids": [], # This is for Action.formateurs, which we might remove or keep separate
             "hero_actions": [

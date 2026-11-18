@@ -2,9 +2,12 @@ from django.urls import path
 
 from intern.views.categorie_views import CategorieListView, CategorieDetailView, CategorieCreateUpdateView, CategorieDeleteView # Importation des nouvelles vues
 from intern.views.stagiaire_views import StagiaireListView, StagiaireCreateUpdateView, StagiaireDetailView, StagiaireDeleteView, stagiaire_cards_print
+from intern.views.entreprise_views import EntrepriseListView, EntrepriseDetailView
 
 
 urlpatterns = [
+    path("entreprises/<int:pk>", EntrepriseDetailView.as_view(), name="entreprise"),
+    path("entreprises", EntrepriseListView.as_view(), name="entreprises"),
     path("categories", CategorieListView.as_view(), name="categories"),
     path("categories/create", CategorieCreateUpdateView.as_view(), name="categorie_create"), # Changé CategorieCreateView à CategorieCreateUpdateView
     path("categories/<int:pk>", CategorieDetailView.as_view(), name="categorie"),

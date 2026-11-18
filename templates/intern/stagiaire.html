@@ -1032,7 +1032,14 @@
                             </div>
 
                             {% if not actions_disponibles %}
-                                <div class="alert alert-warning mt-3 mb-0"><i class="bi bi-exclamation-triangle me-2"></i>Aucune action disponible à laquelle inscrire ce stagiaire.</div>
+                                <div class="alert alert-warning mt-3 mb-0">
+                                    <i class="bi bi-exclamation-triangle me-2"></i>
+                                    {% if not actions_actives_count %}
+                                        Aucune action active n’est enregistrée. Activez ou créez une action avant d’inscrire ce stagiaire.
+                                    {% else %}
+                                        Ce stagiaire est déjà inscrit à toutes les actions actives ({{ actions_deja_suivies_count }}).
+                                    {% endif %}
+                                </div>
                             {% endif %}
                         </div>
 

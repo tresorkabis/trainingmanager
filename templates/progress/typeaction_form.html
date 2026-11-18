@@ -1,18 +1,12 @@
 {% extends "base.html" %}
 {% load static %}
+{% load tm_tags %}
 
 {% block title %}{{ titre }} un Type d'Action{% endblock title %}
 {% block page_header %}{{ titre }} un Type d'Action{% endblock page_header %}
 {% block style %}
+<link rel="stylesheet" href="{% static 'assets/css/training-manager.css' %}">
 <style>
-    .tm-typeaction-form-hero {
-        background:
-            radial-gradient(circle at top right, rgba(67, 94, 190, 0.18), transparent 35%),
-            linear-gradient(135deg, #f7f8fc 0%, #eef3ff 100%);
-        border: 1px solid rgba(67, 94, 190, 0.12);
-        border-radius: 1.25rem;
-    }
-
     .tm-typeaction-form-card {
         border: 1px solid rgba(15, 23, 42, 0.07);
         border-radius: 1rem;
@@ -23,24 +17,7 @@
 
 {% block content %}
 <div class="page-heading">
-    <section class="tm-typeaction-form-hero p-4 p-lg-5 mb-4">
-        <div class="row g-4 align-items-center">
-            <div class="col-12 col-lg-8">
-                <div class="tm-section-titlebar">
-                    <span class="tm-section-titlebar__icon"><i class="bi bi-tag"></i></span>
-                    <div class="tm-section-titlebar__text">
-                        <h3>{{ titre }} un type d'action</h3>
-                        <p>Renseignez les informations du type d'action.</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-12 col-lg-4 d-flex justify-content-lg-end">
-                <a href="{% url 'typeactions' %}" class="btn btn-light-secondary">
-                    <i class="bi bi-arrow-left me-2"></i>Retour aux types d'action
-                </a>
-            </div>
-        </div>
-    </section>
+    {% tm_hero title=titre|add:" un type d'action" subtitle="Renseignez les informations du type d'action." icon="bi bi-tag" actions=hero_actions theme="primary" %}
 
     <section class="section">
         <div class="card tm-typeaction-form-card">

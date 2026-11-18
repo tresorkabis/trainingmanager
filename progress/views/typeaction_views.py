@@ -75,6 +75,16 @@ class TypeActionDetailView(TypeActionPermissionMixin, DetailView):
         ctx['actions_associees'] = typeaction.actions_liees.all().select_related("formation", "formation__filiere").order_by("-date_debut") # Récupérer les actions associées
         ctx['titre'] = "Détail du type d'action"
         ctx['link'] = "typeactions" # Ajout de la variable link pour le menu latéral
+        ctx['hero_actions'] = [
+            {"label": "Retour à la liste", "url": reverse_lazy("typeactions"), "icon": "bi bi-arrow-left", "class": "btn-light-secondary"},
+            {"label": "Modifier", "url": reverse_lazy("typeaction_update", kwargs={"pk": typeaction.pk}), "icon": "bi bi-pencil"},
+            {"label": "Supprimer", "url": reverse_lazy("typeaction_delete", kwargs={"pk": typeaction.pk}), "icon": "bi bi-trash", "class": "btn-light-danger"},
+        ]
+        ctx['hero_stats'] = [
+            {"label": "Code", "value": typeaction.code},
+            {"label": "Statut", "value": "Actif" if typeaction.active else "Inactif"},
+            {"label": "Actions liées", "value": ctx['actions_associees'].count()},
+        ]
         return ctx
 
 @method_decorator(login_required, name="dispatch")
@@ -93,6 +103,9 @@ class TypeActionCreateUpdateView(TypeActionPermissionMixin, View): # Nouvelle vu
             "object": typeaction,
             "submitted": {}, # Pour gérer les erreurs de formulaire
             "link": "typeactions", # Ajout de la variable link pour le menu latéral
+            "hero_actions": [
+                {"label": "Retour aux types d'action", "url": reverse_lazy("typeactions"), "icon": "bi bi-arrow-left", "class": "btn-light-secondary"},
+            ],
         }
         return render(request, self.template_name, ctx)
     
@@ -127,6 +140,9 @@ class TypeActionCreateUpdateView(TypeActionPermissionMixin, View): # Nouvelle vu
                 "submitted": request.POST, # Repopuler le formulaire avec les données soumises
                 "form_errors": errors,
                 "link": "typeactions", # Ajout de la variable link pour le menu latéral
+                "hero_actions": [
+                    {"label": "Retour aux types d'action", "url": reverse_lazy("typeactions"), "icon": "bi bi-arrow-left", "class": "btn-light-secondary"},
+                ],
             }
             return render(request, self.template_name, ctx, status=400)
 
