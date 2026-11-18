@@ -182,6 +182,8 @@ class ModuleProgressDetailView(LoginRequiredMixin, DetailView):
                     'x': session.actual_date.isoformat(),
                     'y': get_subject_index(session.topics_covered, session_index),
                 })
+        progression_chart_data['planned'].sort(key=lambda point: point['x'])
+        progression_chart_data['actual'].sort(key=lambda point: point['x'])
         context['progression_chart_data'] = progression_chart_data
         context['hero_actions'] = [
             {'label': 'Retour à la liste', 'url': reverse_lazy('module_progressions'), 'icon': 'bi bi-arrow-left', 'class': 'btn-light-secondary'},
