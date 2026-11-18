@@ -97,11 +97,11 @@
 
     <div class="card mt-4">
         <div class="card-header">
-            <h4 class="card-title mb-0">Progression par sujet</h4>
+            <h4 class="card-title mb-0">Sujets prévus et couverts</h4>
         </div>
         <div class="card-body">
             {% if progression_chart_data.planned or progression_chart_data.actual %}
-                <div id="progression-subject-chart" aria-label="Dates prévues et réelles par sujet"></div>
+                <div id="progression-subject-chart" aria-label="Nuage de points des sujets prévus et couverts selon la date prévue"></div>
             {% else %}
                 <p class="text-muted small mb-0">Aucune date de séance n’est encore enregistrée pour cette progression.</p>
             {% endif %}
@@ -250,30 +250,45 @@
 
         const data = JSON.parse(document.getElementById('progression-chart-data').textContent);
         const toDatePoints = points => points.map(point => ({
-            x: Date.parse(point.x + 'T12:00:00Z'),
+            x: point.x,
             y: point.y,
         }));
         const singleSubject = data.subjects.length === 1;
+        const singleDate = data.dates.length === 1;
 
         new ApexCharts(chartElement, {
             series: [
                 { name: 'Prévu', data: toDatePoints(data.planned) },
                 { name: 'Réel', data: toDatePoints(data.actual) },
             ],
-            chart: { type: 'line', height: 320, toolbar: { show: false } },
+            chart: { type: 'line', height: 360, toolbar: { show: false } },
             colors: ['#435ebe', '#198754'],
-            stroke: { curve: 'straight', width: 3 },
-            markers: { size: 6, hover: { size: 8 } },
+            stroke: { curve: 'straight', width: 2 },
+            markers: { size: 8, hover: { size: 10 }, shape: ['circle', 'square'], strokeWidth: 1 },
             xaxis: {
-                type: 'datetime',
-                title: { text: 'Dates des séances' },
-                labels: { datetimeUTC: true, format: 'dd/MM/yyyy', rotate: -35, hideOverlappingLabels: true },
+                type: 'numeric',
+                min: singleDate ? -0.5 : 0,
+                max: singleDate ? 0.5 : data.dates.length - 1,
+                tickAmount: singleDate ? 2 : Math.max(data.dates.length - 1, 1),
+                title: { text: 'Date prévue ou réelle de la séance' },
+                labels: {
+                    rotate: -35,
+                    hideOverlappingLabels: true,
+                    formatter: value => {
+                        const index = Math.round(Number(value));
+                        if (Math.abs(Number(value) - index) > 0.01) return '';
+                        const date = data.dates[index];
+                        if (!date) return '';
+                        const [year, month, day] = date.split('-');
+                        return `${day}/${month}/${year}`;
+                    },
+                },
             },
             yaxis: {
                 min: singleSubject ? -0.5 : 0,
                 max: singleSubject ? 0.5 : data.subjects.length - 1,
                 tickAmount: Math.max(data.subjects.length - 1, 1),
-                title: { text: 'Sujets' },
+                title: { text: 'Sujet' },
                 labels: {
                     formatter: value => data.subjects[Math.round(value)] || '',
                     minWidth: 120,

@@ -2,6 +2,7 @@ from django.views.generic import ListView, DetailView, CreateView, UpdateView, D
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.db.models import Q
+from django.utils import timezone
 from progress.models import ModuleProgress, SessionProgress, Module, Formateur, Action # Removed DetailAction
 from progress.forms import ModuleProgressForm, SessionProgressForm
 from django.shortcuts import get_object_or_404, render, redirect
@@ -142,13 +143,33 @@ class ModuleProgressDetailView(LoginRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        if self.object.statut_module in ('TE', 'VA') and not self.object.date_fin_reelle:
+            last_realized_date = self.object.sessions_progress.filter(
+                statut='REALISEE', actual_date__isnull=False
+            ).order_by('-actual_date').values_list('actual_date', flat=True).first()
+            self.object.date_fin_reelle = last_realized_date or timezone.localdate()
+            ModuleProgress.objects.filter(pk=self.object.pk, date_fin_reelle__isnull=True).update(
+                date_fin_reelle=self.object.date_fin_reelle
+            )
         context['sessions'] = self.object.sessions_progress.all()
         context['next_session_defaults'] = ActionWorkflowService.build_session_initial(self.object)
         context['subject_planning'] = self.object.get_subject_planning()
         subjects = list(self.object.module.subjects.all().order_by('ordre', 'id'))
         subject_labels = []
         subject_indexes = {}
-        progression_chart_data = {'subjects': subject_labels, 'planned': [], 'actual': []}
+        chart_dates = sorted({
+            date_value.isoformat()
+            for session in context['sessions']
+            for date_value in (session.planned_date, session.actual_date)
+            if date_value
+        })
+        date_indexes = {date_value: index for index, date_value in enumerate(chart_dates)}
+        progression_chart_data = {
+            'subjects': subject_labels,
+            'dates': chart_dates,
+            'planned': [],
+            'actual': [],
+        }
 
         def get_subject_index(topic_text, fallback_index):
             topic_text = (topic_text or '').strip().casefold()
@@ -174,12 +195,12 @@ class ModuleProgressDetailView(LoginRequiredMixin, DetailView):
         for session_index, session in enumerate(context['sessions']):
             if session.planned_date:
                 progression_chart_data['planned'].append({
-                    'x': session.planned_date.isoformat(),
+                    'x': date_indexes[session.planned_date.isoformat()],
                     'y': get_subject_index(session.planned_topics, session_index),
                 })
             if session.actual_date:
                 progression_chart_data['actual'].append({
-                    'x': session.actual_date.isoformat(),
+                    'x': date_indexes[session.actual_date.isoformat()],
                     'y': get_subject_index(session.topics_covered, session_index),
                 })
         progression_chart_data['planned'].sort(key=lambda point: point['x'])

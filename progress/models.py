@@ -1,6 +1,7 @@
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.db.models import Sum, Q, F
+from django.utils import timezone
 from decimal import Decimal
 import datetime as dt
 from datetime import timedelta
@@ -296,6 +297,7 @@ class ModuleProgress(models.Model):
         realized_sessions = self.sessions_progress.filter(statut='REALISEE')
         has_realized_sessions = realized_sessions.exists()
         first_realized_date = realized_sessions.order_by("actual_date").values_list("actual_date", flat=True).first()
+        last_realized_date = realized_sessions.order_by("-actual_date").values_list("actual_date", flat=True).first()
         if self.module.duree_heures == 0 or (hours_done > 0 and hours_done >= self.module.duree_heures):
             new_statut = 'TE'
         elif hours_done > 0 or has_realized_sessions:
@@ -309,6 +311,10 @@ class ModuleProgress(models.Model):
         if first_realized_date and self.date_debut_reelle != first_realized_date:
             self.date_debut_reelle = first_realized_date
             fields_to_update.append('date_debut_reelle')
+        completion_date = last_realized_date or timezone.localdate()
+        if new_statut == 'TE' and self.date_fin_reelle != completion_date:
+            self.date_fin_reelle = completion_date
+            fields_to_update.append('date_fin_reelle')
         if fields_to_update:
             self.save(update_fields=[*fields_to_update, 'updated_at'])
 
