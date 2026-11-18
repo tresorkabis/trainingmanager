@@ -33,6 +33,29 @@ Créer le compte administrateur de façon interactive :
 docker compose exec web python manage.py createsuperuser
 ```
 
+## Administrer PostgreSQL avec pgAdmin
+
+Définissez `PGADMIN_DEFAULT_EMAIL` et `PGADMIN_DEFAULT_PASSWORD` dans `.env`,
+puis démarrez l'application avec le profil d'administration :
+
+```bash
+docker compose --profile admin up --build -d
+```
+
+Ouvrez `http://localhost:5050` (ou le port configuré dans `PGADMIN_PORT`) et
+connectez-vous avec ces identifiants. Ajoutez un serveur avec les paramètres :
+
+- Hôte : `db`
+- Port : `5432`
+- Base : valeur de `POSTGRES_DB`
+- Utilisateur : valeur de `POSTGRES_USER`
+- Mot de passe : valeur de `POSTGRES_PASSWORD`
+
+Le nom d'hôte `db` est accessible depuis pgAdmin dans le réseau Docker Compose.
+Le profil `admin` est désactivé par défaut. En production, ne publiez pas le
+port pgAdmin sur Internet sans le protéger derrière un VPN ou un proxy avec
+authentification.
+
 Arrêter sans supprimer les données :
 
 ```bash
