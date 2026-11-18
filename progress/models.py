@@ -508,6 +508,49 @@ class SessionProgress(models.Model):
 
 
 
+class ActionEvaluation(models.Model):
+    action = models.ForeignKey(Action, on_delete=models.CASCADE, related_name="evaluations_pedagogiques")
+    date_evaluation = models.DateField(verbose_name="Date réelle de séance évaluée")
+    evaluateur = models.ForeignKey(User, on_delete=models.PROTECT, related_name="evaluations_actions")
+    constat = models.TextField(verbose_name="Constat")
+    recommandation = models.TextField(verbose_name="Recommandation")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Évaluation pédagogique d’action"
+        verbose_name_plural = "Évaluations pédagogiques d’actions"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["action", "date_evaluation"],
+                name="action_evaluation_unique_date",
+            ),
+        ]
+
+    def clean(self):
+        super().clean()
+        profile = getattr(self.evaluateur, "profile", None) if self.evaluateur_id else None
+        if self.evaluateur_id and getattr(profile, "name", None) not in {"Pédagogique", "Manager"}:
+            raise ValidationError({"evaluateur": "L’évaluateur doit avoir le profil Pédagogique ou Manager."})
+        if self.action_id and self.date_evaluation:
+            actual_session_dates = SessionProgress.objects.filter(
+                module_progress__action_id=self.action_id,
+                statut="REALISEE",
+                actual_date=self.date_evaluation,
+            )
+            original_date = type(self).objects.filter(pk=self.pk).values_list("date_evaluation", flat=True).first() if self.pk else None
+            date_changed = original_date != self.date_evaluation
+            if date_changed and not actual_session_dates.exists():
+                raise ValidationError({"date_evaluation": "Choisissez une date réelle de séance pour cette action."})
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"Évaluation pédagogique du {self.action} le {self.date_evaluation}"
+
+
 class FormateurPerformance(models.Model):
     formateur = models.ForeignKey(Formateur, on_delete=models.CASCADE, related_name='performances')
     action = models.ForeignKey(Action, on_delete=models.CASCADE, related_name='formateur_performances')

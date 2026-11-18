@@ -11,7 +11,7 @@
 
 {% block content %}
 <div class="page-heading">
-    {% tm_hero title="Entreprises" subtitle="Liste des entreprises associées aux stagiaires." icon="bi bi-building" stats=hero_stats theme="primary" %}
+    {% tm_hero title="Entreprises" subtitle="Liste des entreprises associées aux stagiaires." icon="bi bi-building" actions=hero_actions stats=hero_stats theme="primary" %}
 
     <section class="section">
         <div class="card tm-listing-card">
@@ -24,18 +24,17 @@
                         <thead>
                             <tr>
                                 <th>Entreprise</th>
-                                <th>Adresse</th>
                                 <th>Téléphone</th>
                                 <th>Email</th>
                                 <th>Stagiaires associés</th>
                                 <th>Statut</th>
+                                <th class="text-end">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for entreprise in entreprise_list %}
                             <tr>
                                 <td class="fw-bold"><a href="{% url 'entreprise' entreprise.pk %}">{{ entreprise.nom }}</a></td>
-                                <td>{{ entreprise.adresse|default:"—" }}</td>
                                 <td>{{ entreprise.telephone|default:"—" }}</td>
                                 <td>{{ entreprise.email|default:"—" }}</td>
                                 <td><span class="badge bg-light-primary text-primary">{{ entreprise.stagiaires_count }}</span></td>
@@ -45,6 +44,9 @@
                                     {% else %}
                                     <span class="badge bg-light-secondary text-secondary">Inactive</span>
                                     {% endif %}
+                                </td>
+                                <td class="text-end">
+                                    <a class="btn btn-sm btn-outline-primary" href="{% url 'entreprise_update' entreprise.pk %}" title="Modifier l’entreprise"><i class="bi bi-pencil"></i><span class="visually-hidden">Modifier</span></a>
                                 </td>
                             </tr>
                             {% empty %}

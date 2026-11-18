@@ -6,7 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.contrib import messages
 from django.db.models.deletion import ProtectedError
-from django.db.models import Count, Min, Max
+from django.db.models import Count, Min, Max, Prefetch
 from django.db import transaction
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
@@ -15,7 +15,14 @@ from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.generic import DeleteView, DetailView, ListView, UpdateView
 
-from progress.models import Action, Formateur, ModuleProgress, TypeAction, SessionProgress, SchedulePreset
+from progress.models import Action, Formateur, ModuleProgress, TypeAction, SessionProgress, SchedulePreset, Paiement
+from progress.permissions import (
+    ACTION_MANAGE_PROFILES,
+    ACTION_VIEW_PROFILES,
+    can_grade_jury,
+    can_manage_action,
+    can_view_action,
+)
 from progress.services import ActionWorkflowService
 from intern.models import Stagiaire
 from training.models import Formation, Module
@@ -24,9 +31,9 @@ from decimal import Decimal
 
 class ActionPermissionMixin:
     # Profils autorisés à GÉRER les actions (créer/modifier/supprimer)
-    MANAGE_ACTION_PROFILES = ["Manager", "Chef de filière", "Chef de service"]
+    MANAGE_ACTION_PROFILES = ACTION_MANAGE_PROFILES
     # Profils autorisés à CONSULTER les actions en lecture seule (sans les gérer)
-    VIEW_ACTION_PROFILES = ["Caisse", "Conseiller", "Inspecteur", "Pédagogique", "Formateur"]
+    VIEW_ACTION_PROFILES = ACTION_VIEW_PROFILES
 
     def normalize_formateur_ids(self, formateur_ids):
         return [int(formateur_id) for formateur_id in formateur_ids if str(formateur_id).isdigit()]
@@ -171,7 +178,7 @@ class ActionStagiairesPrintView(ActionPermissionMixin, DetailView): # Changed fr
         context = super().get_context_data(**kwargs)
         action = self.get_object()
 
-        inscriptions = action.detailaction_set.select_related(
+        inscriptions = action.detailaction_set.filter(active=True).select_related(
             "stagiaire", "stagiaire__categorie", "stagiaire__entreprise"
         ).order_by("stagiaire__nom", "stagiaire__postnom", "stagiaire__prenom")
         formation_cout = action.formation.cout or Decimal("0.00")
@@ -315,7 +322,6 @@ class ActionDetailViews(ActionPermissionMixin, DetailView):
             .get_queryset()
             .select_related("formation", "formation__filiere")
             .prefetch_related(
-                "detailaction_set__stagiaire",
                 "formateurs",
                 "course_schedules",
                 "formation__modules__formateurs",
@@ -330,8 +336,17 @@ class ActionDetailViews(ActionPermissionMixin, DetailView):
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         action = ctx["object"]
-        inscriptions = action.detailaction_set.select_related("stagiaire").order_by("stagiaire__nom", "stagiaire__postnom")
-        inscrit_ids = list(inscriptions.values_list("stagiaire_id", flat=True))
+        inscriptions = list(
+            action.detailaction_set.filter(active=True)
+            .select_related("stagiaire", "stagiaire__categorie")
+            .prefetch_related(Prefetch(
+                "stagiaire__paiements",
+                queryset=Paiement.objects.filter(action=action),
+                to_attr="paiements_pour_action",
+            ))
+            .order_by("stagiaire__nom", "stagiaire__postnom")
+        )
+        inscrit_ids = [inscription.stagiaire_id for inscription in inscriptions]
 
         # On récupère la liste des modules une seule fois
         modules_list = list(action.formation.modules.all().order_by("ordre"))
@@ -353,7 +368,9 @@ class ActionDetailViews(ActionPermissionMixin, DetailView):
             # Calcul de la progression horaire du module
             m_hours_done = 0
             for mp in module.module_progressions:
-                for s in mp.sessions_progress.filter(statut='REALISEE'):
+                for s in mp.sessions_progress.all():
+                    if s.statut != 'REALISEE':
+                        continue
                     if s.actual_start_time and s.actual_end_time:
                         start = datetime.datetime.combine(datetime.date.today(), s.actual_start_time)
                         end = datetime.datetime.combine(datetime.date.today(), s.actual_end_time)
@@ -369,7 +386,11 @@ class ActionDetailViews(ActionPermissionMixin, DetailView):
             for inscription in inscriptions
             if not inscription.stagiaire.is_fee_exempt
         )
-        total_paye = sum(p.montant for ins in inscriptions for p in ins.stagiaire.paiements.filter(action=action))
+        total_paye = sum(
+            paiement.montant
+            for ins in inscriptions
+            for paiement in ins.stagiaire.paiements_pour_action
+        )
         
         total_solde = max(total_attendu - total_paye, 0)
         ctx["finance"] = {
@@ -390,7 +411,7 @@ class ActionDetailViews(ActionPermissionMixin, DetailView):
         # Attacher les notes de jury à chaque inscription pour simplifier le template
         jury_notes_map = {}
         try:
-            for note in action.jury_pv.notes.all().select_related('stagiaire'):
+            for note in action.jury_pv.notes.all():
                 jury_notes_map[note.stagiaire_id] = note
         except Exception:
             pass
@@ -402,11 +423,20 @@ class ActionDetailViews(ActionPermissionMixin, DetailView):
         ctx["inscriptions"] = inscriptions
         ctx["stagiaires_disponibles"] = Stagiaire.objects.filter(active=True).exclude(pk__in=inscrit_ids).order_by("nom", "postnom", "prenom")
         ctx["link"] = "actions"
-        ctx["inscription_count"] = inscriptions.count()
+        ctx["inscription_count"] = len(inscriptions)
         ctx["effectif_depart"] = ctx["inscription_count"]
-        ctx["effectif_cloture"] = inscriptions.filter(a_passe_jury=True).count()
+        ctx["effectif_cloture"] = sum(ins.a_passe_jury for ins in inscriptions)
+        ctx["can_manage_jury"] = can_manage_action(self.request.user, action)
+        ctx["can_grade_jury"] = can_grade_jury(self.request.user, action)
+        ctx["can_view_action"] = can_view_action(self.request.user, action)
+        profile_name = getattr(getattr(self.request.user, "profile", None), "name", None)
+        ctx["can_view_progressions"] = self.request.user.is_superuser or profile_name in {
+            "Manager", "Pédagogique", "Chef de filière", "Chef de service"
+        }
         ctx["formateurs_assignes"] = action.formateurs.all().order_by("nom", "postnom")
         ctx["course_schedules"] = action.course_schedules.all().order_by("jour_semaine", "heure_debut", "ordre", "id")
+        ctx["action_evaluations"] = action.evaluations_pedagogiques.select_related("evaluateur").order_by("-date_evaluation")
+        ctx["can_evaluate_action"] = profile_name in {"Pédagogique", "Manager"}
 
         # Données pour le graphique d'évolution
         all_sessions = SessionProgress.objects.filter(module_progress__action=action).order_by('planned_date')
@@ -471,15 +501,6 @@ class ActionDetailViews(ActionPermissionMixin, DetailView):
             ctx["evolution_chart"] = evolution_data
 
         # Stats pour le Hero
-        # Prépare la map des notes de jury pour l'affichage dans le template
-        jury_notes_map = {}
-        try:
-            for note in action.jury_pv.notes.all().select_related('stagiaire'):
-                jury_notes_map[note.stagiaire_id] = note
-        except Exception:
-            pass
-        ctx["jury_notes_map"] = jury_notes_map
-
         ctx["hero_stats"] = [
             {'label': 'Inscrits', 'value': ctx["inscription_count"]},
             {'label': 'Modules', 'value': len(modules_list)},
@@ -497,11 +518,19 @@ class ActionDetailViews(ActionPermissionMixin, DetailView):
 
         ctx["hero_actions"] = [
             {'label': 'Retour', 'url': reverse_lazy('actions'), 'icon': 'bi bi-arrow-left', 'class': 'btn-light-secondary'},
-            {'label': 'Progressions', 'url': reverse_lazy('module_progressions') + f'?action={action.pk}', 'icon': 'bi bi-list-task'},
-            {'label': 'Mettre à jour les statuts', 'url': reverse_lazy('action_update_progressions', kwargs={'pk': action.pk}), 'icon': 'bi bi-arrow-repeat'},
-            {'label': 'Modifier', 'url': reverse_lazy('action_update', kwargs={'pk': action.pk}), 'icon': 'bi bi-pencil'},
             {'label': 'Imprimer Stagiaires', 'url': reverse_lazy('action_stagiaires_print', kwargs={'pk': action.pk}), 'icon': 'bi bi-printer', 'class': 'btn-info'}, # Nouveau bouton
         ]
+        if ctx["can_view_progressions"]:
+            ctx["hero_actions"].insert(1, {
+                'label': 'Progressions',
+                'url': reverse_lazy('module_progressions') + f'?action={action.pk}',
+                'icon': 'bi bi-list-task',
+            })
+        if ctx["can_manage_jury"]:
+            ctx["hero_actions"].extend([
+                {'label': 'Mettre à jour les statuts', 'url': reverse_lazy('action_update_progressions', kwargs={'pk': action.pk}), 'icon': 'bi bi-arrow-repeat'},
+                {'label': 'Modifier', 'url': reverse_lazy('action_update', kwargs={'pk': action.pk}), 'icon': 'bi bi-pencil'},
+            ])
         ctx["jury_pv_file_url"] = jury_pv_file_url
 
         return ctx

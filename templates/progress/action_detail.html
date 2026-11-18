@@ -82,6 +82,7 @@
                     <li class="nav-item" role="presentation"><a class="nav-link" id="modules-tab" href="#modules" role="tab">Modules & Progressions <span class="badge rounded-pill bg-light-primary text-primary ms-1">{{ modules|length }}</span></a></li>
                     <li class="nav-item" role="presentation"><a class="nav-link" id="stagiaires-tab" href="#stagiaires" role="tab">Stagiaires <span class="badge rounded-pill bg-light-info text-info ms-1">{{ inscription_count }}</span></a></li>
                     <li class="nav-item" role="presentation"><a class="nav-link" id="finances-tab" href="#finances" role="tab">Finances</a></li>
+                    <li class="nav-item" role="presentation"><a class="nav-link" id="evaluations-tab" href="#evaluations" role="tab">Évaluations pédagogiques <span class="badge rounded-pill bg-light-primary text-primary ms-1">{{ action_evaluations|length }}</span></a></li>
                 </ul>
 
                 <div class="tab-content" id="actionDetailTabContent">
@@ -112,22 +113,32 @@
                                 <h6 class="mb-0">PV Jury</h6>
                                 <div class="d-flex gap-2">
                                     {% if object.jury_pv %}
+                                    {% if can_grade_jury %}
                                     <a href="{% url 'jurypv_coter' object.pk %}" class="btn btn-sm btn-primary">
                                         <i class="bi bi-pencil-square me-1"></i>Coter les stagiaires
                                     </a>
+                                    {% endif %}
+                                    {% if can_manage_jury %}
                                     <a href="{% url 'jurypv_form' object.pk %}" class="btn btn-sm btn-warning">
                                         <i class="bi bi-pencil me-1"></i>Modifier le PV
                                     </a>
+                                    {% endif %}
+                                    {% if can_view_action %}
                                     <a href="{% url 'jurypv_generate_pdf' object.pk %}" class="btn btn-sm btn-success">
                                         <i class="bi bi-file-earmark-pdf me-1"></i>Générer le PV
                                     </a>
+                                    {% endif %}
+                                    {% if can_manage_jury %}
                                     <a href="{% url 'jurypv_delete' object.pk %}" class="btn btn-sm btn-danger">
                                         <i class="bi bi-trash me-1"></i>Supprimer
                                     </a>
+                                    {% endif %}
                                     {% else %}
+                                    {% if can_manage_jury %}
                                     <a href="{% url 'jurypv_form' object.pk %}" class="btn btn-sm btn-primary">
                                         <i class="bi bi-plus-circle me-1"></i>Ajouter un PV
                                     </a>
+                                    {% endif %}
                                     {% endif %}
                                 </div>
                             </div>
@@ -165,6 +176,8 @@
                                                 <td class="text-center">{{ ins.note_jury|default:"--" }}</td>
                                                 <td class="text-center fw-bold">{{ ins.note_total|default:"--" }}</td>
                                             </tr>
+                                        {% empty %}
+                                        <tr><td colspan="4" class="text-center text-muted py-3">Aucun stagiaire n’est inscrit à cette action.</td></tr>
                                             {% endfor %}
                                         </tbody>
                                     </table>
@@ -264,11 +277,15 @@
                                                 </a>
                                             </td>
                                         </tr>
+                                        {% empty %}
+                                        <tr><td colspan="3" class="text-center text-muted py-3">Aucun formateur n’est encore assigné à ce module.</td></tr>
                                         {% endfor %}
                                     </tbody>
                                 </table>
                             </div>
                         </div>
+                        {% empty %}
+                        <div class="alert alert-light border text-muted mb-0">Aucun module n’est associé à cette formation.</div>
                         {% endfor %}
                     </div>
 
@@ -335,6 +352,8 @@
                                         </td>
                                         <td class="text-end"><a href="{% url 'stagiaire' ins.stagiaire.pk %}" class="btn btn-sm btn-light-primary">Voir Profil</a></td>
                                     </tr>
+                                    {% empty %}
+                                    <tr><td colspan="6" class="text-center text-muted py-4">Aucun stagiaire n’est inscrit à cette action.</td></tr>
                                     {% endfor %}
                                 </tbody>
                             </table>
@@ -364,6 +383,38 @@
                             </div>
                         </div>
                     </div>
+
+                    <div class="tab-pane fade" id="evaluations" role="tabpanel">
+                        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                            <div>
+                                <h5 class="mb-1">Évaluations pédagogiques de l’action</h5>
+                                <p class="text-muted mb-0">Choisissez une date parmi les dates réelles des séances réalisées. L’évaluation est facultative pour chaque date.</p>
+                            </div>
+                            {% if can_evaluate_action %}
+                            <a class="btn btn-primary" href="{% url 'action_evaluation_create' object.pk %}"><i class="bi bi-plus-circle me-1"></i>Nouvelle évaluation</a>
+                            {% endif %}
+                        </div>
+                        {% if action_evaluations %}
+                        <div class="table-responsive">
+                            <table class="table table-striped align-middle">
+                                <thead><tr><th>Date réelle évaluée</th><th>Évaluateur</th><th>Constat</th><th>Recommandation</th>{% if can_evaluate_action %}<th>Action</th>{% endif %}</tr></thead>
+                                <tbody>
+                                    {% for evaluation in action_evaluations %}
+                                    <tr>
+                                        <td>{{ evaluation.date_evaluation|date:"d/m/Y" }}</td>
+                                        <td>{{ evaluation.evaluateur.get_full_name|default:evaluation.evaluateur.username }}</td>
+                                        <td>{{ evaluation.constat|linebreaksbr }}</td>
+                                        <td>{{ evaluation.recommandation|linebreaksbr }}</td>
+                                        {% if can_evaluate_action %}<td><a class="btn btn-sm btn-outline-primary" href="{% url 'action_evaluation_update' object.pk evaluation.pk %}">Modifier</a></td>{% endif %}
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <div class="alert alert-light-secondary">Aucune évaluation n’a encore été saisie pour cette action.</div>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
         </div>
@@ -387,6 +438,7 @@
         detailTabLinks.forEach(link => {
             link.addEventListener('click', function(e) {
                 e.preventDefault();
+                window.history.replaceState(null, '', this.getAttribute('href'));
                 detailTabLinks.forEach(l => l.classList.remove('active'));
                 this.classList.add('active');
                 detailTabPanes.forEach(pane => {

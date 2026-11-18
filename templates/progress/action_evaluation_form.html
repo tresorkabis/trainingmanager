@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="page-heading">
+    <h3>{{ title }}</h3>
+    <p class="text-muted">{{ action.description }} — {{ action.formation.nom }}</p>
+</div>
+<section class="section">
+    <div class="card">
+        <div class="card-body">
+            <p class="text-muted">La date doit correspondre à une séance marquée comme réalisée dans cette action.</p>
+            <form method="post">
+                {% csrf_token %}
+                {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
+                <div class="mb-3">
+                    <label class="form-label" for="{{ form.date_evaluation.id_for_label }}">{{ form.date_evaluation.label }}</label>
+                    {{ form.date_evaluation }}
+                    {% for error in form.date_evaluation.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="{{ form.constat.id_for_label }}">{{ form.constat.label }}</label>
+                    {{ form.constat }}
+                    {% for error in form.constat.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="{{ form.recommandation.id_for_label }}">{{ form.recommandation.label }}</label>
+                    {{ form.recommandation }}
+                    {% for error in form.recommandation.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                </div>
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                    <a href="{% url 'action' action.pk %}#evaluations" class="btn btn-light-secondary">Retour à l’action</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock content %}

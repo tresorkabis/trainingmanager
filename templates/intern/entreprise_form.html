@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% load static %}
+{% load tm_tags %}
+
+{% block title %}{{ titre }}{% endblock title %}
+{% block page_header %}{{ titre }}{% endblock page_header %}
+
+{% block style %}
+<link rel="stylesheet" href="{% static 'assets/css/training-manager.css' %}">
+{% endblock style %}
+
+{% block content %}
+<div class="page-heading">
+    {% tm_hero title=titre subtitle="Coordonnées et statut de l’entreprise." icon="bi bi-building-gear" actions=hero_actions theme="primary" %}
+
+    <section class="section">
+        <div class="card tm-listing-card">
+            <div class="card-header"><h4 class="card-title mb-0">Informations de l’entreprise</h4></div>
+            <div class="card-body">
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+                    {% endif %}
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label" for="{{ form.nom.id_for_label }}">Nom de l’entreprise</label>
+                            {{ form.nom }}
+                            {% for error in form.nom.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="{{ form.email.id_for_label }}">Adresse e-mail</label>
+                            {{ form.email }}
+                            {% for error in form.email.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="{{ form.telephone.id_for_label }}">Téléphone</label>
+                            {{ form.telephone }}
+                            {% for error in form.telephone.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="{{ form.adresse.id_for_label }}">Adresse</label>
+                            {{ form.adresse }}
+                            {% for error in form.adresse.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                        </div>
+                        <div class="col-12">
+                            <div class="form-check">
+                                {{ form.active }}
+                                <label class="form-check-label" for="{{ form.active.id_for_label }}">Entreprise active</label>
+                            </div>
+                            {% for error in form.active.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+                        {% if object %}
+                        <a class="btn btn-light-secondary" href="{% url 'entreprise' object.pk %}">Annuler</a>
+                        {% else %}
+                        <a class="btn btn-light-secondary" href="{% url 'entreprises' %}">Annuler</a>
+                        {% endif %}
+                        <button type="submit" class="btn btn-primary">Enregistrer</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock content %}

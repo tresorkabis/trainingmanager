@@ -151,7 +151,7 @@ class ModuleProgressDetailView(LoginRequiredMixin, DetailView):
             ModuleProgress.objects.filter(pk=self.object.pk, date_fin_reelle__isnull=True).update(
                 date_fin_reelle=self.object.date_fin_reelle
             )
-        context['sessions'] = self.object.sessions_progress.all()
+        context['sessions'] = self.object.sessions_progress.select_related('formateur').all()
         context['next_session_defaults'] = ActionWorkflowService.build_session_initial(self.object)
         context['subject_planning'] = self.object.get_subject_planning()
         subjects = list(self.object.module.subjects.all().order_by('ordre', 'id'))

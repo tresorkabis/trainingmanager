@@ -62,7 +62,7 @@
                 breakpoint: 480,
                 options: {
                     chart: {
-                        height: 250,
+                        height: 360,
                     },
                     legend: {
                         position: "bottom",
@@ -100,7 +100,7 @@
             var profileChart = new ApexCharts(chartProfileVisit, {
                 chart: {
                     type: "bar",
-                    height: 400,
+                    height: 440,
                     toolbar: { show: false },
                 },
                 plotOptions: {
@@ -129,7 +129,8 @@
                         radius: 3,
                     },
                     itemMargin: {
-                        horizontal: 10,
+                        horizontal: 8,
+                        vertical: 4,
                     },
                 },
                 colors: ["#435ebe", "#667eea"],
@@ -164,7 +165,7 @@
             var statusChart = new ApexCharts(chartActionsStatus, {
                 chart: {
                     type: "donut",
-                    height: 400,
+                    height: 440,
                     toolbar: { show: false },
                 },
                 plotOptions: {
@@ -200,7 +201,8 @@
                         radius: 3,
                     },
                     itemMargin: {
-                        horizontal: 10,
+                        horizontal: 8,
+                        vertical: 4,
                     },
                 },
                 colors: statusData.colors || ["#ffc107", "#0dcaf0", "#198754", "#dc3545"],
@@ -224,7 +226,7 @@
             var paiementsChart = new ApexCharts(chartPaiements, {
                 chart: {
                     type: "bar",
-                    height: 400,
+                    height: 440,
                     toolbar: { show: false },
                 },
                 plotOptions: {
@@ -271,7 +273,7 @@
             var sessionsChart = new ApexCharts(chartSessions, {
                 chart: {
                     type: "bar",
-                    height: 400,
+                    height: 440,
                     toolbar: { show: false },
                 },
                 plotOptions: {
@@ -299,7 +301,8 @@
                         radius: 3,
                     },
                     itemMargin: {
-                        horizontal: 10,
+                        horizontal: 8,
+                        vertical: 4,
                     },
                 },
                 colors: ["#435ebe", "#10b981"],

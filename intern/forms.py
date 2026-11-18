@@ -2,6 +2,19 @@ from django import forms
 from django_select2.forms import Select2Widget
 from .models import Stagiaire, Categorie, Entreprise
 
+
+class EntrepriseForm(forms.ModelForm):
+    class Meta:
+        model = Entreprise
+        fields = ["nom", "adresse", "telephone", "email", "active"]
+        widgets = {
+            "nom": forms.TextInput(attrs={"class": "form-control"}),
+            "adresse": forms.TextInput(attrs={"class": "form-control"}),
+            "telephone": forms.TextInput(attrs={"class": "form-control"}),
+            "email": forms.EmailInput(attrs={"class": "form-control"}),
+            "active": forms.CheckboxInput(attrs={"class": "form-check-input"}),
+        }
+
 class StagiaireForm(forms.ModelForm):
     categorie = forms.ModelChoiceField(
         queryset=Categorie.objects.filter(titre__in=["dans l'emploi", "sans emploi"]).order_by('titre'),

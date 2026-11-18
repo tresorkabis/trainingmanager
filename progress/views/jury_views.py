@@ -1,5 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.core.exceptions import PermissionDenied
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
@@ -11,14 +12,30 @@ import io
 
 from progress.models import Action, JuryPV, JuryNote, Stagiaire
 from progress.forms import JuryPVForm, JuryNoteFormSet
+from progress.permissions import can_grade_jury, can_manage_action, can_view_action
+
+
+class JuryActionPermissionMixin:
+    def get_authorized_action(self, request, action_pk, permission):
+        action = get_object_or_404(
+            Action.objects.select_related("formation__filiere__service"), pk=action_pk
+        )
+        allowed = {
+            "manage": can_manage_action,
+            "grade": can_grade_jury,
+            "view": can_view_action,
+        }[permission](request.user, action)
+        if not allowed:
+            raise PermissionDenied("Vous n'avez pas accès à cette opération sur l'action.")
+        return action
 
 
 @method_decorator(login_required, name="dispatch")
-class JuryPVCustomView(View):
+class JuryPVCustomView(JuryActionPermissionMixin, View):
     template_name = "progress/jurypv_form.html"
 
     def dispatch(self, request, action_pk, *args, **kwargs):
-        self.action = get_object_or_404(Action, pk=action_pk)
+        self.action = self.get_authorized_action(request, action_pk, "manage")
         self.jury_pv = JuryPV.objects.filter(action=self.action).first()
         return super().dispatch(request, action_pk, *args, **kwargs)
 
@@ -109,11 +126,11 @@ class JuryPVCustomView(View):
 
 
 @method_decorator(login_required, name="dispatch")
-class JuryPVDeleteView(View):
+class JuryPVDeleteView(JuryActionPermissionMixin, View):
     template_name = "progress/jurypv_confirm_delete.html"
 
     def get(self, request, action_pk):
-        action = get_object_or_404(Action, pk=action_pk)
+        action = self.get_authorized_action(request, action_pk, "manage")
         jury_pv = get_object_or_404(JuryPV, action=action)
         context = {
             "jury_pv": jury_pv,
@@ -123,7 +140,7 @@ class JuryPVDeleteView(View):
         return render(request, self.template_name, context)
 
     def post(self, request, action_pk):
-        action = get_object_or_404(Action, pk=action_pk)
+        action = self.get_authorized_action(request, action_pk, "manage")
         jury_pv = get_object_or_404(JuryPV, action=action)
         jury_pv.delete()
         messages.success(request, "PV Jury supprimé avec succès.")
@@ -131,25 +148,25 @@ class JuryPVDeleteView(View):
 
 
 @method_decorator(login_required, name="dispatch")
-class JuryPVCoterView(View):
+class JuryPVCoterView(JuryActionPermissionMixin, View):
     template_name = "progress/jurypv_coter.html"
 
     def get(self, request, action_pk):
-        action = get_object_or_404(Action, pk=action_pk)
+        action = self.get_authorized_action(request, action_pk, "grade")
         jury_pv = JuryPV.objects.filter(action=action).first()
         stagiaires = Stagiaire.objects.filter(
             detailaction__action=action, detailaction__active=True
         ).order_by("nom", "postnom", "prenom")
 
+        notes_by_stagiaire = {
+            note.stagiaire_id: note
+            for note in jury_pv.notes.all()
+        } if jury_pv else {}
         stagiaires_notes = []
         for s in stagiaires:
-            note_formation = None
-            note_jury = None
-            if jury_pv:
-                note_obj = jury_pv.notes.filter(stagiaire=s).first()
-                if note_obj:
-                    note_formation = note_obj.note_formation
-                    note_jury = note_obj.note_jury
+            note_obj = notes_by_stagiaire.get(s.pk)
+            note_formation = note_obj.note_formation if note_obj else None
+            note_jury = note_obj.note_jury if note_obj else None
             total = (note_formation or 0) + (note_jury or 0)
             stagiaires_notes.append({
                 "stagiaire": s,
@@ -164,7 +181,7 @@ class JuryPVCoterView(View):
         })
 
     def post(self, request, action_pk):
-        action = get_object_or_404(Action, pk=action_pk)
+        action = self.get_authorized_action(request, action_pk, "grade")
         jury_pv = JuryPV.objects.filter(action=action).first()
         if not jury_pv:
             messages.error(request, "Veuillez d'abord créer le PV Jury avant de saisir les notes.")
@@ -196,9 +213,9 @@ class JuryPVCoterView(View):
 
 
 @method_decorator(login_required, name="dispatch")
-class JuryPVGeneratePDFView(View):
+class JuryPVGeneratePDFView(JuryActionPermissionMixin, View):
     def get(self, request, action_pk):
-        action = get_object_or_404(Action, pk=action_pk)
+        action = self.get_authorized_action(request, action_pk, "view")
         jury_pv = get_object_or_404(JuryPV, action=action)
 
         try:

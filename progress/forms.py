@@ -2,7 +2,7 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.db.models import Q
 from django_select2.forms import Select2Widget # Importez Select2Widget
-from .models import Paiement, Stagiaire, Formateur, ModuleProgress, SessionProgress, DetailAction, JuryPV, JuryNote # Added JuryPV, JuryNote
+from .models import Paiement, Stagiaire, Formateur, ModuleProgress, SessionProgress, ActionEvaluation, Action, DetailAction, JuryPV, JuryNote # Added JuryPV, JuryNote
 from training.models import Module # Import Module
 from users.models import User # Import User pour le formulaire
 
@@ -261,6 +261,41 @@ def clean(self):
             self.add_error('topics_covered', 'Les sujets prévus sont présents mais aucun sujet couvert n\'a été renseigné.')
 
         return cleaned_data
+
+
+class ActionEvaluationForm(forms.ModelForm):
+    date_evaluation = forms.DateField(
+        label="Date réelle de séance évaluée",
+        widget=forms.Select(attrs={"class": "form-select"}),
+    )
+    constat = forms.CharField(
+        label="Constat",
+        widget=forms.Textarea(attrs={"class": "form-control", "rows": 4}),
+    )
+    recommandation = forms.CharField(
+        label="Recommandation",
+        widget=forms.Textarea(attrs={"class": "form-control", "rows": 4}),
+    )
+
+    class Meta:
+        model = ActionEvaluation
+        fields = ["date_evaluation", "constat", "recommandation"]
+
+    def __init__(self, *args, action, **kwargs):
+        super().__init__(*args, **kwargs)
+        actual_dates = list(
+            SessionProgress.objects.filter(
+                module_progress__action=action,
+                statut="REALISEE",
+                actual_date__isnull=False,
+            ).values_list("actual_date", flat=True).distinct().order_by("actual_date")
+        )
+        choices = [("", "Choisir une date réelle de séance")]
+        choices.extend((date.isoformat(), date.strftime("%d/%m/%Y")) for date in actual_dates)
+        if self.instance.pk and self.instance.date_evaluation not in actual_dates:
+            date = self.instance.date_evaluation
+            choices.append((date.isoformat(), f"{date.strftime('%d/%m/%Y')} (date déjà enregistrée)"))
+        self.fields["date_evaluation"].widget.choices = choices
 
 
 class JuryPVForm(forms.ModelForm):

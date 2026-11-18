@@ -9,6 +9,7 @@ from progress.views.module_progress_views import (
     ModuleProgressUpdateView, ModuleProgressDeleteView,
     SessionProgressCreateView, SessionProgressUpdateView, SessionProgressDeleteView,
 )
+from progress.views.evaluation_views import ActionEvaluationView
 from progress.views.jury_views import JuryPVCustomView, JuryPVDeleteView, JuryPVGeneratePDFView, JuryPVCoterView
 from progress.views.schedule_preset_views import SchedulePresetListView, SchedulePresetCreateView, SchedulePresetDeleteView
 
@@ -24,6 +25,8 @@ urlpatterns = [
     path("actions/<int:pk>/delete/", ActionDeleteView.as_view(), name="action_delete"),
     path("actions/<int:pk>/update-progressions/", ActionUpdateProgressionsView.as_view(), name="action_update_progressions"),
     path("actions/<int:pk>/print-stagiaires/", ActionStagiairesPrintView.as_view(), name="action_stagiaires_print"),
+    path("actions/<int:action_pk>/evaluations/create/", ActionEvaluationView.as_view(), name="action_evaluation_create"),
+    path("actions/<int:action_pk>/evaluations/<int:evaluation_pk>/update/", ActionEvaluationView.as_view(), name="action_evaluation_update"),
 
     # Formateurs
     path("formateurs/", FormateurListView.as_view(), name="formateurs"),

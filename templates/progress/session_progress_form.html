@@ -203,16 +203,17 @@
         const schedulesElement = document.getElementById('schedules-data');
         const schedules = schedulesElement ? JSON.parse(schedulesElement.textContent) : [];
 
+        function getScheduleForDate() {
+            if (!dateSelect || !dateSelect.value) return null;
+            const [year, month, day] = dateSelect.value.split('-').map(Number);
+            const selectedDate = new Date(year, month - 1, day);
+            const djangoDay = (selectedDate.getDay() + 6) % 7;
+            return schedules.find(schedule => Number(schedule.day) === djangoDay) || null;
+        }
+
         if (dateSelect && schedules.length > 0) {
             dateSelect.addEventListener('change', function() {
-                const selectedDateStr = this.value;
-                if (!selectedDateStr) return;
-
-                const selectedDate = new Date(selectedDateStr);
-                const jsDay = selectedDate.getDay();
-                const djangoDay = (jsDay + 6) % 7;
-
-                const match = schedules.find(s => s.day === djangoDay);
+                const match = getScheduleForDate();
 
                 if (match) {
                     if (startTimeInput && !startTimeInput.value) {
@@ -236,12 +237,22 @@
 
         if (copyBtn) {
             copyBtn.addEventListener('click', function() {
-                if (dateSelect) actualDateInput.value = dateSelect.value;
-                if (startTimeInput) actualStartInput.value = startTimeInput.value;
-                if (endTimeInput) actualEndInput.value = endTimeInput.value;
+                const schedule = getScheduleForDate();
+                const copyTime = (source, target, fallback) => {
+                    if (!target) return;
+                    const value = (source && source.value) || fallback || '';
+                    if (!value) return;
+                    target.value = value.slice(0, 5);
+                    target.dispatchEvent(new Event('input', { bubbles: true }));
+                    target.dispatchEvent(new Event('change', { bubbles: true }));
+                };
+
+                if (dateSelect && actualDateInput) actualDateInput.value = dateSelect.value;
+                copyTime(startTimeInput, actualStartInput, schedule && schedule.start);
+                copyTime(endTimeInput, actualEndInput, schedule && schedule.end);
                 if (topicsInput && !coveredInput.value) coveredInput.value = topicsInput.value;
                 if (statutSelect) statutSelect.value = 'REALISEE';
-                checkActualDate();
+                if (actualDateInput) checkActualDate();
             });
         }
 
