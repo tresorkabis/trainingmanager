@@ -1,6 +1,6 @@
 from django.urls import path
 from progress.views.actions_views import ActionListViews, ActionDetailViews, ActionCreateView, ActionUpdateView, ActionDeleteView, ActionUpdateProgressionsView, ActionStagiairesPrintView
-from progress.views.detailAction_views import DetailActionListViews, DetailActionDetailView, DetailActionCreateView
+from progress.views.detailAction_views import DetailActionListViews, DetailActionDetailView, DetailActionCreateView, DetailActionJuryUpdateView
 from progress.views.formateur_views import FormateurListView, FormateurCreateUpdateView, FormateurDeleteView, FormateurDetailView
 from progress.views.typeaction_views import TypeActionListView, TypeActionDetailView, TypeActionCreateUpdateView, TypeActionDeleteView
 from progress.views.paiement_views import PaiementListView, PaiementCreateView, PaiementDetailView, PaiementUpdateView, PaiementDeleteView, PaiementReceiptPrintView
@@ -62,6 +62,7 @@ urlpatterns = [
     # DetailActions (Inscriptions des stagiaires)
     path("detailactions/", DetailActionListViews.as_view(), name="detailactions"),
     path("detailactions/create/", DetailActionCreateView.as_view(), name="detailaction_create"),
+    path("detailactions/<int:pk>/jury/", DetailActionJuryUpdateView.as_view(), name="detailaction_jury_update"),
     path("detailactions/<int:pk>/", DetailActionDetailView.as_view(), name="detailaction"),
 
     # PV Jury (un seul par action - OneToOne pas de pk nécessaire)

@@ -274,6 +274,20 @@
 
                     <!-- Stagiaires Tab -->
                     <div class="tab-pane fade" id="stagiaires" role="tabpanel">
+                        <div class="row g-3 mb-4">
+                            <div class="col-sm-6">
+                                <div class="p-3 rounded border bg-light-primary d-flex justify-content-between align-items-center">
+                                    <span class="fw-semibold">Effectif au départ</span>
+                                    <strong class="fs-4 text-primary">{{ effectif_depart }}</strong>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="p-3 rounded border bg-light-success d-flex justify-content-between align-items-center">
+                                    <span class="fw-semibold">Effectif à la clôture</span>
+                                    <strong class="fs-4 text-success">{{ effectif_cloture }}</strong>
+                                </div>
+                            </div>
+                        </div>
                         <div class="card mb-4 border-0 bg-light">
                             <div class="card-body">
                                 <form method="post" action="{% url 'detailaction_create' %}" class="row g-3 align-items-end">
@@ -297,12 +311,28 @@
                         </div>
                         <div class="table-responsive">
                             <table class="table table-striped" id="stagiaireTable">
-                                <thead><tr><th>Nom Complet</th><th>Date Inscription</th><th class="text-end">Profil</th></tr></thead>
+                                <thead><tr><th>Nom Complet</th><th>Sexe</th><th>Catégorie</th><th>Date Inscription</th><th>A passé le jury</th><th class="text-end">Profil</th></tr></thead>
                                 <tbody>
                                     {% for ins in inscriptions %}
                                     <tr>
                                         <td>{{ ins.stagiaire.get_full_name }}</td>
+                                        <td>{{ ins.stagiaire.get_sexe_display|default:ins.stagiaire.sexe|default:"—" }}</td>
+                                        <td>{{ ins.stagiaire.categorie|default:"—" }}</td>
                                         <td>{{ ins.date_inscription|date:"d/m/Y" }}</td>
+                                        <td>
+                                            {% if request.user.is_superuser or request.user.profile.name == "Manager" or request.user.profile.name == "Conseiller" %}
+                                            <form method="post" action="{% url 'detailaction_jury_update' ins.pk %}" class="d-flex align-items-center gap-2">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="next" value="{{ request.path }}#stagiaires">
+                                                <div class="form-check mb-0">
+                                                    <input class="form-check-input" type="checkbox" name="a_passe_jury" id="jury-passe-{{ ins.pk }}" {% if ins.a_passe_jury %}checked{% endif %} onchange="this.form.submit()">
+                                                    <label class="form-check-label" for="jury-passe-{{ ins.pk }}">{% if ins.a_passe_jury %}Oui{% else %}Non{% endif %}</label>
+                                                </div>
+                                            </form>
+                                            {% else %}
+                                                {% if ins.a_passe_jury %}<span class="badge bg-light-success text-success">Oui</span>{% else %}<span class="text-muted">Non</span>{% endif %}
+                                            {% endif %}
+                                        </td>
                                         <td class="text-end"><a href="{% url 'stagiaire' ins.stagiaire.pk %}" class="btn btn-sm btn-light-primary">Voir Profil</a></td>
                                     </tr>
                                     {% endfor %}
@@ -367,6 +397,8 @@
                 if (targetPane) targetPane.classList.add('show', 'active');
             });
         });
+        const requestedTab = Array.from(detailTabLinks).find(link => link.getAttribute('href') === window.location.hash);
+        if (requestedTab) requestedTab.click();
 
         // 1. Initialisation Datatable
         try {

@@ -79,3 +79,20 @@ class DetailActionCreateView(View):
             )
 
         return HttpResponseRedirect(next_url or reverse_lazy('stagiaire', kwargs={'pk': stagiaire.pk}))
+
+
+@method_decorator(login_required, name='dispatch')
+class DetailActionJuryUpdateView(View):
+    """Update the jury attendance status for an action registration."""
+    def post(self, request, pk):
+        user = request.user
+        profile = getattr(user, 'profile', None)
+        if not (user.is_superuser or (profile and profile.name in ['Manager', 'Conseiller'])):
+            messages.error(request, "Vous n'avez pas la permission de modifier le statut du jury.")
+            return HttpResponseRedirect(request.META.get('HTTP_REFERER', reverse_lazy('detailactions')))
+
+        inscription = get_object_or_404(DetailAction, pk=pk)
+        inscription.a_passe_jury = request.POST.get('a_passe_jury') == 'on'
+        inscription.save(update_fields=['a_passe_jury', 'updated_at'])
+        messages.success(request, "Statut de passage du jury mis à jour.")
+        return HttpResponseRedirect(request.POST.get('next') or reverse_lazy('action', kwargs={'pk': inscription.action_id}) + '#stagiaires')

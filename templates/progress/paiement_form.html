@@ -151,6 +151,7 @@
     {{ preferred_action_by_stagiaire|json_script:"preferred-action-data" }}
     {{ action_costs|json_script:"action-costs-data" }}
     {{ already_paid|json_script:"already-paid-data" }}
+    {{ fee_exempt_stagiaires|json_script:"fee-exempt-stagiaires-data" }}
     <script>
         // Initialisation manuelle de Select2 après le chargement du DOM
         $(document).ready(function() {
@@ -188,6 +189,7 @@
                 const preferredAction = JSON.parse(document.getElementById('preferred-action-data').textContent);
                 const actionCosts = JSON.parse(document.getElementById('action-costs-data').textContent);
                 const alreadyPaid = JSON.parse(document.getElementById('already-paid-data').textContent);
+                const feeExemptStagiaires = new Set(JSON.parse(document.getElementById('fee-exempt-stagiaires-data').textContent).map(String));
 
                 function formatMoney(value) {
                     var n = parseFloat(value);
@@ -202,10 +204,11 @@
                     var deja = document.getElementById('montant-deja-paye');
                     var solde = document.getElementById('solde-restant');
                     if (!stagiaireId || !actionId) { wrapper.style.display = 'none'; return; }
-                    var cout = parseFloat(actionCosts[actionId]) || 0;
+                    var isExempt = feeExemptStagiaires.has(String(stagiaireId));
+                    var cout = isExempt ? 0 : (parseFloat(actionCosts[actionId]) || 0);
                     var stagMap = alreadyPaid[stagiaireId] || {};
                     var paye = parseFloat(stagMap[actionId]) || 0;
-                    if (aPayer) aPayer.textContent = formatMoney(cout);
+                    if (aPayer) aPayer.textContent = isExempt ? 'Exempté' : formatMoney(cout);
                     if (deja) deja.textContent = formatMoney(paye);
                     if (solde) solde.textContent = formatMoney(cout - paye);
                     wrapper.style.display = '';

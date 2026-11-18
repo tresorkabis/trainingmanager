@@ -1,5 +1,6 @@
 from django import forms
 from django.core.exceptions import ValidationError
+from django.db.models import Q
 from django_select2.forms import Select2Widget # Importez Select2Widget
 from .models import Paiement, Stagiaire, Formateur, ModuleProgress, SessionProgress, DetailAction, JuryPV, JuryNote # Added JuryPV, JuryNote
 from training.models import Module # Import Module
@@ -42,6 +43,14 @@ class PaiementForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        eligible_stagiaires = Stagiaire.objects.exclude(
+            categorie__titre__iexact="dans l'emploi"
+        )
+        if self.instance and self.instance.pk and self.instance.stagiaire_id:
+            eligible_stagiaires = Stagiaire.objects.filter(
+                Q(categorie__titre__iexact="dans l'emploi") & Q(pk=self.instance.stagiaire_id)
+            ) | eligible_stagiaires
+        self.fields['stagiaire'].queryset = eligible_stagiaires.order_by('nom', 'postnom', 'prenom')
         # L'action de formation doit être liée au stagiaire : on ne propose que les
         # actions auxquelles le stagiaire est inscrit (DetailAction). Ce filtre est
         # appliqué côté serveur lors d'un POST ou d'une modification.

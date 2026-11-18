@@ -4,76 +4,172 @@
     <meta charset="UTF-8">
     <title>Liste des Stagiaires - {{ action.description }}</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; color: #333; }
-        .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #435ebe; padding-bottom: 10px; }
-        .header h1 { margin: 0; color: #435ebe; font-size: 24px; }
-        .header p { margin: 5px 0; color: #666; }
-        .info-section { margin-bottom: 20px; display: flex; justify-content: space-between; }
-        .info-box { font-size: 14px; }
-        .info-box strong { color: #435ebe; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #dee2e6; padding: 12px; text-align: left; font-size: 13px; }
-        th { background-color: #f8f9fa; color: #435ebe; font-weight: bold; }
-        .badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; text-transform: uppercase; color: #fff; }
-        .bg-success { background-color: #28a745; }
-        .bg-warning { background-color: #ffc107; color: #212529 !important; }
-        .bg-danger { background-color: #dc3545; }
-        .text-right { text-align: right; }
+        :root { color-scheme: light; --ink: #19233a; --muted: #68758b; --brand: #435ebe; --line: #dfe5ef; --soft: #f4f6fb; }
+        @page { size: landscape; margin: 14mm 12mm 12mm; }
+        * { box-sizing: border-box; }
+        body { margin: 0; padding: 24px; background: #edf1f7; color: var(--ink); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .page { max-width: 1500px; margin: 0 auto; padding: 28px 32px; background: #fff; border: 1px solid #e5e9f1; border-radius: 12px; box-shadow: 0 12px 36px #19233a12; }
+        .toolbar { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+        .print-button { padding: 10px 16px; border: 0; border-radius: 7px; background: var(--brand); color: #fff; font: inherit; font-weight: 600; cursor: pointer; }
+        .print-button--closing { background: #187746; }
+        .header { padding: 0 0 16px; border-bottom: 2px solid var(--brand); }
+        .eyebrow { margin: 0 0 5px; color: var(--brand); font-size: 9px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
+        .header h1 { margin: 0; color: var(--ink); font-size: 22px; letter-spacing: -.02em; }
+        .header p { margin: 6px 0 0; color: var(--muted); font-size: 11px; }
+        .header p strong { color: var(--ink); }
+        .compact-info { display: grid; gap: 7px; margin: 14px 0 18px; }
+        .info-row { display: flex; flex-wrap: wrap; gap: 6px; }
+        .info-chip { padding: 6px 9px; border: 1px solid var(--line); border-radius: 5px; color: var(--muted); font-size: 10px; }
+        .info-chip strong { color: var(--ink); }
+        .section-title { margin: 0 0 9px; color: var(--ink); font-size: 12px; font-weight: 700; }
+        .roster-section + .roster-section { margin-top: 26px; }
+        .roster-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 9px; padding-bottom: 7px; border-bottom: 1px solid var(--line); }
+        .roster-heading .section-title { margin: 0; font-size: 15px; }
+        .roster-total { color: var(--brand); font-size: 11px; font-weight: 700; }
+        .category-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+        .category-card { min-width: 0; padding: 9px 11px; border: 1px solid var(--line); border-radius: 6px; break-inside: avoid; }
+        .category-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; padding-bottom: 6px; border-bottom: 1px solid var(--line); font-size: 10px; }
+        .category-head span { color: var(--brand); font-size: 9px; font-weight: 700; white-space: nowrap; }
+        .sex-list { display: flex; flex-wrap: wrap; gap: 5px 14px; padding-top: 6px; }
+        .sex-item { display: flex; gap: 5px; color: var(--muted); font-size: 9px; }
+        .sex-item strong { color: var(--ink); }
+        .empty-stats { color: var(--muted); font-size: 10px; }
+        .table-wrap { margin-top: 18px; }
+        table { width: 100%; border-collapse: collapse; }
+        .roster th, .roster td { padding: 7px 8px; border-bottom: 1px solid var(--line); text-align: left; font-size: 9px; vertical-align: middle; }
+        .roster thead th { border-top: 1px solid var(--line); border-bottom: 1px solid #cbd4e2; background: var(--soft); color: #35435f; font-size: 8px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+        .roster tbody tr:nth-child(even) { background: #fafbfe; }
+        .roster tfoot { font-weight: 700; background: var(--soft); }
+        .badge { display: inline-block; padding: 3px 7px; border-radius: 99px; font-size: 8px; font-weight: 700; text-transform: uppercase; white-space: nowrap; }
+        .bg-success { background: #e5f5ec; color: #187746; }
+        .bg-warning { background: #fff3d5; color: #805a00; }
+        .bg-danger { background: #fde8e8; color: #a52b35; }
+        .text-right { text-align: right !important; white-space: nowrap; }
+        .empty-row { padding: 22px !important; color: var(--muted); text-align: center !important; }
         @media print {
-            .no-print { display: none; }
-            body { padding: 0; }
-            .header { border-bottom: 2px solid #000; }
+            html, body { width: auto; height: auto; margin: 0 !important; padding: 0 !important; overflow: visible !important; }
+            body { background: #fff; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+            .page { max-width: none; margin: 0; padding: 0; border: 0; border-radius: 0; box-shadow: none; overflow: visible; }
+            .no-print { display: none !important; }
+            .category-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+            thead { display: table-header-group; }
+            tr { break-inside: avoid; }
+            .header, .compact-info, .stats-section { break-inside: avoid; page-break-inside: avoid; }
+            .roster-section + .roster-section { margin-top: 0; break-before: page; page-break-before: always; }
+            body[data-print-roster="depart"] .roster-section[data-stage="cloture"],
+            body[data-print-roster="cloture"] .roster-section[data-stage="depart"] { display: none !important; }
+        }
+        @media screen and (max-width: 900px) {
+            body { padding: 10px; }
+            .page { padding: 20px 16px; }
+            .category-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .table-wrap { overflow-x: auto; }
+            .roster { min-width: 1050px; }
         }
     </style>
 </head>
 <body>
-    <div class="no-print" style="margin-bottom: 20px; text-align: right;">
-        <button onclick="window.print()" class="btn btn-primary" style="padding: 10px 20px; background: #435ebe; color: white; border: none; border-radius: 5px; cursor: pointer;">
-            <i class="bi bi-printer"></i> Imprimer la liste
-        </button>
+    <main class="page">
+    <div class="toolbar no-print">
+        <button onclick="printRoster('depart')" class="print-button">Imprimer l’effectif de départ</button>
+        <button onclick="printRoster('cloture')" class="print-button print-button--closing">Imprimer l’effectif de clôture</button>
     </div>
 
     <div class="header">
-        <h1>Liste des Stagiaires et État des Paiements</h1>
-        <p>Action : {{ action.description }}</p>
+        <p class="eyebrow">Suivi de l’action</p>
+        <h1>Liste des stagiaires et état des paiements</h1>
+        <p><strong>{{ action.description }}</strong> · Du {{ action.date_debut|date:"d/m/Y" }} au {{ action.date_fin|date:"d/m/Y" }}{% if action.lieu %} · Lieu : {{ action.lieu }}{% endif %}</p>
     </div>
 
-    <div class="info-section">
-        <div class="info-box">
-            <p><strong>Formation :</strong> {{ action.formation.nom }}</p>
-            <p><strong>Filière :</strong> {{ action.formation.filiere.nom }}</p>
+    <div class="compact-info">
+        <div class="info-row">
+            <span class="info-chip"><strong>Formation :</strong> {{ action.formation.nom }}</span>
+            <span class="info-chip"><strong>Filière :</strong> {{ action.formation.filiere.nom|default:"—" }}</span>
+            <span class="info-chip"><strong>Type :</strong> {{ action.type_action.libelle|default:"—" }}</span>
         </div>
-        <div class="info-box" style="text-align: right;">
-            <p><strong>Coût de la formation :</strong> {{ formation_cout|floatformat:2 }} USD</p>
-            <p><strong>Date d'impression :</strong> {% now "d/m/Y H:i" %}</p>
+        <div class="info-row">
+            <span class="info-chip"><strong>Coût réf. :</strong> {{ formation_cout|floatformat:2 }} USD</span>
+            <span class="info-chip"><strong>Total dû :</strong> {{ total_attendu|floatformat:2 }} USD</span>
+            <span class="info-chip"><strong>Effectif total :</strong> {{ total_stagiaires }}</span>
+            <span class="info-chip"><strong>Effectif départ :</strong> {{ stagiaires_depart|length }}</span>
+            <span class="info-chip"><strong>Effectif clôture :</strong> {{ stagiaires_cloture|length }}</span>
+            <span class="info-chip"><strong>Encaissé :</strong> {{ total_encaisse|floatformat:2 }} USD</span>
+            <span class="info-chip"><strong>Imprimé :</strong> {% now "d/m/Y H:i" %}</span>
         </div>
     </div>
 
-    <table>
+    {% for roster in rosters %}
+    <section class="roster-section" data-stage="{{ roster.stage }}">
+        <div class="roster-heading">
+            <h2 class="section-title">{{ roster.title }}</h2>
+            <span class="roster-total">{{ roster.total }} stagiaire{{ roster.total|pluralize }}</span>
+        </div>
+        <section class="stats-section">
+            <h3 class="section-title">Effectifs par catégorie et par sexe</h3>
+            <div class="category-grid">
+                {% for category in roster.category_stats %}
+                <article class="category-card">
+                    <div class="category-head"><strong>{{ category.name }}</strong><span>{{ category.total }} stagiaire{{ category.total|pluralize }}</span></div>
+                    <div class="sex-list">
+                        {% for label, count in category.sexes %}<span class="sex-item">{{ label }} <strong>{{ count }}</strong></span>{% endfor %}
+                    </div>
+                </article>
+                {% empty %}<p class="empty-stats">Aucun stagiaire dans cet effectif.</p>{% endfor %}
+            </div>
+        </section>
+        <div class="table-wrap">
+        <table class="roster">
         <thead>
             <tr>
+                <th>N°</th>
                 <th>Nom Complet</th>
+                <th>Téléphone</th>
+                <th>Sexe</th>
+                <th>Catégorie</th>
+                <th>Entreprise / Fonction</th>
                 <th>Date d'Inscription</th>
+                <th class="text-right">Montant dû</th>
                 <th class="text-right">Montant Payé</th>
+                <th class="text-right">Solde</th>
                 <th class="text-right">Statut</th>
             </tr>
         </thead>
         <tbody>
-            {% for s in stagiaires_list %}
+            {% for s in roster.people %}
             <tr>
+                <td>{{ forloop.counter }}</td>
                 <td>{{ s.nom }}</td>
+                <td>{{ s.telephone|default:"—" }}</td>
+                <td>{{ s.sexe|default:"—" }}</td>
+                <td>{{ s.categorie|default:"—" }}</td>
+                <td>{% if s.entreprise %}{{ s.entreprise }}{% endif %}{% if s.fonction %}{% if s.entreprise %} · {% endif %}{{ s.fonction }}{% endif %}{% if not s.entreprise and not s.fonction %}—{% endif %}</td>
                 <td>{{ s.date|date:"d/m/Y" }}</td>
+                <td class="text-right">{% if s.fee_exempt %}Exempté{% else %}{{ s.cout_du|floatformat:2 }} USD{% endif %}</td>
                 <td class="text-right">{{ s.total_paye|floatformat:2 }} USD</td>
+                <td class="text-right">{{ s.solde|floatformat:2 }} USD</td>
                 <td class="text-right">
                     <span class="badge {{ s.badge }}">{{ s.statut }}</span>
                 </td>
             </tr>
             {% empty %}
             <tr>
-                <td colspan="4" style="text-align: center; padding: 20px;">Aucun stagiaire inscrit pour cette action.</td>
+                <td colspan="11" class="empty-row">Aucun stagiaire dans cet effectif.</td>
             </tr>
             {% endfor %}
         </tbody>
-    </table>
+        </table>
+        </div>
+    </section>
+    {% endfor %}
+    </main>
+    <script>
+        function printRoster(stage) {
+            document.body.dataset.printRoster = stage;
+            window.print();
+        }
+        window.addEventListener('afterprint', function() {
+            delete document.body.dataset.printRoster;
+        });
+    </script>
 </body>
 </html>

@@ -3,8 +3,8 @@ from datetime import date
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
-from django.db import models, transaction # Import transaction
-from django.db.models import OuterRef, Subquery, Count, Sum # Import Sum for aggregation
+from django.db import transaction
+from django.db.models import Count, Sum
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse_lazy
@@ -117,41 +117,43 @@ class StagiaireListView(StagiairePermissionMixin, ListView):
         if category_id.isdigit():
             queryset = queryset.filter(categorie_id=int(category_id))
 
-        from django.utils import timezone
-        from django.db.models.functions import Coalesce
-
-        today = timezone.now().date()
-
-        latest_detail_action_pk = DetailAction.objects.filter(
-            stagiaire=OuterRef("pk")
-        ).order_by("-action__date_debut").values("pk")[:1]
-
-        active_detail_action_pk = DetailAction.objects.filter(
-            stagiaire=OuterRef("pk"),
-            action__date_debut__lte=today,
-            action__date_fin__gte=today
-        ).order_by("-action__date_debut").values("pk")[:1]
-
-        active_formation_name = DetailAction.objects.filter(
-            pk=Subquery(active_detail_action_pk)
-        ).values("action__formation__nom")[:1]
-
-        latest_formation_name = DetailAction.objects.filter(
-            pk=Subquery(latest_detail_action_pk)
-        ).values("action__formation__nom")[:1]
-
         return queryset.annotate(
             etudes_count=Count('etudes', distinct=True),
             autres_formations_count=Count('autres_formations', distinct=True),
-            current_formation_name=Coalesce(
-                Subquery(active_formation_name, output_field=models.CharField()),
-                Subquery(latest_formation_name, output_field=models.CharField())
-            )
         )
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx["link"] = "stagiaires"
+
+        # Choose the currently running action, falling back to the most recent
+        # enrollment when the stagiaire has no action running today.
+        page_stagiaires = list(ctx["object_list"])
+        page_ids = [stagiaire.pk for stagiaire in page_stagiaires]
+        inscriptions = (
+            DetailAction.objects.filter(stagiaire_id__in=page_ids)
+            .select_related("action__formation")
+            .order_by("stagiaire_id", "-action__date_debut", "-pk")
+        )
+        inscriptions_par_stagiaire = {}
+        for inscription in inscriptions:
+            inscriptions_par_stagiaire.setdefault(inscription.stagiaire_id, []).append(inscription)
+
+        from django.utils import timezone
+        today = timezone.localdate()
+        for stagiaire in page_stagiaires:
+            stagiaire_inscriptions = inscriptions_par_stagiaire.get(stagiaire.pk, [])
+            inscription_actuelle = next(
+                (
+                    inscription for inscription in stagiaire_inscriptions
+                    if inscription.action.date_debut <= today <= inscription.action.date_fin
+                ),
+                None,
+            )
+            inscription_affichee = inscription_actuelle or next(iter(stagiaire_inscriptions), None)
+            stagiaire.current_formation_name = (
+                inscription_affichee.action.formation.nom if inscription_affichee else ""
+            )
         
         # Utiliser le queryset source (non paginé, sans annotations coûteuses) pour les stats
         base_queryset = self.get_stagiaire_queryset()
@@ -205,8 +207,8 @@ class StagiaireDetailView(StagiairePermissionMixin, DetailView):
             stagiaire=current_stagiaire
         ).values_list('action__formation__cout', flat=True).distinct()
         
-        total_cost = sum(formations_cost_qs) if formations_cost_qs else 0
-        solde_restant = total_cost - total_paid
+        total_cost = 0 if current_stagiaire.is_fee_exempt else (sum(formations_cost_qs) if formations_cost_qs else 0)
+        solde_restant = 0 if current_stagiaire.is_fee_exempt else max(total_cost - total_paid, 0)
 
         actions_suivies = list(
             DetailAction.objects.filter(stagiaire=current_stagiaire)

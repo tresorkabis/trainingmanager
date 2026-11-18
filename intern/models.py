@@ -81,6 +81,10 @@ class Stagiaire(models.Model):
         full_name = f"{self.nom} {self.postnom} {prenom}"
         return full_name.strip()
 
+    @property
+    def is_fee_exempt(self):
+        return bool(self.categorie_id and self.categorie.titre.strip().casefold() == "dans l'emploi")
+
 
 class EtudeStagiaire(models.Model):
     stagiaire = models.ForeignKey(

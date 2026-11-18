@@ -178,6 +178,7 @@ class DetailAction(models.Model):
     stagiaire = models.ForeignKey(Stagiaire, on_delete=models.CASCADE)
     action = models.ForeignKey(Action, on_delete=models.CASCADE)
     statut = models.CharField(max_length=50, default="Inscrit")
+    a_passe_jury = models.BooleanField(default=False, verbose_name="A passé le jury")
     date_inscription = models.DateField(auto_now_add=True)
 
     active = models.BooleanField(default=True)
@@ -613,12 +614,18 @@ class Paiement(models.Model):
 
     def clean(self):
         super().clean()
+        if not self.pk and self.stagiaire_id and self.stagiaire.is_fee_exempt:
+            raise ValidationError({
+                "stagiaire": "Ce stagiaire est exempté des frais. Aucun paiement ne peut être enregistré pour lui."
+            })
         if self.mode_paiement == "VIREMENT" and not self.bordereau_photo:
             raise ValidationError({
                 "bordereau_photo": "La photo du bordereau est obligatoire pour un paiement par virement bancaire."
             })
 
     def get_total_cout(self):
+        if self.stagiaire_id and self.stagiaire.is_fee_exempt:
+            return Decimal("0.00")
         if self.action and self.action.formation:
             return self.action.formation.cout or Decimal("0.00")
         return None
@@ -633,6 +640,8 @@ class Paiement(models.Model):
         return total or Decimal("0.00")
 
     def get_solde_restant(self):
+        if self.stagiaire_id and self.stagiaire.is_fee_exempt:
+            return Decimal("0.00")
         total_cout = self.get_total_cout()
         total_paye = self.get_total_paye()
         if total_cout is None or total_paye is None:

@@ -170,15 +170,23 @@ class ActionStagiairesPrintView(ActionPermissionMixin, DetailView): # Changed fr
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         action = self.get_object()
-        
-        inscriptions = action.detailaction_set.select_related("stagiaire").order_by("stagiaire__nom", "stagiaire__postnom")
+
+        inscriptions = action.detailaction_set.select_related(
+            "stagiaire", "stagiaire__categorie", "stagiaire__entreprise"
+        ).order_by("stagiaire__nom", "stagiaire__postnom", "stagiaire__prenom")
         formation_cout = action.formation.cout or Decimal("0.00")
         
         stagiaires_data = []
+        category_stats = {"depart": {}, "cloture": {}}
         for ins in inscriptions:
             total_paye = sum(p.montant for p in ins.stagiaire.paiements.filter(action=action))
             
-            if total_paye >= formation_cout:
+            fee_exempt = ins.stagiaire.is_fee_exempt
+            payable = Decimal("0.00") if fee_exempt else formation_cout
+            if fee_exempt:
+                statut_paiement = "Exempté"
+                badge_class = "bg-secondary"
+            elif total_paye >= payable:
                 statut_paiement = "Payé"
                 badge_class = "bg-success"
             elif total_paye > 0:
@@ -190,14 +198,61 @@ class ActionStagiairesPrintView(ActionPermissionMixin, DetailView): # Changed fr
                 
             stagiaires_data.append({
                 'nom': ins.stagiaire.get_full_name(),
+                'telephone': ins.stagiaire.telephone,
+                'sexe': ins.stagiaire.get_sexe_display(),
+                'categorie': ins.stagiaire.categorie.titre if ins.stagiaire.categorie_id else "",
+                'entreprise': ins.stagiaire.entreprise.nom if ins.stagiaire.entreprise_id else "",
+                'fonction': ins.stagiaire.fonction,
+                'fee_exempt': fee_exempt,
                 'date': ins.date_inscription,
+                'a_passe_jury': ins.a_passe_jury,
                 'total_paye': total_paye,
+                'cout_du': payable,
+                'solde': max(payable - total_paye, Decimal("0.00")),
                 'statut': statut_paiement,
                 'badge': badge_class,
             })
+            sex_label = ins.stagiaire.get_sexe_display() or "Non renseigné"
+            category_label = ins.stagiaire.categorie.titre if ins.stagiaire.categorie_id else "Non renseignée"
+            for stage in ("depart", "cloture") if ins.a_passe_jury else ("depart",):
+                category_bucket = category_stats[stage].setdefault(
+                    category_label, {"total": 0, "sexes": {}}
+                )
+                category_bucket["total"] += 1
+                category_bucket["sexes"][sex_label] = category_bucket["sexes"].get(sex_label, 0) + 1
             
         context['stagiaires_list'] = stagiaires_data
+        context['stagiaires_depart'] = stagiaires_data
+        context['stagiaires_cloture'] = [item for item in stagiaires_data if item['a_passe_jury']]
         context['formation_cout'] = formation_cout
+        context['total_stagiaires'] = len(stagiaires_data)
+        context['total_encaisse'] = sum((item['total_paye'] for item in stagiaires_data), Decimal("0.00"))
+        context['total_attendu'] = sum((item['cout_du'] for item in stagiaires_data), Decimal("0.00"))
+        for stage in ("depart", "cloture"):
+            context[f'category_stats_{stage}'] = [
+                {
+                    "name": category,
+                    "total": values["total"],
+                    "sexes": sorted(values["sexes"].items()),
+                }
+                for category, values in sorted(category_stats[stage].items())
+            ]
+        context['rosters'] = [
+            {
+                "stage": "depart",
+                "title": "Effectif de départ",
+                "people": context['stagiaires_depart'],
+                "total": len(context['stagiaires_depart']),
+                "category_stats": context['category_stats_depart'],
+            },
+            {
+                "stage": "cloture",
+                "title": "Effectif de clôture",
+                "people": context['stagiaires_cloture'],
+                "total": len(context['stagiaires_cloture']),
+                "category_stats": context['category_stats_cloture'],
+            },
+        ]
         return context
 
 @method_decorator(login_required, name="dispatch")
@@ -307,19 +362,24 @@ class ActionDetailViews(ActionPermissionMixin, DetailView):
             if module.progress_percent > 100: module.progress_percent = 100
 
         # Statistiques financières
-        total_attendu = (action.formation.cout or 0) * inscriptions.count()
+        total_attendu = sum(
+            (action.formation.cout or 0)
+            for inscription in inscriptions
+            if not inscription.stagiaire.is_fee_exempt
+        )
         total_paye = sum(p.montant for ins in inscriptions for p in ins.stagiaire.paiements.filter(action=action))
         
+        total_solde = max(total_attendu - total_paye, 0)
         ctx["finance"] = {
             "total_attendu": total_attendu,
             "total_paye": total_paye,
-            "solde": total_attendu - total_paye,
+            "solde": total_solde,
             "percent": int((total_paye / total_attendu * 100)) if total_attendu > 0 else 0
         }
 
         # Données pour le graphique financier (Donut)
         ctx["finance_chart"] = {
-            'series': [float(total_paye), float(total_attendu - total_paye)],
+            'series': [float(total_paye), float(total_solde)],
             'labels': ['Encaissé', 'Reste à percevoir']
         }
 
@@ -341,6 +401,8 @@ class ActionDetailViews(ActionPermissionMixin, DetailView):
         ctx["stagiaires_disponibles"] = Stagiaire.objects.filter(active=True).exclude(pk__in=inscrit_ids).order_by("nom", "postnom", "prenom")
         ctx["link"] = "actions"
         ctx["inscription_count"] = inscriptions.count()
+        ctx["effectif_depart"] = ctx["inscription_count"]
+        ctx["effectif_cloture"] = inscriptions.filter(a_passe_jury=True).count()
         ctx["formateurs_assignes"] = action.formateurs.all().order_by("nom", "postnom")
         ctx["course_schedules"] = action.course_schedules.all().order_by("jour_semaine", "heure_debut", "ordre", "id")
 

@@ -84,8 +84,10 @@ def build_paiement_financial_maps(exclude_paiement_id=None):
 
     action_costs : {action_pk: cout_formation}
     already_paid : {stagiaire_pk: {action_pk: total_verse}}
+    fee_exempt_stagiaires : list of exempt stagiaire IDs
     """
     from progress.models import Action, Paiement
+    from intern.models import Stagiaire
     from django.db.models import Sum
     action_costs = {
         a.pk: float(a.formation.cout or 0)
@@ -99,7 +101,11 @@ def build_paiement_financial_maps(exclude_paiement_id=None):
         if row["action_id"] is None:
             continue
         already_paid.setdefault(row["stagiaire_id"], {})[row["action_id"]] = float(row["total"] or 0)
-    return action_costs, already_paid
+    fee_exempt_stagiaires = list(
+        Stagiaire.objects.filter(categorie__titre__iexact="dans l'emploi")
+        .values_list("pk", flat=True)
+    )
+    return action_costs, already_paid, fee_exempt_stagiaires
 
 
 class PaiementManagePermissionMixin:
@@ -146,7 +152,7 @@ class PaiementListView(ListView):
     paginate_by = 10
 
     def get_queryset(self):
-        queryset = super().get_queryset().select_related('stagiaire', 'action', 'action__formation').order_by('-date_paiement', '-id')
+        queryset = super().get_queryset().select_related('stagiaire', 'stagiaire__categorie', 'action', 'action__formation').order_by('-date_paiement', '-id')
         return queryset
 
     def get_context_data(self, **kwargs):
@@ -180,16 +186,17 @@ class PaiementListView(ListView):
         context['titre'] = 'Liste des paiements'
 
         # Calcul des soldes restants par paiement (évite N+1)
-        action_costs, already_paid = build_paiement_financial_maps()
+        action_costs, already_paid, fee_exempt_stagiaires = build_paiement_financial_maps()
         soldes = {}
         for p in all_paiements:
             if p.action_id and p.stagiaire_id:
-                cout = action_costs.get(p.action_id, 0)
+                cout = 0 if p.stagiaire.is_fee_exempt else action_costs.get(p.action_id, 0)
                 paye = already_paid.get(p.stagiaire_id, {}).get(p.action_id, 0)
-                soldes[p.pk] = cout - paye
+                soldes[p.pk] = 0 if p.stagiaire.is_fee_exempt else cout - paye
             else:
                 soldes[p.pk] = None
         context['soldes'] = soldes
+        context['fee_exempt_stagiaires'] = fee_exempt_stagiaires
 
         # Injecte les soldes directement sur chaque objet paiement pour éviter N+1
         # lorsque le template appelle paiement.get_solde_restant
@@ -271,7 +278,7 @@ class PaiementCreateView(PaiementManagePermissionMixin, CreateView):
         # Données pour le filtrage dynamique action <-> stagiaire
         context['actions_by_stagiaire'], context['actions_map'], context['preferred_action_by_stagiaire'] = build_action_stagiaire_map()
         # Donneess financieres (montant a payer / deja paye) pour l'affichage dynamique
-        context['action_costs'], context['already_paid'] = build_paiement_financial_maps(
+        context['action_costs'], context['already_paid'], context['fee_exempt_stagiaires'] = build_paiement_financial_maps(
             exclude_paiement_id=getattr(self.object, 'pk', None)
         )
 
@@ -339,7 +346,7 @@ class PaiementUpdateView(PaiementManagePermissionMixin, UpdateView):
         # Données pour le filtrage dynamique action <-> stagiaire
         context['actions_by_stagiaire'], context['actions_map'], context['preferred_action_by_stagiaire'] = build_action_stagiaire_map()
         # Donneess financieres (montant a payer / deja paye) pour l'affichage dynamique
-        context['action_costs'], context['already_paid'] = build_paiement_financial_maps(
+        context['action_costs'], context['already_paid'], context['fee_exempt_stagiaires'] = build_paiement_financial_maps(
             exclude_paiement_id=getattr(self.object, 'pk', None)
         )
         return context
