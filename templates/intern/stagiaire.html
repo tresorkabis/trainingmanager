@@ -444,6 +444,11 @@
                             <div class="col-md-4 employment-only">
                                 <label class="form-label" for="{{ form.entreprise.id_for_label }}"><i class="bi bi-building"></i> {{ form.entreprise.label }}</label>
                                 {{ form.entreprise }}
+                                <datalist id="entreprises-list">
+                                    {% for entreprise in entreprises %}
+                                    <option value="{{ entreprise.nom }}"></option>
+                                    {% endfor %}
+                                </datalist>
                                 {{ form.entreprise.errors }}
                             </div>
                         </div>

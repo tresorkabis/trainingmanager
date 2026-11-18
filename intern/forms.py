@@ -1,5 +1,5 @@
 from django import forms
-from django_select2.forms import Select2Widget, ModelSelect2TagWidget
+from django_select2.forms import Select2Widget
 from .models import Stagiaire, Categorie, Entreprise
 
 class StagiaireForm(forms.ModelForm):
@@ -8,13 +8,16 @@ class StagiaireForm(forms.ModelForm):
         label="Catégorie",
         widget=Select2Widget(attrs={'data-width': '100%', 'class': 'form-select select2'}) # Utilisation de Select2Widget ici aussi
     )
-    # Use a CharField with Select2 tagging enabled so users can type a new company name.
-    # clean_entreprise will return an Entreprise instance so ModelForm assigns the FK correctly.
-    # Use a CharField with a ModelSelect2TagWidget so both existing PKs and free-text names are accepted.
+    # Plain text input accepts company names with spaces; clean_entreprise maps
+    # an existing ID/name to its model instance or creates a new company.
     entreprise = forms.CharField(
         label="Entreprise",
         required=False,
-        widget=ModelSelect2TagWidget(model=Entreprise, search_fields=["nom__icontains"], attrs={'data-width': '100%', 'class': 'form-select', 'data-tags': 'true', 'data-minimum-input-length': '0'})
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'list': 'entreprises-list',
+            'autocomplete': 'organization',
+        }),
     )
 
     class Meta:
@@ -45,9 +48,11 @@ class StagiaireForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        if self.instance and self.instance.pk and self.instance.entreprise_id:
+            self.initial['entreprise'] = self.instance.entreprise.nom
         # Assurez-vous que tous les champs ont la classe form-control ou form-select
         for field_name, field in self.fields.items():
-            if not isinstance(field.widget, Select2Widget) and not isinstance(field.widget, ModelSelect2TagWidget):
+            if not isinstance(field.widget, Select2Widget):
                 if isinstance(field.widget, forms.Select):
                     field.widget.attrs.update({'class': 'form-select'})
                 elif isinstance(field.widget, forms.CheckboxInput):
@@ -61,22 +66,21 @@ class StagiaireForm(forms.ModelForm):
         if not data:
             return None
         
-        # Si la donnée est déjà une instance du modèle, c'est une sélection existante.
-        if isinstance(data, Entreprise):
-            return data
-        
-        # ModelSelect2TagWidget envoie l'ID en chaîne pour les sélections existantes
-        # et le texte brut pour les nouvelles balises.
-        if isinstance(data, str):
-            try:
-                # C'est un ID d'une entreprise existante
-                entreprise_id = int(data)
-                return Entreprise.objects.get(pk=entreprise_id)
-            except (ValueError, Entreprise.DoesNotExist):
-                # C'est un nouveau nom d'entreprise à créer
-                entreprise_nom = data.strip()
-                if entreprise_nom:
-                    entreprise, _ = Entreprise.objects.get_or_create(nom=entreprise_nom)
-                    return entreprise
-        
-        return None
+        entreprise_nom = data.strip()
+        if not entreprise_nom:
+            return None
+
+        # Accept an existing company ID for compatibility with previously rendered forms.
+        try:
+            entreprise_id = int(entreprise_nom)
+        except ValueError:
+            entreprise_id = None
+        if entreprise_id is not None:
+            entreprise = Entreprise.objects.filter(pk=entreprise_id).first()
+            if entreprise:
+                return entreprise
+
+        entreprise = Entreprise.objects.filter(nom__iexact=entreprise_nom).first()
+        if entreprise:
+            return entreprise
+        return Entreprise.objects.create(nom=entreprise_nom)

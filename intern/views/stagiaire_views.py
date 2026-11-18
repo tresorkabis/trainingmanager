@@ -394,6 +394,7 @@ class StagiaireCreateUpdateView(StagiairePermissionMixin, View):
                 {'label': 'Retour', 'url': reverse_lazy('stagiaires'), 'icon': 'bi bi-arrow-left', 'class': 'btn-light-secondary'},
             ],
         }
+        ctx["form_data"] = request.POST
         # Inclure l'aperçu photo lors d'une validation invalide (si stagiaire existant)
         ctx['photo_url'] = stagiaire.photo.url if stagiaire and getattr(stagiaire, 'photo', None) else None
         reconstructed_studies = []

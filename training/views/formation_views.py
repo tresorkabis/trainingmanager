@@ -146,7 +146,8 @@ class FormationDetailView(FormationPermissionMixin, DetailView):
         # Hero Context
         ctx["hero_stats"] = [
             {'label': 'Modules', 'value': formation.modules.count()},
-            {'label': 'Durée', 'value': f"{formation.duree_heures}h"},
+            {'label': 'Durée en heures', 'value': f"{formation.duree_heures} h"},
+            {'label': 'Durée en mois', 'value': f"{formation.duree} mois"},
             {'label': 'Coût', 'value': f"{formation.cout:,.0f} USD"},
             {'label': 'Sessions', 'value': formation.actions.count()},
         ]
