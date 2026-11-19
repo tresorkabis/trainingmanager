@@ -65,7 +65,7 @@
                         height: 360,
                     },
                     legend: {
-                        position: "bottom",
+                        position: "top",
                     },
                 },
             },
@@ -118,14 +118,20 @@
                 },
                 legend: {
                     show: true,
-                    position: "bottom",
+                    position: "top",
+                    floating: false,
+                    offsetY: 0,
                     horizontalAlign: "center",
-                    fontSize: "0.8rem",
+                    fontSize: "0.95rem",
                     fontFamily: "'Nunito', sans-serif",
                     fontWeight: 600,
+                    labels: {
+                        colors: "#263449",
+                        useSeriesColors: false,
+                    },
                     markers: {
-                        width: 10,
-                        height: 10,
+                        width: 13,
+                        height: 13,
                         radius: 3,
                     },
                     itemMargin: {
@@ -190,14 +196,20 @@
                 },
                 legend: {
                     show: true,
-                    position: "bottom",
+                    position: "top",
+                    floating: false,
+                    offsetY: 0,
                     horizontalAlign: "center",
-                    fontSize: "0.8rem",
+                    fontSize: "0.95rem",
                     fontFamily: "'Nunito', sans-serif",
                     fontWeight: 600,
+                    labels: {
+                        colors: "#263449",
+                        useSeriesColors: false,
+                    },
                     markers: {
-                        width: 10,
-                        height: 10,
+                        width: 13,
+                        height: 13,
                         radius: 3,
                     },
                     itemMargin: {
@@ -290,14 +302,20 @@
                 },
                 legend: {
                     show: true,
-                    position: "bottom",
+                    position: "top",
+                    floating: false,
+                    offsetY: 0,
                     horizontalAlign: "center",
-                    fontSize: "0.8rem",
+                    fontSize: "0.95rem",
                     fontFamily: "'Nunito', sans-serif",
                     fontWeight: 600,
+                    labels: {
+                        colors: "#263449",
+                        useSeriesColors: false,
+                    },
                     markers: {
-                        width: 10,
-                        height: 10,
+                        width: 13,
+                        height: 13,
                         radius: 3,
                     },
                     itemMargin: {
