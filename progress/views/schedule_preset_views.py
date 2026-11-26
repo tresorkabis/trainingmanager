@@ -5,7 +5,6 @@ from django.db import IntegrityError, transaction
 from django.shortcuts import redirect
 from django.utils.decorators import method_decorator
 from django.views.generic import ListView, View
-from django.urls import reverse_lazy
 
 from progress.models import Action, SchedulePreset
 from progress.services import ActionWorkflowService
@@ -36,9 +35,6 @@ class SchedulePresetListView(SchedulePresetPermissionMixin, ListView):
         context = super().get_context_data(**kwargs)
         context["link"] = "schedule_presets"
         context["titre"] = "Configurations des créneaux"
-        context["hero_actions"] = [
-            {"label": "Retour aux actions", "url": reverse_lazy("actions"), "icon": "bi bi-arrow-left", "class": "btn-light-secondary"},
-        ]
         context["hero_stats"] = [{"label": "Configurations", "value": self.get_queryset().count()}]
         context["days"] = Action.DAY_OF_WEEK_CHOICES
         return context
