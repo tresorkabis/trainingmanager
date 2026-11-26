@@ -42,7 +42,7 @@
                                 <th>Stagiaire</th>
                                 <th>Action / Formation</th>
                                 <th>Montant</th>
-                                <th>Solde restant</th>
+                                <th>Solde dû pour l’action</th>
                                 <th>Date</th>
                                 <th>Mode</th>
                                 {% if can_manage_paiement or can_delete_paiement %}
@@ -95,34 +95,41 @@
                                         <span class="badge bg-light-primary text-primary w-100 d-inline-flex align-items-center justify-content-center"><i class="bi bi-credit-card me-1"></i>Virement</span>
                                     {% endif %}
                                 </td>
+                                {% if can_manage_paiement or can_delete_paiement %}
                                 <td class="text-end">
-                                    {% if can_manage_paiement %}
                                     <div class="d-flex gap-2 justify-content-end">
+                                        {% if can_manage_paiement %}
                                         <a href="{% url 'paiement_update' paiement.pk %}" class="btn btn-sm btn-outline-info" title="Modifier"><i class="bi bi-pencil"></i></a>
+                                        {% endif %}
+                                        {% if can_delete_paiement %}
                                         <a href="{% url 'paiement_delete' paiement.pk %}" class="btn btn-sm btn-outline-danger" title="Supprimer"><i class="bi bi-trash"></i></a>
+                                        {% endif %}
                                     </div>
-                                    {% endif %}
                                 </td>
+                                {% endif %}
                             </tr>
                             {% endfor %}
                             {% else %}
-                            <tr><td colspan="{% if can_manage_paiement %}7{% else %}6{% endif %}" class="text-center p-5 text-muted">Aucun paiement enregistré.</td></tr>
+                            <tr><td colspan="{% if can_manage_paiement or can_delete_paiement %}8{% else %}7{% endif %}" class="text-center p-5 text-muted">Aucun paiement enregistré.</td></tr>
                             {% endif %}
                         </tbody>
                     </table>
                 </div>
+                <div id="paiementNoResults" class="text-center p-4 text-muted" role="status" hidden>Aucun paiement ne correspond à la recherche ou au filtre sélectionné.</div>
 
                 {% if is_paginated %}
                 <div class="d-flex justify-content-between align-items-center mt-3">
                     <div class="dataTable-info">Page {{ page_obj.number }} sur {{ page_obj.paginator.num_pages }}</div>
                     <ul class="pagination pagination-primary float-end">
-                        {% if page_obj.has_previous %}
-                        <li class="page-item pager"><a href="?page=1" class="page-link">&laquo;</a></li>
-                        {% endif %}
-                        <li class="page-item active"><a href="#" class="page-link">{{ page_obj.number }}</a></li>
-                        {% if page_obj.has_next %}
-                        <li class="page-item pager"><a href="?page={{ page_obj.paginator.num_pages }}" class="page-link">&raquo;</a></li>
-                        {% endif %}
+                        {% for page_number in page_range %}
+                            {% if page_number == page_obj.paginator.ELLIPSIS %}
+                            <li class="page-item disabled"><span class="page-link">{{ page_number }}</span></li>
+                            {% elif page_number == page_obj.number %}
+                            <li class="page-item active" aria-current="page"><span class="page-link">{{ page_number }}</span></li>
+                            {% else %}
+                            <li class="page-item"><a href="?page={{ page_number }}" class="page-link">{{ page_number }}</a></li>
+                            {% endif %}
+                        {% endfor %}
                     </ul>
                 </div>
                 {% endif %}
@@ -139,18 +146,22 @@
         const tableBody = document.getElementById('paiementTableBody');
         const rows = Array.from(tableBody.querySelectorAll('.paiement-row'));
         const filterBtns = document.querySelectorAll('.filter-btn');
+        const noResults = document.getElementById('paiementNoResults');
 
         function filterTable() {
             const term = searchInput.value.toLowerCase().trim();
             const mode = document.querySelector('.filter-btn.active').getAttribute('data-mode');
 
+            let visibleCount = 0;
             rows.forEach(row => {
                 const text = row.textContent.toLowerCase();
                 const rowMode = row.getAttribute('data-mode-label');
                 const matchesSearch = text.includes(term);
                 const matchesFilter = mode === 'all' || rowMode === mode;
                 row.style.display = (matchesSearch && matchesFilter) ? '' : 'none';
+                if (matchesSearch && matchesFilter) visibleCount += 1;
             });
+            noResults.hidden = rows.length === 0 || visibleCount > 0;
         }
 
         searchInput.addEventListener('keyup', filterTable);

@@ -157,6 +157,10 @@ class PaiementListView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        if context.get('is_paginated'):
+            context['page_range'] = context['page_obj'].paginator.get_elided_page_range(
+                number=context['page_obj'].number
+            )
         all_paiements = self.get_queryset()
         today = date.today()
         
