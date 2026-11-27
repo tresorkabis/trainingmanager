@@ -84,7 +84,7 @@
     </div>
 
     <div class="header">
-        <p class="eyebrow">Suivi de l’action</p>
+        <p class="eyebrow">{{ institution_name }} ({{ institution_acronym }}) · Suivi de l’action</p>
         <h1>Liste des stagiaires et état des paiements</h1>
         <p><strong>{{ action.description }}</strong> · Du {{ action.date_debut|date:"d/m/Y" }} au {{ action.date_fin|date:"d/m/Y" }}{% if action.lieu %} · Lieu : {{ action.lieu }}{% endif %}</p>
     </div>

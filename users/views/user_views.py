@@ -8,7 +8,10 @@ from django.contrib import messages
 from django.db.models import Count
 from django.db import transaction
 
-from users.models import User, Profile
+from users.models import (
+    User, Profile, InstitutionSettings, DEFAULT_INSTITUTION_NAME,
+    DEFAULT_INSTITUTION_ACRONYM,
+)
 from users.utils import createprofile
 from users.forms import CustomUserCreationForm, CustomUserChangeForm
 from intern.models import Categorie, Stagiaire
@@ -179,6 +182,13 @@ class SettingsView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         context['titre'] = 'Réglages'
         context['link'] = 'settings'
+        context['institution_settings'], _ = InstitutionSettings.objects.get_or_create(
+            pk=1,
+            defaults={
+                'institution_name': DEFAULT_INSTITUTION_NAME,
+                'institution_acronym': DEFAULT_INSTITUTION_ACRONYM,
+            },
+        )
         # Utilisateurs
         context['total_users'] = User.objects.count()
         context['users_with_profile'] = User.objects.exclude(profile__isnull=True).count()
@@ -195,6 +205,34 @@ class SettingsView(UserPassesTestMixin, TemplateView):
         context['total_stagiaires'] = Stagiaire.objects.count()
         context['stagiaires_with_categorie'] = Stagiaire.objects.exclude(categorie__isnull=True).count()
         return context
+
+
+@method_decorator(login_required, name='dispatch')
+class InstitutionSettingsUpdateView(UserPassesTestMixin, View):
+    """Met à jour les informations d'identité de l'institut."""
+
+    def test_func(self):
+        return self.request.user.is_superuser
+
+    def post(self, request, *args, **kwargs):
+        institution_name = request.POST.get('institution_name', '').strip()
+        institution_acronym = request.POST.get('institution_acronym', '').strip()
+        if not institution_name or not institution_acronym:
+            messages.error(request, "Le nom officiel et le sigle de l'institut sont obligatoires.")
+            return redirect('settings')
+
+        settings, _ = InstitutionSettings.objects.get_or_create(
+            pk=1,
+            defaults={
+                'institution_name': DEFAULT_INSTITUTION_NAME,
+                'institution_acronym': DEFAULT_INSTITUTION_ACRONYM,
+            },
+        )
+        settings.institution_name = institution_name[:200]
+        settings.institution_acronym = institution_acronym[:50]
+        settings.save(update_fields=['institution_name', 'institution_acronym', 'updated_at'])
+        messages.success(request, "L'identité de l'institut a été mise à jour.")
+        return redirect('settings')
 
 
 @method_decorator(login_required, name='dispatch')

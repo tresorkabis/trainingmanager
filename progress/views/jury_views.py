@@ -242,7 +242,7 @@ class JuryPVGeneratePDFView(JuryActionPermissionMixin, View):
         html_string = render_to_string("progress/jurypv_pdf.html", {
             "pv": jury_pv,
             "stagiaires_notes": stagiaires_notes,
-        })
+        }, request=request)
 
         # Génération du PDF avec xhtml2pdf (pur-Python, compatible avec les
         # environnements serverless comme Vercel — contrairement à WeasyPrint).

@@ -82,6 +82,7 @@
         flex-grow: 1;
     }
 
+    .print-institution { color: #435ebe; font-size: 0.54rem; font-weight: 700; line-height: 1.15; }
     .print-name { font-weight: 800; color: #12224b; font-size: 1.15rem; letter-spacing: 0.01em; }
     .print-title { font-weight: 600; color: #435ebe; font-size: 0.85rem; text-transform: capitalize; }
     .print-company { color: #4e5a6b; font-size: 0.8rem; }
@@ -110,7 +111,7 @@
 <div class="d-flex justify-content-between align-items-center mb-3 no-print">
     <h3>Cartes des stagiaires</h3>
     <div>
-        <a href="#" onclick="window.print(); return false;" class="btn btn-primary">Imprimer</a>
+        <a href="#" onclick="window.print(); return false;" class="btn btn-primary">Imprimer les cartes</a>
         <a href="{% url 'stagiaires' %}" class="btn btn-secondary">Retour</a>
     </div>
 </div>
@@ -128,11 +129,12 @@
         </div>
 
         <div class="print-content">
+            <div class="print-institution">{{ institution_name }} ({{ institution_acronym }})</div>
             <div class="print-name">{{ s.nom }} {{ s.postnom }} {{ s.prenom }}</div>
             {% if s.fonction %}
             <div class="print-title">{{ s.fonction }}</div>
             {% endif %}
-            <div class="print-company">Métier: {{ s.current_formation_name|default:"" }}</div>
+            <div class="print-company">Métier: {{ s.current_formation_name|default:"Non renseigné" }}</div>
             {% if s.entreprise and s.categorie and s.categorie.titre != 'sans emploi' %}
             <div class="print-company">{{ s.entreprise.nom }}</div>
             {% endif %}

@@ -9,6 +9,7 @@ from users.views.user_views import (
     UserResetProfileView,
     UserResetAllProfilesView,
     SettingsView,
+    InstitutionSettingsUpdateView,
     CategoryResetView,
     ProfileListView,
 )
@@ -29,6 +30,7 @@ urlpatterns = [
 
     # URLs de la page Réglages (superutilisateurs uniquement)
     path("settings/", SettingsView.as_view(), name="settings"),
+    path("settings/institution/", InstitutionSettingsUpdateView.as_view(), name="institution_settings_update"),
     path("settings/reset-profiles/", UserResetAllProfilesView.as_view(), name="user_reset_all_profiles"),
     path("settings/reset-categories/", CategoryResetView.as_view(), name="category_reset"),
     path("profiles/", ProfileListView.as_view(), name="profiles"),

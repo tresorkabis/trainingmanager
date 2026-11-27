@@ -48,6 +48,7 @@
         <button type="button" onclick="window.print()">Imprimer le rapport</button>
     </div>
     <header>
+        <p class="meta">{{ institution_name }} ({{ institution_acronym }})</p>
         <h1>Rapport des actions de formation</h1>
         <p class="subtitle">Vue d’ensemble des actions accessibles selon votre profil.</p>
         <p class="meta">Généré le {{ generated_at|date:"d/m/Y à H:i" }}</p>

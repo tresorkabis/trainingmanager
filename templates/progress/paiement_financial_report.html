@@ -52,6 +52,7 @@
     </div>
 
     <header>
+        <p class="meta">{{ institution_name }} ({{ institution_acronym }})</p>
         <h1>Rapport financier des paiements</h1>
         <p class="subtitle">Synthèse des encaissements et détail des paiements enregistrés.</p>
         <p class="meta">Généré le {{ generated_at|date:"d/m/Y à H:i" }}{% if date_debut or date_fin %} · Période : {{ date_debut|default:"début" }} au {{ date_fin|default:"aujourd’hui" }}{% else %} · Toutes les périodes{% endif %}</p>

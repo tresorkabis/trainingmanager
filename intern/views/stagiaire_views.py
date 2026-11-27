@@ -9,6 +9,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
+from django.utils import timezone
 from django.views import View
 from django.views.generic import DetailView, ListView, UpdateView, DeleteView
 
@@ -18,6 +19,36 @@ from progress.models import DetailAction, Paiement, Action
 from training.models import Filiere
 
 ALLOWED_CATEGORIE_TITRES = ["dans l'emploi", "sans emploi"]
+
+
+def attach_current_formation_names(stagiaires):
+    """Ajoute la formation actuelle, ou la plus récente, à chaque stagiaire."""
+    stagiaires = list(stagiaires)
+    stagiaire_ids = [stagiaire.pk for stagiaire in stagiaires]
+    inscriptions = (
+        DetailAction.objects.filter(stagiaire_id__in=stagiaire_ids)
+        .select_related("action__formation")
+        .order_by("stagiaire_id", "-action__date_debut", "-pk")
+    )
+    inscriptions_by_stagiaire = {}
+    for inscription in inscriptions:
+        inscriptions_by_stagiaire.setdefault(inscription.stagiaire_id, []).append(inscription)
+
+    today = timezone.localdate()
+    for stagiaire in stagiaires:
+        stagiaire_inscriptions = inscriptions_by_stagiaire.get(stagiaire.pk, [])
+        current_enrollment = next(
+            (
+                enrollment for enrollment in stagiaire_inscriptions
+                if enrollment.action.date_debut <= today <= enrollment.action.date_fin
+            ),
+            None,
+        )
+        selected_enrollment = current_enrollment or next(iter(stagiaire_inscriptions), None)
+        stagiaire.current_formation_name = (
+            selected_enrollment.action.formation.nom if selected_enrollment else ""
+        )
+    return stagiaires
 
 
 class StagiairePermissionMixin:
@@ -126,34 +157,9 @@ class StagiaireListView(StagiairePermissionMixin, ListView):
         ctx = super().get_context_data(**kwargs)
         ctx["link"] = "stagiaires"
 
-        # Choose the currently running action, falling back to the most recent
-        # enrollment when the stagiaire has no action running today.
-        page_stagiaires = list(ctx["object_list"])
-        page_ids = [stagiaire.pk for stagiaire in page_stagiaires]
-        inscriptions = (
-            DetailAction.objects.filter(stagiaire_id__in=page_ids)
-            .select_related("action__formation")
-            .order_by("stagiaire_id", "-action__date_debut", "-pk")
-        )
-        inscriptions_par_stagiaire = {}
-        for inscription in inscriptions:
-            inscriptions_par_stagiaire.setdefault(inscription.stagiaire_id, []).append(inscription)
-
-        from django.utils import timezone
-        today = timezone.localdate()
-        for stagiaire in page_stagiaires:
-            stagiaire_inscriptions = inscriptions_par_stagiaire.get(stagiaire.pk, [])
-            inscription_actuelle = next(
-                (
-                    inscription for inscription in stagiaire_inscriptions
-                    if inscription.action.date_debut <= today <= inscription.action.date_fin
-                ),
-                None,
-            )
-            inscription_affichee = inscription_actuelle or next(iter(stagiaire_inscriptions), None)
-            stagiaire.current_formation_name = (
-                inscription_affichee.action.formation.nom if inscription_affichee else ""
-            )
+        # Show the running action, falling back to the most recent enrollment.
+        page_stagiaires = attach_current_formation_names(ctx["object_list"])
+        ctx["object_list"] = page_stagiaires
         
         # Utiliser le queryset source (non paginé, sans annotations coûteuses) pour les stats
         base_queryset = self.get_stagiaire_queryset()
@@ -177,10 +183,38 @@ class StagiaireListView(StagiairePermissionMixin, ListView):
 
         ctx["hero_actions"] = [
             {'label': 'Nouveau stagiaire', 'url': reverse_lazy('stagiaire_create'), 'icon': 'bi bi-person-plus'},
-            {'label': 'Imprimer', 'url': reverse_lazy('stagiaires_print'), 'icon': 'bi bi-printer', 'class': 'btn-light-secondary'},
+            {'label': 'Imprimer le rapport', 'url': reverse_lazy('stagiaires_report'), 'icon': 'bi bi-file-earmark-text', 'class': 'btn-light-secondary'},
+            {'label': 'Imprimer les cartes', 'url': reverse_lazy('stagiaires_print'), 'icon': 'bi bi-printer', 'class': 'btn-light-secondary'},
         ]
 
         return ctx
+
+
+class StagiaireReportView(StagiaireListView):
+    """Rapport complet, avec les mêmes permissions et filtres que la liste."""
+    template_name = "intern/stagiaires_report.html"
+    paginate_by = None
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        stagiaires = list(context["object_list"])
+        context.update({
+            "report_stagiaires": stagiaires,
+            "report_total": len(stagiaires),
+            "report_actifs": sum(stagiaire.active for stagiaire in stagiaires),
+            "report_dans_emploi": sum(
+                bool(stagiaire.categorie and stagiaire.categorie.titre.casefold() == "dans l'emploi")
+                for stagiaire in stagiaires
+            ),
+            "report_sans_emploi": sum(
+                bool(stagiaire.categorie and stagiaire.categorie.titre.casefold() == "sans emploi")
+                for stagiaire in stagiaires
+            ),
+            "report_feminin": sum(stagiaire.sexe == "F" for stagiaire in stagiaires),
+            "report_masculin": sum(stagiaire.sexe == "M" for stagiaire in stagiaires),
+            "generated_at": timezone.localtime(),
+        })
+        return context
 
 
 @method_decorator(login_required, name="dispatch")
@@ -499,7 +533,8 @@ def stagiaire_cards_print(request):
 
     paginator = Paginator(qs, list_view.paginate_by or 20)
     page_obj = paginator.get_page(page_num)
+    page_stagiaires = attach_current_formation_names(page_obj.object_list)
     ctx = {
-        'object_list': page_obj.object_list,
+        'object_list': page_stagiaires,
     }
     return render(request, 'intern/stagiaire_cards_print.html', ctx)

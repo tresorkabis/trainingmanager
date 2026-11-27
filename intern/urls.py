@@ -1,7 +1,7 @@
 from django.urls import path
 
 from intern.views.categorie_views import CategorieListView, CategorieDetailView, CategorieCreateUpdateView, CategorieDeleteView # Importation des nouvelles vues
-from intern.views.stagiaire_views import StagiaireListView, StagiaireCreateUpdateView, StagiaireDetailView, StagiaireDeleteView, stagiaire_cards_print
+from intern.views.stagiaire_views import StagiaireListView, StagiaireReportView, StagiaireCreateUpdateView, StagiaireDetailView, StagiaireDeleteView, stagiaire_cards_print
 from intern.views.entreprise_views import EntrepriseCreateView, EntrepriseListView, EntrepriseDetailView, EntrepriseUpdateView
 
 
@@ -17,6 +17,7 @@ urlpatterns = [
     path("categories/<int:pk>/delete", CategorieDeleteView.as_view(), name="categorie_delete"), # Nouvelle URL pour la suppression
 
     path("stagiaires", StagiaireListView.as_view(), name="stagiaires"),
+    path("stagiaires/rapport", StagiaireReportView.as_view(), name="stagiaires_report"),
     path("stagiaires/create", StagiaireCreateUpdateView.as_view(), name="stagiaire_create"),
     path("stagiaires/<int:pk>/update", StagiaireCreateUpdateView.as_view(), name="stagiaire_update"),
     path("stagiaires/<int:pk>/delete", StagiaireDeleteView.as_view(), name="stagiaire_delete"),

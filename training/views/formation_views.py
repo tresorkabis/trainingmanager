@@ -8,6 +8,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
+from django.utils import timezone
 from django.views import View
 from django.views.generic import DetailView, ListView, DeleteView
 from django.forms import modelformset_factory
@@ -116,11 +117,26 @@ class FormationListView(FormationPermissionMixin, ListView):
         user = self.request.user
         hero_actions = [
             {'label': 'Voir les formateurs', 'url': reverse_lazy('formateurs'), 'icon': 'bi bi-person-badge', 'class': 'btn-light-secondary'},
+            {'label': 'Imprimer les dépliants', 'url': reverse_lazy('formations_brochure'), 'icon': 'bi bi-printer', 'class': 'btn-light-secondary'},
         ]
         if user.is_superuser or (getattr(user, 'profile', None) and getattr(user.profile, 'name', None) in ['Manager', 'Chef de filière', 'Chef de service']):
             hero_actions.insert(0, {'label': 'Nouvelle formation', 'url': reverse_lazy('formation_create'), 'icon': 'bi bi-folder-plus'})
         ctx['hero_actions'] = hero_actions
         return ctx
+
+
+class FormationBrochureView(FormationListView):
+    """Fiches imprimables en trois volets pour toutes les formations filtrées."""
+    template_name = "training/formations_brochure.html"
+    paginate_by = None
+
+    def get_queryset(self):
+        return super().get_queryset().prefetch_related("modules")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["generated_at"] = timezone.localtime()
+        return context
 
 
 @method_decorator(login_required, name="dispatch")

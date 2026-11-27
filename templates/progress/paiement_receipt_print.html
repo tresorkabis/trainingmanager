@@ -36,6 +36,12 @@
             letter-spacing: 2px;
             margin-bottom: 5px;
         }
+        .header .institution {
+            font-family: Arial, sans-serif;
+            font-size: 13px;
+            font-weight: bold;
+            margin-bottom: 7px;
+        }
         .header .ref {
             font-size: 14px;
             font-weight: bold;
@@ -153,6 +159,7 @@
     <div class="watermark">PAID</div>
     <div class="receipt">
         <div class="header">
+            <div class="institution">{{ institution_name }} ({{ institution_acronym }})</div>
             <h1>Reçu de Paiement</h1>
             <div class="ref">N° {{ paiement.reference }}</div>
             <div class="date">Date : {{ paiement.date_paiement|date:"l d F Y" }}</div>

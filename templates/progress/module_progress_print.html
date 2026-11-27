@@ -48,6 +48,7 @@
         <button type="button" onclick="window.print()"><i>⎙</i> Imprimer</button>
     </div>
     <header>
+        <p class="meta">{{ institution_name }} ({{ institution_acronym }})</p>
         <h1>Rapport de progression du module</h1>
         <p class="meta">{{ module_progress.module.titre }} · Généré le {{ generated_at|date:"d/m/Y à H:i" }}</p>
     </header>
