@@ -5,6 +5,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse_lazy # Import reverse_lazy
 from django.utils.decorators import method_decorator
+from django.utils import timezone
 from django.views import View
 from django.views.generic import ListView, DetailView, UpdateView, DeleteView # Import UpdateView and DeleteView
 
@@ -113,12 +114,22 @@ class FiliereDetailView(FilierePermissionMixin, DetailView):
         
         ctx["hero_actions"] = [
             {'label': 'Retour à la liste', 'url': reverse_lazy('filieres'), 'icon': 'bi bi-arrow-left', 'class': 'btn-light-secondary'},
+            {'label': 'Imprimer la fiche', 'url': reverse_lazy('filiere_print', kwargs={'pk': filiere.pk}), 'icon': 'bi bi-printer', 'class': 'btn-light-secondary'},
         ]
         if ctx["can_manage"]:
             ctx["hero_actions"].append(
                 {'label': 'Modifier', 'url': reverse_lazy('filiere_update', kwargs={'pk': filiere.pk}), 'icon': 'bi bi-pencil'}
             )
         return ctx
+
+
+class FilierePrintView(FiliereDetailView):
+    template_name = "training/filiere_print.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["generated_at"] = timezone.localtime()
+        return context
 
 
 @method_decorator(login_required, name="dispatch")

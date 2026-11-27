@@ -171,6 +171,7 @@ class FormationDetailView(FormationPermissionMixin, DetailView):
         # Construire hero_actions en respectant les permissions de gestion
         hero_actions = [
             {'label': 'Retour à la liste', 'url': reverse_lazy('formations'), 'icon': 'bi bi-arrow-left', 'class': 'btn-light-secondary'},
+            {'label': 'Imprimer la fiche', 'url': reverse_lazy('formation_print', kwargs={'pk': formation.pk}), 'icon': 'bi bi-printer', 'class': 'btn-light-secondary'},
         ]
         user = self.request.user
         if user.is_superuser or (getattr(user, 'profile', None) and getattr(user.profile, 'name', None) in ['Manager', 'Chef de filière', 'Chef de service']):
@@ -179,6 +180,15 @@ class FormationDetailView(FormationPermissionMixin, DetailView):
         ctx['hero_actions'] = hero_actions
 
         return ctx
+
+
+class FormationPrintView(FormationDetailView):
+    template_name = "training/formation_print.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["generated_at"] = timezone.localtime()
+        return context
 
 
 @method_decorator(login_required, name="dispatch")

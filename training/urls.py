@@ -2,7 +2,7 @@ from django.urls import path
 from training.views.home_views import HomeView
 from training.views.filiere_views import FiliereListView, FiliereDetailView, FiliereCreateUpdateView, FiliereDeleteView
 from training.views.service_views import ServiceListView, ServiceDetailView, ServiceCreateUpdateView, ServiceDeleteView
-from training.views.formation_views import FormationListView, FormationBrochureView, FormationDetailView, FormationCreateUpdateView, FormationDeleteView, ModuleSubjectManageView, ModuleFormateursView, ModuleListView, ModuleCreateView, ModuleUpdateView, ModuleDeleteView, ModuleDetailView # Import ModuleDetailView
+from training.views.formation_views import FormationListView, FormationBrochureView, FormationDetailView, FormationPrintView, FormationCreateUpdateView, FormationDeleteView, ModuleSubjectManageView, ModuleFormateursView, ModuleListView, ModuleCreateView, ModuleUpdateView, ModuleDeleteView, ModuleDetailView # Import ModuleDetailView
 
 
 urlpatterns = [
@@ -29,6 +29,7 @@ urlpatterns = [
     path("formations/create", FormationCreateUpdateView.as_view(), name="formation_create"), # Utilise la vue unifiée
     path("formations/create", FormationCreateUpdateView.as_view(), name="metier_create"),
 
+    path("formations/<int:pk>/print", FormationPrintView.as_view(), name="formation_print"),
     path("formations/<int:pk>", FormationDetailView.as_view(), name="formation"),
     path("formations/<int:pk>", FormationDetailView.as_view(), name="metier"),
 

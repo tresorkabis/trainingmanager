@@ -1,0 +1,110 @@
+{% load humanize %}
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Dépliant · {{ object.nom }}</title>
+    <style>
+        :root { --ink:#202b46; --muted:#667085; --brand:#435ebe; --deep:#263b86; --line:#d8deea; --paper:#fff; --pale:#f3f5fb; }
+        * { box-sizing:border-box; }
+        body { margin:0; color:var(--ink); background:#eef1f6; font:14px/1.45 Arial,sans-serif; }
+        .toolbar { max-width:1200px; margin:20px auto; padding:0 18px; display:flex; justify-content:space-between; align-items:center; gap:12px; }
+        .toolbar a,.toolbar button { display:inline-block; border:0; border-radius:6px; padding:10px 16px; background:var(--brand); color:white; font:inherit; text-decoration:none; cursor:pointer; }
+        .toolbar a { background:#64748b; }
+        .brochure { width:min(1180px, calc(100% - 36px)); min-height:780px; margin:18px auto 28px; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); background:var(--paper); box-shadow:0 8px 28px #202b4618; }
+        .panel { position:relative; padding:34px 28px; min-width:0; }
+        .panel + .panel { border-left:1px dashed #aab4cb; }
+        .cover { display:flex; flex-direction:column; justify-content:space-between; overflow:hidden; color:#fff; background:linear-gradient(150deg,var(--brand),var(--deep)); }
+        .cover:after { content:""; position:absolute; width:250px; height:250px; border:1px solid #ffffff30; border-radius:50%; right:-100px; bottom:-85px; box-shadow:0 0 0 25px #ffffff0c,0 0 0 55px #ffffff0a; }
+        .brand { font-size:11px; letter-spacing:.14em; font-weight:700; text-transform:uppercase; opacity:.8; }
+        .ref { font-size:11px; opacity:.75; }
+        .cover h1 { position:relative; z-index:1; margin:18px 0; font-size:31px; line-height:1.12; overflow-wrap:anywhere; }
+        .type { display:inline-block; align-self:flex-start; padding:6px 10px; border:1px solid #ffffff70; border-radius:30px; font-size:11px; text-transform:uppercase; letter-spacing:.07em; }
+        .cover .pathway { position:relative; z-index:1; padding-top:16px; border-top:1px solid #ffffff50; }
+        h2 { margin:0 0 16px; color:var(--brand); font-size:18px; }
+        .intro { color:#44506a; font-size:13px; }
+        .module-list { margin:0; padding:0; list-style:none; }
+        .module-list li { padding:12px 0; border-top:1px solid var(--line); break-inside:avoid; }
+        .module-title { font-weight:700; }
+        .module-meta { color:var(--muted); font-size:11px; }
+        .module-description { margin-top:5px; color:#4e586c; font-size:11px; white-space:pre-line; }
+        .facts { margin:0; }
+        .fact { padding:10px 0; border-bottom:1px solid var(--line); }
+        .fact dt { color:var(--muted); font-size:10px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; }
+        .fact dd { margin:3px 0 0; font-weight:700; }
+        .cost { margin-top:18px; padding:14px; border-radius:8px; background:var(--pale); }
+        .cost strong { display:block; color:var(--brand); font-size:21px; }
+        @media(max-width:760px) { .brochure{width:100%;margin:0 0 18px;grid-template-columns:1fr;min-height:0}.panel{padding:24px}.panel+.panel{border-left:0;border-top:1px dashed #aab4cb}.toolbar{padding:0 12px;flex-wrap:wrap}.cover{min-height:350px} }
+        @media print {
+            @page { size:A4 landscape; margin:0; }
+            body { background:#fff; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+            .no-print { display:none!important; }
+            .brochure { width:297mm; height:210mm; min-height:0; margin:0; grid-template-columns:repeat(3,99mm); box-shadow:none; }
+            .panel { padding:15mm 11mm 12mm; }
+            .cover h1 { font-size:27px; }
+            .module-list li { padding:8px 0; }
+            .module-description { font-size:10px; }
+        }
+    </style>
+</head>
+<body>
+<div class="toolbar no-print">
+    <a href="{% url 'formation' object.pk %}">← Retour à la formation</a>
+    <button type="button" onclick="window.print()">Imprimer le dépliant</button>
+</div>
+
+<article class="brochure">
+    <section class="panel cover">
+        <div>
+            <div class="brand">{{ institution_acronym }} · {{ institution_name }}<br>Catalogue de formation</div>
+            <div class="ref">Référence FOR-{{ object.pk }}</div>
+        </div>
+        <div>
+            <span class="type">{{ object.get_type_formation_display }}</span>
+            <h1>{{ object.nom }}</h1>
+            <div class="pathway">
+                <strong>{% if object.filiere %}{{ object.filiere.nom }}{% else %}Formation professionnelle{% endif %}</strong>
+                {% if object.filiere.service %}<br><span>{{ object.filiere.service.nom }}</span>{% endif %}
+            </div>
+        </div>
+        <div class="ref">Fiche individuelle · Générée le {{ generated_at|date:"d/m/Y" }}</div>
+    </section>
+
+    <section class="panel">
+        <h2>Programme de formation</h2>
+        <p class="intro">Un parcours structuré en {{ object.modules.count }} module(s), pour un volume total de {{ object.duree_heures }} heures.</p>
+        <ol class="module-list">
+            {% for module in object.modules.all %}
+            <li>
+                <div class="module-title">{{ forloop.counter }}. {{ module.titre }}</div>
+                <div class="module-meta">{{ module.duree_heures }} h</div>
+                {% if module.description %}<div class="module-description">{{ module.description }}</div>{% endif %}
+            </li>
+            {% empty %}
+            <li class="module-meta">Le programme détaillé n’est pas encore renseigné.</li>
+            {% endfor %}
+        </ol>
+    </section>
+
+    <section class="panel">
+        <h2>Informations pratiques</h2>
+        <dl class="facts">
+            <div class="fact"><dt>Durée estimée</dt><dd>{{ object.duree }} mois</dd></div>
+            <div class="fact"><dt>Volume horaire</dt><dd>{{ object.duree_heures }} heures</dd></div>
+            <div class="fact"><dt>Filière</dt><dd>{{ object.filiere.nom|default:"Non renseignée" }}</dd></div>
+            <div class="fact"><dt>Service</dt><dd>{{ object.filiere.service.nom|default:"Non renseigné" }}</dd></div>
+            <div class="fact"><dt>Modules</dt><dd>{{ object.modules.count }}</dd></div>
+            <div class="fact"><dt>Statut</dt><dd>{% if object.active %}Active{% else %}Inactive{% endif %}</dd></div>
+        </dl>
+        <div class="cost">
+            <span>Coût total</span>
+            <strong>{{ object.cout|floatformat:0|intcomma }} USD</strong>
+            <div class="module-meta">Participation : {{ object.frais_participation|floatformat:0|intcomma }} USD</div>
+            <div class="module-meta">Jury : {{ object.frais_jury|floatformat:0|intcomma }} USD</div>
+            <div class="module-meta">Matériel : {{ object.frais_materiels|floatformat:0|intcomma }} USD</div>
+        </div>
+    </section>
+</article>
+</body>
+</html>
