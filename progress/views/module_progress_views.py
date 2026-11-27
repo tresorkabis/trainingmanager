@@ -239,6 +239,15 @@ class ModuleProgressDetailView(LoginRequiredMixin, DetailView):
 
         return context
 
+
+class ModuleProgressPrintView(ModuleProgressDetailView):
+    template_name = 'progress/module_progress_print.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['generated_at'] = timezone.localtime()
+        return context
+
 class ModuleProgressCreateView(LoginRequiredMixin, View):
     template_name = 'progress/module_progress_form.html'
 

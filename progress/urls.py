@@ -5,7 +5,7 @@ from progress.views.formateur_views import FormateurListView, FormateurCreateUpd
 from progress.views.typeaction_views import TypeActionListView, TypeActionDetailView, TypeActionCreateUpdateView, TypeActionDeleteView
 from progress.views.paiement_views import PaiementListView, PaiementCreateView, PaiementDetailView, PaiementUpdateView, PaiementDeleteView, PaiementReceiptPrintView, PaiementFinancialReportView
 from progress.views.module_progress_views import (
-    ModuleProgressListView, ModuleProgressDetailView, ModuleProgressCreateView,
+    ModuleProgressListView, ModuleProgressDetailView, ModuleProgressPrintView, ModuleProgressCreateView,
     ModuleProgressUpdateView, ModuleProgressDeleteView,
     SessionProgressCreateView, SessionProgressUpdateView, SessionProgressDeleteView,
 )
@@ -55,6 +55,7 @@ urlpatterns = [
     # Module Progressions
     path("module_progressions/", ModuleProgressListView.as_view(), name="module_progressions"),
     path("module_progressions/create/", ModuleProgressCreateView.as_view(), name="module_progress_create"),
+    path("module_progressions/<int:pk>/print/", ModuleProgressPrintView.as_view(), name="module_progress_print"),
     path("module_progressions/<int:pk>/", ModuleProgressDetailView.as_view(), name="module_progress_detail"),
     path("module_progressions/<int:pk>/update/", ModuleProgressUpdateView.as_view(), name="module_progress_update"),
     path("module_progressions/<int:pk>/delete/", ModuleProgressDeleteView.as_view(), name="module_progress_delete"),

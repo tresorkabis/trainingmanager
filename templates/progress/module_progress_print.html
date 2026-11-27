@@ -1,0 +1,106 @@
+{% load humanize %}
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Progression du module - {{ module_progress.module.titre }}</title>
+    <style>
+        :root { --ink: #203044; --muted: #64748b; --line: #dbe3eb; --brand: #435ebe; --pale: #f2f5fa; }
+        * { box-sizing: border-box; }
+        body { margin: 0; background: #eef2f6; color: var(--ink); font: 14px/1.45 Arial, sans-serif; }
+        .page { max-width: 1240px; margin: 28px auto; padding: 32px; background: #fff; box-shadow: 0 8px 30px #20304418; }
+        .toolbar { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 22px; }
+        .toolbar a, .toolbar button { border: 0; border-radius: 6px; padding: 10px 15px; background: var(--brand); color: white; font: inherit; text-decoration: none; cursor: pointer; }
+        .toolbar a { background: #64748b; }
+        h1 { margin: 0; font-size: 25px; }
+        h2 { margin: 25px 0 10px; font-size: 16px; }
+        .meta { margin: 5px 0 20px; color: var(--muted); }
+        .facts { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 10px; margin: 18px 0; }
+        .fact { border: 1px solid var(--line); border-radius: 7px; padding: 12px; }
+        .fact span { display: block; color: var(--muted); font-size: 10px; font-weight: 700; text-transform: uppercase; }
+        .fact strong { display: block; margin-top: 5px; }
+        .comment { padding: 12px; border-left: 3px solid var(--brand); background: var(--pale); white-space: pre-wrap; }
+        .table-wrap { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 11px; }
+        th, td { padding: 8px 7px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+        th { background: var(--pale); color: var(--muted); font-size: 9px; text-transform: uppercase; }
+        .empty { padding: 20px; text-align: center; color: var(--muted); }
+        footer { margin-top: 22px; color: var(--muted); font-size: 10px; }
+        @media (max-width: 700px) { .page { margin: 0; padding: 18px 12px; } .facts { grid-template-columns: repeat(2,1fr); } .toolbar { flex-direction: column; } }
+        @media print {
+            @page { size: landscape; margin: 12mm; }
+            body { background: #fff; font-size: 10px; }
+            .page { max-width: none; margin: 0; padding: 0; box-shadow: none; }
+            .no-print { display: none !important; }
+            .facts { grid-template-columns: repeat(4,1fr); }
+            .fact { padding: 8px; }
+            table { font-size: 9px; }
+            th, td { padding: 5px; }
+            tr { break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
+<main class="page">
+    <div class="toolbar no-print">
+        <a href="{% url 'module_progress_detail' module_progress.pk %}">← Retour à la progression</a>
+        <button type="button" onclick="window.print()"><i>⎙</i> Imprimer</button>
+    </div>
+    <header>
+        <h1>Rapport de progression du module</h1>
+        <p class="meta">{{ module_progress.module.titre }} · Généré le {{ generated_at|date:"d/m/Y à H:i" }}</p>
+    </header>
+
+    <section class="facts" aria-label="Résumé de la progression">
+        <div class="fact"><span>Action de formation</span><strong>{{ module_progress.action.description }}</strong></div>
+        <div class="fact"><span>Formation</span><strong>{{ module_progress.action.formation.nom }}</strong></div>
+        <div class="fact"><span>Formateur</span><strong>{{ module_progress.formateur.get_full_name }}</strong></div>
+        <div class="fact"><span>Statut du module</span><strong>{{ module_progress.get_statut_module_display }}</strong></div>
+        <div class="fact"><span>Volume du module</span><strong>{{ module_progress.module.duree_heures }} h</strong></div>
+        <div class="fact"><span>Heures réalisées</span><strong>{{ hours_done|floatformat:1 }} h</strong></div>
+        <div class="fact"><span>Heures planifiées</span><strong>{{ hours_planned|floatformat:1 }} h</strong></div>
+        <div class="fact"><span>Note</span><strong>{% if module_progress.note != None %}{{ module_progress.note|floatformat:2 }} / 20{% else %}Non renseignée{% endif %}</strong></div>
+        <div class="fact"><span>Début réel</span><strong>{{ module_progress.date_debut_reelle|date:"d/m/Y"|default:"-" }}</strong></div>
+        <div class="fact"><span>Fin réelle</span><strong>{{ module_progress.date_fin_reelle|date:"d/m/Y"|default:"-" }}</strong></div>
+        <div class="fact"><span>Quota horaire</span><strong>{% if is_finished %}Atteint{% elif can_plan_more %}En cours{% else %}Planifié{% endif %}</strong></div>
+        <div class="fact"><span>Nombre de séances</span><strong>{{ sessions|length|intcomma }}</strong></div>
+    </section>
+
+    {% if module_progress.commentaires %}
+    <section>
+        <h2>Commentaires</h2>
+        <div class="comment">{{ module_progress.commentaires }}</div>
+    </section>
+    {% endif %}
+
+    <section>
+        <h2>Détail des séances</h2>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>#</th><th>Date prévue</th><th>Horaire prévu</th><th>Date réelle</th><th>Horaire réel</th><th>Formateur</th><th>Sujets prévus</th><th>Sujets couverts</th><th>Statut</th><th>Notes</th></tr></thead>
+                <tbody>
+                {% for session in sessions %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ session.planned_date|date:"d/m/Y"|default:"-" }}</td>
+                        <td>{% if session.planned_start_time or session.planned_end_time %}{{ session.planned_start_time|time:"H:i"|default:"-" }} - {{ session.planned_end_time|time:"H:i"|default:"-" }}{% else %}-{% endif %}</td>
+                        <td>{{ session.actual_date|date:"d/m/Y"|default:"-" }}</td>
+                        <td>{% if session.actual_start_time or session.actual_end_time %}{{ session.actual_start_time|time:"H:i"|default:"-" }} - {{ session.actual_end_time|time:"H:i"|default:"-" }}{% else %}-{% endif %}</td>
+                        <td>{{ session.formateur.get_full_name|default:"-" }}</td>
+                        <td>{{ session.planned_topics|default:"-"|linebreaksbr }}</td>
+                        <td>{{ session.topics_covered|default:"-"|linebreaksbr }}</td>
+                        <td>{{ session.get_statut_display }}</td>
+                        <td>{{ session.notes|default:"-"|linebreaksbr }}</td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="10" class="empty">Aucune séance n’est enregistrée pour cette progression.</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+    <footer>Document généré depuis le suivi pédagogique de Training Manager.</footer>
+</main>
+</body>
+</html>

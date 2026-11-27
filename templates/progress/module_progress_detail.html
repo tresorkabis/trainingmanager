@@ -86,6 +86,7 @@
                     </div>
                     {% endif %}
                     <div class="mt-4">
+                        <a href="{% url 'module_progress_print' module_progress.pk %}" class="btn btn-primary" target="_blank" rel="noopener"><i class="bi bi-printer me-1"></i>Imprimer la progression</a>
                         <a href="{% url 'module_progress_update' module_progress.pk %}" class="btn btn-warning">Modifier</a>
                         <a href="{% url 'module_progress_delete' module_progress.pk %}" class="btn btn-danger">Supprimer</a>
                         <a href="{% url 'module_progressions' %}" class="btn btn-secondary">Retour à la liste</a>
