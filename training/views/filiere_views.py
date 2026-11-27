@@ -83,6 +83,9 @@ class FiliereListView(FilierePermissionMixin, ListView):
             ]
         else:
             ctx["hero_actions"] = []
+        ctx["hero_actions"].append(
+            {'label': 'Imprimer le catalogue', 'url': reverse_lazy('filieres_catalogue'), 'icon': 'bi bi-printer', 'class': 'btn-light-secondary'}
+        )
         return ctx
 
 
@@ -125,6 +128,20 @@ class FiliereDetailView(FilierePermissionMixin, DetailView):
 
 class FilierePrintView(FiliereDetailView):
     template_name = "training/filiere_print.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["generated_at"] = timezone.localtime()
+        return context
+
+
+class FiliereCatalogueView(FiliereListView):
+    """Dépliants imprimables pour toutes les filières accessibles."""
+    template_name = "training/filieres_catalogue.html"
+    paginate_by = None
+
+    def get_queryset(self):
+        return super().get_queryset().select_related("service").prefetch_related("formations")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

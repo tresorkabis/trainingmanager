@@ -1,6 +1,6 @@
 from django.urls import path
 from training.views.home_views import HomeView
-from training.views.filiere_views import FiliereListView, FiliereDetailView, FiliereCreateUpdateView, FiliereDeleteView
+from training.views.filiere_views import FiliereListView, FiliereDetailView, FilierePrintView, FiliereCatalogueView, FiliereCreateUpdateView, FiliereDeleteView
 from training.views.service_views import ServiceListView, ServiceDetailView, ServiceCreateUpdateView, ServiceDeleteView
 from training.views.formation_views import FormationListView, FormationBrochureView, FormationDetailView, FormationPrintView, FormationCreateUpdateView, FormationDeleteView, ModuleSubjectManageView, ModuleFormateursView, ModuleListView, ModuleCreateView, ModuleUpdateView, ModuleDeleteView, ModuleDetailView # Import ModuleDetailView
 
@@ -9,7 +9,9 @@ urlpatterns = [
     path("", HomeView.as_view(), name="home"),
 
     path("filieres", FiliereListView.as_view(), name="filieres"),
+    path("filieres/depliant", FiliereCatalogueView.as_view(), name="filieres_catalogue"),
     path("filieres/create", FiliereCreateUpdateView.as_view(), name="filiere_create"),
+    path("filieres/<int:pk>/print", FilierePrintView.as_view(), name="filiere_print"),
     path("filieres/<int:pk>", FiliereDetailView.as_view(), name="filiere"),
     path("filieres/<int:pk>/update", FiliereCreateUpdateView.as_view(), name="filiere_update"),
     path("filieres/<int:pk>/delete", FiliereDeleteView.as_view(), name="filiere_delete"),

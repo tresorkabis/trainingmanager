@@ -78,6 +78,9 @@
                                         <a href="{% url 'filiere' item.pk %}" class="btn btn-sm btn-outline-primary" title="Voir">
                                             <i class="bi bi-eye"></i>
                                         </a>
+                                        <a href="{% url 'filiere_print' item.pk %}" class="btn btn-sm btn-outline-secondary" title="Imprimer la fiche">
+                                            <i class="bi bi-printer"></i>
+                                        </a>
                                         {% if can_manage %}
                                         <a href="{% url 'filiere_update' item.pk %}" class="btn btn-sm btn-outline-info" title="Modifier">
                                             <i class="bi bi-pencil"></i>
