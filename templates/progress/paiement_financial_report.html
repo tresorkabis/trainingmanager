@@ -1,0 +1,99 @@
+{% load humanize %}
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Rapport financier des paiements</title>
+    <style>
+        :root { color-scheme: light; --ink: #203044; --muted: #64748b; --line: #dbe3eb; --brand: #128c83; --pale: #f3f7f8; }
+        * { box-sizing: border-box; }
+        body { margin: 0; background: #eef2f6; color: var(--ink); font: 14px/1.45 Arial, sans-serif; }
+        .page { max-width: 1180px; margin: 32px auto; padding: 34px; background: #fff; box-shadow: 0 8px 30px #20304418; }
+        .toolbar { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 26px; }
+        .toolbar a, .toolbar button, .filters button { border: 0; border-radius: 6px; padding: 10px 15px; color: #fff; background: var(--brand); font: inherit; text-decoration: none; cursor: pointer; }
+        .toolbar a { background: #64748b; }
+        h1 { margin: 0; font-size: 28px; }
+        .subtitle, .meta { color: var(--muted); }
+        .filters { display: flex; flex-wrap: wrap; align-items: end; gap: 12px; margin: 22px 0; padding: 16px; background: var(--pale); }
+        .filters label { display: grid; gap: 5px; color: var(--muted); font-size: 12px; font-weight: 700; }
+        .filters input { min-width: 170px; padding: 8px; border: 1px solid var(--line); border-radius: 5px; font: inherit; }
+        .error { margin: 12px 0; padding: 12px; color: #9f1239; background: #fff1f2; }
+        .summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin: 22px 0; }
+        .metric { padding: 15px; border: 1px solid var(--line); border-radius: 8px; }
+        .metric span { display: block; color: var(--muted); font-size: 12px; text-transform: uppercase; }
+        .metric strong { display: block; margin-top: 6px; font-size: 20px; }
+        .table-wrap { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        th, td { padding: 9px 8px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+        th { color: var(--muted); background: var(--pale); font-size: 10px; text-transform: uppercase; }
+        .amount { text-align: right; white-space: nowrap; font-weight: 700; }
+        tfoot td { border-top: 2px solid var(--ink); font-weight: 700; }
+        @media (max-width: 700px) { .page { margin: 0; padding: 20px 14px; } .summary { grid-template-columns: repeat(2, minmax(0,1fr)); } .toolbar { align-items: flex-start; flex-direction: column; } }
+        @media print {
+            @page { size: landscape; margin: 12mm; }
+            body { background: #fff; font-size: 10px; }
+            .page { max-width: none; margin: 0; padding: 0; box-shadow: none; }
+            .no-print { display: none !important; }
+            .summary { grid-template-columns: repeat(4,1fr); margin: 12px 0; }
+            .metric { padding: 9px; }
+            .metric strong { font-size: 15px; }
+            table { font-size: 9px; }
+            th, td { padding: 5px; }
+            tr { break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
+<main class="page">
+    <div class="toolbar no-print">
+        <a href="{% url 'paiements' %}">← Retour aux paiements</a>
+        <button type="button" onclick="window.print()">Imprimer le rapport</button>
+    </div>
+
+    <header>
+        <h1>Rapport financier des paiements</h1>
+        <p class="subtitle">Synthèse des encaissements et détail des paiements enregistrés.</p>
+        <p class="meta">Généré le {{ generated_at|date:"d/m/Y à H:i" }}{% if date_debut or date_fin %} · Période : {{ date_debut|default:"début" }} au {{ date_fin|default:"aujourd’hui" }}{% else %} · Toutes les périodes{% endif %}</p>
+    </header>
+
+    <form class="filters no-print" method="get">
+        <label>Date de début<input type="date" name="date_debut" value="{{ date_debut }}"></label>
+        <label>Date de fin<input type="date" name="date_fin" value="{{ date_fin }}"></label>
+        <button type="submit">Appliquer la période</button>
+        <a href="{% url 'paiement_financial_report' %}">Toutes les périodes</a>
+    </form>
+
+    {% for error in errors %}<div class="error" role="alert">{{ error }}</div>{% endfor %}
+
+    <section class="summary" aria-label="Synthèse financière">
+        <div class="metric"><span>Total encaissé</span><strong>{{ total|floatformat:2|intcomma }} USD</strong></div>
+        <div class="metric"><span>Nombre de paiements</span><strong>{{ paiement_count|intcomma }}</strong></div>
+        <div class="metric"><span>Espèces</span><strong>{{ total_especes|floatformat:2|intcomma }} USD</strong></div>
+        <div class="metric"><span>Virements</span><strong>{{ total_virements|floatformat:2|intcomma }} USD</strong></div>
+    </section>
+
+    <div class="table-wrap">
+        <table>
+            <thead><tr><th>Date</th><th>Référence</th><th>Stagiaire</th><th>Action / formation</th><th>Mode</th><th>Motif</th><th class="amount">Montant (USD)</th></tr></thead>
+            <tbody>
+            {% for paiement in paiements %}
+                <tr>
+                    <td>{{ paiement.date_paiement|date:"d/m/Y" }}</td>
+                    <td>{{ paiement.reference|default:"-" }}</td>
+                    <td>{{ paiement.stagiaire.get_full_name }}</td>
+                    <td>{% if paiement.action %}{{ paiement.action.description }}{% if paiement.action.formation %} / {{ paiement.action.formation.nom }}{% endif %}{% else %}Hors action{% endif %}</td>
+                    <td>{{ paiement.get_mode_paiement_display }}</td>
+                    <td>{{ paiement.motif|default:"-" }}</td>
+                    <td class="amount">{{ paiement.montant|floatformat:2|intcomma }}</td>
+                </tr>
+            {% empty %}
+                <tr><td colspan="7" style="text-align:center;padding:24px;color:#64748b;">Aucun paiement pour cette période.</td></tr>
+            {% endfor %}
+            </tbody>
+            <tfoot><tr><td colspan="6">Total de la période</td><td class="amount">{{ total|floatformat:2|intcomma }} USD</td></tr></tfoot>
+        </table>
+    </div>
+</main>
+</body>
+</html>

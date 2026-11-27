@@ -1,9 +1,9 @@
 from django.urls import path
-from progress.views.actions_views import ActionListViews, ActionDetailViews, ActionCreateView, ActionUpdateView, ActionDeleteView, ActionUpdateProgressionsView, ActionStagiairesPrintView
+from progress.views.actions_views import ActionListViews, ActionReportView, ActionDetailViews, ActionCreateView, ActionUpdateView, ActionDeleteView, ActionUpdateProgressionsView, ActionStagiairesPrintView
 from progress.views.detailAction_views import DetailActionListViews, DetailActionDetailView, DetailActionCreateView, DetailActionJuryUpdateView
 from progress.views.formateur_views import FormateurListView, FormateurCreateUpdateView, FormateurDeleteView, FormateurDetailView
 from progress.views.typeaction_views import TypeActionListView, TypeActionDetailView, TypeActionCreateUpdateView, TypeActionDeleteView
-from progress.views.paiement_views import PaiementListView, PaiementCreateView, PaiementDetailView, PaiementUpdateView, PaiementDeleteView, PaiementReceiptPrintView
+from progress.views.paiement_views import PaiementListView, PaiementCreateView, PaiementDetailView, PaiementUpdateView, PaiementDeleteView, PaiementReceiptPrintView, PaiementFinancialReportView
 from progress.views.module_progress_views import (
     ModuleProgressListView, ModuleProgressDetailView, ModuleProgressCreateView,
     ModuleProgressUpdateView, ModuleProgressDeleteView,
@@ -19,6 +19,7 @@ urlpatterns = [
     path("schedule-presets/<int:pk>/delete/", SchedulePresetDeleteView.as_view(), name="schedule_preset_delete"),
     # Actions
     path("actions/", ActionListViews.as_view(), name="actions"),
+    path("actions/rapport/", ActionReportView.as_view(), name="action_report"),
     path("actions/create/", ActionCreateView.as_view(), name="action_create"),
     path("actions/<int:pk>/", ActionDetailViews.as_view(), name="action"),
     path("actions/<int:pk>/update/", ActionUpdateView.as_view(), name="action_update"),
@@ -44,6 +45,7 @@ urlpatterns = [
 
     # Paiements
     path("paiements/", PaiementListView.as_view(), name="paiements"),
+    path("paiements/rapport-financier/", PaiementFinancialReportView.as_view(), name="paiement_financial_report"),
     path("paiements/create/", PaiementCreateView.as_view(), name="paiement_create"),
     path("paiements/<int:pk>/", PaiementDetailView.as_view(), name="paiement"),
     path("paiements/<int:pk>/update/", PaiementUpdateView.as_view(), name="paiement_update"),

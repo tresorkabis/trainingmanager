@@ -3,10 +3,11 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
-from django.views.generic import ListView, CreateView, DetailView, UpdateView, DeleteView
-from django.db.models import Sum
+from django.views.generic import ListView, CreateView, DetailView, UpdateView, DeleteView, TemplateView
+from django.db.models import Sum, Q
 from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
+from django.utils.dateparse import parse_date
 from datetime import date
 
 
@@ -181,6 +182,9 @@ class PaiementListView(ListView):
         context['can_manage_paiement'] = can_manage_paiements(self.request.user)
         context['can_delete_paiement'] = can_delete_paiements(self.request.user)
         context['hero_actions'] = []
+        context['hero_actions'].append(
+            {'label': 'Rapport financier', 'url': reverse_lazy('paiement_financial_report'), 'icon': 'bi bi-printer', 'class': 'btn-light-primary'},
+        )
         if context['can_manage_paiement']:
             context['hero_actions'].append(
                 {'label': 'Nouveau paiement', 'url': reverse_lazy('paiement_create'), 'icon': 'bi bi-plus-circle', 'class': 'btn-primary'},
@@ -207,6 +211,56 @@ class PaiementListView(ListView):
         for p in context['paiement_list']:
             setattr(p, '_precomputed_solde', soldes.get(p.pk))
 
+        return context
+
+
+@method_decorator(login_required, name='dispatch')
+class PaiementFinancialReportView(TemplateView):
+    template_name = 'progress/paiement_financial_report.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        queryset = Paiement.objects.select_related(
+            'stagiaire', 'action', 'action__formation'
+        ).order_by('-date_paiement', '-id')
+
+        start_value = self.request.GET.get('date_debut', '').strip()
+        end_value = self.request.GET.get('date_fin', '').strip()
+        start_date = parse_date(start_value) if start_value else None
+        end_date = parse_date(end_value) if end_value else None
+        errors = []
+
+        if start_value and not start_date:
+            errors.append('La date de début est invalide.')
+        if end_value and not end_date:
+            errors.append('La date de fin est invalide.')
+        if start_date and end_date and start_date > end_date:
+            errors.append('La date de début doit précéder la date de fin.')
+
+        if errors:
+            queryset = queryset.none()
+        else:
+            if start_date:
+                queryset = queryset.filter(date_paiement__gte=start_date)
+            if end_date:
+                queryset = queryset.filter(date_paiement__lte=end_date)
+
+        totals = queryset.aggregate(
+            total=Sum('montant'),
+            total_especes=Sum('montant', filter=Q(mode_paiement='ESPECES')),
+            total_virements=Sum('montant', filter=Q(mode_paiement='VIREMENT')),
+        )
+        context.update({
+            'paiements': queryset,
+            'total': totals['total'] or 0,
+            'total_especes': totals['total_especes'] or 0,
+            'total_virements': totals['total_virements'] or 0,
+            'paiement_count': queryset.count(),
+            'date_debut': start_value,
+            'date_fin': end_value,
+            'errors': errors,
+            'generated_at': timezone.localtime(),
+        })
         return context
 
         

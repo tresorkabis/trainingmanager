@@ -12,6 +12,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
+from django.utils import timezone
 from django.views import View
 from django.views.generic import DeleteView, DetailView, ListView, UpdateView
 
@@ -300,6 +301,7 @@ class ActionListViews(ActionPermissionMixin, ListView):
         ctx["hero_actions"] = [
             {'label': 'Nouvelle action', 'url': reverse_lazy('action_create'), 'icon': 'bi bi-clipboard-plus'},
             {'label': 'Voir les formations', 'url': reverse_lazy('formations'), 'class': 'btn-light-secondary', 'icon': 'bi bi-journal-text'},
+            {'label': 'Rapport des actions', 'url': reverse_lazy('action_report'), 'class': 'btn-light-secondary', 'icon': 'bi bi-printer'},
         ]
 
         ctx["hero_stats"] = [
@@ -309,6 +311,48 @@ class ActionListViews(ActionPermissionMixin, ListView):
             {'label': 'Inscrits', 'value': enrolled},
         ]
         return ctx
+
+
+@method_decorator(login_required, name="dispatch")
+class ActionReportView(ActionPermissionMixin, ListView):
+    model = Action
+    template_name = "progress/action_report.html"
+    context_object_name = "actions"
+
+    def get_queryset(self):
+        return super().get_queryset().prefetch_related(
+            "formation__modules", "module_progressions", "formateurs"
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        actions = list(context["object_list"])
+        enrolled_total = 0
+        for action in actions:
+            action.status_meta = self.get_action_status(action)
+            action.stagiaire_total = getattr(action, "stagiaire_total", 0)
+            action.formateur_total = getattr(action, "formateur_total", 0)
+            enrolled_total += action.stagiaire_total
+            total_modules = len(action.formation.modules.all())
+            completed_modules = len({
+                progress.module_id
+                for progress in action.module_progressions.all()
+                if progress.statut_module in {"TE", "VA"}
+            })
+            action.progression_percent = (
+                int(completed_modules * 100 / total_modules) if total_modules else 0
+            )
+
+        context.update({
+            "total_actions": len(actions),
+            "planned_actions": sum(action.statut == "PLANIFIEE" for action in actions),
+            "ongoing_actions": sum(action.statut == "EN_COURS" for action in actions),
+            "completed_actions": sum(action.statut == "TERMINEE" for action in actions),
+            "canceled_actions": sum(action.statut == "ANNULEE" for action in actions),
+            "enrolled_total": enrolled_total,
+            "generated_at": timezone.localtime(),
+        })
+        return context
 
 
 @method_decorator(login_required, name="dispatch")
